@@ -940,8 +940,10 @@ font-weight:700;border:1px solid #333;background:#111;
 <datalist id="clientList"></datalist><datalist id="supplierList"></datalist>
 
 
-</main></div></div><script>
-const KEY='TECH42SERVICE_V8_1_ULTIMATE_PRO_DB';const LOCAL_ONLY_MODE=true;let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
+</main></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const KEY='TECH42SERVICE_V8_1_ULTIMATE_PRO_DB';const LOCAL_ONLY_MODE=false;let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 const tabs=[
   {id:'home',icon:'🏠',title:'Accueil',desc:'Tableau de bord général'},
   {id:'clients',icon:'👤',title:'Clients',desc:'Liste et gestion des clients'},
@@ -1872,7 +1874,7 @@ setInterval(autoSaveTick,30000);
 function loadCloudConfigUI(){
   let c = JSON.parse(localStorage.getItem('tech42_cloud_v8')||'{}');
   if(!c.url || !c.anonKey){
-    c={provider:'supabase',url:'https://uenpjlqskauvcsndajyq.supabase.co',anonKey:'sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q',table:'tech42_data',enabled:false};
+    c={provider:'supabase',url:'https://uenpjlqskauvcsndajyq.supabase.co',anonKey:'sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q',table:'tech42_data',enabled:true};
     localStorage.setItem('tech42_cloud_v8',JSON.stringify(c));
   }
   window.TECH42_CLOUD=c;
@@ -1967,7 +1969,7 @@ async function startCloudSync(){
 window.addEventListener('online',()=>updateSaveBadge('💾 Mode local — données sur ce PC'));
 window.addEventListener('offline',()=>updateSaveBadge('💾 Mode local — données sur ce PC'));
 
-localStorage.setItem('tech42_cloud_v8',JSON.stringify({provider:'supabase',url:'',anonKey:'',table:'tech42_data',enabled:false}));
+if(!localStorage.getItem('tech42_cloud_v8')){localStorage.setItem('tech42_cloud_v8',JSON.stringify({provider:'supabase',url:'https://uenpjlqskauvcsndajyq.supabase.co',anonKey:'sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q',table:'tech42_data',enabled:true}));}
 
 let agendaMode='list', currentSheetIndex=-1, sheetData=[['Colonne A','Colonne B','Colonne C'],['','','']];
 function clearAgenda(){['ag_i','ag_title','ag_date','ag_time','ag_client','ag_tel','ag_notes'].forEach(x=>setv(x,''));setv('ag_type','Rendez-vous')}
@@ -2080,7 +2082,7 @@ function openManagedFile(i){let x=db.managedFiles[i];let a=document.createElemen
 function deleteManagedFile(i){if(confirm('Supprimer ce document ?')){db.managedFiles.splice(i,1);save('Document supprimé')}}
 function renderFiles(){if(!$('fileList'))return;let q=val('q_files').toLowerCase();$('fileList').innerHTML=db.managedFiles.map((x,i)=>({...x,i})).filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q)).map(x=>`<div class="fileCard"><b>${esc(x.name)}</b><br><span class="pill">${esc(x.cat)}</span><p class="muted">${esc(x.client||'')} ${esc(x.repair||'')}<br>${esc(x.date||'')} — ${(x.size/1024).toFixed(0)} Ko</p><button class="small" onclick="gmailManagedFile(${x.i})">📧 Gmail</button> <button class="small" onclick="printManagedFile(${x.i})">🖨️ Imprimer</button> <button class="small" onclick="editManagedFile(${x.i})">✏️ Modifier</button> <button class="small danger" onclick="deleteManagedFile(${x.i})">Supprimer</button></div>`).join('')||'<p class="muted">Aucun document.</p>'}
 
-render();toggleSaleOrigin();updateSaveBadge('💾 V5.0 stable — données sur ce PC');startSplash();setTimeout(()=>runHealthCheck(false),300);
+render();toggleSaleOrigin();updateSaveBadge('☁️ Connexion cloud en cours…');startSplash();setTimeout(()=>runHealthCheck(false),300);
 setInterval(autoSaveEvery5Min,300000);
 
 function openExternal(url){ window.open(url,'_blank'); }
@@ -2105,7 +2107,18 @@ async function cloudRestore(){
 
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(syncDocumentTypeUI,0)});
 
-window.addEventListener('load',()=>{setTimeout(()=>{try{show('home')}catch(e){console.error('Initialisation navigation',e)}},50)});
+window.addEventListener('load',()=>{
+  setTimeout(async ()=>{
+    try{
+      show('home');
+      loadCloudConfigUI();
+      await startCloudSync();
+    }catch(e){
+      console.error('Initialisation navigation/cloud',e);
+      updateSaveBadge('💾 Mode local — cloud indisponible');
+    }
+  },80);
+});
 </script>
 
 </body></html>
