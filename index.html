@@ -796,6 +796,58 @@ font-weight:700;border:1px solid #333;background:#111;
 .repairPhotoModal img{max-width:94vw;max-height:88vh;border:1px solid var(--gold);border-radius:12px}
 .repairPhotoModal button{position:absolute;right:16px;top:16px}
 
+
+/* V6.2 — Assistant IA diagnostic */
+.aiDiagnosticBox{
+  grid-column:1/-1;
+  border:1px solid #5f4d18;
+  border-radius:14px;
+  padding:13px;
+  background:linear-gradient(145deg,#16130a,#0a0a0a);
+}
+.aiDiagnosticHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.aiDiagnosticHead h4{margin:0;color:var(--gold2);font-size:16px}
+.aiDiagnosticResult{
+  margin-top:11px;padding:12px;border:1px solid var(--line);border-radius:11px;
+  background:#080808;min-height:70px;white-space:pre-wrap;line-height:1.5
+}
+.aiDiagnosticActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.aiDiagnosticLoading{color:var(--warn);font-weight:900}
+.aiDiagnosticDisclaimer{margin-top:8px;color:var(--muted);font-size:11px}
+
+
+/* V6.3 IA Native */
+.brandVersion{font-weight:900;color:var(--gold2);font-size:12px;margin-top:2px}
+.brandVersion span{display:inline-block;margin-left:7px;padding:2px 7px;border:1px solid #725f1e;border-radius:7px;background:#171207;font-size:10px}
+.userBadge{width:42px;min-width:42px;border-radius:12px!important;font-size:16px!important}
+.appSidebar{display:flex;flex-direction:column;gap:12px}
+.socialPanel{margin:0 8px 12px;padding:12px;border:1px solid #6c5818;border-radius:13px;background:linear-gradient(150deg,#0d0d0d,#050505)}
+.socialPanelTitle{color:var(--gold2);font-size:12px;font-weight:900;margin:0 4px 9px}
+.socialPanel button{width:100%;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:8px 6px;text-align:left;min-height:36px}
+.socialPanel button:hover{background:#171717}
+.socialIcon{display:inline-grid;place-items:center;width:23px;height:23px;border-radius:7px;color:white;font-weight:900;font-size:13px}
+.socialIcon.whatsapp{background:#16c765}.socialIcon.facebook{background:#1877f2}
+.socialIcon.instagram{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}
+.socialIcon.youtube{background:#ff0000}.socialIcon.tiktok{background:#111;border:1px solid #666}
+
+.aiNativeBox{grid-column:1/-1;border:1px solid #8b2bc9;border-radius:14px;padding:14px;background:linear-gradient(145deg,rgba(80,18,99,.22),#09080b 55%)}
+.aiNativeTop{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.aiNativeTop h4{margin:0 0 5px;color:#f0e8ff;font-size:18px}
+.aiAnalyzeButton{background:linear-gradient(145deg,#8f36c7,#541375)!important;border-color:#b45de8!important;color:white!important;box-shadow:0 0 18px rgba(157,52,213,.25)}
+.aiResultGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.aiResultCard{display:flex;align-items:center;gap:10px;min-height:70px;padding:10px;border:1px solid #35263e;border-radius:11px;background:#0d0b10}
+.aiResultCard b{display:block;color:#eee;font-size:13px;margin-bottom:4px}
+.aiResultText{color:#aaa;font-size:11px;line-height:1.35}
+.aiResultIcon{flex:0 0 37px;width:37px;height:37px;display:grid;place-items:center;border-radius:9px;font-size:18px}
+.aiResultIcon.diagnostic{background:#083647;color:#46caff}
+.aiResultIcon.parts{background:#083b22;color:#46dd78}
+.aiResultIcon.time{background:#3d104d;color:#e36cff}
+.aiResultIcon.cost{background:#451616;color:#ff6a6a}
+.aiNativeLoading{margin-top:11px;color:#d879ff;font-weight:900}
+.aiDiagnosticActions{margin-top:11px}
+@media(max-width:1050px){.aiResultGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.aiResultGrid{grid-template-columns:1fr}.socialPanel{display:none}}
+
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -815,9 +867,19 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button onclick="show('settings')">⚙️ Paramètres</button><button class="danger" onclick="logout()" title="Déconnexion">🚪</button></div></header>
+<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">V6.3 <span>IA NATIVE</span></div></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger userBadge" onclick="logout()" title="Déconnexion">T</button></div></header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
-<div class="appShell"><aside class="appSidebar"><nav id="nav"></nav></aside><div class="appContent"><div id="moduleBar"><button onclick="show('home')">← Accueil</button><div id="moduleTitle" class="moduleTitle">Accueil</div></div><main>
+<div class="appShell"><aside class="appSidebar">
+<nav id="nav"></nav>
+<div class="socialPanel">
+  <div class="socialPanelTitle">RÉSEAUX SOCIAUX</div>
+  <button type="button" onclick="openSocialNetwork('whatsapp')"><span class="socialIcon whatsapp">◉</span>WhatsApp</button>
+  <button type="button" onclick="openSocialNetwork('facebook')"><span class="socialIcon facebook">f</span>Facebook</button>
+  <button type="button" onclick="openSocialNetwork('instagram')"><span class="socialIcon instagram">◎</span>Instagram</button>
+  <button type="button" onclick="openSocialNetwork('youtube')"><span class="socialIcon youtube">▶</span>YouTube</button>
+  <button type="button" onclick="openSocialNetwork('tiktok')"><span class="socialIcon tiktok">♪</span>TikTok</button>
+</div>
+</aside><div class="appContent"><div id="moduleBar"><button onclick="show('home')">← Accueil</button><div id="moduleTitle" class="moduleTitle">Accueil</div></div><main>
 <section id="home" class="active">
 <div class="dashboardWrap">
   <div class="dashboardTitle">
@@ -902,7 +964,8 @@ font-weight:700;border:1px solid #333;background:#111;
 </section>
 <section id="new"><div class="card"><h3>Création rapide</h3><div class="grid"><button class="primary" onclick="show('clients')">👤 Nouveau client</button><button class="primary" onclick="show('repairs')">📱 Nouvelle réparation</button><button class="primary" onclick="show('sales')">💰 Achat/Revente</button><button class="primary" onclick="show('usedparts')">♻️ Pièces</button><button class="primary" onclick="show('docs')">🧾 Devis/Facture</button><button class="primary" onclick="show('repairs')">📄 Prise en charge</button></div></div></section>
 <section id="clients"><div class="card"><h3>Clients</h3><div class="form"><input type="hidden" id="c_i"><div><label>Nom</label><input id="c_nom"></div><div><label>Prénom</label><input id="c_pre"></div><div><label>Téléphone</label><input id="c_tel"></div><div><label>Email</label><input id="c_mail"></div><div class="full"><label>Adresse / notes</label><textarea id="c_notes"></textarea></div><div class="full"><button class="primary" onclick="saveClient()">Enregistrer</button><button onclick="clearForm('c')">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_clients" oninput="render()" placeholder="Recherche client..."></div><table><thead><tr><th>Client</th><th>Téléphone</th><th>Email</th><th>Historique</th><th>Actions</th></tr></thead><tbody id="clientsRows"></tbody></table></div><div class="card" id="clientHistoryCard" style="display:none"><div class="toolbar"><h3 id="clientHistoryTitle" style="margin:0;flex:1">Historique des réparations</h3><button class="primary" id="clientHistoryNewBtn">+ Nouvelle réparation</button><button onclick="closeClientHistory()">Fermer</button></div><div id="clientHistorySummary" class="grid"></div><div style="overflow:auto"><table><thead><tr><th>Dossier</th><th>Date</th><th>Appareil</th><th>Panne</th><th>Statut</th><th>Montant</th><th>Garantie</th><th>Actions</th></tr></thead><tbody id="clientHistoryRows"></tbody></table></div></div></section>
-<section id="repairs"><div class="card"><h3>Réparations atelier</h3><div class="form"><input type="hidden" id="r_i"><input type="hidden" id="r_client_id"><div><label>Client</label><input id="r_client" list="clientList" onchange="linkRepairClient()" onblur="linkRepairClient()"></div><div><label>Téléphone</label><input id="r_tel"></div><div><label>Statut</label><select id="r_status"><option>Diagnostic</option><option>En cours</option><option>Pièce commandée</option><option>Terminé</option><option>Livré</option><option>Annulé</option></select></div><div><label>Acompte €</label><input id="r_deposit" type="number" value="0"></div><div><label>Garantie mois</label><input id="r_warranty" type="number" value="3"></div><div class="lineEditor"><div class="toolbar"><b>Appareils, réparations, produits et prestations</b><button type="button" class="primary small" onclick="addRepairLine()">+ Ajouter une ligne</button></div><div style="overflow:auto"><table><thead><tr><th>Type</th><th>Appareil / produit</th><th>Marque</th><th>IMEI / série</th><th>Statut appareil</th><th>Réparation / prestation / accessoire</th><th>Qté</th><th>Prix unit. €</th><th>Coût €</th><th></th></tr></thead><tbody id="repairLineRows"></tbody></table></div><div id="repairLineTotal" class="lineTotal">Total client : 0,00 €</div></div><input type="hidden" id="r_device"><input type="hidden" id="r_brand"><input type="hidden" id="r_imei"><input type="hidden" id="r_issue"><input type="hidden" id="r_price"><input type="hidden" id="r_cost"><div class="full"><label>Notes générales / accessoires remis</label><textarea id="r_notes"></textarea></div><div class="repairGalleryBox">
+<section id="repairs"><div class="card"><h3>Réparations atelier</h3><div class="form"><input type="hidden" id="r_i"><input type="hidden" id="r_client_id"><div><label>Client</label><input id="r_client" list="clientList" onchange="linkRepairClient()" onblur="linkRepairClient()"></div><div><label>Téléphone</label><input id="r_tel"></div><div><label>Statut</label><select id="r_status"><option>Diagnostic</option><option>En cours</option><option>Pièce commandée</option><option>Terminé</option><option>Livré</option><option>Annulé</option></select></div><div><label>Acompte €</label><input id="r_deposit" type="number" value="0"></div><div><label>Garantie mois</label><input id="r_warranty" type="number" value="3"></div><div class="lineEditor"><div class="toolbar"><b>Appareils, réparations, produits et prestations</b><button type="button" class="primary small" onclick="addRepairLine()">+ Ajouter une ligne</button></div><div style="overflow:auto"><table><thead><tr><th>Type</th><th>Appareil / produit</th><th>Marque</th><th>IMEI / série</th><th>Statut appareil</th><th>Réparation / prestation / accessoire</th><th>Qté</th><th>Prix unit. €</th><th>Coût €</th><th></th></tr></thead><tbody id="repairLineRows"></tbody></table></div><div id="repairLineTotal" class="lineTotal">Total client : 0,00 €</div></div><input type="hidden" id="r_device"><input type="hidden" id="r_brand"><input type="hidden" id="r_imei"><input type="hidden" id="r_issue"><input type="hidden" id="r_price"><input type="hidden" id="r_cost"><div class="full"><label>Notes générales / accessoires remis</label><textarea id="r_notes"></textarea></div>
+<div class="repairGalleryBox">
   <div class="repairGalleryHead">
     <div><b>📷 Photos de la réparation</b><div id="repairPhotoCount" class="muted">0 / 10 photos</div></div>
     <label class="primary" style="cursor:pointer;padding:9px 12px;border-radius:10px;font-weight:900">
@@ -911,6 +974,45 @@ font-weight:700;border:1px solid #333;background:#111;
     </label>
   </div>
   <div id="repairGalleryGrid" class="repairGalleryGrid"></div>
+</div>
+
+<div class="aiNativeBox">
+  <div class="aiNativeTop">
+    <div>
+      <h4>🤖 Diagnostic IA (OpenAI)</h4>
+      <div class="muted">L’IA analyse les photos, la description de la panne et les informations de l’appareil.</div>
+    </div>
+    <button type="button" class="aiAnalyzeButton" onclick="runRepairAI()">🤖 Analyser avec l’IA</button>
+  </div>
+
+  <div id="repairAILoading" class="aiNativeLoading" style="display:none">Analyse en cours…</div>
+
+  <div class="aiResultGrid">
+    <div class="aiResultCard">
+      <div class="aiResultIcon diagnostic">♙</div>
+      <div><b>Diagnostic probable</b><div id="aiDiagnosis" class="aiResultText">Identification du problème</div></div>
+    </div>
+    <div class="aiResultCard">
+      <div class="aiResultIcon parts">🛠</div>
+      <div><b>Pièces recommandées</b><div id="aiParts" class="aiResultText">Liste des pièces nécessaires</div></div>
+    </div>
+    <div class="aiResultCard">
+      <div class="aiResultIcon time">◷</div>
+      <div><b>Temps de réparation</b><div id="aiTime" class="aiResultText">Estimation du temps</div></div>
+    </div>
+    <div class="aiResultCard">
+      <div class="aiResultIcon cost">🛠</div>
+      <div><b>Estimation du coût</b><div id="aiCost" class="aiResultText">Coût total approximatif</div></div>
+    </div>
+  </div>
+
+  <div id="repairAIResult" class="aiDiagnosticResult muted" style="display:none"></div>
+  <div class="aiDiagnosticActions">
+    <button type="button" onclick="copyRepairAI()">📋 Copier l’analyse</button>
+    <button type="button" onclick="insertRepairAIIntoNotes()">📝 Ajouter aux notes</button>
+    <button type="button" class="danger" onclick="clearRepairAI()">Effacer</button>
+  </div>
+  <div class="aiDiagnosticDisclaimer">Les propositions doivent toujours être vérifiées par le technicien avant intervention.</div>
 </div>
 <div class="full"><button class="primary" onclick="saveRepair()">Enregistrer réparation</button><button onclick="clearRepairV61()">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_repairs" oninput="render()" placeholder="Recherche dossier, client, IMEI..."><button onclick="show('kanban')">🧩 Voir Kanban</button> <button onclick="makeBlankPickupDoc()">📄 Document prise en charge</button><span class="muted">Utilisez le bouton <b>⋮ Actions</b> ou faites un clic droit sur une ligne.</span></div><table><thead><tr><th>Dossier</th><th>Client</th><th>Appareil</th><th>Statut</th><th>Jours</th><th>Reste</th><th>Marge</th><th>Garantie</th><th>Actions</th></tr></thead><tbody id="repairsRows"></tbody></table></div></section>
 <section id="kanban"><div class="card"><h3>Kanban atelier glisser-déposer</h3><div class="kanban" id="kanbanBoard"></div></div></section>
@@ -927,7 +1029,7 @@ font-weight:700;border:1px solid #333;background:#111;
 <section id="settings"><div class="card"><h3>Paramètres entreprise</h3><div class="form"><div><label>Nom entreprise</label><input id="p_name"></div><div><label>Téléphone</label><input id="p_tel"></div><div><label>Email</label><input id="p_mail"></div><div><label>SIRET</label><input id="p_siret"></div><div><label>Logo entreprise</label><input id="p_logo_file" type="file" accept="image/*" onchange="loadLogo(event)"></div><div><label>Aperçu logo</label><br><img id="logoPreview" class="logoPreview" alt="Logo"></div><div class="full"><label>Adresse</label><input id="p_addr"></div><div class="full"><div class="card" style="margin:8px 0"><h3>👥 Deux utilisateurs</h3><p class="muted">Modifie ici les identifiants et mots de passe. Il doit toujours rester exactement deux comptes.</p><div class="form"><div><label>Utilisateur 1</label><input id="p_user1_name" autocomplete="off"></div><div><label>Rôle</label><select id="p_user1_role"><option>Administrateur</option><option>Employé</option></select></div><div><label>Nouveau mot de passe utilisateur 1</label><input id="p_user1_pass" type="password" autocomplete="new-password" placeholder="Laisser vide pour conserver"></div><div><label>Utilisateur 2</label><input id="p_user2_name" autocomplete="off"></div><div><label>Rôle</label><select id="p_user2_role"><option>Administrateur</option><option>Employé</option></select></div><div><label>Nouveau mot de passe utilisateur 2</label><input id="p_user2_pass" type="password" autocomplete="new-password" placeholder="Laisser vide pour conserver"></div><div class="full"><button class="primary" onclick="saveTwoUsers()">Enregistrer les deux utilisateurs</button></div></div></div></div><div><label>Frais fixes par dossier facturé € HT</label><input id="p_fixed_order_fee" type="number" min="0" step="0.01" value="7.99"></div><div class="full"><label>Mentions générales</label><textarea id="p_terms"></textarea></div></div></div>
 <div class="card"><h3>📄 Conditions en bas de documents</h3><p class="muted">Ces textes apparaissent en bas des factures, devis et documents de prise en charge. Tu peux les modifier à tout moment.</p><div class="form"><div class="full"><label>Bas de page factures</label><textarea id="p_footer_invoice"></textarea></div><div class="full"><label>Bas de page devis</label><textarea id="p_footer_quote"></textarea></div><div class="full"><label>Bas de page prise en charge</label><textarea id="p_footer_pickup"></textarea></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer les conditions</button></div></div></div>
 <div class="card"><h3>📧 SMS / E-mail automatisés</h3><p class="muted">Le bouton e-mail ouvre ton logiciel de messagerie avec le message prêt. Pour un envoi 100% automatique, configure ensuite EmailJS/Brevo/Twilio.</p><div class="form"><div><label>Email service ID</label><input id="p_email_service" placeholder="Optionnel"></div><div><label>Email template ID</label><input id="p_email_template" placeholder="Optionnel"></div><div><label>Email public key</label><input id="p_email_key" placeholder="Optionnel"></div><div><label>Email de récupération</label><input id="p_recovery_email" type="email" value="tech42service@gmail.com" placeholder="tech42service@gmail.com"></div><div class="full"><label>Message SMS réparation terminée</label><textarea id="p_sms_ready"></textarea></div><div class="full"><label>Texte type — produit économiquement non réparable</label><textarea id="p_nonrepair_text" style="min-height:150px"></textarea><p class="muted">Ce texte est utilisé dans le module Gmail.</p></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer SMS / e-mail</button></div></div></div>
-<div class="card"><h3>Réseaux sociaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div></section>
+<div class="card"><h3>Réseaux sociaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>YouTube</label><input id="p_youtube" placeholder="https://youtube.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div></section>
 
 <section id="backup">
   <div class="card">
@@ -1014,7 +1116,22 @@ const tabs=[
   {id:'settingsHub',icon:'⚙️',title:'Paramètres',desc:'Réglages, journal et garanties'}
 ];
 document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${t.id==='chatgpt'?'openChatGPT()':`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
-function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mail:'tech42service@gmail.com',recoveryEmail:'tech42service@gmail.com',emailService:'',emailTemplate:'',emailKey:'',addr:'Loire (42)',siret:'',pass:'admin',terms:'TVA non applicable, article 293 B du CGI sauf indication contraire.',logo:'logo.png',facebook:'',instagram:'',tiktok:'',whatsapp:'https://wa.me/33743262415',website:'',maps:'',fixedOrderFee:7.99},clients:[],repairs:[],sales:[],usedParts:[],stock:[],suppliers:[{name:'Mobilax',tel:'',mail:'',site:'https://www.mobilax.fr'},{name:'SOSav',tel:'',mail:'',site:'https://www.sosav.fr'},{name:'iFixit',tel:'',mail:'',site:'https://fr.ifixit.com'},{name:'Amazon',tel:'',mail:'',site:'https://www.amazon.fr'},{name:'eBay',tel:'',mail:'',site:'https://www.ebay.fr'},{name:'AliExpress',tel:'',mail:'',site:'https://fr.aliexpress.com'},{name:'Back Market',tel:'',mail:'',site:'https://www.backmarket.fr'},{name:'Cdiscount',tel:'',mail:'',site:'https://www.cdiscount.com'}],toolLinks:[
+
+function openSocialNetwork(network){
+  const settings=(db&&db.settings)||{};
+  const defaults={
+    whatsapp:'https://wa.me/33743262415',
+    facebook:'https://www.facebook.com/',
+    instagram:'https://www.instagram.com/',
+    youtube:'https://www.youtube.com/',
+    tiktok:'https://www.tiktok.com/'
+  };
+  const url=(settings[network]||defaults[network]||'').trim();
+  if(!url)return alert('Lien '+network+' non configuré.');
+  window.open(url,'_blank','noopener,noreferrer');
+}
+
+function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mail:'tech42service@gmail.com',recoveryEmail:'tech42service@gmail.com',emailService:'',emailTemplate:'',emailKey:'',addr:'Loire (42)',siret:'',pass:'admin',terms:'TVA non applicable, article 293 B du CGI sauf indication contraire.',logo:'logo.png',facebook:'',instagram:'',youtube:'',tiktok:'',whatsapp:'https://wa.me/33743262415',website:'',maps:'',fixedOrderFee:7.99},clients:[],repairs:[],sales:[],usedParts:[],stock:[],suppliers:[{name:'Mobilax',tel:'',mail:'',site:'https://www.mobilax.fr'},{name:'SOSav',tel:'',mail:'',site:'https://www.sosav.fr'},{name:'iFixit',tel:'',mail:'',site:'https://fr.ifixit.com'},{name:'Amazon',tel:'',mail:'',site:'https://www.amazon.fr'},{name:'eBay',tel:'',mail:'',site:'https://www.ebay.fr'},{name:'AliExpress',tel:'',mail:'',site:'https://fr.aliexpress.com'},{name:'Back Market',tel:'',mail:'',site:'https://www.backmarket.fr'},{name:'Cdiscount',tel:'',mail:'',site:'https://www.cdiscount.com'}],toolLinks:[
 {name:'Gamepad Tester',cat:'Test manette',url:'https://gamepad-tester.com/',note:'Tester manettes PS/Xbox/Switch sur navigateur'},
 {name:'Hardware Tester',cat:'Diagnostic PC',url:'https://hardwaretester.com/gamepad',note:'Tests matériel et manette'},
 {name:'Dead Pixel Test',cat:'Test écran',url:'https://lcdtech.info/en/tests/dead.pixel.htm',note:'Tester pixels morts écran'},
@@ -1266,7 +1383,111 @@ function renderRepairGallery(){
 function removeRepairPhoto(i){repairGalleryData.splice(i,1);renderRepairGallery()}
 function openRepairPhotoModal(i){if(!repairGalleryData[i])return;$('repairPhotoModalImg').src=repairGalleryData[i];$('repairPhotoModal').classList.add('active')}
 function closeRepairPhotoModal(){$('repairPhotoModal').classList.remove('active');$('repairPhotoModalImg').src=''}
-function clearRepairV61(){clearForm('r');resetRepairLines();repairGalleryData=[];renderRepairGallery()}
+function clearRepairV61(){clearForm('r');resetRepairLines();repairGalleryData=[];renderRepairGallery();clearRepairAI()}
+
+
+let lastRepairAIText='';
+
+function getRepairAIContext(){
+  const lines=(repairLines||[]).map((x,i)=>({
+    numero:i+1,
+    appareil:x.device||'',
+    marque:x.brand||'',
+    imei:x.imei||'',
+    panne:x.description||'',
+    statut:x.status||''
+  }));
+  return {
+    lignes:lines,
+    notes:val('r_notes')||'',
+    statut:val('r_status')||'',
+    photos_count:Array.isArray(repairGalleryData)?repairGalleryData.length:0,
+    photos:Array.isArray(repairGalleryData)?repairGalleryData.slice(0,3):[]
+  };
+}
+
+async function runRepairAI(){
+  const result=$('repairAIResult');
+  const loading=$('repairAILoading');
+  const context=getRepairAIContext();
+  const hasInfo=context.notes||context.lignes.some(x=>x.appareil||x.marque||x.panne)||context.photos.length;
+  if(!hasInfo){
+    alert('Renseigne au minimum l’appareil, la panne ou ajoute une photo.');
+    return;
+  }
+
+  loading.style.display='block';
+  result.style.display='none';
+  lastRepairAIText='';
+  ['aiDiagnosis','aiParts','aiTime','aiCost'].forEach(id=>$(id).textContent='Analyse en cours…');
+
+  try{
+    const response=await fetch('/api/diagnostic-ai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(context)
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||'Service IA indisponible');
+
+    const analysis=data.analysis||{};
+    $('aiDiagnosis').textContent=analysis.diagnostic||'Aucun diagnostic proposé.';
+    $('aiParts').textContent=analysis.parts||'Aucune pièce identifiée.';
+    $('aiTime').textContent=analysis.time||'Temps non estimé.';
+    $('aiCost').textContent=analysis.cost||'Coût non estimé.';
+
+    lastRepairAIText=[
+      'DIAGNOSTIC PROBABLE\n'+$('aiDiagnosis').textContent,
+      'PIÈCES RECOMMANDÉES\n'+$('aiParts').textContent,
+      'TEMPS DE RÉPARATION\n'+$('aiTime').textContent,
+      'ESTIMATION DU COÛT\n'+$('aiCost').textContent,
+      analysis.tests?'TESTS CONSEILLÉS\n'+analysis.tests:'',
+      analysis.precautions?'PRÉCAUTIONS\n'+analysis.precautions:''
+    ].filter(Boolean).join('\n\n');
+
+    result.textContent=lastRepairAIText;
+    result.className='aiDiagnosticResult';
+  }catch(error){
+    console.error('Diagnostic IA',error);
+    ['aiDiagnosis','aiParts','aiTime','aiCost'].forEach(id=>$(id).textContent='IA indisponible');
+    result.style.display='block';
+    result.className='aiDiagnosticResult late';
+    result.textContent='IA indisponible : '+error.message;
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function copyRepairAI(){
+  if(!lastRepairAIText)return alert('Aucun diagnostic à copier.');
+  try{
+    await navigator.clipboard.writeText(lastRepairAIText);
+    alert('Diagnostic copié.');
+  }catch(e){
+    alert('Copie impossible sur cet appareil.');
+  }
+}
+
+function insertRepairAIIntoNotes(){
+  if(!lastRepairAIText)return alert('Aucun diagnostic à ajouter.');
+  const current=val('r_notes').trim();
+  setv('r_notes',(current?current+'\n\n':'')+'--- Diagnostic IA ---\n'+lastRepairAIText);
+  alert('Diagnostic ajouté aux notes.');
+}
+
+function clearRepairAI(){
+  lastRepairAIText='';
+  const result=$('repairAIResult');
+  if(result){
+    result.style.display='none';
+    result.className='aiDiagnosticResult muted';
+    result.textContent='';
+  }
+  $('aiDiagnosis').textContent='Identification du problème';
+  $('aiParts').textContent='Liste des pièces nécessaires';
+  $('aiTime').textContent='Estimation du temps';
+  $('aiCost').textContent='Coût total approximatif';
+}
 
 function saveRepair(){linkRepairClient();let i=val('r_i');if(!repairLines.length)addRepairLine();let price=repairLines.reduce((s,x)=>s+Number(x.qty||0)*Number(x.price||0),0),cost=repairLines.reduce((s,x)=>s+Number(x.qty||0)*Number(x.cost||0),0),old=i===''?{}:db.repairs[+i]||{},o={id:i===''?next('case'):old.id,date:i===''?today():old.date,clientId:val('r_client_id')||old.clientId||'',client:val('r_client'),tel:val('r_tel'),device:repairLines.map(x=>x.device).filter(Boolean).join(' / '),brand:repairLines.map(x=>x.brand).filter(Boolean).join(' / '),imei:repairLines.map(x=>x.imei).filter(Boolean).join(' / '),issue:repairLines.map(x=>x.description).filter(Boolean).join(' + '),items:repairLines.map(x=>({...x})),devices:repairLines.reduce((acc,x)=>{const key=[x.device,x.brand,x.imei].join('|');let d=acc.find(y=>y.key===key);if(!d){d={key,device:x.device,brand:x.brand,imei:x.imei,status:x.status||'Diagnostic',items:[]};acc.push(d)}d.items.push({...x});return acc},[]),status:val('r_status'),price,cost,deposit:num('r_deposit'),warranty:num('r_warranty'),notes:val('r_notes'),photos:repairGalleryData.slice(0,10)};if(i==='')db.repairs.push(o);else db.repairs[+i]=o;clearRepairV61();save('Réparation enregistrée : '+o.id)}
 function editRepair(i){let r=db.repairs[i];ensureClientIds();for(let [k,v] of Object.entries({i,client_id:r.clientId||'',client:r.client,tel:r.tel,status:r.status,deposit:r.deposit,warranty:r.warranty,notes:r.notes}))setv('r_'+k,v);repairLines=normalizeRepairLines(r);renderRepairLines();repairGalleryData=Array.isArray(r.photos)?r.photos.slice(0,10):[r.photoDevice,r.photoImei].filter(Boolean);renderRepairGallery()}
@@ -1853,7 +2074,7 @@ function emailPickupDoc(i){
   window.open('https://mail.google.com/mail/?view=cm&fs=1&to=&su='+subject+'&body='+body,'_blank','noopener');
 }
 function saveUser(){let i=val('u_i'),o={name:val('u_name'),role:val('u_role'),pass:val('u_pass')||'0000'};if(i==='')db.users.push(o);else db.users[+i]=o;clearForm('u');save('Compte enregistré : '+o.name)}function editUser(i){let u=db.users[i];setv('u_i',i);setv('u_name',u.name);setv('u_role',u.role);setv('u_pass',u.pass)}function del(arr,i){if(confirm('Supprimer ?')){let x=db[arr][i];db[arr].splice(i,1);save('Suppression dans '+arr)}}function clearJournal(){if(confirm('Vider le journal ?')){db.log=[];save('Journal vidé')}}
-function saveSettings(){db.settings={...db.settings,name:val('p_name'),tel:val('p_tel'),mail:val('p_mail'),siret:val('p_siret'),addr:val('p_addr'),pass:db.settings.pass||'admin',terms:val('p_terms'),footerInvoice:val('p_footer_invoice'),footerQuote:val('p_footer_quote'),footerPickup:val('p_footer_pickup'),smsReady:val('p_sms_ready'),nonRepairText:val('p_nonrepair_text'),emailService:val('p_email_service'),emailTemplate:val('p_email_template'),emailKey:val('p_email_key'),recoveryEmail:val('p_recovery_email'),facebook:val('p_facebook'),instagram:val('p_instagram'),tiktok:val('p_tiktok'),whatsapp:val('p_whatsapp'),website:val('p_website'),maps:val('p_maps'),fixedOrderFee:Number(val('p_fixed_order_fee')||7.99)};save('Paramètres modifiés')}function fillSettings(){let p=db.settings;setv('p_name',p.name);setv('p_tel',p.tel);setv('p_mail',p.mail);setv('p_siret',p.siret);setv('p_addr',p.addr);setv('p_terms',p.terms);setv('p_footer_invoice',p.footerInvoice||'');setv('p_footer_quote',p.footerQuote||'');setv('p_footer_pickup',p.footerPickup||'');setv('p_sms_ready',p.smsReady||'Bonjour {client}, votre appareil {appareil} est prêt chez TECH42SERVICE. Dossier {dossier}.');setv('p_nonrepair_text',p.nonRepairText||defaultNonRepairText());setv('p_email_service',p.emailService||'');setv('p_email_template',p.emailTemplate||'');setv('p_email_key',p.emailKey||'');setv('p_recovery_email',p.recoveryEmail||p.mail||'');setv('p_facebook',p.facebook);setv('p_instagram',p.instagram);setv('p_tiktok',p.tiktok);setv('p_whatsapp',p.whatsapp);setv('p_website',p.website);setv('p_maps',p.maps);setv('p_fixed_order_fee',Number(p.fixedOrderFee??7.99).toFixed(2)); if($('logoPreview')) $('logoPreview').src=p.logo||''}
+function saveSettings(){db.settings={...db.settings,name:val('p_name'),tel:val('p_tel'),mail:val('p_mail'),siret:val('p_siret'),addr:val('p_addr'),pass:db.settings.pass||'admin',terms:val('p_terms'),footerInvoice:val('p_footer_invoice'),footerQuote:val('p_footer_quote'),footerPickup:val('p_footer_pickup'),smsReady:val('p_sms_ready'),nonRepairText:val('p_nonrepair_text'),emailService:val('p_email_service'),emailTemplate:val('p_email_template'),emailKey:val('p_email_key'),recoveryEmail:val('p_recovery_email'),facebook:val('p_facebook'),instagram:val('p_instagram'),tiktok:val('p_tiktok'),youtube:val('p_youtube'),whatsapp:val('p_whatsapp'),website:val('p_website'),maps:val('p_maps'),fixedOrderFee:Number(val('p_fixed_order_fee')||7.99)};save('Paramètres modifiés')}function fillSettings(){let p=db.settings;setv('p_name',p.name);setv('p_tel',p.tel);setv('p_mail',p.mail);setv('p_siret',p.siret);setv('p_addr',p.addr);setv('p_terms',p.terms);setv('p_footer_invoice',p.footerInvoice||'');setv('p_footer_quote',p.footerQuote||'');setv('p_footer_pickup',p.footerPickup||'');setv('p_sms_ready',p.smsReady||'Bonjour {client}, votre appareil {appareil} est prêt chez TECH42SERVICE. Dossier {dossier}.');setv('p_nonrepair_text',p.nonRepairText||defaultNonRepairText());setv('p_email_service',p.emailService||'');setv('p_email_template',p.emailTemplate||'');setv('p_email_key',p.emailKey||'');setv('p_recovery_email',p.recoveryEmail||p.mail||'');setv('p_facebook',p.facebook);setv('p_instagram',p.instagram);setv('p_tiktok',p.tiktok);setv('p_youtube',p.youtube||'');setv('p_whatsapp',p.whatsapp);setv('p_website',p.website);setv('p_maps',p.maps);setv('p_fixed_order_fee',Number(p.fixedOrderFee??7.99).toFixed(2)); if($('logoPreview')) $('logoPreview').src=p.logo||''}
 let backupDirectoryHandle=null;
 let autoBackupTimer=null;
 let lastAutoBackupAt=0;
