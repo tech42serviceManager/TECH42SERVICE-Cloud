@@ -797,7 +797,7 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">💾 Sauvegarde</button><button onclick="show('settings')">⚙️ Paramètres</button><button class="danger" onclick="logout()" title="Déconnexion">🚪</button></div></header>
+<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button onclick="show('settings')">⚙️ Paramètres</button><button class="danger" onclick="logout()" title="Déconnexion">🚪</button></div></header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar"><nav id="nav"></nav></aside><div class="appContent"><div id="moduleBar"><button onclick="show('home')">← Accueil</button><div id="moduleTitle" class="moduleTitle">Accueil</div></div><main>
 <section id="home" class="active">
@@ -900,7 +900,38 @@ font-weight:700;border:1px solid #333;background:#111;
 <div class="card"><h3>📄 Conditions en bas de documents</h3><p class="muted">Ces textes apparaissent en bas des factures, devis et documents de prise en charge. Tu peux les modifier à tout moment.</p><div class="form"><div class="full"><label>Bas de page factures</label><textarea id="p_footer_invoice"></textarea></div><div class="full"><label>Bas de page devis</label><textarea id="p_footer_quote"></textarea></div><div class="full"><label>Bas de page prise en charge</label><textarea id="p_footer_pickup"></textarea></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer les conditions</button></div></div></div>
 <div class="card"><h3>📧 SMS / E-mail automatisés</h3><p class="muted">Le bouton e-mail ouvre ton logiciel de messagerie avec le message prêt. Pour un envoi 100% automatique, configure ensuite EmailJS/Brevo/Twilio.</p><div class="form"><div><label>Email service ID</label><input id="p_email_service" placeholder="Optionnel"></div><div><label>Email template ID</label><input id="p_email_template" placeholder="Optionnel"></div><div><label>Email public key</label><input id="p_email_key" placeholder="Optionnel"></div><div><label>Email de récupération</label><input id="p_recovery_email" type="email" value="tech42service@gmail.com" placeholder="tech42service@gmail.com"></div><div class="full"><label>Message SMS réparation terminée</label><textarea id="p_sms_ready"></textarea></div><div class="full"><label>Texte type — produit économiquement non réparable</label><textarea id="p_nonrepair_text" style="min-height:150px"></textarea><p class="muted">Ce texte est utilisé dans le module Gmail.</p></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer SMS / e-mail</button></div></div></div>
 <div class="card"><h3>Réseaux sociaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div></section>
-<section id="backup"><div class="card"><h3>Sauvegarde sur votre clé USB ou votre PC</h3><div class="saveControls"><button class="primary" onclick="backup()">⬇️ Créer une sauvegarde</button><button onclick="chooseBackupFolder()">📁 Choisir le dossier SAVE</button><button onclick="autoBackupNow()">💾 Sauvegarder maintenant dans SAVE</button><label style="margin:0"><span class="small" style="display:inline-block;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:#1b1b1b;color:var(--text)">⬆️ Restaurer une sauvegarde</span><input type="file" accept=".json,application/json" onchange="restore(event)" style="display:none"></label><button onclick="manualSaveNow()">💾 Enregistrer dans ce navigateur</button><button class="danger" onclick="resetAll()">Réinitialiser</button></div><p class="saveInfo"><b>Mode local uniquement :</b> aucune donnée n’est envoyée vers Internet. Cliquez une fois sur <b>Choisir le dossier SAVE</b>. Ensuite, une sauvegarde JSON y sera créée automatiquement après vos modifications et toutes les 5 minutes.</p><p class="saveInfo" id="backupFolderInfo">Aucun dossier SAVE autorisé pour le moment.</p><p class="saveInfo">Pour changer le mot de passe : ouvre <b>⚙️ Paramètres</b>, saisis le mot de passe actuel, puis le nouveau mot de passe deux fois.</p><p class="saveInfo" id="lastSaveInfo"></p><div class="card" style="margin-top:14px"><h3>Contrôle de stabilité V5.0</h3><div id="healthCheck" class="grid"></div><div class="toolbar"><button onclick="runHealthCheck(true)">🔎 Vérifier les données</button><button onclick="downloadEmergencyBackup()">🛟 Copie de secours immédiate</button></div><p class="saveInfo">La restauration crée automatiquement une copie de sécurité des données actuelles avant tout remplacement.</p></div></div></section>
+
+<section id="backup">
+  <div class="card">
+    <h3>☁️ Cloud TECH42SERVICE</h3>
+
+    <div class="grid" style="margin-bottom:14px">
+      <div class="card" style="margin:0">
+        <div class="muted">État</div>
+        <div id="cloudPanelStatus" class="big oktext">Connexion en cours…</div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="muted">Dernière synchronisation</div>
+        <div id="cloudPanelTime" class="big" style="font-size:20px">—</div>
+      </div>
+    </div>
+
+    <div class="saveControls">
+      <button class="primary" onclick="syncCloudNow()">🔄 Synchroniser maintenant</button>
+      <button onclick="backup()">⬇️ Exporter une sauvegarde JSON</button>
+      <label style="margin:0">
+        <span class="small" style="display:inline-block;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:#1b1b1b;color:var(--text)">⬆️ Importer une sauvegarde JSON</span>
+        <input type="file" accept=".json,application/json" onchange="restore(event)" style="display:none">
+      </label>
+    </div>
+
+    <p class="saveInfo">
+      Les modifications sont enregistrées automatiquement dans le cloud et récupérées sur vos autres appareils.
+    </p>
+    <p class="saveInfo" id="lastSaveInfo"></p>
+  </div>
+</section>
+
 
 <section id="agenda"><div class="card"><h3>📅 Agenda</h3><div class="form"><input type="hidden" id="ag_i"><div><label>Titre *</label><input id="ag_title" placeholder="Rendez-vous client"></div><div><label>Date</label><input id="ag_date" type="date"></div><div><label>Heure</label><input id="ag_time" type="time"></div><div><label>Type</label><select id="ag_type"><option>Rendez-vous</option><option>Appareil à rendre</option><option>Pièce à commander</option><option>Rappel</option></select></div><div><label>Client</label><input id="ag_client" list="clientList"></div><div><label>Téléphone</label><input id="ag_tel"></div><div class="full"><label>Notes</label><textarea id="ag_notes"></textarea></div><div class="full"><button class="primary" onclick="saveAgenda()">Enregistrer</button> <button onclick="clearAgenda()">Vider</button> <button onclick="openGoogleAgenda()">Ajouter à Google Agenda</button></div></div></div><div class="card"><div class="moduleTabs"><button onclick="agendaMode='list';renderAgenda()">Liste</button><button onclick="agendaMode='week';renderAgenda()">Semaine</button></div><div id="agendaView"></div></div></section>
 <section id="contacts"><div class="card"><h3>📇 Carnet de contacts</h3><div class="form"><input type="hidden" id="ct_i"><div><label>Nom *</label><input id="ct_nom"></div><div><label>Prénom</label><input id="ct_pre"></div><div><label>Société</label><input id="ct_societe"></div><div><label>Téléphone</label><input id="ct_tel"></div><div><label>E-mail</label><input id="ct_mail" type="email"></div><div class="full"><label>Adresse</label><input id="ct_adresse"></div><div class="full"><label>Notes</label><textarea id="ct_notes"></textarea></div><div class="full"><button class="primary" onclick="saveContact()">Enregistrer</button> <button onclick="clearContact()">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_contacts" oninput="renderContacts()" placeholder="Rechercher un contact..."><button onclick="exportContactsCSV()">Exporter CSV</button><button onclick="exportContactsVCF()">Exporter fichier contacts (.vcf)</button><label><span class="small" style="display:inline-block;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer">Importer CSV / VCF</span><input type="file" accept=".csv,.vcf,text/csv,text/vcard" onchange="importContacts(event)" style="display:none"></label></div><table><thead><tr><th>Contact</th><th>Société</th><th>Téléphone</th><th>E-mail</th><th>Actions</th></tr></thead><tbody id="contactsRows"></tbody></table></div></section>
@@ -1000,7 +1031,11 @@ function save(action){
   markLocalChange();
   if(action)log(action);
   render();
-  scheduleCloudSync();
+  if(!LOCAL_ONLY_MODE && navigator.onLine){
+    syncToCloud(true);
+  }else{
+    scheduleCloudSync();
+  }
   scheduleAutoBackup();
 }function log(a){db.log.push({date:new Date().toLocaleString('fr-FR'),user:currentUser,action:a});localStorage.setItem(KEY,JSON.stringify(db))}function $(id){return document.getElementById(id)}function val(id){return ($(id)?.value||'').trim()}function num(id){return Number(val(id)||0)}function setv(id,v){if($(id))$(id).value=v??''}function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function euro(n){return Number(n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}function today(){return new Date().toISOString().slice(0,10)}function days(d){return Math.floor((new Date()-new Date(d))/(864e5))}function match(o,q){q=(q||'').toLowerCase();return !q||JSON.stringify(o).toLowerCase().includes(q)}function show(id){
   document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
@@ -1010,7 +1045,7 @@ function save(action){
   const isHome=id==='home';
   document.body.classList.toggle('moduleView',!isHome);
   const tab=tabs.find(t=>t.id===id);
-  const labels={repairs:'Réparations',usedparts:'Pièces',stock:'Stock',suppliers:'Fournisseurs',repairhelp:'Aide démontage',tools:'Outils / Tests',settings:'Paramètres entreprise',journal:'Journal',warranties:'Garanties',new:'Nouvelle opération',backup:'Sauvegardes'};
+  const labels={repairs:'Réparations',usedparts:'Pièces',stock:'Stock',suppliers:'Fournisseurs',repairhelp:'Aide démontage',tools:'Outils / Tests',settings:'Paramètres entreprise',journal:'Journal',warranties:'Garanties',new:'Nouvelle opération',backup:'Cloud'};
   const title=tab?`${tab.icon} ${tab.title}`:(labels[id]||id);
   if($('moduleTitle'))$('moduleTitle').textContent=title;
   render();
@@ -1355,8 +1390,39 @@ function autoSaveEvery5Min(){
   updateSaveBadge('✅ Sauvegarde auto '+new Date().toLocaleTimeString('fr-FR'));
 }
 function updateSaveBadge(text){
-  const b=$('autoSaveBadge'); if(b)b.textContent=text;
-  const info=$('lastSaveInfo'); if(info)info.textContent='Dernière sauvegarde : '+(db.lastAutoSave||'non disponible');
+  const b=$('autoSaveBadge');
+  if(b)b.textContent=text;
+
+  const info=$('lastSaveInfo');
+  if(info)info.textContent='Dernière synchronisation : '+(db.lastAutoSave||'non disponible');
+
+  const status=$('cloudPanelStatus');
+  const time=$('cloudPanelTime');
+  if(status){
+    status.textContent=text||'État inconnu';
+    status.className='big '+(
+      String(text).includes('synchronisé') ? 'oktext' :
+      String(text).includes('Hors ligne') || String(text).includes('indisponible') ? 'late' :
+      'warn'
+    );
+  }
+  if(time){
+    const d=db.lastAutoSave?new Date(db.lastAutoSave):null;
+    time.textContent=d&&!isNaN(d)?d.toLocaleString('fr-FR'):'Aucune synchronisation';
+  }
+}
+
+async function syncCloudNow(){
+  updateSaveBadge('☁️ Synchronisation…');
+  try{
+    await syncToCloud(false);
+    await syncFromCloud(true,true);
+    updateSaveBadge('☁️ Cloud synchronisé');
+  }catch(e){
+    console.error(e);
+    updateSaveBadge('⚠️ Cloud indisponible');
+    alert('Synchronisation impossible pour le moment.');
+  }
 }
 let usedPartPhotoData='';
 function previewUsedPartPhoto(e){const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{usedPartPhotoData=r.result;$('op_photo_preview').src=r.result};r.readAsDataURL(f)}
@@ -1963,13 +2029,20 @@ async function startCloudSync(){
     return;
   }
   await testCloudConnection(true);
-  await syncFromCloud(true,true);
-  scheduleCloudSync();
+  await syncFromCloud(true,false);
+  clearInterval(window.__tech42CloudPull);
+  window.__tech42CloudPull=setInterval(()=>syncFromCloud(true,true),15000);
 }
-window.addEventListener('online',()=>updateSaveBadge('💾 Mode local — données sur ce PC'));
-window.addEventListener('offline',()=>updateSaveBadge('💾 Mode local — données sur ce PC'));
+window.addEventListener('online',()=>{updateSaveBadge('☁️ Reconnexion cloud…');startCloudSync();});
+window.addEventListener('offline',()=>updateSaveBadge('💾 Hors ligne — sauvegarde locale'));
 
-if(!localStorage.getItem('tech42_cloud_v8')){localStorage.setItem('tech42_cloud_v8',JSON.stringify({provider:'supabase',url:'https://uenpjlqskauvcsndajyq.supabase.co',anonKey:'sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q',table:'tech42_data',enabled:true}));}
+localStorage.setItem('tech42_cloud_v8',JSON.stringify({
+  provider:'supabase',
+  url:'https://uenpjlqskauvcsndajyq.supabase.co',
+  anonKey:'sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q',
+  table:'tech42_data',
+  enabled:true
+}));
 
 let agendaMode='list', currentSheetIndex=-1, sheetData=[['Colonne A','Colonne B','Colonne C'],['','','']];
 function clearAgenda(){['ag_i','ag_title','ag_date','ag_time','ag_client','ag_tel','ag_notes'].forEach(x=>setv(x,''));setv('ag_type','Rendez-vous')}
