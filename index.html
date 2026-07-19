@@ -848,6 +848,53 @@ font-weight:700;border:1px solid #333;background:#111;
 @media(max-width:1050px){.aiResultGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.aiResultGrid{grid-template-columns:1fr}.socialPanel{display:none}}
 
+
+/* PRO 6.4 */
+.powerButton{
+  width:42px!important;min-width:42px!important;height:42px!important;
+  border-radius:50%!important;font-size:24px!important;line-height:1!important;
+  display:grid!important;place-items:center!important;padding:0!important;
+}
+.appShell{grid-template-columns:220px minmax(0,1fr) 250px!important}
+.appRightbar{
+  position:sticky;top:76px;align-self:start;max-height:calc(100vh - 88px);
+  overflow:auto;display:flex;flex-direction:column;gap:10px
+}
+.rightPanel{
+  padding:12px;border:1px solid #4a3d17;border-radius:14px;
+  background:linear-gradient(180deg,#111,#080808);box-shadow:0 8px 22px rgba(0,0,0,.28)
+}
+.rightPanel h3{margin:0 0 7px;color:var(--gold2);font-size:14px}
+.rightPanelHead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.socialRightList{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.socialRightItem{
+  width:100%;display:flex;align-items:center;gap:9px;text-align:left;
+  min-height:38px!important;padding:7px 8px!important;background:#0b0b0b!important;
+  border:1px solid #302817!important;border-radius:9px!important
+}
+.socialRightItem:hover{border-color:var(--gold)!important}
+.socialRightIcon{
+  width:25px;height:25px;display:grid;place-items:center;border-radius:7px;
+  background:#171717;border:1px solid #4c3e19;font-weight:900
+}
+.socialManagerHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.socialEditRow{
+  display:grid;grid-template-columns:150px 1fr 1.5fr auto;gap:8px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line)
+}
+.socialEditActions{display:flex;gap:5px}
+.socialEditActions button{min-height:34px!important;padding:5px 7px!important}
+@media(max-width:1250px){.appShell{grid-template-columns:190px minmax(0,1fr) 220px!important}}
+@media(max-width:980px){
+  .appShell{grid-template-columns:180px minmax(0,1fr)!important}
+  .appRightbar{position:static;grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);max-height:none}
+}
+@media(max-width:760px){
+  .appRightbar{display:block}.rightPanel{margin-top:9px}
+  .socialEditRow{grid-template-columns:1fr}
+  .socialEditActions{grid-column:1/-1}
+}
+
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -867,18 +914,10 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">V6.3 <span>IA NATIVE</span></div></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger userBadge" onclick="logout()" title="Déconnexion">T</button></div></header>
+<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">PRO 6.4 <span>IA NATIVE</span></div></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar">
 <nav id="nav"></nav>
-<div class="socialPanel">
-  <div class="socialPanelTitle">RÉSEAUX SOCIAUX</div>
-  <button type="button" onclick="openSocialNetwork('whatsapp')"><span class="socialIcon whatsapp">◉</span>WhatsApp</button>
-  <button type="button" onclick="openSocialNetwork('facebook')"><span class="socialIcon facebook">f</span>Facebook</button>
-  <button type="button" onclick="openSocialNetwork('instagram')"><span class="socialIcon instagram">◎</span>Instagram</button>
-  <button type="button" onclick="openSocialNetwork('youtube')"><span class="socialIcon youtube">▶</span>YouTube</button>
-  <button type="button" onclick="openSocialNetwork('tiktok')"><span class="socialIcon tiktok">♪</span>TikTok</button>
-</div>
 </aside><div class="appContent"><div id="moduleBar"><button onclick="show('home')">← Accueil</button><div id="moduleTitle" class="moduleTitle">Accueil</div></div><main>
 <section id="home" class="active">
 <div class="dashboardWrap">
@@ -1029,7 +1068,21 @@ font-weight:700;border:1px solid #333;background:#111;
 <section id="settings"><div class="card"><h3>Paramètres entreprise</h3><div class="form"><div><label>Nom entreprise</label><input id="p_name"></div><div><label>Téléphone</label><input id="p_tel"></div><div><label>Email</label><input id="p_mail"></div><div><label>SIRET</label><input id="p_siret"></div><div><label>Logo entreprise</label><input id="p_logo_file" type="file" accept="image/*" onchange="loadLogo(event)"></div><div><label>Aperçu logo</label><br><img id="logoPreview" class="logoPreview" alt="Logo"></div><div class="full"><label>Adresse</label><input id="p_addr"></div><div class="full"><div class="card" style="margin:8px 0"><h3>👥 Deux utilisateurs</h3><p class="muted">Modifie ici les identifiants et mots de passe. Il doit toujours rester exactement deux comptes.</p><div class="form"><div><label>Utilisateur 1</label><input id="p_user1_name" autocomplete="off"></div><div><label>Rôle</label><select id="p_user1_role"><option>Administrateur</option><option>Employé</option></select></div><div><label>Nouveau mot de passe utilisateur 1</label><input id="p_user1_pass" type="password" autocomplete="new-password" placeholder="Laisser vide pour conserver"></div><div><label>Utilisateur 2</label><input id="p_user2_name" autocomplete="off"></div><div><label>Rôle</label><select id="p_user2_role"><option>Administrateur</option><option>Employé</option></select></div><div><label>Nouveau mot de passe utilisateur 2</label><input id="p_user2_pass" type="password" autocomplete="new-password" placeholder="Laisser vide pour conserver"></div><div class="full"><button class="primary" onclick="saveTwoUsers()">Enregistrer les deux utilisateurs</button></div></div></div></div><div><label>Frais fixes par dossier facturé € HT</label><input id="p_fixed_order_fee" type="number" min="0" step="0.01" value="7.99"></div><div class="full"><label>Mentions générales</label><textarea id="p_terms"></textarea></div></div></div>
 <div class="card"><h3>📄 Conditions en bas de documents</h3><p class="muted">Ces textes apparaissent en bas des factures, devis et documents de prise en charge. Tu peux les modifier à tout moment.</p><div class="form"><div class="full"><label>Bas de page factures</label><textarea id="p_footer_invoice"></textarea></div><div class="full"><label>Bas de page devis</label><textarea id="p_footer_quote"></textarea></div><div class="full"><label>Bas de page prise en charge</label><textarea id="p_footer_pickup"></textarea></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer les conditions</button></div></div></div>
 <div class="card"><h3>📧 SMS / E-mail automatisés</h3><p class="muted">Le bouton e-mail ouvre ton logiciel de messagerie avec le message prêt. Pour un envoi 100% automatique, configure ensuite EmailJS/Brevo/Twilio.</p><div class="form"><div><label>Email service ID</label><input id="p_email_service" placeholder="Optionnel"></div><div><label>Email template ID</label><input id="p_email_template" placeholder="Optionnel"></div><div><label>Email public key</label><input id="p_email_key" placeholder="Optionnel"></div><div><label>Email de récupération</label><input id="p_recovery_email" type="email" value="tech42service@gmail.com" placeholder="tech42service@gmail.com"></div><div class="full"><label>Message SMS réparation terminée</label><textarea id="p_sms_ready"></textarea></div><div class="full"><label>Texte type — produit économiquement non réparable</label><textarea id="p_nonrepair_text" style="min-height:150px"></textarea><p class="muted">Ce texte est utilisé dans le module Gmail.</p></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer SMS / e-mail</button></div></div></div>
-<div class="card"><h3>Réseaux sociaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>YouTube</label><input id="p_youtube" placeholder="https://youtube.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div></section>
+<div class="card"><h3>Réseaux sociaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>YouTube</label><input id="p_youtube" placeholder="https://youtube.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div>
+<div id="socialManagerCard" class="card">
+  <div class="socialManagerHead">
+    <div>
+      <h3>🌐 Réseaux sociaux</h3>
+      <p class="muted">Ajoute, modifie, supprime, masque et change l’ordre.</p>
+    </div>
+    <button class="primary" onclick="addSocialLink()">➕ Ajouter</button>
+  </div>
+  <div id="socialManagerRows"></div>
+  <div style="margin-top:12px">
+    <button class="primary" onclick="saveSocialLinks()">Enregistrer les réseaux sociaux</button>
+  </div>
+</div>
+</section>
 
 <section id="backup">
   <div class="card">
@@ -1097,7 +1150,30 @@ font-weight:700;border:1px solid #333;background:#111;
 <datalist id="clientList"></datalist><datalist id="supplierList"></datalist>
 
 
-</main></div></div>
+</main></div>
+<aside class="appRightbar">
+  <div class="rightPanel">
+    <div class="rightPanelHead">
+      <div>
+        <h3>🌐 Réseaux sociaux</h3>
+        <div class="muted">Accès rapide</div>
+      </div>
+      <button class="small" onclick="show('settings');setTimeout(()=>document.getElementById('socialManagerCard')?.scrollIntoView({behavior:'smooth'}),150)">⚙️ Gérer</button>
+    </div>
+    <div id="socialRightList" class="socialRightList"></div>
+  </div>
+
+  <div class="rightPanel">
+    <h3>🤖 Assistant IA</h3>
+    <div class="muted">Disponible dans chaque fiche de réparation.</div>
+    <button class="primary" style="width:100%;margin-top:10px" onclick="show('repairs')">Ouvrir une réparation</button>
+  </div>
+
+  <div class="rightPanel">
+    <h3>☁️ Cloud</h3>
+    <div id="rightCloudStatus" class="oktext">Synchronisé</div>
+  </div>
+</aside></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const KEY='TECH42SERVICE_V8_1_ULTIMATE_PRO_DB';const LOCAL_ONLY_MODE=false;let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
@@ -1117,21 +1193,87 @@ const tabs=[
 ];
 document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${t.id==='chatgpt'?'openChatGPT()':`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
 
-function openSocialNetwork(network){
-  const settings=(db&&db.settings)||{};
-  const defaults={
-    whatsapp:'https://wa.me/33743262415',
-    facebook:'https://www.facebook.com/',
-    instagram:'https://www.instagram.com/',
-    youtube:'https://www.youtube.com/',
-    tiktok:'https://www.tiktok.com/'
-  };
-  const url=(settings[network]||defaults[network]||'').trim();
-  if(!url)return alert('Lien '+network+' non configuré.');
-  window.open(url,'_blank','noopener,noreferrer');
-}
 
-function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mail:'tech42service@gmail.com',recoveryEmail:'tech42service@gmail.com',emailService:'',emailTemplate:'',emailKey:'',addr:'Loire (42)',siret:'',pass:'admin',terms:'TVA non applicable, article 293 B du CGI sauf indication contraire.',logo:'logo.png',facebook:'',instagram:'',youtube:'',tiktok:'',whatsapp:'https://wa.me/33743262415',website:'',maps:'',fixedOrderFee:7.99},clients:[],repairs:[],sales:[],usedParts:[],stock:[],suppliers:[{name:'Mobilax',tel:'',mail:'',site:'https://www.mobilax.fr'},{name:'SOSav',tel:'',mail:'',site:'https://www.sosav.fr'},{name:'iFixit',tel:'',mail:'',site:'https://fr.ifixit.com'},{name:'Amazon',tel:'',mail:'',site:'https://www.amazon.fr'},{name:'eBay',tel:'',mail:'',site:'https://www.ebay.fr'},{name:'AliExpress',tel:'',mail:'',site:'https://fr.aliexpress.com'},{name:'Back Market',tel:'',mail:'',site:'https://www.backmarket.fr'},{name:'Cdiscount',tel:'',mail:'',site:'https://www.cdiscount.com'}],toolLinks:[
+const SOCIAL_ICONS={
+  whatsapp:'💬',facebook:'f',instagram:'◎',youtube:'▶',tiktok:'♪',
+  linkedin:'in',snapchat:'👻',x:'𝕏',telegram:'✈',website:'🌐',other:'🔗'
+};
+
+function defaultSocialLinks(){
+  return [
+    {name:'WhatsApp',type:'whatsapp',url:'https://wa.me/33743262415',enabled:true},
+    {name:'Facebook',type:'facebook',url:'',enabled:true},
+    {name:'Instagram',type:'instagram',url:'',enabled:true},
+    {name:'YouTube',type:'youtube',url:'',enabled:true},
+    {name:'TikTok',type:'tiktok',url:'',enabled:true}
+  ];
+}
+function ensureSocialLinks(){
+  if(!Array.isArray(db.settings.socialLinks)){
+    const s=db.settings||{};
+    db.settings.socialLinks=defaultSocialLinks().map(x=>({...x,url:s[x.type]||x.url}));
+  }
+  db.settings.socialLinks=db.settings.socialLinks.map(x=>({
+    name:String(x.name||'Réseau'),
+    type:String(x.type||'other'),
+    url:String(x.url||''),
+    enabled:x.enabled!==false
+  }));
+}
+function socialIcon(type){return SOCIAL_ICONS[type]||SOCIAL_ICONS.other}
+function renderSocialRightPanel(){
+  ensureSocialLinks();
+  const box=$('socialRightList');if(!box)return;
+  const links=db.settings.socialLinks.filter(x=>x.enabled);
+  box.innerHTML=links.map((x,i)=>`
+    <button class="socialRightItem" onclick="openSocialLink(${i})">
+      <span class="socialRightIcon">${esc(socialIcon(x.type))}</span>
+      <span>${esc(x.name)}</span>
+    </button>`).join('')||'<div class="muted">Aucun réseau configuré.</div>';
+}
+function openSocialLink(index){
+  ensureSocialLinks();
+  const link=db.settings.socialLinks.filter(x=>x.enabled)[index];
+  if(!link)return;
+  if(!link.url){alert('Lien non configuré pour '+link.name+'.');return}
+  window.open(link.url,'_blank','noopener,noreferrer');
+}
+function renderSocialManager(){
+  ensureSocialLinks();
+  const box=$('socialManagerRows');if(!box)return;
+  const types=['whatsapp','facebook','instagram','youtube','tiktok','linkedin','snapchat','x','telegram','website','other'];
+  box.innerHTML=db.settings.socialLinks.map((x,i)=>`
+    <div class="socialEditRow">
+      <select id="social_type_${i}">
+        ${types.map(t=>`<option value="${t}" ${x.type===t?'selected':''}>${esc(socialIcon(t))} ${esc(t)}</option>`).join('')}
+      </select>
+      <input id="social_name_${i}" value="${esc(x.name)}" placeholder="Nom">
+      <input id="social_url_${i}" value="${esc(x.url)}" placeholder="https://...">
+      <div class="socialEditActions">
+        <button onclick="moveSocial(${i},-1)">↑</button>
+        <button onclick="moveSocial(${i},1)">↓</button>
+        <button class="${x.enabled?'ok':''}" onclick="toggleSocial(${i})">${x.enabled?'👁':'🙈'}</button>
+        <button class="danger" onclick="removeSocial(${i})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function readSocialRows(){
+  ensureSocialLinks();
+  db.settings.socialLinks=db.settings.socialLinks.map((x,i)=>({
+    ...x,
+    type:val('social_type_'+i)||x.type,
+    name:val('social_name_'+i)||'Réseau',
+    url:val('social_url_'+i)
+  }));
+}
+function addSocialLink(){readSocialRows();db.settings.socialLinks.push({name:'Nouveau réseau',type:'other',url:'',enabled:true});renderSocialManager()}
+function removeSocial(i){readSocialRows();db.settings.socialLinks.splice(i,1);renderSocialManager()}
+function moveSocial(i,d){readSocialRows();const j=i+d;if(j<0||j>=db.settings.socialLinks.length)return;[db.settings.socialLinks[i],db.settings.socialLinks[j]]=[db.settings.socialLinks[j],db.settings.socialLinks[i]];renderSocialManager()}
+function toggleSocial(i){readSocialRows();db.settings.socialLinks[i].enabled=!db.settings.socialLinks[i].enabled;renderSocialManager()}
+function saveSocialLinks(){readSocialRows();save('Réseaux sociaux modifiés');renderSocialManager();renderSocialRightPanel();alert('Réseaux sociaux enregistrés.')}
+
+
+function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mail:'tech42service@gmail.com',recoveryEmail:'tech42service@gmail.com',emailService:'',emailTemplate:'',emailKey:'',addr:'Loire (42)',siret:'',pass:'admin',terms:'TVA non applicable, article 293 B du CGI sauf indication contraire.',logo:'logo.png',facebook:'',instagram:'',youtube:'',tiktok:'',whatsapp:'https://wa.me/33743262415',website:'',maps:'',fixedOrderFee:7.99,socialLinks:defaultSocialLinks()},clients:[],repairs:[],sales:[],usedParts:[],stock:[],suppliers:[{name:'Mobilax',tel:'',mail:'',site:'https://www.mobilax.fr'},{name:'SOSav',tel:'',mail:'',site:'https://www.sosav.fr'},{name:'iFixit',tel:'',mail:'',site:'https://fr.ifixit.com'},{name:'Amazon',tel:'',mail:'',site:'https://www.amazon.fr'},{name:'eBay',tel:'',mail:'',site:'https://www.ebay.fr'},{name:'AliExpress',tel:'',mail:'',site:'https://fr.aliexpress.com'},{name:'Back Market',tel:'',mail:'',site:'https://www.backmarket.fr'},{name:'Cdiscount',tel:'',mail:'',site:'https://www.cdiscount.com'}],toolLinks:[
 {name:'Gamepad Tester',cat:'Test manette',url:'https://gamepad-tester.com/',note:'Tester manettes PS/Xbox/Switch sur navigateur'},
 {name:'Hardware Tester',cat:'Diagnostic PC',url:'https://hardwaretester.com/gamepad',note:'Tests matériel et manette'},
 {name:'Dead Pixel Test',cat:'Test écran',url:'https://lcdtech.info/en/tests/dead.pixel.htm',note:'Tester pixels morts écran'},
@@ -1142,7 +1284,7 @@ function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mai
 {name:'SickW IMEI',cat:'Check IMEI',url:'https://sickw.com/',note:'Check IMEI selon service disponible'},
 {name:'Apple Coverage',cat:'Garantie constructeur',url:'https://checkcoverage.apple.com/',note:'Vérifier garantie Apple'},
 {name:'Samsung Warranty',cat:'Garantie constructeur',url:'https://www.samsung.com/fr/support/warranty/',note:'Infos garantie Samsung'}
-],contacts:[],docs:[],users:[{name:'Admin',role:'Administrateur',pass:'admin'},{name:'Utilisateur2',role:'Employé',pass:'admin'}],log:[],seq:{case:1,fac:1,dev:1},meta:{schemaVersion:5,appVersion:'5.1.0',lastMigration:''}}}let db=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('TECH42SERVICE_V7_ULTIMATE_DB')||'null')||blank();if(!db.toolLinks) db.toolLinks=blank().toolLinks;if(!Array.isArray(db.usedParts)) db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];if(!Array.isArray(db.stockMovements))db.stockMovements=[];if(Array.isArray(db.stock))db.stock=db.stock.map(x=>({...x,min:Number(x.min??1)}));if(!db.lastAutoSave) db.lastAutoSave='';if(!db.settings)db.settings=blank().settings;if(!db.settings.pass)db.settings.pass='admin';if(!db.settings.recoveryEmail)db.settings.recoveryEmail='tech42service@gmail.com';if(db.settings.fixedOrderFee===undefined||db.settings.fixedOrderFee===null||db.settings.fixedOrderFee==='')db.settings.fixedOrderFee=7.99;if(!Array.isArray(db.users))db.users=[];db.users=db.users.slice(0,2);while(db.users.length<2)db.users.push(db.users.length===0?{name:'Admin',role:'Administrateur',pass:'admin'}:{name:'Utilisateur2',role:'Employé',pass:'admin'});db.users=db.users.map((u,i)=>({name:String(u.name||('Utilisateur'+(i+1))),role:u.role|| (i===0?'Administrateur':'Employé'),pass:String(u.pass||'admin')}));
+],contacts:[],docs:[],users:[{name:'Admin',role:'Administrateur',pass:'admin'},{name:'Utilisateur2',role:'Employé',pass:'admin'}],log:[],seq:{case:1,fac:1,dev:1},meta:{schemaVersion:5,appVersion:'5.1.0',lastMigration:''}}}let db=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('TECH42SERVICE_V7_ULTIMATE_DB')||'null')||blank();if(!db.toolLinks) db.toolLinks=blank().toolLinks;if(!Array.isArray(db.usedParts)) db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];if(!Array.isArray(db.stockMovements))db.stockMovements=[];if(Array.isArray(db.stock))db.stock=db.stock.map(x=>({...x,min:Number(x.min??1)}));if(!db.lastAutoSave) db.lastAutoSave='';if(!db.settings)db.settings=blank().settings;ensureSocialLinks();if(!db.settings.pass)db.settings.pass='admin';if(!db.settings.recoveryEmail)db.settings.recoveryEmail='tech42service@gmail.com';if(db.settings.fixedOrderFee===undefined||db.settings.fixedOrderFee===null||db.settings.fixedOrderFee==='')db.settings.fixedOrderFee=7.99;if(!Array.isArray(db.users))db.users=[];db.users=db.users.slice(0,2);while(db.users.length<2)db.users.push(db.users.length===0?{name:'Admin',role:'Administrateur',pass:'admin'}:{name:'Utilisateur2',role:'Employé',pass:'admin'});db.users=db.users.map((u,i)=>({name:String(u.name||('Utilisateur'+(i+1))),role:u.role|| (i===0?'Administrateur':'Employé'),pass:String(u.pass||'admin')}));
 function migrateDatabase(data){
   const base=blank();
   const arrays=['clients','repairs','sales','usedParts','stock','suppliers','contacts','docs','users','log','agenda','sheets','writerDocs','managedFiles','stockMovements','toolLinks'];
@@ -1694,7 +1836,7 @@ function autoSaveEvery5Min(){
 }
 function updateSaveBadge(text){
   const b=$('autoSaveBadge');
-  if(b)b.textContent=text;
+  if(b)b.textContent=text;const rc=$('rightCloudStatus');if(rc)rc.textContent=String(text||'').replace(/^☁️\s*/,'');
 
   const info=$('lastSaveInfo');
   if(info)info.textContent='Dernière synchronisation : '+(db.lastAutoSave||'non disponible');
@@ -2206,7 +2348,7 @@ function updateLiveDashboard(){
   if($('dashAlerts'))$('dashAlerts').innerHTML=alerts.length?alerts.join(''):'<div class="dashboardEmpty">Aucune alerte. Tout est sous contrôle.</div>';
 }
 
-function render(){ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderFiles();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
+function render(){renderSocialRightPanel();renderSocialManager();ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderFiles();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
 $('clientsRows').innerHTML=db.clients.map((c,i)=>({...c,i})).filter(c=>match(c,val('q_clients'))).map(c=>{let n=clientRepairs(c).length;return `<tr><td>${esc(c.nom)} ${esc(c.pre)}</td><td>${esc(c.tel)}</td><td>${esc(c.mail)}</td><td><button class="small" onclick="showClientHistory(${c.i})">${n} réparation(s)</button></td><td><button class="small primary" onclick="newRepairForClient(${c.i})">+ Réparation</button> <button class="small" onclick="editClient(${c.i})">Modifier</button> <button class="small danger" onclick="del('clients',${c.i})">Suppr.</button></td></tr>`}).join('');
 $('repairsRows').innerHTML=db.repairs.map((r,i)=>({...r,i})).filter(r=>match(r,val('q_repairs'))).map(r=>{let w=r.warranty?warranty(r):null;return `<tr oncontextmenu="return repairRowContext(event,${r.i})"><td>${r.id}<br><span class="muted">${r.date}</span></td><td><button class="small" title="Ouvrir la fiche client" onclick="openClientFromRepair(${r.i})">👤 ${esc(r.client)||'Client'}</button><br><span class="muted">${esc(r.tel)}</span></td><td>${esc(r.device)}<br><span class="muted">${esc(r.imei)}</span></td><td><span class="pill">${esc(r.status)}</span></td><td class="${days(r.date)>7&&!['Livré','Annulé'].includes(r.status)?'late':''}">${days(r.date)}</td><td>${euro(r.price-r.deposit)}</td><td>${euro(r.price-r.cost)}</td><td>${w? w.end+'<br><span class="muted">'+w.state+'</span>':'-'}</td><td><button class="small primary" onclick="openRepairActionsButton(event,${r.i})">⋮ Actions</button> <button class="small" onclick="editRepair(${r.i})">Modifier</button></td></tr>`}).join('');let statuses=['Diagnostic','En cours','Pièce commandée','Terminé','Livré','Annulé'];$('kanbanBoard').innerHTML=statuses.map(st=>`<div class="col" ondragover="event.preventDefault()" ondrop="changeStatus(event.dataTransfer.getData('i'),'${st}')"><h3>${st}</h3>${db.repairs.map((r,i)=>({...r,i})).filter(r=>r.status===st).map(r=>`<div class="task" draggable="true" ondragstart="event.dataTransfer.setData('i','${r.i}')"><b>${r.id}</b><br>${esc(r.client)}<br><span class="muted">${esc(r.device)}</span></div>`).join('')}</div>`).join('');
 $('salesRows').innerHTML=db.sales.map((s,i)=>{let total=(s.buy||0)+(s.cost||0)+(s.shipping||0),m=(s.sell||0)-total;return `<tr><td><b>${esc(s.purchase_id||'')}</b><br><span class="muted">${esc(s.date||'')}</span></td><td>${esc(s.origin||'Fournisseur')}</td><td>${esc(s.product||'')}<br><span class="muted">${esc(s.imei||'')}</span></td><td>${saleParty(s)}</td><td>${euro(total)}</td><td>${euro(s.shipping||0)}</td><td>${euro(s.sell)}</td><td class="${m>=0?'oktext':'late'}">${euro(m)}</td><td>${esc(s.status||'')}</td><td><button class="small" onclick="editSale(${i})">Modifier</button> <button class="small" onclick="printPurchaseDoc(${i})">Dossier</button> <button class="small danger" onclick="del('sales',${i})">Suppr.</button></td></tr>`}).join('');let stockCost=db.stock.reduce((a,x)=>a+Number(x.buy||0)*Number(x.qty||0),0),stockSell=db.stock.reduce((a,x)=>a+Number(x.sell||0)*Number(x.qty||0),0),stockLow=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1));if($('stockStats'))$('stockStats').innerHTML=`<div class="stockStat">Références<b>${db.stock.length}</b></div><div class="stockStat">Valeur achat<b>${euro(stockCost)}</b></div><div class="stockStat">Valeur vente<b>${euro(stockSell)}</b></div><div class="stockStat">Alertes stock<b class="${stockLow.length?'late':'oktext'}">${stockLow.length}</b></div>`;$('stockRows').innerHTML=db.stock.map((s,i)=>{let low=Number(s.qty||0)<=Number(s.min??1);return `<tr class="${low?'lowStockRow':''}"><td>${esc(s.ref)}</td><td>${esc(s.name)}<br><span class="muted">${esc(s.supplier)}</span></td><td class="${low?'stockLow':'stockOk'}">${s.qty}</td><td>${Number(s.min??1)}</td><td>${euro(Number(s.buy||0)*Number(s.qty||0))}</td><td>${euro(Number(s.sell||0)-Number(s.buy||0))}</td><td><span class="${low?'stockLow':'stockOk'}">${low?'À commander':'Disponible'}</span></td><td><button class="small" onclick="editStock(${i})">Modifier</button> <button class="small danger" onclick="del('stock',${i})">Suppr.</button></td></tr>`}).join('');$('suppliersRows').innerHTML=db.suppliers.map((f,i)=>`<tr><td>${esc(f.name)}</td><td>${esc(f.tel)}</td><td>${esc(f.mail)}</td><td>${f.site?`<a style="color:var(--gold2)" target="_blank" href="${esc(f.site)}">Ouvrir</a>`:'-'}</td><td><button class="small" onclick="editSupplier(${i})">Modifier</button> <button class="small danger" onclick="del('suppliers',${i})">Suppr.</button></td></tr>`).join('');$('warrantyRows').innerHTML=db.repairs.filter(r=>r.warranty>0&&match(r,val('q_war'))).map(r=>{let w=warranty(r);return `<tr oncontextmenu="return repairRowContext(event,${r.i})"><td>${r.id}</td><td>${esc(r.client)}</td><td>${esc(r.imei)}</td><td>${r.date}</td><td>${w.end}</td><td class="${w.left<0?'late':w.left<30?'warn':'oktext'}">${w.state} (${w.left} j)</td></tr>`}).join('');$('docsRows').innerHTML=db.docs.slice().map((d,i)=>({...d,i})).reverse().map(d=>`<tr>
@@ -2481,7 +2623,7 @@ async function cloudRestore(){
   showToast('Restauration cloud prête : configure cloud-config.js puis relie Supabase/Firebase.');
 }
 
-window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{syncDocumentTypeUI();renderRepairGallery()},0)});
+window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{syncDocumentTypeUI();renderRepairGallery();renderSocialRightPanel();renderSocialManager()},0)});
 
 window.addEventListener('load',()=>{
   setTimeout(async ()=>{
