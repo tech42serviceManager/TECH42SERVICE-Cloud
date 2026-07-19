@@ -918,16 +918,12 @@ font-weight:700;border:1px solid #333;background:#111;
 
     <div class="saveControls">
       <button class="primary" onclick="syncCloudNow()">🔄 Synchroniser maintenant</button>
-      <button onclick="backup()">⬇️ Exporter une sauvegarde JSON</button>
-      <label style="margin:0">
-        <span class="small" style="display:inline-block;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:#1b1b1b;color:var(--text)">⬆️ Importer une sauvegarde JSON</span>
-        <input type="file" accept=".json,application/json" onchange="restore(event)" style="display:none">
-      </label>
     </div>
 
     <p class="saveInfo">
       Les modifications sont enregistrées automatiquement dans le cloud et récupérées sur vos autres appareils.
     </p>
+    <p class="saveInfo">Aucun dossier SAVE ni sauvegarde locale manuelle n'est nécessaire.</p>
     <p class="saveInfo" id="lastSaveInfo"></p>
   </div>
 </section>
@@ -1036,7 +1032,7 @@ function save(action){
   }else{
     scheduleCloudSync();
   }
-  scheduleAutoBackup();
+
 }function log(a){db.log.push({date:new Date().toLocaleString('fr-FR'),user:currentUser,action:a});localStorage.setItem(KEY,JSON.stringify(db))}function $(id){return document.getElementById(id)}function val(id){return ($(id)?.value||'').trim()}function num(id){return Number(val(id)||0)}function setv(id,v){if($(id))$(id).value=v??''}function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function euro(n){return Number(n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}function today(){return new Date().toISOString().slice(0,10)}function days(d){return Math.floor((new Date()-new Date(d))/(864e5))}function match(o,q){q=(q||'').toLowerCase();return !q||JSON.stringify(o).toLowerCase().includes(q)}function show(id){
   document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
   const target=$(id);
@@ -1786,7 +1782,7 @@ async function chooseBackupFolder(){if(!window.showDirectoryPicker){alert('Utili
 async function writeBackupToFolder(askPermission=false){if(!backupDirectoryHandle)return false;if(!(await ensureBackupPermission(backupDirectoryHandle,askPermission)))return false;const fileHandle=await backupDirectoryHandle.getFileHandle(backupFilename(),{create:true});const writable=await fileHandle.createWritable();await writable.write(JSON.stringify(backupPayload(),null,2));await writable.close();lastAutoBackupAt=Date.now();db.lastAutoSave=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(db));updateBackupFolderInfo('✅ Sauvegarde enregistrée dans '+backupDirectoryHandle.name+' à '+new Date().toLocaleTimeString('fr-FR'));updateSaveBadge('✅ Sauvegarde automatique créée');return true}
 async function autoBackupNow(askPermission=true){try{if(!backupDirectoryHandle){if(askPermission)alert('Choisissez d’abord le dossier SAVE.');return false}const ok=await writeBackupToFolder(askPermission);if(!ok&&askPermission)alert('Autorisation du dossier SAVE nécessaire.');return ok}catch(e){console.error(e);if(askPermission)alert('Erreur de sauvegarde : '+e.message);return false}}
 function scheduleAutoBackup(){clearTimeout(autoBackupTimer);autoBackupTimer=setTimeout(()=>autoBackupNow(false),10000)}
-async function backup(){if(await autoBackupNow(false))return;const blob=new Blob([JSON.stringify(backupPayload(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=backupFilename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);updateSaveBadge('✅ Fichier de sauvegarde créé')}
+async function backup(){if(await autoBackupNow(false))return;const blob=new Blob([JSON.stringify(backupPayload(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=backupFilename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);updateSaveBadge('✅ Export créé')}
 setInterval(()=>{if(Date.now()-lastAutoBackupAt>=5*60*1000)autoBackupNow(false)},60000);
 window.addEventListener('load',()=>{loadBackupHandle();runHealthCheck(false)});
 function validateBackupData(restored){
