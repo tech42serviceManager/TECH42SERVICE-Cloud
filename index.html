@@ -1569,7 +1569,7 @@ function setAIProgress(percent,text,steps){
 }
 
 async function callDiagnosticFunction(context){
-  const urls=['/.netlify/functions/diagnostic-ai','/api/diagnostic-ai'];
+  const urls=['/.netlify/functions/diagnostic-ai'];
   let lastError=null;
 
   for(const url of urls){
