@@ -849,7 +849,7 @@ font-weight:700;border:1px solid #333;background:#111;
 @media(max-width:700px){.aiResultGrid{grid-template-columns:1fr}.socialPanel{display:none}}
 
 
-/* PRO 6.4 */
+/* PRO 6.5 */
 .powerButton{
   width:42px!important;min-width:42px!important;height:42px!important;
   border-radius:50%!important;font-size:24px!important;line-height:1!important;
@@ -894,6 +894,13 @@ font-weight:700;border:1px solid #333;background:#111;
   .socialEditRow{grid-template-columns:1fr}
   .socialEditActions{grid-column:1/-1}
 }
+
+
+/* PRO 6.5 — IA Stable */
+.aiProgressTrack{height:10px;margin-top:9px;border:1px solid #5a2a70;border-radius:999px;background:#120b16;overflow:hidden}
+.aiProgressBar{height:100%;width:0;background:linear-gradient(90deg,#7430a0,#d15dff);transition:width .35s ease}
+.aiProgressSteps{margin-top:8px;color:#c7aacd;font-size:12px;white-space:pre-line}
+.aiErrorDetails{margin-top:8px;padding:8px;border:1px solid #642727;border-radius:8px;background:#190909;color:#ff9d9d;font-size:11px;white-space:pre-wrap}
 
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
@@ -1024,7 +1031,11 @@ font-weight:700;border:1px solid #333;background:#111;
     <button type="button" class="aiAnalyzeButton" onclick="runRepairAI()">🤖 Analyser avec l’IA</button>
   </div>
 
-  <div id="repairAILoading" class="aiNativeLoading" style="display:none">Analyse en cours…</div>
+  <div id="repairAILoading" class="aiNativeLoading" style="display:none">
+  <div id="aiProgressText">Connexion au service IA…</div>
+  <div class="aiProgressTrack"><div id="aiProgressBar" class="aiProgressBar"></div></div>
+  <div id="aiProgressSteps" class="aiProgressSteps"></div>
+</div>
 
   <div class="aiResultGrid">
     <div class="aiResultCard">
@@ -1548,11 +1559,57 @@ function getRepairAIContext(){
   };
 }
 
+let aiProgressTimer=null;
+
+function setAIProgress(percent,text,steps){
+  const bar=$('aiProgressBar'),label=$('aiProgressText'),stepBox=$('aiProgressSteps');
+  if(bar)bar.style.width=Math.max(0,Math.min(100,percent))+'%';
+  if(label)label.textContent=text||'Analyse en cours…';
+  if(stepBox)stepBox.textContent=(steps||[]).join('\n');
+}
+
+async function callDiagnosticFunction(context){
+  const urls=['/.netlify/functions/diagnostic-ai','/api/diagnostic-ai'];
+  let lastError=null;
+
+  for(const url of urls){
+    try{
+      const response=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify(context)
+      });
+
+      const raw=await response.text();
+      let data={};
+      try{data=raw?JSON.parse(raw):{}}catch{
+        throw new Error('Réponse non JSON reçue depuis '+url+' (HTTP '+response.status+').');
+      }
+
+      if(response.ok)return data;
+
+      const detail=data.details||data.error||('Erreur HTTP '+response.status);
+      lastError=new Error(detail);
+      lastError.status=response.status;
+      lastError.url=url;
+
+      // Une erreur autre que 404 prouve que la fonction existe : inutile d'essayer une autre URL.
+      if(response.status!==404)throw lastError;
+    }catch(error){
+      lastError=error;
+      if(error.status&&error.status!==404)throw error;
+    }
+  }
+
+  throw lastError||new Error('Fonction Netlify diagnostic-ai introuvable.');
+}
+
 async function runRepairAI(){
   const result=$('repairAIResult');
   const loading=$('repairAILoading');
   const context=getRepairAIContext();
   const hasInfo=context.notes||context.lignes.some(x=>x.appareil||x.marque||x.panne)||context.photos.length;
+
   if(!hasInfo){
     alert('Renseigne au minimum l’appareil, la panne ou ajoute une photo.');
     return;
@@ -1563,16 +1620,23 @@ async function runRepairAI(){
   lastRepairAIText='';
   ['aiDiagnosis','aiParts','aiTime','aiCost'].forEach(id=>$(id).textContent='Analyse en cours…');
 
-  try{
-    const response=await fetch('/api/diagnostic-ai',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(context)
-    });
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(data.error||'Service IA indisponible');
+  setAIProgress(12,'Connexion au service IA…',['⏳ Préparation de la fiche']);
+  clearInterval(aiProgressTimer);
+  let progress=12;
+  aiProgressTimer=setInterval(()=>{
+    progress=Math.min(88,progress+7);
+    const steps=['✓ Préparation de la fiche'];
+    if(progress>=30)steps.push('✓ Lecture des informations');
+    if(progress>=50)steps.push('✓ Analyse des photos');
+    if(progress>=68)steps.push('✓ Recherche des causes possibles');
+    if(progress>=82)steps.push('⏳ Estimation des pièces, du temps et du coût');
+    setAIProgress(progress,'Analyse en cours…',steps);
+  },650);
 
+  try{
+    const data=await callDiagnosticFunction(context);
     const analysis=data.analysis||{};
+
     $('aiDiagnosis').textContent=analysis.diagnostic||'Aucun diagnostic proposé.';
     $('aiParts').textContent=analysis.parts||'Aucune pièce identifiée.';
     $('aiTime').textContent=analysis.time||'Temps non estimé.';
@@ -1589,14 +1653,18 @@ async function runRepairAI(){
 
     result.textContent=lastRepairAIText;
     result.className='aiDiagnosticResult';
+    setAIProgress(100,'Analyse terminée',['✓ Informations analysées','✓ Photos analysées','✓ Diagnostic généré']);
+    setTimeout(()=>loading.style.display='none',900);
   }catch(error){
     console.error('Diagnostic IA',error);
     ['aiDiagnosis','aiParts','aiTime','aiCost'].forEach(id=>$(id).textContent='IA indisponible');
     result.style.display='block';
     result.className='aiDiagnosticResult late';
-    result.textContent='IA indisponible : '+error.message;
+    result.innerHTML='<b>IA indisponible</b><div class="aiErrorDetails">'+esc(error.message||String(error))+'</div>';
+    setAIProgress(100,'Échec de la connexion',['✗ Analyse interrompue']);
   }finally{
-    loading.style.display='none';
+    clearInterval(aiProgressTimer);
+    aiProgressTimer=null;
   }
 }
 
