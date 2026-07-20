@@ -118,9 +118,7 @@ export default async (request) => {
   }
 };
 
-export const config = {
-  path: "/api/diagnostic-ai"
-};
+
 
 function json(status, body) {
   return new Response(status === 204 ? null : JSON.stringify(body), {
