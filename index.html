@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V11.4 Mode Atelier</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE — ATELIER</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -881,7 +881,7 @@ font-weight:700;border:1px solid #333;background:#111;
 /* V11.3 — version allégée */
 .versionNotice{font-size:11px;color:var(--muted)}
 
-/* V11.4 — MODE ATELIER */
+/* V11.5 — MODE ATELIER */
 .atelierDashboard{max-width:1320px;margin:0 auto;animation:atelierEnter .28s ease-out}
 .atelierHero{
   position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;
@@ -942,6 +942,41 @@ font-weight:700;border:1px solid #333;background:#111;
   .atelierStatusGrid,.atelierActions{grid-template-columns:1fr}
 }
 
+
+/* V11.5 — Notes et Drive */
+.notesLayout{display:grid;grid-template-columns:370px minmax(0,1fr);gap:12px;align-items:start}
+.notesComposer{position:sticky;top:132px}
+.notesTitleRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.notesTitleRow h3{margin-bottom:4px}
+.notesCounter{padding:5px 9px;border:1px solid #66531b;border-radius:999px;background:#211b08;color:var(--gold2);font-size:11px;font-weight:900}
+.notesOptions{display:flex;gap:18px;flex-wrap:wrap;padding:8px 0}
+.notesOptions label{display:flex;gap:7px;align-items:center;color:var(--text)}
+.notesOptions input{width:auto;min-height:auto}
+.notesToolbar input{flex:1;max-width:none}
+.notesToolbar select{width:180px}
+.notesGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.noteCard{
+  min-height:190px;padding:14px;border:1px solid #3b3218;border-radius:15px;
+  background:linear-gradient(150deg,#171717,#0b0b0b);box-shadow:0 8px 20px rgba(0,0,0,.24);
+  transition:transform .16s ease,border-color .16s ease
+}
+.noteCard:hover{transform:translateY(-2px);border-color:#755f1d}
+.noteCard.pinned{border-color:#9a7c22;background:linear-gradient(150deg,#211b08,#0c0c0c)}
+.noteCard.done{opacity:.62}
+.noteCard.done h4,.noteCard.done p{text-decoration:line-through}
+.noteCardTop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.noteCategory,.noteTaskBadge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:900}
+.noteCategory{background:#211b08;color:var(--gold2);border:1px solid #5f4d18}
+.noteTaskBadge{margin-left:4px;background:#092416;color:#bdf7cc;border:1px solid #22c55e}
+.noteCard h4{font-size:16px;color:#fff3bf;margin:12px 0 7px}
+.noteCard p{color:#d4ccb1;line-height:1.45;min-height:54px}
+.noteDue{font-size:11px;color:var(--muted);margin:9px 0}
+.noteActions{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.noteAlert{cursor:pointer}
+.noteAlert:hover{background:rgba(212,175,55,.07)}
+@media(max-width:950px){.notesLayout{grid-template-columns:1fr}.notesComposer{position:static}}
+@media(max-width:600px){.notesToolbar select{width:100%}.notesGrid{grid-template-columns:1fr}}
+
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -961,7 +996,7 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">V11.4 <span>MODE ATELIER</span></div></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
+<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">ATELIER</div></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar">
 <nav id="nav"></nav>
@@ -1022,7 +1057,8 @@ font-weight:700;border:1px solid #333;background:#111;
       <button onclick="show('clients')"><span>👥</span><b>Clients</b></button>
       <button onclick="show('stock')"><span>📦</span><b>Stock</b></button>
       <button onclick="show('agenda')"><span>📅</span><b>Agenda</b></button>
-      <button onclick="show('docs')"><span>📄</span><b>Documents</b></button>
+      <button onclick="show('notes')"><span>📝</span><b>Notes</b></button>
+      <button onclick="show('files')"><span>☁️</span><b>Drive</b></button>
     </div>
 
     <div aria-hidden="true" style="display:none">
@@ -1060,11 +1096,11 @@ font-weight:700;border:1px solid #333;background:#111;
 <section id="settings"><div class="card"><h3>Paramètres entreprise</h3><div class="form"><div><label>Nom entreprise</label><input id="p_name"></div><div><label>Téléphone</label><input id="p_tel"></div><div><label>Email</label><input id="p_mail"></div><div><label>SIRET</label><input id="p_siret"></div><div><label>Logo entreprise</label><input id="p_logo_file" type="file" accept="image/*" onchange="loadLogo(event)"></div><div><label>Aperçu logo</label><br><img id="logoPreview" class="logoPreview" alt="Logo"></div><div class="full"><label>Adresse</label><input id="p_addr"></div><div class="full"><div class="card" style="margin:8px 0"><h3>👥 Deux utilisateurs</h3><p class="muted">Modifie ici les identifiants et mots de passe. Il doit toujours rester exactement deux comptes.</p><div class="form"><div><label>Utilisateur 1</label><input id="p_user1_name" autocomplete="off"></div><div><label>Rôle</label><select id="p_user1_role"><option>Administrateur</option><option>Employé</option></select></div><div><label>Nouveau mot de passe utilisateur 1</label><input id="p_user1_pass" type="password" autocomplete="new-password" placeholder="Laisser vide pour conserver"></div><div><label>Utilisateur 2</label><input id="p_user2_name" autocomplete="off"></div><div><label>Rôle</label><select id="p_user2_role"><option>Administrateur</option><option>Employé</option></select></div><div><label>Nouveau mot de passe utilisateur 2</label><input id="p_user2_pass" type="password" autocomplete="new-password" placeholder="Laisser vide pour conserver"></div><div class="full"><button class="primary" onclick="saveTwoUsers()">Enregistrer les deux utilisateurs</button></div></div></div></div><div><label>Frais fixes par dossier facturé € HT</label><input id="p_fixed_order_fee" type="number" min="0" step="0.01" value="7.99"></div><div class="full"><label>Mentions générales</label><textarea id="p_terms"></textarea></div></div></div>
 <div class="card"><h3>📄 Conditions en bas de documents</h3><p class="muted">Ces textes apparaissent en bas des factures, devis et documents de prise en charge. Tu peux les modifier à tout moment.</p><div class="form"><div class="full"><label>Bas de page factures</label><textarea id="p_footer_invoice"></textarea></div><div class="full"><label>Bas de page devis</label><textarea id="p_footer_quote"></textarea></div><div class="full"><label>Bas de page prise en charge</label><textarea id="p_footer_pickup"></textarea></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer les conditions</button></div></div></div>
 <div class="card"><h3>📧 SMS / E-mail automatisés</h3><p class="muted">Le bouton e-mail ouvre ton logiciel de messagerie avec le message prêt. Pour un envoi 100% automatique, configure ensuite EmailJS/Brevo/Twilio.</p><div class="form"><div><label>Email service ID</label><input id="p_email_service" placeholder="Optionnel"></div><div><label>Email template ID</label><input id="p_email_template" placeholder="Optionnel"></div><div><label>Email public key</label><input id="p_email_key" placeholder="Optionnel"></div><div><label>Email de récupération</label><input id="p_recovery_email" type="email" value="tech42service@gmail.com" placeholder="tech42service@gmail.com"></div><div class="full"><label>Message SMS réparation terminée</label><textarea id="p_sms_ready"></textarea></div><div class="full"><label>Texte type — produit économiquement non réparable</label><textarea id="p_nonrepair_text" style="min-height:150px"></textarea><p class="muted">Ce texte est utilisé dans le module Gmail.</p></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer SMS / e-mail</button></div></div></div>
-<div class="card"><h3>Réseaux sociaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>YouTube</label><input id="p_youtube" placeholder="https://youtube.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div>
+<div class="card"><h3>Réseaux / liens accueil</h3><div class="form"><div><label>Facebook</label><input id="p_facebook" placeholder="https://facebook.com/..."></div><div><label>Instagram</label><input id="p_instagram" placeholder="https://instagram.com/..."></div><div><label>TikTok</label><input id="p_tiktok" placeholder="https://tiktok.com/@..."></div><div><label>YouTube</label><input id="p_youtube" placeholder="https://youtube.com/@..."></div><div><label>WhatsApp</label><input id="p_whatsapp" placeholder="https://wa.me/33743262415"></div><div><label>Site web</label><input id="p_website" placeholder="https://..."></div><div><label>Google Maps / avis</label><input id="p_maps" placeholder="https://g.page/..."></div><div class="full"><button class="primary" onclick="saveSettings()">Enregistrer paramètres</button></div></div></div>
 <div id="socialManagerCard" class="card">
   <div class="socialManagerHead">
     <div>
-      <h3>🌐 Réseaux sociaux</h3>
+      <h3>🌐 Réseaux</h3>
       <p class="muted">Ajoute, modifie, supprime, masque et change l’ordre.</p>
     </div>
     <button class="primary" onclick="addSocialLink()">➕ Ajouter</button>
@@ -1108,7 +1144,70 @@ font-weight:700;border:1px solid #333;background:#111;
 <section id="contacts"><div class="card"><h3>📇 Carnet de contacts</h3><div class="form"><input type="hidden" id="ct_i"><div><label>Nom *</label><input id="ct_nom"></div><div><label>Prénom</label><input id="ct_pre"></div><div><label>Société</label><input id="ct_societe"></div><div><label>Téléphone</label><input id="ct_tel"></div><div><label>E-mail</label><input id="ct_mail" type="email"></div><div class="full"><label>Adresse</label><input id="ct_adresse"></div><div class="full"><label>Notes</label><textarea id="ct_notes"></textarea></div><div class="full"><button class="primary" onclick="saveContact()">Enregistrer</button> <button onclick="clearContact()">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_contacts" oninput="renderContacts()" placeholder="Rechercher un contact..."><button onclick="exportContactsCSV()">Exporter CSV</button><button onclick="exportContactsVCF()">Exporter fichier contacts (.vcf)</button><label><span class="small" style="display:inline-block;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer">Importer CSV / VCF</span><input type="file" accept=".csv,.vcf,text/csv,text/vcard" onchange="importContacts(event)" style="display:none"></label></div><table><thead><tr><th>Contact</th><th>Société</th><th>Téléphone</th><th>E-mail</th><th>Actions</th></tr></thead><tbody id="contactsRows"></tbody></table></div></section>
 <section id="repairhelp"><div class="card"><h3>🧰 Aide au démontage et à la réparation</h3><p class="muted">Ajoutez, modifiez ou supprimez vos sites de guides, vidéos et documentations. Les liens sont inclus dans les sauvegardes JSON.</p><div class="form"><input type="hidden" id="rh_i"><div><label>Catégorie</label><input id="rh_cat" placeholder="Ex : Téléphone, Console, Vidéo..."></div><div><label>Nom du site *</label><input id="rh_name" placeholder="Ex : iFixit France"></div><div class="full"><label>Adresse du site *</label><input id="rh_url" placeholder="https://..."></div><div class="full"><label>Description / notes</label><input id="rh_note" placeholder="À quoi sert ce site ?"></div><div class="full"><button class="primary" onclick="saveRepairHelpSite()">Enregistrer le site</button> <button onclick="clearRepairHelpForm()">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_repairhelp" oninput="renderRepairHelp()" placeholder="Rechercher un site, une marque, une catégorie..."></div><div class="toolGrid" id="repairHelpLinks"></div></div></section>
 <section id="mail"><div class="card"><h3>📧 Gmail / E-mail</h3><div class="form"><div><label>Destinataire</label><input id="mail_to" type="email"></div><div><label>Objet</label><input id="mail_subject"></div><div class="full"><label>Message</label><textarea id="mail_body" style="min-height:220px"></textarea></div><div class="full"><button class="primary" onclick="openGmail()">Ouvrir dans Gmail</button> <button onclick="mailReadyTemplate()">Message « appareil prêt »</button> <button onclick="mailReportTemplate()">Compte-rendu réparation</button> <button onclick="mailNonRepairTemplate()">Produit économiquement non réparable</button></div></div></div></section>
-<section id="files"><div class="card"><h3>📂 Gestionnaire de documents</h3><div class="form"><div><label>Nom</label><input id="file_name"></div><div><label>Catégorie</label><select id="file_cat"><option>Notice PDF</option><option>Facture fournisseur</option><option>Photo</option><option>Contrat</option><option>Garantie</option><option>Autre</option></select></div><div><label>Client lié</label><input id="file_client" list="clientList"></div><div><label>Réparation liée</label><input id="file_repair" placeholder="REP-..."></div><div class="full"><label>Fichier</label><input id="file_input" type="file"></div><div class="full"><label>Notes</label><textarea id="file_notes"></textarea></div><div class="full"><button class="primary" onclick="saveManagedFile()">Ajouter le document</button></div></div><p class="saveInfo">Les petits documents sont enregistrés dans la sauvegarde du logiciel. Pour éviter de saturer le navigateur, la taille maximale est fixée à 3 Mo par fichier.</p></div><div class="card"><div class="toolbar"><input id="q_files" oninput="renderFiles()" placeholder="Rechercher un document, client, réparation..."></div><div id="fileList" class="fileGrid"></div></div></section>
+
+<section id="notes">
+  <div class="notesLayout">
+    <div class="card notesComposer">
+      <div class="notesTitleRow">
+        <div>
+          <h3>📝 Notes</h3>
+          <p class="muted">Idées, rappels et tâches de l’atelier.</p>
+        </div>
+        <span id="notesOpenCount" class="notesCounter">0 active</span>
+      </div>
+
+      <input type="hidden" id="note_i">
+      <div class="form">
+        <div class="full">
+          <label>Titre</label>
+          <input id="note_title" placeholder="Ex. Commander écran Samsung A54">
+        </div>
+        <div>
+          <label>Catégorie</label>
+          <select id="note_category">
+            <option>Atelier</option>
+            <option>Commande</option>
+            <option>Client</option>
+            <option>Administratif</option>
+            <option>Idée</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div>
+          <label>Date prévue</label>
+          <input id="note_due" type="date">
+        </div>
+        <div class="full">
+          <label>Contenu</label>
+          <textarea id="note_text" placeholder="Écris ta note ici…"></textarea>
+        </div>
+        <div class="full notesOptions">
+          <label><input id="note_pinned" type="checkbox"> 📌 Épingler</label>
+          <label><input id="note_task" type="checkbox"> ✅ Afficher dans les tâches de l’Atelier</label>
+        </div>
+        <div class="full">
+          <button class="primary" onclick="saveNote()">Enregistrer la note</button>
+          <button onclick="clearNoteForm()">Vider</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar notesToolbar">
+        <input id="q_notes" oninput="renderNotes()" placeholder="Rechercher une note…">
+        <select id="notes_filter" onchange="renderNotes()">
+          <option value="active">Notes actives</option>
+          <option value="all">Toutes les notes</option>
+          <option value="tasks">Tâches Atelier</option>
+          <option value="done">Terminées</option>
+        </select>
+      </div>
+      <div id="notesList" class="notesGrid"></div>
+    </div>
+  </div>
+</section>
+
+<section id="files"><div class="card"><h3>☁️ Drive atelier</h3><div class="form"><div><label>Nom</label><input id="file_name"></div><div><label>Catégorie</label><select id="file_cat"><option>Notice PDF</option><option>Facture fournisseur</option><option>Photo</option><option>Contrat</option><option>Garantie</option><option>Autre</option></select></div><div><label>Client lié</label><input id="file_client" list="clientList"></div><div><label>Réparation liée</label><input id="file_repair" placeholder="REP-..."></div><div class="full"><label>Fichier</label><input id="file_input" type="file"></div><div class="full"><label>Notes</label><textarea id="file_notes"></textarea></div><div class="full"><button class="primary" onclick="saveManagedFile()">Ajouter le document</button></div></div><p class="saveInfo">Les fichiers sont conservés dans la sauvegarde locale du logiciel. Pour éviter de saturer le navigateur, la taille maximale est fixée à 3 Mo par fichier.</p></div><div class="card"><div class="toolbar"><input id="q_files" oninput="renderFiles()" placeholder="Rechercher un document, client, réparation..."></div><div id="fileList" class="fileGrid"></div></div></section>
 
 <section id="repairsHub">
   <div class="card">
@@ -1147,7 +1246,7 @@ font-weight:700;border:1px solid #333;background:#111;
   <div class="rightPanel">
     <div class="rightPanelHead">
       <div>
-        <h3>🌐 Réseaux sociaux</h3>
+        <h3>🌐 Réseaux</h3>
         <div class="muted">Accès rapide</div>
       </div>
       <button class="small" onclick="show('settings');setTimeout(()=>document.getElementById('socialManagerCard')?.scrollIntoView({behavior:'smooth'}),150)">⚙️ Gérer</button>
@@ -1167,7 +1266,8 @@ const tabs=[
   {id:'sales',icon:'🛒',title:'Achat/Revente',desc:'Achats, ventes et transactions'},
   {id:'docs',icon:'📄',title:'Devis/Factures',desc:'Devis, factures et attestations'},
   {id:'mail',icon:'📧',title:'Gmail',desc:'Accéder à votre messagerie'},
-  {id:'files',icon:'📁',title:'Documents',desc:'Archives et documents de l’atelier'},
+  {id:'notes',icon:'📝',title:'Notes',desc:'Notes, rappels et tâches'},
+  {id:'files',icon:'☁️',title:'Drive',desc:'Fichiers et archives de l’atelier'},
   {id:'settingsHub',icon:'⚙️',title:'Paramètres',desc:'Réglages, journal et garanties'}
 ];
 document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
@@ -1249,7 +1349,7 @@ function addSocialLink(){readSocialRows();db.settings.socialLinks.push({name:'No
 function removeSocial(i){readSocialRows();db.settings.socialLinks.splice(i,1);renderSocialManager()}
 function moveSocial(i,d){readSocialRows();const j=i+d;if(j<0||j>=db.settings.socialLinks.length)return;[db.settings.socialLinks[i],db.settings.socialLinks[j]]=[db.settings.socialLinks[j],db.settings.socialLinks[i]];renderSocialManager()}
 function toggleSocial(i){readSocialRows();db.settings.socialLinks[i].enabled=!db.settings.socialLinks[i].enabled;renderSocialManager()}
-function saveSocialLinks(){readSocialRows();save('Réseaux sociaux modifiés');renderSocialManager();renderSocialRightPanel();alert('Réseaux sociaux enregistrés.')}
+function saveSocialLinks(){readSocialRows();save('Réseaux modifiés');renderSocialManager();renderSocialRightPanel();alert('Réseaux enregistrés.')}
 
 
 function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mail:'tech42service@gmail.com',recoveryEmail:'tech42service@gmail.com',emailService:'',emailTemplate:'',emailKey:'',addr:'Loire (42)',siret:'',pass:'admin',terms:'TVA non applicable, article 293 B du CGI sauf indication contraire.',logo:'logo.png',facebook:'',instagram:'',youtube:'',tiktok:'',whatsapp:'https://wa.me/33743262415',website:'',maps:'',fixedOrderFee:7.99,socialLinks:defaultSocialLinks()},clients:[],repairs:[],sales:[],usedParts:[],stock:[],suppliers:[{name:'Mobilax',tel:'',mail:'',site:'https://www.mobilax.fr'},{name:'SOSav',tel:'',mail:'',site:'https://www.sosav.fr'},{name:'iFixit',tel:'',mail:'',site:'https://fr.ifixit.com'},{name:'Amazon',tel:'',mail:'',site:'https://www.amazon.fr'},{name:'eBay',tel:'',mail:'',site:'https://www.ebay.fr'},{name:'AliExpress',tel:'',mail:'',site:'https://fr.aliexpress.com'},{name:'Back Market',tel:'',mail:'',site:'https://www.backmarket.fr'},{name:'Cdiscount',tel:'',mail:'',site:'https://www.cdiscount.com'}],toolLinks:[
@@ -1263,10 +1363,10 @@ function blank(){return {settings:{name:'TECH42SERVICE',tel:'07 43 26 24 15',mai
 {name:'SickW IMEI',cat:'Check IMEI',url:'https://sickw.com/',note:'Check IMEI selon service disponible'},
 {name:'Apple Coverage',cat:'Garantie constructeur',url:'https://checkcoverage.apple.com/',note:'Vérifier garantie Apple'},
 {name:'Samsung Warranty',cat:'Garantie constructeur',url:'https://www.samsung.com/fr/support/warranty/',note:'Infos garantie Samsung'}
-],contacts:[],docs:[],users:[{name:'Admin',role:'Administrateur',pass:'admin'},{name:'Utilisateur2',role:'Employé',pass:'admin'}],log:[],seq:{case:1,fac:1,dev:1},meta:{schemaVersion:5,appVersion:'5.1.0',lastMigration:''}}}let db=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('TECH42SERVICE_V7_ULTIMATE_DB')||'null')||blank();if(!db.toolLinks) db.toolLinks=blank().toolLinks;if(!Array.isArray(db.usedParts)) db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];if(!Array.isArray(db.stockMovements))db.stockMovements=[];if(Array.isArray(db.stock))db.stock=db.stock.map(x=>({...x,min:Number(x.min??1)}));if(!db.lastAutoSave) db.lastAutoSave='';if(!db.settings)db.settings=blank().settings;ensureSocialLinks();if(!db.settings.pass)db.settings.pass='admin';if(!db.settings.recoveryEmail)db.settings.recoveryEmail='tech42service@gmail.com';if(db.settings.fixedOrderFee===undefined||db.settings.fixedOrderFee===null||db.settings.fixedOrderFee==='')db.settings.fixedOrderFee=7.99;if(!Array.isArray(db.users))db.users=[];db.users=db.users.slice(0,2);while(db.users.length<2)db.users.push(db.users.length===0?{name:'Admin',role:'Administrateur',pass:'admin'}:{name:'Utilisateur2',role:'Employé',pass:'admin'});db.users=db.users.map((u,i)=>({name:String(u.name||('Utilisateur'+(i+1))),role:u.role|| (i===0?'Administrateur':'Employé'),pass:String(u.pass||'admin')}));
+],contacts:[],notes:[],docs:[],users:[{name:'Admin',role:'Administrateur',pass:'admin'},{name:'Utilisateur2',role:'Employé',pass:'admin'}],log:[],seq:{case:1,fac:1,dev:1},meta:{schemaVersion:5,appVersion:'5.1.0',lastMigration:''}}}let db=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('TECH42SERVICE_V7_ULTIMATE_DB')||'null')||blank();if(!db.toolLinks) db.toolLinks=blank().toolLinks;if(!Array.isArray(db.usedParts)) db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];if(!Array.isArray(db.notes))db.notes=[];if(!Array.isArray(db.stockMovements))db.stockMovements=[];if(Array.isArray(db.stock))db.stock=db.stock.map(x=>({...x,min:Number(x.min??1)}));if(!db.lastAutoSave) db.lastAutoSave='';if(!db.settings)db.settings=blank().settings;ensureSocialLinks();if(!db.settings.pass)db.settings.pass='admin';if(!db.settings.recoveryEmail)db.settings.recoveryEmail='tech42service@gmail.com';if(db.settings.fixedOrderFee===undefined||db.settings.fixedOrderFee===null||db.settings.fixedOrderFee==='')db.settings.fixedOrderFee=7.99;if(!Array.isArray(db.users))db.users=[];db.users=db.users.slice(0,2);while(db.users.length<2)db.users.push(db.users.length===0?{name:'Admin',role:'Administrateur',pass:'admin'}:{name:'Utilisateur2',role:'Employé',pass:'admin'});db.users=db.users.map((u,i)=>({name:String(u.name||('Utilisateur'+(i+1))),role:u.role|| (i===0?'Administrateur':'Employé'),pass:String(u.pass||'admin')}));
 function migrateDatabase(data){
   const base=blank();
-  const arrays=['clients','repairs','sales','usedParts','stock','suppliers','contacts','docs','users','log','agenda','sheets','writerDocs','managedFiles','stockMovements','toolLinks'];
+  const arrays=['clients','repairs','sales','usedParts','stock','suppliers','contacts','notes','docs','users','log','agenda','sheets','writerDocs','managedFiles','stockMovements','toolLinks'];
   arrays.forEach(k=>{if(!Array.isArray(data[k]))data[k]=Array.isArray(base[k])?base[k]:[]});
   data.settings={...base.settings,...(data.settings||{})};
   data.seq={...base.seq,...(data.seq||{})};
@@ -2311,6 +2411,11 @@ function updateLiveDashboard(){
   const recent=repairs.map((r,i)=>({...r,i})).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).slice(0,6);
   if($('dashRecentRepairs'))$('dashRecentRepairs').innerHTML=recent.length?recent.map(r=>`<div class="dashboardRepair" onclick="editRepair(${r.i})"><b>${esc(r.id||'')}</b><div><b>${esc(r.client||'Client')}</b><br><span class="muted">${esc(r.device||'Appareil')} · ${esc(r.date||'')}</span></div><span class="pill">${esc(r.status||'')}</span></div>`).join(''):'<div class="dashboardEmpty">Aucune réparation enregistrée.</div>';
   const alerts=[];
+  (Array.isArray(db.notes)?db.notes:[])
+    .filter(n=>n.task&&!n.done)
+    .sort((a,b)=>Boolean(b.pinned)-Boolean(a.pinned))
+    .slice(0,6)
+    .forEach(n=>alerts.push(`<div class="dashboardAlert noteAlert" onclick="show('notes')"><b>📝 ${esc(n.title||'Tâche')}</b>${n.due?`<br><span class="${n.due<today?'late':'muted'}">Prévue : ${esc(n.due)}</span>`:''}</div>`));
   waiting.slice(0,4).forEach(r=>alerts.push(`<div class="dashboardAlert"><b class="warn">⏳ Attente pièce</b><br>${esc(r.id||'')} — ${esc(r.client||'')}</div>`));
   lowStock.slice(0,5).forEach(x=>alerts.push(`<div class="dashboardAlert"><b class="late">⚠️ Stock faible</b><br>${esc(x.name||x.ref||'Article')} : ${Number(x.qty||0)} restant(s)</div>`));
   repairs.filter(r=>!['Livré','Annulé'].includes(r.status)&&days(r.date)>7).slice(0,3).forEach(r=>alerts.push(`<div class="dashboardAlert"><b class="late">🕒 Dossier ancien</b><br>${esc(r.id||'')} — ${days(r.date)} jours</div>`));
@@ -2318,7 +2423,7 @@ function updateLiveDashboard(){
   if($('atelierTaskCount'))$('atelierTaskCount').textContent=alerts.length;
 }
 
-function render(){updateAtelierClock();renderSocialRightPanel();renderSocialManager();ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderFiles();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
+function render(){updateAtelierClock();renderSocialRightPanel();renderSocialManager();ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderNotes();renderFiles();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
 $('clientsRows').innerHTML=db.clients.map((c,i)=>({...c,i})).filter(c=>match(c,val('q_clients'))).map(c=>{let n=clientRepairs(c).length;return `<tr><td>${esc(c.nom)} ${esc(c.pre)}</td><td>${esc(c.tel)}</td><td>${esc(c.mail)}</td><td><button class="small" onclick="showClientHistory(${c.i})">${n} réparation(s)</button></td><td><button class="small primary" onclick="newRepairForClient(${c.i})">+ Réparation</button> <button class="small" onclick="editClient(${c.i})">Modifier</button> <button class="small danger" onclick="del('clients',${c.i})">Suppr.</button></td></tr>`}).join('');
 $('repairsRows').innerHTML=db.repairs.map((r,i)=>({...r,i})).filter(r=>match(r,val('q_repairs'))).map(r=>{let w=r.warranty?warranty(r):null;return `<tr oncontextmenu="return repairRowContext(event,${r.i})"><td>${r.id}<br><span class="muted">${r.date}</span></td><td><button class="small" title="Ouvrir la fiche client" onclick="openClientFromRepair(${r.i})">👤 ${esc(r.client)||'Client'}</button><br><span class="muted">${esc(r.tel)}</span></td><td>${esc(r.device)}<br><span class="muted">${esc(r.imei)}</span></td><td><span class="pill">${esc(r.status)}</span></td><td class="${days(r.date)>7&&!['Livré','Annulé'].includes(r.status)?'late':''}">${days(r.date)}</td><td>${euro(r.price-r.deposit)}</td><td>${euro(r.price-r.cost)}</td><td>${w? w.end+'<br><span class="muted">'+w.state+'</span>':'-'}</td><td><button class="small primary" onclick="openRepairActionsButton(event,${r.i})">⋮ Actions</button> <button class="small" onclick="editRepair(${r.i})">Modifier</button></td></tr>`}).join('');
 $('salesRows').innerHTML=db.sales.map((s,i)=>{let total=(s.buy||0)+(s.cost||0)+(s.shipping||0),m=(s.sell||0)-total;return `<tr><td><b>${esc(s.purchase_id||'')}</b><br><span class="muted">${esc(s.date||'')}</span></td><td>${esc(s.origin||'Fournisseur')}</td><td>${esc(s.product||'')}<br><span class="muted">${esc(s.imei||'')}</span></td><td>${saleParty(s)}</td><td>${euro(total)}</td><td>${euro(s.shipping||0)}</td><td>${euro(s.sell)}</td><td class="${m>=0?'oktext':'late'}">${euro(m)}</td><td>${esc(s.status||'')}</td><td><button class="small" onclick="editSale(${i})">Modifier</button> <button class="small" onclick="printPurchaseDoc(${i})">Dossier</button> <button class="small danger" onclick="del('sales',${i})">Suppr.</button></td></tr>`}).join('');let stockCost=db.stock.reduce((a,x)=>a+Number(x.buy||0)*Number(x.qty||0),0),stockSell=db.stock.reduce((a,x)=>a+Number(x.sell||0)*Number(x.qty||0),0),stockLow=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1));if($('stockStats'))$('stockStats').innerHTML=`<div class="stockStat">Références<b>${db.stock.length}</b></div><div class="stockStat">Valeur achat<b>${euro(stockCost)}</b></div><div class="stockStat">Valeur vente<b>${euro(stockSell)}</b></div><div class="stockStat">Alertes stock<b class="${stockLow.length?'late':'oktext'}">${stockLow.length}</b></div>`;$('stockRows').innerHTML=db.stock.map((s,i)=>{let low=Number(s.qty||0)<=Number(s.min??1);return `<tr class="${low?'lowStockRow':''}"><td>${esc(s.ref)}</td><td>${esc(s.name)}<br><span class="muted">${esc(s.supplier)}</span></td><td class="${low?'stockLow':'stockOk'}">${s.qty}</td><td>${Number(s.min??1)}</td><td>${euro(Number(s.buy||0)*Number(s.qty||0))}</td><td>${euro(Number(s.sell||0)-Number(s.buy||0))}</td><td><span class="${low?'stockLow':'stockOk'}">${low?'À commander':'Disponible'}</span></td><td><button class="small" onclick="editStock(${i})">Modifier</button> <button class="small danger" onclick="del('stock',${i})">Suppr.</button></td></tr>`}).join('');$('suppliersRows').innerHTML=db.suppliers.map((f,i)=>`<tr><td>${esc(f.name)}</td><td>${esc(f.tel)}</td><td>${esc(f.mail)}</td><td>${f.site?`<a style="color:var(--gold2)" target="_blank" href="${esc(f.site)}">Ouvrir</a>`:'-'}</td><td><button class="small" onclick="editSupplier(${i})">Modifier</button> <button class="small danger" onclick="del('suppliers',${i})">Suppr.</button></td></tr>`).join('');$('warrantyRows').innerHTML=db.repairs.filter(r=>r.warranty>0&&match(r,val('q_war'))).map(r=>{let w=warranty(r);return `<tr oncontextmenu="return repairRowContext(event,${r.i})"><td>${r.id}</td><td>${esc(r.client)}</td><td>${esc(r.imei)}</td><td>${r.date}</td><td>${w.end}</td><td class="${w.left<0?'late':w.left<30?'warn':'oktext'}">${w.state} (${w.left} j)</td></tr>`}).join('');$('docsRows').innerHTML=db.docs.slice().map((d,i)=>({...d,i})).reverse().map(d=>`<tr>
@@ -2565,6 +2670,125 @@ function openGmail(){let url='https://mail.google.com/mail/?view=cm&fs=1&to='+en
 function mailReadyTemplate(){setv('mail_subject','Votre appareil est prêt - TECH42SERVICE');setv('mail_body','Bonjour,\n\nVotre appareil est prêt et disponible à l’atelier TECH42SERVICE.\n\nCordialement,\nTECH42SERVICE')}
 function mailReportTemplate(){setv('mail_subject','Compte-rendu de réparation - TECH42SERVICE');setv('mail_body','Bonjour,\n\nVoici le compte-rendu concernant votre appareil :\n\nDiagnostic :\nRéparation effectuée :\nMontant :\n\nCordialement,\nTECH42SERVICE')}
 function mailNonRepairTemplate(){setv('mail_subject','Appareil économiquement non réparable - '+(db.settings.name||'TECH42SERVICE'));setv('mail_body',db.settings.nonRepairText||defaultNonRepairText())}
+
+function clearNoteForm(){
+  setv('note_i','');
+  setv('note_title','');
+  setv('note_category','Atelier');
+  setv('note_due','');
+  setv('note_text','');
+  if($('note_pinned'))$('note_pinned').checked=false;
+  if($('note_task'))$('note_task').checked=false;
+}
+
+function saveNote(){
+  const title=val('note_title').trim();
+  const content=val('note_text').trim();
+  if(!title&&!content){alert('Écris un titre ou une note.');return}
+
+  const i=val('note_i');
+  const previous=i===''?{}:(db.notes[Number(i)]||{});
+  const note={
+    id:previous.id||('NOTE-'+Date.now()),
+    title:title||'Note sans titre',
+    text:content,
+    category:val('note_category')||'Atelier',
+    due:val('note_due'),
+    pinned:Boolean($('note_pinned')?.checked),
+    task:Boolean($('note_task')?.checked),
+    done:Boolean(previous.done),
+    created:previous.created||new Date().toISOString(),
+    updated:new Date().toISOString()
+  };
+
+  if(i==='')db.notes.push(note);else db.notes[Number(i)]=note;
+  clearNoteForm();
+  save('Note enregistrée : '+note.title);
+}
+
+function editNote(i){
+  const n=db.notes[i];if(!n)return;
+  setv('note_i',i);
+  setv('note_title',n.title||'');
+  setv('note_category',n.category||'Atelier');
+  setv('note_due',n.due||'');
+  setv('note_text',n.text||'');
+  if($('note_pinned'))$('note_pinned').checked=Boolean(n.pinned);
+  if($('note_task'))$('note_task').checked=Boolean(n.task);
+  show('notes');
+  setTimeout(()=>$('note_title')?.focus(),100);
+}
+
+function toggleNoteDone(i){
+  const n=db.notes[i];if(!n)return;
+  n.done=!n.done;n.updated=new Date().toISOString();
+  save(n.done?'Note terminée : '+n.title:'Note réactivée : '+n.title);
+}
+
+function toggleNotePin(i){
+  const n=db.notes[i];if(!n)return;
+  n.pinned=!n.pinned;n.updated=new Date().toISOString();
+  save(n.pinned?'Note épinglée : '+n.title:'Note désépinglée : '+n.title);
+}
+
+function toggleNoteTask(i){
+  const n=db.notes[i];if(!n)return;
+  n.task=!n.task;n.updated=new Date().toISOString();
+  save(n.task?'Note ajoutée aux tâches Atelier : '+n.title:'Note retirée des tâches Atelier : '+n.title);
+}
+
+function deleteNote(i){
+  const n=db.notes[i];if(!n)return;
+  if(confirm('Supprimer la note « '+n.title+' » ?')){
+    db.notes.splice(i,1);
+    save('Note supprimée');
+  }
+}
+
+function renderNotes(){
+  if(!Array.isArray(db.notes))db.notes=[];
+  const box=$('notesList');if(!box)return;
+  const q=val('q_notes').toLowerCase();
+  const filter=val('notes_filter')||'active';
+
+  let rows=db.notes.map((n,i)=>({...n,i}));
+  if(filter==='active')rows=rows.filter(n=>!n.done);
+  if(filter==='tasks')rows=rows.filter(n=>n.task&&!n.done);
+  if(filter==='done')rows=rows.filter(n=>n.done);
+  if(q)rows=rows.filter(n=>JSON.stringify(n).toLowerCase().includes(q));
+
+  rows.sort((a,b)=>{
+    if(Boolean(a.pinned)!==Boolean(b.pinned))return a.pinned?-1:1;
+    if(Boolean(a.done)!==Boolean(b.done))return a.done?1:-1;
+    return String(b.updated||b.created||'').localeCompare(String(a.updated||a.created||''));
+  });
+
+  if($('notesOpenCount')){
+    const count=db.notes.filter(n=>!n.done).length;
+    $('notesOpenCount').textContent=count+' active'+(count>1?'s':'');
+  }
+
+  box.innerHTML=rows.map(n=>`
+    <article class="noteCard ${n.done?'done':''} ${n.pinned?'pinned':''}">
+      <div class="noteCardTop">
+        <div>
+          <span class="noteCategory">${esc(n.category||'Atelier')}</span>
+          ${n.task?'<span class="noteTaskBadge">Tâche Atelier</span>':''}
+        </div>
+        <button class="small" onclick="toggleNotePin(${n.i})" title="Épingler">${n.pinned?'📌':'📍'}</button>
+      </div>
+      <h4>${esc(n.title||'Note')}</h4>
+      <p>${esc(n.text||'').replace(/\n/g,'<br>')}</p>
+      ${n.due?`<div class="noteDue ${n.due<today()&&!n.done?'late':''}">📅 ${esc(n.due)}</div>`:''}
+      <div class="noteActions">
+        <button class="small ${n.done?'':'ok'}" onclick="toggleNoteDone(${n.i})">${n.done?'↩ Réactiver':'✓ Terminer'}</button>
+        <button class="small" onclick="toggleNoteTask(${n.i})">${n.task?'Retirer des tâches':'Transformer en tâche'}</button>
+        <button class="small" onclick="editNote(${n.i})">Modifier</button>
+        <button class="small danger" onclick="deleteNote(${n.i})">Supprimer</button>
+      </div>
+    </article>`).join('')||'<div class="dashboardEmpty">Aucune note dans cette catégorie.</div>';
+}
+
 function saveManagedFile(){let input=$('file_input'),f=input.files[0];if(!f){alert('Choisissez un fichier.');return}if(f.size>3*1024*1024){alert('Fichier trop volumineux. Maximum : 3 Mo.');return}let r=new FileReader();r.onload=()=>{db.managedFiles.push({name:val('file_name')||f.name,filename:f.name,type:f.type,size:f.size,cat:val('file_cat'),client:val('file_client'),repair:val('file_repair'),notes:val('file_notes'),data:r.result,date:new Date().toLocaleString('fr-FR')});['file_name','file_client','file_repair','file_notes'].forEach(x=>setv(x,''));input.value='';save('Document ajouté : '+f.name)};r.readAsDataURL(f)}
 function openManagedFile(i){let x=db.managedFiles[i];let a=document.createElement('a');a.href=x.data;a.download=x.filename||x.name;a.target='_blank';a.click()}
 function deleteManagedFile(i){if(confirm('Supprimer ce document ?')){db.managedFiles.splice(i,1);save('Document supprimé')}}
