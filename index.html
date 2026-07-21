@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V5 Atelier</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V11.2 Stable</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -797,26 +797,7 @@ font-weight:700;border:1px solid #333;background:#111;
 .repairPhotoModal button{position:absolute;right:16px;top:16px}
 
 
-/* V6.2 — Assistant IA diagnostic */
-.aiDiagnosticBox{
-  grid-column:1/-1;
-  border:1px solid #5f4d18;
-  border-radius:14px;
-  padding:13px;
-  background:linear-gradient(145deg,#16130a,#0a0a0a);
-}
-.aiDiagnosticHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.aiDiagnosticHead h4{margin:0;color:var(--gold2);font-size:16px}
-.aiDiagnosticResult{
-  margin-top:11px;padding:12px;border:1px solid var(--line);border-radius:11px;
-  background:#080808;min-height:70px;white-space:pre-wrap;line-height:1.5
-}
-.aiDiagnosticActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.aiDiagnosticLoading{color:var(--warn);font-weight:900}
-.aiDiagnosticDisclaimer{margin-top:8px;color:var(--muted);font-size:11px}
-
-
-/* V6.3 IA Native */
+/* V6.3 interface */
 .brandVersion{font-weight:900;color:var(--gold2);font-size:12px;margin-top:2px}
 .brandVersion span{display:inline-block;margin-left:7px;padding:2px 7px;border:1px solid #725f1e;border-radius:7px;background:#171207;font-size:10px}
 .userBadge{width:42px;min-width:42px;border-radius:12px!important;font-size:16px!important}
@@ -896,11 +877,30 @@ font-weight:700;border:1px solid #333;background:#111;
 }
 
 
-/* PRO 6.5 — IA Stable */
-.aiProgressTrack{height:10px;margin-top:9px;border:1px solid #5a2a70;border-radius:999px;background:#120b16;overflow:hidden}
-.aiProgressBar{height:100%;width:0;background:linear-gradient(90deg,#7430a0,#d15dff);transition:width .35s ease}
-.aiProgressSteps{margin-top:8px;color:#c7aacd;font-size:12px;white-space:pre-line}
-.aiErrorDetails{margin-top:8px;padding:8px;border:1px solid #642727;border-radius:8px;background:#190909;color:#ff9d9d;font-size:11px;white-space:pre-wrap}
+/* V11.2 — Diagnostic atelier manuel */
+.manualDiagnosticBox{
+  grid-column:1/-1;
+  border:1px solid #2f7a4b;
+  border-radius:14px;
+  padding:14px;
+  background:linear-gradient(145deg,rgba(16,74,42,.22),#090b09 58%);
+}
+.manualDiagnosticHead{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;margin-bottom:12px
+}
+.manualDiagnosticHead h4{margin:0 0 4px;color:#bdf7cc;font-size:18px}
+.manualDiagnosticBadge{
+  padding:5px 9px;border:1px solid #2f7a4b;border-radius:999px;
+  color:#bdf7cc;background:#092416;font-size:11px;font-weight:900
+}
+.manualDiagnosticGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px
+}
+@media(max-width:1000px){.manualDiagnosticGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.manualDiagnosticGrid{grid-template-columns:1fr}}
 
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
@@ -921,7 +921,7 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">PRO 6.4 <span>IA NATIVE</span></div></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
+<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">V11.2 <span>STABLE</span></div></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar">
 <nav id="nav"></nav>
@@ -1022,47 +1022,66 @@ font-weight:700;border:1px solid #333;background:#111;
   <div id="repairGalleryGrid" class="repairGalleryGrid"></div>
 </div>
 
-<div class="aiNativeBox">
-  <div class="aiNativeTop">
+
+<div class="manualDiagnosticBox">
+  <div class="manualDiagnosticHead">
     <div>
-      <h4>🤖 Diagnostic IA (OpenAI)</h4>
-      <div class="muted">L’IA analyse les photos, la description de la panne et les informations de l’appareil.</div>
+      <h4>🔍 Diagnostic atelier</h4>
+      <div class="muted">Diagnostic renseigné et validé par le technicien.</div>
     </div>
-    <button type="button" class="aiAnalyzeButton" onclick="runRepairAI()">🤖 Analyser avec l’IA</button>
+    <span class="manualDiagnosticBadge">SANS IA</span>
   </div>
 
-  <div id="repairAILoading" class="aiNativeLoading" style="display:none">
-  <div id="aiProgressText">Connexion au service IA…</div>
-  <div class="aiProgressTrack"><div id="aiProgressBar" class="aiProgressBar"></div></div>
-  <div id="aiProgressSteps" class="aiProgressSteps"></div>
-</div>
+  <div class="manualDiagnosticGrid">
+    <div>
+      <label>Type de panne constatée</label>
+      <select id="r_diag_fault">
+        <option value="">— Sélectionner —</option>
+        <option>Ne s’allume plus</option>
+        <option>Écran cassé / affichage</option>
+        <option>Tactile défectueux</option>
+        <option>Problème de charge</option>
+        <option>Batterie</option>
+        <option>Caméra</option>
+        <option>Audio / microphone / haut-parleur</option>
+        <option>Réseau / Wi-Fi / Bluetooth</option>
+        <option>Oxydation / liquide</option>
+        <option>Connecteur / port HDMI / USB</option>
+        <option>Carte mère / microsoudure</option>
+        <option>Problème logiciel</option>
+        <option>Autre</option>
+      </select>
+    </div>
+    <div>
+      <label>Temps estimé</label>
+      <input id="r_diag_time" placeholder="Ex. 1 h 30">
+    </div>
+    <div>
+      <label>Coût estimé €</label>
+      <input id="r_diag_cost" type="number" min="0" step="0.01" value="0">
+    </div>
+    <div>
+      <label>Technicien</label>
+      <input id="r_diag_technician" placeholder="Nom du technicien">
+    </div>
 
-  <div class="aiResultGrid">
-    <div class="aiResultCard">
-      <div class="aiResultIcon diagnostic">♙</div>
-      <div><b>Diagnostic probable</b><div id="aiDiagnosis" class="aiResultText">Identification du problème</div></div>
+    <div class="full">
+      <label>Diagnostic probable</label>
+      <textarea id="r_diag_probable" placeholder="Décris la cause probable après contrôle."></textarea>
     </div>
-    <div class="aiResultCard">
-      <div class="aiResultIcon parts">🛠</div>
-      <div><b>Pièces recommandées</b><div id="aiParts" class="aiResultText">Liste des pièces nécessaires</div></div>
+    <div class="full">
+      <label>Pièces à remplacer / consommables</label>
+      <textarea id="r_diag_parts" placeholder="Écran, batterie, connecteur, joint, colle…"></textarea>
     </div>
-    <div class="aiResultCard">
-      <div class="aiResultIcon time">◷</div>
-      <div><b>Temps de réparation</b><div id="aiTime" class="aiResultText">Estimation du temps</div></div>
+    <div class="full">
+      <label>Tests effectués</label>
+      <textarea id="r_diag_tests" placeholder="Charge, caméra, réseau, micro, haut-parleur, boutons…"></textarea>
     </div>
-    <div class="aiResultCard">
-      <div class="aiResultIcon cost">🛠</div>
-      <div><b>Estimation du coût</b><div id="aiCost" class="aiResultText">Coût total approximatif</div></div>
+    <div class="full">
+      <label>Observations techniques</label>
+      <textarea id="r_diag_observations" placeholder="Risques, précautions, état du châssis, traces d’oxydation…"></textarea>
     </div>
   </div>
-
-  <div id="repairAIResult" class="aiDiagnosticResult muted" style="display:none"></div>
-  <div class="aiDiagnosticActions">
-    <button type="button" onclick="copyRepairAI()">📋 Copier l’analyse</button>
-    <button type="button" onclick="insertRepairAIIntoNotes()">📝 Ajouter aux notes</button>
-    <button type="button" class="danger" onclick="clearRepairAI()">Effacer</button>
-  </div>
-  <div class="aiDiagnosticDisclaimer">Les propositions doivent toujours être vérifiées par le technicien avant intervention.</div>
 </div>
 <div class="full"><button class="primary" onclick="saveRepair()">Enregistrer réparation</button><button onclick="clearRepairV61()">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_repairs" oninput="render()" placeholder="Recherche dossier, client, IMEI..."><button onclick="show('kanban')">🧩 Voir Kanban</button> <button onclick="makeBlankPickupDoc()">📄 Document prise en charge</button><span class="muted">Utilisez le bouton <b>⋮ Actions</b> ou faites un clic droit sur une ligne.</span></div><table><thead><tr><th>Dossier</th><th>Client</th><th>Appareil</th><th>Statut</th><th>Jours</th><th>Reste</th><th>Marge</th><th>Garantie</th><th>Actions</th></tr></thead><tbody id="repairsRows"></tbody></table></div></section>
 <section id="kanban"><div class="card"><h3>Kanban atelier glisser-déposer</h3><div class="kanban" id="kanbanBoard"></div></div></section>
@@ -1173,17 +1192,6 @@ font-weight:700;border:1px solid #333;background:#111;
     </div>
     <div id="socialRightList" class="socialRightList"></div>
   </div>
-
-  <div class="rightPanel">
-    <h3>🤖 Assistant IA</h3>
-    <div class="muted">Disponible dans chaque fiche de réparation.</div>
-    <button class="primary" style="width:100%;margin-top:10px" onclick="show('repairs')">Ouvrir une réparation</button>
-  </div>
-
-  <div class="rightPanel">
-    <h3>☁️ Cloud</h3>
-    <div id="rightCloudStatus" class="oktext">Synchronisé</div>
-  </div>
 </aside></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1198,11 +1206,10 @@ const tabs=[
   {id:'sales',icon:'🛒',title:'Achat/Revente',desc:'Achats, ventes et transactions'},
   {id:'docs',icon:'📄',title:'Devis/Factures',desc:'Devis, factures et attestations'},
   {id:'mail',icon:'📧',title:'Gmail',desc:'Accéder à votre messagerie'},
-  {id:'chatgpt',icon:'🤖',title:'ChatGPT',desc:'Assistant intelligent'},
   {id:'files',icon:'📁',title:'Documents',desc:'Archives et documents de l’atelier'},
   {id:'settingsHub',icon:'⚙️',title:'Paramètres',desc:'Réglages, journal et garanties'}
 ];
-document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${t.id==='chatgpt'?'openChatGPT()':`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
+document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
 
 
 const SOCIAL_ICONS={
@@ -1536,171 +1543,95 @@ function renderRepairGallery(){
 function removeRepairPhoto(i){repairGalleryData.splice(i,1);renderRepairGallery()}
 function openRepairPhotoModal(i){if(!repairGalleryData[i])return;$('repairPhotoModalImg').src=repairGalleryData[i];$('repairPhotoModal').classList.add('active')}
 function closeRepairPhotoModal(){$('repairPhotoModal').classList.remove('active');$('repairPhotoModalImg').src=''}
-function clearRepairV61(){clearForm('r');resetRepairLines();repairGalleryData=[];renderRepairGallery();clearRepairAI()}
-
-
-let lastRepairAIText='';
-
-function getRepairAIContext(){
-  const lines=(repairLines||[]).map((x,i)=>({
-    numero:i+1,
-    appareil:x.device||'',
-    marque:x.brand||'',
-    imei:x.imei||'',
-    panne:x.description||'',
-    statut:x.status||''
-  }));
-  return {
-    lignes:lines,
-    notes:val('r_notes')||'',
-    statut:val('r_status')||'',
-    photos_count:Array.isArray(repairGalleryData)?repairGalleryData.length:0,
-    photos:Array.isArray(repairGalleryData)?repairGalleryData.slice(0,3):[]
-  };
+function clearRepairV61(){
+  clearForm('r');
+  resetRepairLines();
+  repairGalleryData=[];
+  renderRepairGallery();
+  ['diag_fault','diag_time','diag_cost','diag_technician','diag_probable','diag_parts','diag_tests','diag_observations']
+    .forEach(k=>setv('r_'+k,k==='diag_cost'?0:''));
 }
 
-let aiProgressTimer=null;
 
-function setAIProgress(percent,text,steps){
-  const bar=$('aiProgressBar'),label=$('aiProgressText'),stepBox=$('aiProgressSteps');
-  if(bar)bar.style.width=Math.max(0,Math.min(100,percent))+'%';
-  if(label)label.textContent=text||'Analyse en cours…';
-  if(stepBox)stepBox.textContent=(steps||[]).join('\n');
+function saveRepair(){
+  linkRepairClient();
+  let i=val('r_i');
+  if(!repairLines.length)addRepairLine();
+  let price=repairLines.reduce((s,x)=>s+Number(x.qty||0)*Number(x.price||0),0),
+      cost=repairLines.reduce((s,x)=>s+Number(x.qty||0)*Number(x.cost||0),0),
+      old=i===''?{}:db.repairs[+i]||{},
+      o={
+        id:i===''?next('case'):old.id,
+        date:i===''?today():old.date,
+        clientId:val('r_client_id')||old.clientId||'',
+        client:val('r_client'),
+        tel:val('r_tel'),
+        device:repairLines.map(x=>x.device).filter(Boolean).join(' / '),
+        brand:repairLines.map(x=>x.brand).filter(Boolean).join(' / '),
+        imei:repairLines.map(x=>x.imei).filter(Boolean).join(' / '),
+        issue:repairLines.map(x=>x.description).filter(Boolean).join(' + '),
+        items:repairLines.map(x=>({...x})),
+        devices:repairLines.reduce((acc,x)=>{
+          const key=[x.device,x.brand,x.imei].join('|');
+          let d=acc.find(y=>y.key===key);
+          if(!d){
+            d={key,device:x.device,brand:x.brand,imei:x.imei,status:x.status||'Diagnostic',items:[]};
+            acc.push(d)
+          }
+          d.items.push({...x});
+          return acc
+        },[]),
+        status:val('r_status'),
+        price,
+        cost,
+        deposit:num('r_deposit'),
+        warranty:num('r_warranty'),
+        notes:val('r_notes'),
+        photos:repairGalleryData.slice(0,10),
+        diagnostic:{
+          fault:val('r_diag_fault'),
+          probable:val('r_diag_probable'),
+          parts:val('r_diag_parts'),
+          time:val('r_diag_time'),
+          estimatedCost:num('r_diag_cost'),
+          tests:val('r_diag_tests'),
+          observations:val('r_diag_observations'),
+          technician:val('r_diag_technician'),
+          updatedAt:new Date().toISOString()
+        }
+      };
+  if(i==='')db.repairs.push(o);else db.repairs[+i]=o;
+  clearRepairV61();
+  save('Réparation enregistrée : '+o.id);
 }
-
-async function callDiagnosticFunction(context){
-  const urls=['/.netlify/functions/diagnostic-ai'];
-  let lastError=null;
-
-  for(const url of urls){
-    try{
-      const response=await fetch(url,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Accept':'application/json'},
-        body:JSON.stringify(context)
-      });
-
-      const raw=await response.text();
-      let data={};
-      try{data=raw?JSON.parse(raw):{}}catch{
-        throw new Error('Réponse non JSON reçue depuis '+url+' (HTTP '+response.status+').');
-      }
-
-      if(response.ok)return data;
-
-      const detail=data.details||data.error||('Erreur HTTP '+response.status);
-      lastError=new Error(detail);
-      lastError.status=response.status;
-      lastError.url=url;
-
-      // Une erreur autre que 404 prouve que la fonction existe : inutile d'essayer une autre URL.
-      if(response.status!==404)throw lastError;
-    }catch(error){
-      lastError=error;
-      if(error.status&&error.status!==404)throw error;
-    }
-  }
-
-  throw lastError||new Error('Fonction Netlify diagnostic-ai introuvable.');
+function editRepair(i){
+  let r=db.repairs[i];
+  if(!r)return;
+  ensureClientIds();
+  for(let [k,v] of Object.entries({
+    i,
+    client_id:r.clientId||'',
+    client:r.client,
+    tel:r.tel,
+    status:r.status,
+    deposit:r.deposit,
+    warranty:r.warranty,
+    notes:r.notes
+  }))setv('r_'+k,v);
+  repairLines=normalizeRepairLines(r);
+  renderRepairLines();
+  repairGalleryData=Array.isArray(r.photos)?r.photos.slice(0,10):[r.photoDevice,r.photoImei].filter(Boolean);
+  renderRepairGallery();
+  const d=r.diagnostic||{};
+  setv('r_diag_fault',d.fault||'');
+  setv('r_diag_probable',d.probable||'');
+  setv('r_diag_parts',d.parts||'');
+  setv('r_diag_time',d.time||'');
+  setv('r_diag_cost',Number(d.estimatedCost||0));
+  setv('r_diag_tests',d.tests||'');
+  setv('r_diag_observations',d.observations||'');
+  setv('r_diag_technician',d.technician||'');
 }
-
-async function runRepairAI(){
-  const result=$('repairAIResult');
-  const loading=$('repairAILoading');
-  const context=getRepairAIContext();
-  const hasInfo=context.notes||context.lignes.some(x=>x.appareil||x.marque||x.panne)||context.photos.length;
-
-  if(!hasInfo){
-    alert('Renseigne au minimum l’appareil, la panne ou ajoute une photo.');
-    return;
-  }
-
-  loading.style.display='block';
-  result.style.display='none';
-  lastRepairAIText='';
-  ['aiDiagnosis','aiParts','aiTime','aiCost'].forEach(id=>$(id).textContent='Analyse en cours…');
-
-  setAIProgress(12,'Connexion au service IA…',['⏳ Préparation de la fiche']);
-  clearInterval(aiProgressTimer);
-  let progress=12;
-  aiProgressTimer=setInterval(()=>{
-    progress=Math.min(88,progress+7);
-    const steps=['✓ Préparation de la fiche'];
-    if(progress>=30)steps.push('✓ Lecture des informations');
-    if(progress>=50)steps.push('✓ Analyse des photos');
-    if(progress>=68)steps.push('✓ Recherche des causes possibles');
-    if(progress>=82)steps.push('⏳ Estimation des pièces, du temps et du coût');
-    setAIProgress(progress,'Analyse en cours…',steps);
-  },650);
-
-  try{
-    const data=await callDiagnosticFunction(context);
-    const analysis=data.analysis||{};
-
-    $('aiDiagnosis').textContent=analysis.diagnostic||'Aucun diagnostic proposé.';
-    $('aiParts').textContent=analysis.parts||'Aucune pièce identifiée.';
-    $('aiTime').textContent=analysis.time||'Temps non estimé.';
-    $('aiCost').textContent=analysis.cost||'Coût non estimé.';
-
-    lastRepairAIText=[
-      'DIAGNOSTIC PROBABLE\n'+$('aiDiagnosis').textContent,
-      'PIÈCES RECOMMANDÉES\n'+$('aiParts').textContent,
-      'TEMPS DE RÉPARATION\n'+$('aiTime').textContent,
-      'ESTIMATION DU COÛT\n'+$('aiCost').textContent,
-      analysis.tests?'TESTS CONSEILLÉS\n'+analysis.tests:'',
-      analysis.precautions?'PRÉCAUTIONS\n'+analysis.precautions:''
-    ].filter(Boolean).join('\n\n');
-
-    result.textContent=lastRepairAIText;
-    result.className='aiDiagnosticResult';
-    setAIProgress(100,'Analyse terminée',['✓ Informations analysées','✓ Photos analysées','✓ Diagnostic généré']);
-    setTimeout(()=>loading.style.display='none',900);
-  }catch(error){
-    console.error('Diagnostic IA',error);
-    ['aiDiagnosis','aiParts','aiTime','aiCost'].forEach(id=>$(id).textContent='IA indisponible');
-    result.style.display='block';
-    result.className='aiDiagnosticResult late';
-    result.innerHTML='<b>IA indisponible</b><div class="aiErrorDetails">'+esc(error.message||String(error))+'</div>';
-    setAIProgress(100,'Échec de la connexion',['✗ Analyse interrompue']);
-  }finally{
-    clearInterval(aiProgressTimer);
-    aiProgressTimer=null;
-  }
-}
-
-async function copyRepairAI(){
-  if(!lastRepairAIText)return alert('Aucun diagnostic à copier.');
-  try{
-    await navigator.clipboard.writeText(lastRepairAIText);
-    alert('Diagnostic copié.');
-  }catch(e){
-    alert('Copie impossible sur cet appareil.');
-  }
-}
-
-function insertRepairAIIntoNotes(){
-  if(!lastRepairAIText)return alert('Aucun diagnostic à ajouter.');
-  const current=val('r_notes').trim();
-  setv('r_notes',(current?current+'\n\n':'')+'--- Diagnostic IA ---\n'+lastRepairAIText);
-  alert('Diagnostic ajouté aux notes.');
-}
-
-function clearRepairAI(){
-  lastRepairAIText='';
-  const result=$('repairAIResult');
-  if(result){
-    result.style.display='none';
-    result.className='aiDiagnosticResult muted';
-    result.textContent='';
-  }
-  $('aiDiagnosis').textContent='Identification du problème';
-  $('aiParts').textContent='Liste des pièces nécessaires';
-  $('aiTime').textContent='Estimation du temps';
-  $('aiCost').textContent='Coût total approximatif';
-}
-
-function saveRepair(){linkRepairClient();let i=val('r_i');if(!repairLines.length)addRepairLine();let price=repairLines.reduce((s,x)=>s+Number(x.qty||0)*Number(x.price||0),0),cost=repairLines.reduce((s,x)=>s+Number(x.qty||0)*Number(x.cost||0),0),old=i===''?{}:db.repairs[+i]||{},o={id:i===''?next('case'):old.id,date:i===''?today():old.date,clientId:val('r_client_id')||old.clientId||'',client:val('r_client'),tel:val('r_tel'),device:repairLines.map(x=>x.device).filter(Boolean).join(' / '),brand:repairLines.map(x=>x.brand).filter(Boolean).join(' / '),imei:repairLines.map(x=>x.imei).filter(Boolean).join(' / '),issue:repairLines.map(x=>x.description).filter(Boolean).join(' + '),items:repairLines.map(x=>({...x})),devices:repairLines.reduce((acc,x)=>{const key=[x.device,x.brand,x.imei].join('|');let d=acc.find(y=>y.key===key);if(!d){d={key,device:x.device,brand:x.brand,imei:x.imei,status:x.status||'Diagnostic',items:[]};acc.push(d)}d.items.push({...x});return acc},[]),status:val('r_status'),price,cost,deposit:num('r_deposit'),warranty:num('r_warranty'),notes:val('r_notes'),photos:repairGalleryData.slice(0,10)};if(i==='')db.repairs.push(o);else db.repairs[+i]=o;clearRepairV61();save('Réparation enregistrée : '+o.id)}
-function editRepair(i){let r=db.repairs[i];ensureClientIds();for(let [k,v] of Object.entries({i,client_id:r.clientId||'',client:r.client,tel:r.tel,status:r.status,deposit:r.deposit,warranty:r.warranty,notes:r.notes}))setv('r_'+k,v);repairLines=normalizeRepairLines(r);renderRepairLines();repairGalleryData=Array.isArray(r.photos)?r.photos.slice(0,10):[r.photoDevice,r.photoImei].filter(Boolean);renderRepairGallery()}
 function repToDoc(i,type='Facture'){let r=db.repairs[i];show('docs');setv('d_type',type);setv('d_client',r.client);setv('d_case',r.id);setv('d_deposit',r.deposit);docLines=normalizeRepairLines(r).map(x=>({category:x.type,description:x.description||x.device,reference:[x.device,x.brand,x.imei].filter(Boolean).join(' - '),qty:x.qty,price:x.price}));renderDocLines()}
 function changeStatus(i,status){db.repairs[i].status=status;save('Statut '+db.repairs[i].id+' → '+status)}
 function code39Svg(value){
