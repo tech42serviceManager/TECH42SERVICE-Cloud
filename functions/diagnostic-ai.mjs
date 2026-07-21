@@ -9,7 +9,9 @@ export default async (request) => {
     return json(405, { error: "Méthode non autorisée." });
   }
 
-  const apiKey = Netlify.env.get("OPENAI_API_KEY");
+ const apiKey = (Netlify.env.get("OPENAI_API_KEY") || "").trim();
+
+console.log("OPENAI KEY =", apiKey.substring(0, 15));
   if (!apiKey) {
     return json(500, {
       error: "Clé OpenAI absente.",
