@@ -1,21 +1,36 @@
 const OPENAI_URL = "https://api.openai.com/v1/responses";
 
 export default async (request) => {
-  if (request.method === "OPTIONS") {
-    return json(204, {});
+  if (request.method === "OPTIONS") return json(204, {});
+
+  if (request.method === "GET") {
+    const apiKey = getApiKey();
+    return json(200, {
+      ok: true,
+      service: "TECH42SERVICE V11.1 IA",
+      function: "diagnostic-ai",
+      keyConfigured: Boolean(apiKey),
+      keyFormatValid: Boolean(apiKey && apiKey.startsWith("sk-"))
+    });
   }
 
   if (request.method !== "POST") {
     return json(405, { error: "Méthode non autorisée." });
   }
 
- const apiKey = (Netlify.env.get("OPENAI_API_KEY") || "").trim();
+  const apiKey = getApiKey();
 
-console.log("OPENAI KEY =", apiKey.substring(0, 15));
   if (!apiKey) {
     return json(500, {
       error: "Clé OpenAI absente.",
-      details: "OPENAI_API_KEY n'est pas configurée dans les variables d'environnement Netlify."
+      details: "Ajoute OPENAI_API_KEY dans Netlify avec le scope Functions, puis redéploie."
+    });
+  }
+
+  if (!apiKey.startsWith("sk-")) {
+    return json(500, {
+      error: "Format de clé OpenAI incorrect.",
+      details: "OPENAI_API_KEY doit contenir uniquement la clé complète commençant par sk- ou sk-proj-."
     });
   }
 
@@ -27,9 +42,7 @@ console.log("OPENAI KEY =", apiKey.substring(0, 15));
   }
 
   const photos = Array.isArray(input.photos)
-    ? input.photos
-        .filter(value => typeof value === "string" && value.startsWith("data:image/"))
-        .slice(0, 3)
+    ? input.photos.filter(v => typeof v === "string" && v.startsWith("data:image/")).slice(0, 3)
     : [];
 
   const prompt = [
@@ -37,9 +50,8 @@ console.log("OPENAI KEY =", apiKey.substring(0, 15));
     "Analyse les informations et les photos disponibles.",
     "Reste prudent : ce sont des hypothèses à vérifier physiquement.",
     "Réponds uniquement avec un objet JSON valide, sans Markdown.",
-    'Structure exacte : {"diagnostic":"...","parts":"...","time":"...","cost":"...","tests":"...","precautions":"..."}',
+    '{"diagnostic":"...","parts":"...","time":"...","cost":"...","tests":"...","precautions":"..."}',
     "Réponds en français, clairement et sans discours inutile.",
-    "Pour le coût, donne une fourchette prudente en euros lorsque c'est pertinent.",
     "",
     "Fiche de réparation :",
     JSON.stringify({
@@ -52,17 +64,14 @@ console.log("OPENAI KEY =", apiKey.substring(0, 15));
 
   const content = [{ type: "input_text", text: prompt }];
   for (const image of photos) {
-    content.push({
-      type: "input_image",
-      image_url: image
-    });
+    content.push({ type: "input_image", image_url: image });
   }
 
   try {
     const apiResponse = await fetch(OPENAI_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -73,13 +82,14 @@ console.log("OPENAI KEY =", apiKey.substring(0, 15));
       })
     });
 
-    const apiData = await apiResponse.json().catch(() => ({}));
+    const raw = await apiResponse.text();
+    let apiData = {};
+    try { apiData = raw ? JSON.parse(raw) : {}; } catch { apiData = { raw }; }
 
     if (!apiResponse.ok) {
-      console.error("OpenAI API error:", JSON.stringify(apiData));
       return json(apiResponse.status, {
         error: "Erreur OpenAI.",
-        details: apiData?.error?.message || `La requête OpenAI a retourné HTTP ${apiResponse.status}.`
+        details: apiData?.error?.message || `HTTP ${apiResponse.status}`
       });
     }
 
@@ -112,7 +122,6 @@ console.log("OPENAI KEY =", apiKey.substring(0, 15));
 
     return json(200, { analysis });
   } catch (error) {
-    console.error("Function exception:", error);
     return json(500, {
       error: "Impossible de contacter OpenAI.",
       details: error?.message || String(error)
@@ -120,7 +129,9 @@ console.log("OPENAI KEY =", apiKey.substring(0, 15));
   }
 };
 
-
+function getApiKey() {
+  return String(process.env.OPENAI_API_KEY || "").trim();
+}
 
 function json(status, body) {
   return new Response(status === 204 ? null : JSON.stringify(body), {
@@ -130,7 +141,7 @@ function json(status, body) {
       "Cache-Control": "no-store",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS"
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
     }
   });
 }
