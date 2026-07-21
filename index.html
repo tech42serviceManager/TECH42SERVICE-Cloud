@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V11.3 Stable</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V11.4 Mode Atelier</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -880,6 +880,68 @@ font-weight:700;border:1px solid #333;background:#111;
 
 /* V11.3 — version allégée */
 .versionNotice{font-size:11px;color:var(--muted)}
+
+/* V11.4 — MODE ATELIER */
+.atelierDashboard{max-width:1320px;margin:0 auto;animation:atelierEnter .28s ease-out}
+.atelierHero{
+  position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;
+  gap:20px;margin-bottom:14px;padding:20px 22px;border:1px solid #5d4b18;border-radius:18px;
+  background:
+    radial-gradient(circle at 85% 15%,rgba(246,211,101,.16),transparent 30%),
+    linear-gradient(135deg,#17140a,#0b0b0b 58%);
+  box-shadow:0 14px 34px rgba(0,0,0,.3)
+}
+.atelierHero:after{content:"";position:absolute;inset:auto -15% -60% 45%;height:150px;background:rgba(212,175,55,.07);transform:rotate(-8deg);pointer-events:none}
+.atelierEyebrow{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:900}
+.atelierHero h2{margin:4px 0;font-size:29px;color:var(--gold2)}
+.atelierGreeting{color:#e6dbb5;font-size:14px}
+.atelierClock{text-align:right;position:relative;z-index:1;color:var(--muted);text-transform:capitalize}
+.atelierClock strong{display:block;color:var(--gold2);font-size:27px;margin-top:3px}
+.atelierStatusGrid{display:grid;grid-template-columns:repeat(5,minmax(135px,1fr));gap:9px;margin-bottom:12px}
+.atelierStatus{
+  min-height:82px!important;display:flex;align-items:center;gap:11px;text-align:left!important;
+  padding:12px!important;border-radius:14px!important;background:#101010!important;
+  border:1px solid #302a19!important;box-shadow:0 7px 18px rgba(0,0,0,.25);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease!important
+}
+.atelierStatus:hover{transform:translateY(-3px)!important;background:#17150e!important}
+.atelierStatus>span{font-size:25px;width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:#080808}
+.atelierStatus small{display:block;color:#bdb596;font-size:11px;margin-bottom:2px}
+.atelierStatus b{font-size:23px;color:#fff}
+.atelierStatus.diagnostic{border-left:3px solid #eab308!important}
+.atelierStatus.progress{border-left:3px solid #3b82f6!important}
+.atelierStatus.waiting{border-left:3px solid #a855f7!important}
+.atelierStatus.ready{border-left:3px solid #22c55e!important}
+.atelierStatus.delivered{border-left:3px solid #71717a!important}
+.atelierPanels{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px}
+.atelierPanel{
+  min-height:225px;padding:14px;border:1px solid #332b14;border-radius:15px;
+  background:linear-gradient(180deg,#141414,#0c0c0c);box-shadow:0 8px 20px rgba(0,0,0,.24)
+}
+.atelierPanelHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.atelierPanelHead h3{margin:0;color:var(--gold2);font-size:15px}
+.atelierPanelHead button{min-height:30px!important;padding:5px 8px!important;font-size:10px!important}
+.atelierCount{display:grid;place-items:center;min-width:28px;height:28px;padding:0 7px;border-radius:999px;background:#2b2208;border:1px solid #6a5519;color:var(--gold2);font-weight:900}
+.atelierActions{display:grid;grid-template-columns:repeat(5,minmax(125px,1fr));gap:9px}
+.atelierActions button{min-height:72px!important;display:flex;align-items:center;justify-content:center;gap:9px;font-size:13px!important}
+.atelierActions button span{font-size:22px}
+#moduleBar button:first-child{background:#211b08;border-color:#6c5818;color:var(--gold2)}
+@keyframes atelierEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(max-width:1050px){
+  .atelierStatusGrid{grid-template-columns:repeat(3,1fr)}
+  .atelierActions{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:720px){
+  .atelierHero{align-items:flex-start}.atelierClock{text-align:left}
+  .atelierStatusGrid{grid-template-columns:repeat(2,1fr)}
+  .atelierPanels{grid-template-columns:1fr}
+  .atelierActions{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:430px){
+  .atelierHero{display:block}.atelierClock{margin-top:12px}
+  .atelierStatusGrid,.atelierActions{grid-template-columns:1fr}
+}
+
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -899,92 +961,77 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">V11.3 <span>STABLE</span></div></div></div><div class="headerSearch"><input id="globalSearch" placeholder="Rechercher client, dossier, IMEI, document…" oninput="runGlobalSearch()" onfocus="runGlobalSearch()"><div id="globalSearchResults" class="searchResults"></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
+<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">V11.4 <span>MODE ATELIER</span></div></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar">
 <nav id="nav"></nav>
-</aside><div class="appContent"><div id="moduleBar"><button onclick="show('home')">← Accueil</button><div id="moduleTitle" class="moduleTitle">Accueil</div></div><main>
+</aside><div class="appContent"><div id="moduleBar"><button onclick="goBackModule()">← Retour</button><div id="moduleTitle" class="moduleTitle">Atelier</div></div><main>
+
 <section id="home" class="active">
-<div class="dashboardWrap">
-  <div class="dashboardTitle">
-    <div>
-      <h2>Tableau de bord atelier</h2>
-      <div class="muted">Votre activité en un coup d’œil</div>
-    </div>
-    <div class="dashboardPilotWrap">
-  <div id="healthBox" class="healthBox health-green">
-    <span class="healthDot"></span>
-    <span id="healthText">Atelier en bonne santé</span>
-  </div>
-  <div id="dashboardDate" class="dashboardDate"></div>
-</div>
-  </div>
-
-  <div class="pro2Top">
-    <div class="dashboardKpis">
-      <div class="dashboardKpi" onclick="show('repairs')">
-        <div class="dashboardKpiIcon">📅</div>
-        <div class="dashboardKpiLabel">Réparations du jour</div>
-        <div id="dashToday" class="dashboardKpiValue">0</div>
+  <div class="atelierDashboard">
+    <div class="atelierHero">
+      <div>
+        <div class="atelierEyebrow">TECH42SERVICE</div>
+        <h2>🔧 Atelier</h2>
+        <div id="atelierGreeting" class="atelierGreeting">Bonjour, bonne journée.</div>
       </div>
-      <div class="dashboardKpi" onclick="show('repairs')">
-        <div class="dashboardKpiIcon">🔧</div>
-        <div class="dashboardKpiLabel">En cours</div>
-        <div id="dashInProgress" class="dashboardKpiValue">0</div>
-      </div>
-      <div class="dashboardKpi warning" onclick="show('repairs')">
-        <div class="dashboardKpiIcon">⏳</div>
-        <div class="dashboardKpiLabel">Attente pièce</div>
-        <div id="dashWaiting" class="dashboardKpiValue">0</div>
-      </div>
-      <div class="dashboardKpi success" onclick="show('repairs')">
-        <div class="dashboardKpiIcon">✅</div>
-        <div class="dashboardKpiLabel">Prêtes</div>
-        <div id="dashReady" class="dashboardKpiValue">0</div>
-      </div>
-      <div id="dashStockCard" class="dashboardKpi" onclick="openRepairsSubmodule('stock')">
-        <div class="dashboardKpiIcon">⚠️</div>
-        <div class="dashboardKpiLabel">Stock faible</div>
-        <div id="dashLowStock" class="dashboardKpiValue">0</div>
+      <div class="atelierClock">
+        <div id="atelierDate"></div>
+        <strong id="atelierTime">--:--</strong>
       </div>
     </div>
 
-    <div class="todayPanel">
-      <div class="todayPanelHead">
-        <h3>📅 Aujourd’hui</h3>
-        <button onclick="show('agenda')">Ouvrir l’agenda</button>
-      </div>
-      <div id="dashTodayAgenda"></div>
+    <div class="atelierStatusGrid">
+      <button class="atelierStatus diagnostic" onclick="show('repairs')">
+        <span>🔍</span><div><small>Diagnostics</small><b id="dashDiagnostic">0</b></div>
+      </button>
+      <button class="atelierStatus progress" onclick="show('repairs')">
+        <span>🔧</span><div><small>En cours</small><b id="dashInProgress">0</b></div>
+      </button>
+      <button class="atelierStatus waiting" onclick="show('repairs')">
+        <span>📦</span><div><small>Attente de pièces</small><b id="dashWaiting">0</b></div>
+      </button>
+      <button class="atelierStatus ready" onclick="show('repairs')">
+        <span>✅</span><div><small>Terminées / prêtes</small><b id="dashReady">0</b></div>
+      </button>
+      <button class="atelierStatus delivered" onclick="show('repairs')">
+        <span>📤</span><div><small>Livrées</small><b id="dashDelivered">0</b></div>
+      </button>
     </div>
-  </div>
 
-  <div class="dashboardBottom">
-    <div class="dashboardPanel">
-      <h3>Dernières réparations</h3>
-      <div id="dashRecentRepairs"></div>
-      <div class="dashboardQuick">
-        <button class="primary" onclick="openQuickRepair()">+ Nouvelle opération</button>
-        <button onclick="show('repairs')">Réparations</button>
-        
+    <div class="atelierPanels">
+      <div class="atelierPanel">
+        <div class="atelierPanelHead">
+          <h3>📅 Rendez-vous du jour</h3>
+          <button onclick="show('agenda')">Ouvrir l’agenda</button>
+        </div>
+        <div id="dashTodayAgenda"></div>
+      </div>
+
+      <div class="atelierPanel">
+        <div class="atelierPanelHead">
+          <h3>⚠️ À faire aujourd’hui</h3>
+          <span id="atelierTaskCount" class="atelierCount">0</span>
+        </div>
+        <div id="dashAlerts"></div>
       </div>
     </div>
-    <div class="dashboardPanel">
-      <h3>Alertes atelier</h3>
-      <div id="dashAlerts">
-<div class="dashboardAlert" onclick="show('repairs')" style="cursor:pointer"><b>🔴 Réparations &gt; 7 jours</b><br>Cliquez pour ouvrir.</div>
-<div class="dashboardAlert" onclick="openRepairsSubmodule('stock')" style="cursor:pointer"><b>🟠 Stock faible</b><br>Cliquez pour ouvrir.</div>
-<div class="dashboardAlert" onclick="show('agenda')" style="cursor:pointer"><b>🔵 Rendez-vous du jour</b><br>Cliquez pour ouvrir.</div>
-<div class="dashboardAlert" onclick="show('repairs')" style="cursor:pointer"><b>🟢 Appareils prêts</b><br>Cliquez pour ouvrir.</div>
-</div>
+
+    <div class="atelierActions">
+      <button class="primary" onclick="show('repairs')"><span>🔧</span><b>Nouvelle réparation</b></button>
+      <button onclick="show('clients')"><span>👥</span><b>Clients</b></button>
+      <button onclick="openRepairsSubmodule('stock')"><span>📦</span><b>Stock</b></button>
+      <button onclick="show('agenda')"><span>📅</span><b>Agenda</b></button>
+      <button onclick="show('docs')"><span>📄</span><b>Documents</b></button>
+    </div>
+
+    <div aria-hidden="true" style="display:none">
+      <div id="dashToday">0</div><div id="dashLowStock">0</div>
+      <div id="kpis"></div><div id="quickLinks"></div>
+      <table><tbody id="alerts"></tbody></table>
+      <table><tbody id="recentLog"></tbody></table>
     </div>
   </div>
-
-  <div aria-hidden="true" style="display:none">
-    <div id="kpis"></div><div id="quickLinks"></div>
-    <table><tbody id="alerts"></tbody></table>
-    <table><tbody id="recentLog"></tbody></table>
-  </div>
-</div>
 </section>
 <section id="new"><div class="card"><h3>Création rapide</h3><div class="grid"><button class="primary" onclick="show('clients')">👤 Nouveau client</button><button class="primary" onclick="show('repairs')">📱 Nouvelle réparation</button><button class="primary" onclick="show('sales')">💰 Achat/Revente</button><button class="primary" onclick="show('usedparts')">♻️ Pièces</button><button class="primary" onclick="show('docs')">🧾 Devis/Facture</button><button class="primary" onclick="show('repairs')">📄 Prise en charge</button></div></div></section>
 <section id="clients"><div class="card"><h3>Clients</h3><div class="form"><input type="hidden" id="c_i"><div><label>Nom</label><input id="c_nom"></div><div><label>Prénom</label><input id="c_pre"></div><div><label>Téléphone</label><input id="c_tel"></div><div><label>Email</label><input id="c_mail"></div><div class="full"><label>Adresse / notes</label><textarea id="c_notes"></textarea></div><div class="full"><button class="primary" onclick="saveClient()">Enregistrer</button><button onclick="clearForm('c')">Vider</button></div></div></div><div class="card"><div class="toolbar"><input id="q_clients" oninput="render()" placeholder="Recherche client..."></div><table><thead><tr><th>Client</th><th>Téléphone</th><th>Email</th><th>Historique</th><th>Actions</th></tr></thead><tbody id="clientsRows"></tbody></table></div><div class="card" id="clientHistoryCard" style="display:none"><div class="toolbar"><h3 id="clientHistoryTitle" style="margin:0;flex:1">Historique des réparations</h3><button class="primary" id="clientHistoryNewBtn">+ Nouvelle réparation</button><button onclick="closeClientHistory()">Fermer</button></div><div id="clientHistorySummary" class="grid"></div><div style="overflow:auto"><table><thead><tr><th>Dossier</th><th>Date</th><th>Appareil</th><th>Panne</th><th>Statut</th><th>Montant</th><th>Garantie</th><th>Actions</th></tr></thead><tbody id="clientHistoryRows"></tbody></table></div></div></section>
@@ -1112,7 +1159,7 @@ font-weight:700;border:1px solid #333;background:#111;
 <script>
 const KEY='TECH42SERVICE_V8_1_ULTIMATE_PRO_DB';const LOCAL_ONLY_MODE=false;let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 const tabs=[
-  {id:'home',icon:'🏠',title:'Accueil',desc:'Tableau de bord général'},
+  {id:'home',icon:'🔧',title:'Atelier',desc:'Pilotage quotidien de l’atelier'},
   {id:'clients',icon:'👤',title:'Clients',desc:'Liste et gestion des clients'},
   {id:'repairsHub',icon:'🛠️',title:'Réparations',desc:'Réparations, pièces, stock et outils'},
   {id:'contacts',icon:'📇',title:'Contact',desc:'Carnet d’adresses et contacts utiles'},
@@ -1252,17 +1299,33 @@ function save(action){
     scheduleCloudSync();
   }
 
-}function log(a){db.log.push({date:new Date().toLocaleString('fr-FR'),user:currentUser,action:a});localStorage.setItem(KEY,JSON.stringify(db))}function $(id){return document.getElementById(id)}function val(id){return ($(id)?.value||'').trim()}function num(id){return Number(val(id)||0)}function setv(id,v){if($(id))$(id).value=v??''}function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function euro(n){return Number(n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}function today(){return new Date().toISOString().slice(0,10)}function days(d){return Math.floor((new Date()-new Date(d))/(864e5))}function match(o,q){q=(q||'').toLowerCase();return !q||JSON.stringify(o).toLowerCase().includes(q)}function show(id){
+}function log(a){db.log.push({date:new Date().toLocaleString('fr-FR'),user:currentUser,action:a});localStorage.setItem(KEY,JSON.stringify(db))}function $(id){return document.getElementById(id)}function val(id){return ($(id)?.value||'').trim()}function num(id){return Number(val(id)||0)}function setv(id,v){if($(id))$(id).value=v??''}function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function euro(n){return Number(n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}function today(){return new Date().toISOString().slice(0,10)}function days(d){return Math.floor((new Date()-new Date(d))/(864e5))}function match(o,q){q=(q||'').toLowerCase();return !q||JSON.stringify(o).toLowerCase().includes(q)}let moduleHistory=['home'];
+function goBackModule(){
+  if(moduleHistory.length>1)moduleHistory.pop();
+  const target=moduleHistory[moduleHistory.length-1]||'home';
+  show(target,true);
+}
+function show(id,fromHistory=false){
   document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
   const target=$(id);
   if(!target){console.warn('Module introuvable :',id);return}
   target.classList.add('active');
+
+  if(!fromHistory){
+    const last=moduleHistory[moduleHistory.length-1];
+    if(last!==id)moduleHistory.push(id);
+  }
+
   const isHome=id==='home';
   document.body.classList.toggle('moduleView',!isHome);
   const tab=tabs.find(t=>t.id===id);
-  const labels={repairs:'Réparations',usedparts:'Pièces',stock:'Stock',suppliers:'Fournisseurs',repairhelp:'Aide démontage',tools:'Outils / Tests',settings:'Paramètres entreprise',journal:'Journal',warranties:'Garanties',new:'Nouvelle opération',backup:'Cloud'};
+  const labels={
+    repairs:'Réparations',usedparts:'Pièces',stock:'Stock',suppliers:'Fournisseurs',
+    repairhelp:'Aide démontage',tools:'Outils / Tests',settings:'Paramètres entreprise',
+    journal:'Journal',warranties:'Garanties',new:'Nouvelle opération',backup:'Cloud'
+  };
   const title=tab?`${tab.icon} ${tab.title}`:(labels[id]||id);
-  if($('moduleTitle'))$('moduleTitle').textContent=title;
+  if($('moduleTitle'))$('moduleTitle').textContent=isHome?'Atelier':`Atelier  ›  ${title}`;
   render();
   window.scrollTo(0,0);
 }
@@ -2179,6 +2242,19 @@ function warranty(r){let end=new Date(r.date);end.setMonth(end.getMonth()+Number
 function sendReadySms(i){let r=db.repairs[i];let msg=(db.settings.smsReady||'Bonjour, votre appareil est prêt chez TECH42SERVICE.').replaceAll('{client}',r.client).replaceAll('{dossier}',r.id).replaceAll('{appareil}',r.device);let tel=(r.tel||'').replace(/\s/g,'');if(!tel){alert('Aucun téléphone client renseigné.');return}window.location.href='sms:'+tel+'?&body='+encodeURIComponent(msg);log('SMS prêt ouvert pour '+r.id)}
 function emailRealNotice(){alert('Envoi e-mail automatique : configure EmailJS/Brevo/Twilio dans Paramètres. En attendant, le bouton ouvre ton logiciel de messagerie avec le texte prêt.');}
 
+
+function updateAtelierClock(){
+  const now=new Date();
+  const dateEl=$('atelierDate'),timeEl=$('atelierTime'),greeting=$('atelierGreeting');
+  if(dateEl)dateEl.textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(timeEl)timeEl.textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  if(greeting){
+    const h=now.getHours();
+    greeting.textContent=(h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir')+', bonne journée.';
+  }
+}
+setInterval(updateAtelierClock,30000);
+
 function updateLiveDashboard(){
   const today=new Date().toISOString().slice(0,10);
   const month=today.slice(0,7);
@@ -2193,9 +2269,11 @@ function updateLiveDashboard(){
   const lowStock=stock.filter(x=>Number(x.qty||0)<=Number(x.min??1));
   if($('dashboardDate'))$('dashboardDate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   if($('dashToday'))$('dashToday').textContent=todayRepairs.length;
+  if($('dashDiagnostic'))$('dashDiagnostic').textContent=repairs.filter(r=>r.status==='Diagnostic').length;
   if($('dashInProgress'))$('dashInProgress').textContent=inProgress.length;
   if($('dashWaiting'))$('dashWaiting').textContent=waiting.length;
   if($('dashReady'))$('dashReady').textContent=ready.length;
+  if($('dashDelivered'))$('dashDelivered').textContent=repairs.filter(r=>r.status==='Livré').length;
   if($('dashRevenue'))$('dashRevenue').textContent=euro(estimatedMargin);
   if($('dashLowStock'))$('dashLowStock').textContent=lowStock.length;
   if($('dashStockCard'))$('dashStockCard').classList.toggle('danger',lowStock.length>0);
@@ -2236,10 +2314,11 @@ function updateLiveDashboard(){
   waiting.slice(0,4).forEach(r=>alerts.push(`<div class="dashboardAlert"><b class="warn">⏳ Attente pièce</b><br>${esc(r.id||'')} — ${esc(r.client||'')}</div>`));
   lowStock.slice(0,5).forEach(x=>alerts.push(`<div class="dashboardAlert"><b class="late">⚠️ Stock faible</b><br>${esc(x.name||x.ref||'Article')} : ${Number(x.qty||0)} restant(s)</div>`));
   repairs.filter(r=>!['Livré','Annulé'].includes(r.status)&&days(r.date)>7).slice(0,3).forEach(r=>alerts.push(`<div class="dashboardAlert"><b class="late">🕒 Dossier ancien</b><br>${esc(r.id||'')} — ${days(r.date)} jours</div>`));
-  if($('dashAlerts'))$('dashAlerts').innerHTML=alerts.length?alerts.join(''):'<div class="dashboardEmpty">Aucune alerte. Tout est sous contrôle.</div>';
+  if($('dashAlerts'))$('dashAlerts').innerHTML=alerts.length?alerts.join(''):'<div class="dashboardEmpty">Aucune tâche urgente. Tout est sous contrôle.</div>';
+  if($('atelierTaskCount'))$('atelierTaskCount').textContent=alerts.length;
 }
 
-function render(){renderSocialRightPanel();renderSocialManager();ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderFiles();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
+function render(){updateAtelierClock();renderSocialRightPanel();renderSocialManager();ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderFiles();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
 $('clientsRows').innerHTML=db.clients.map((c,i)=>({...c,i})).filter(c=>match(c,val('q_clients'))).map(c=>{let n=clientRepairs(c).length;return `<tr><td>${esc(c.nom)} ${esc(c.pre)}</td><td>${esc(c.tel)}</td><td>${esc(c.mail)}</td><td><button class="small" onclick="showClientHistory(${c.i})">${n} réparation(s)</button></td><td><button class="small primary" onclick="newRepairForClient(${c.i})">+ Réparation</button> <button class="small" onclick="editClient(${c.i})">Modifier</button> <button class="small danger" onclick="del('clients',${c.i})">Suppr.</button></td></tr>`}).join('');
 $('repairsRows').innerHTML=db.repairs.map((r,i)=>({...r,i})).filter(r=>match(r,val('q_repairs'))).map(r=>{let w=r.warranty?warranty(r):null;return `<tr oncontextmenu="return repairRowContext(event,${r.i})"><td>${r.id}<br><span class="muted">${r.date}</span></td><td><button class="small" title="Ouvrir la fiche client" onclick="openClientFromRepair(${r.i})">👤 ${esc(r.client)||'Client'}</button><br><span class="muted">${esc(r.tel)}</span></td><td>${esc(r.device)}<br><span class="muted">${esc(r.imei)}</span></td><td><span class="pill">${esc(r.status)}</span></td><td class="${days(r.date)>7&&!['Livré','Annulé'].includes(r.status)?'late':''}">${days(r.date)}</td><td>${euro(r.price-r.deposit)}</td><td>${euro(r.price-r.cost)}</td><td>${w? w.end+'<br><span class="muted">'+w.state+'</span>':'-'}</td><td><button class="small primary" onclick="openRepairActionsButton(event,${r.i})">⋮ Actions</button> <button class="small" onclick="editRepair(${r.i})">Modifier</button></td></tr>`}).join('');
 $('salesRows').innerHTML=db.sales.map((s,i)=>{let total=(s.buy||0)+(s.cost||0)+(s.shipping||0),m=(s.sell||0)-total;return `<tr><td><b>${esc(s.purchase_id||'')}</b><br><span class="muted">${esc(s.date||'')}</span></td><td>${esc(s.origin||'Fournisseur')}</td><td>${esc(s.product||'')}<br><span class="muted">${esc(s.imei||'')}</span></td><td>${saleParty(s)}</td><td>${euro(total)}</td><td>${euro(s.shipping||0)}</td><td>${euro(s.sell)}</td><td class="${m>=0?'oktext':'late'}">${euro(m)}</td><td>${esc(s.status||'')}</td><td><button class="small" onclick="editSale(${i})">Modifier</button> <button class="small" onclick="printPurchaseDoc(${i})">Dossier</button> <button class="small danger" onclick="del('sales',${i})">Suppr.</button></td></tr>`}).join('');let stockCost=db.stock.reduce((a,x)=>a+Number(x.buy||0)*Number(x.qty||0),0),stockSell=db.stock.reduce((a,x)=>a+Number(x.sell||0)*Number(x.qty||0),0),stockLow=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1));if($('stockStats'))$('stockStats').innerHTML=`<div class="stockStat">Références<b>${db.stock.length}</b></div><div class="stockStat">Valeur achat<b>${euro(stockCost)}</b></div><div class="stockStat">Valeur vente<b>${euro(stockSell)}</b></div><div class="stockStat">Alertes stock<b class="${stockLow.length?'late':'oktext'}">${stockLow.length}</b></div>`;$('stockRows').innerHTML=db.stock.map((s,i)=>{let low=Number(s.qty||0)<=Number(s.min??1);return `<tr class="${low?'lowStockRow':''}"><td>${esc(s.ref)}</td><td>${esc(s.name)}<br><span class="muted">${esc(s.supplier)}</span></td><td class="${low?'stockLow':'stockOk'}">${s.qty}</td><td>${Number(s.min??1)}</td><td>${euro(Number(s.buy||0)*Number(s.qty||0))}</td><td>${euro(Number(s.sell||0)-Number(s.buy||0))}</td><td><span class="${low?'stockLow':'stockOk'}">${low?'À commander':'Disponible'}</span></td><td><button class="small" onclick="editStock(${i})">Modifier</button> <button class="small danger" onclick="del('stock',${i})">Suppr.</button></td></tr>`}).join('');$('suppliersRows').innerHTML=db.suppliers.map((f,i)=>`<tr><td>${esc(f.name)}</td><td>${esc(f.tel)}</td><td>${esc(f.mail)}</td><td>${f.site?`<a style="color:var(--gold2)" target="_blank" href="${esc(f.site)}">Ouvrir</a>`:'-'}</td><td><button class="small" onclick="editSupplier(${i})">Modifier</button> <button class="small danger" onclick="del('suppliers',${i})">Suppr.</button></td></tr>`).join('');$('warrantyRows').innerHTML=db.repairs.filter(r=>r.warranty>0&&match(r,val('q_war'))).map(r=>{let w=warranty(r);return `<tr oncontextmenu="return repairRowContext(event,${r.i})"><td>${r.id}</td><td>${esc(r.client)}</td><td>${esc(r.imei)}</td><td>${r.date}</td><td>${w.end}</td><td class="${w.left<0?'late':w.left<30?'warn':'oktext'}">${w.state} (${w.left} j)</td></tr>`}).join('');$('docsRows').innerHTML=db.docs.slice().map((d,i)=>({...d,i})).reverse().map(d=>`<tr>
