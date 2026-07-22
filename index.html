@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — BUILD VISUEL 001</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — WOW BUILD</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1098,137 +1098,273 @@ body{
 }
 
 
-/* V12 PRO BUILD VISUEL 001 — VISUEL UNIQUEMENT */
+/* ==========================================================
+   TECH42SERVICE V12 PRO — WOW VISUAL BUILD
+   Modification visuelle uniquement
+   ========================================================== */
 :root{
- --v12-bg:#070808;--v12-panel:#121414;--v12-panel2:#171919;
- --v12-border:#2d3030;--v12-gold:#d4af37;--v12-gold2:#f1d477;
- --v12-text:#f3f1e8;--v12-muted:#989e9e;--v12-shadow:0 16px 40px rgba(0,0,0,.34)
+  --wow-bg:#050606;
+  --wow-panel:#101212;
+  --wow-panel-2:#171919;
+  --wow-line:#282c2c;
+  --wow-gold:#d8b343;
+  --wow-gold-2:#f5d87d;
+  --wow-text:#f4f1e7;
+  --wow-muted:#909797;
+  --wow-blue:#4f8cff;
+  --wow-orange:#f59e0b;
+  --wow-green:#2acb73;
+  --wow-red:#ef5350;
 }
 body{
- background:radial-gradient(circle at 83% -8%,rgba(212,175,55,.10),transparent 24%),
- linear-gradient(145deg,#050606,#0a0b0b 52%,#070808)!important;
- color:var(--v12-text)!important;font-family:Segoe UI,Arial,sans-serif!important
+  font-family:Inter,Segoe UI,Arial,sans-serif!important;
+  background:
+    radial-gradient(circle at 80% -10%,rgba(216,179,67,.18),transparent 24%),
+    radial-gradient(circle at -10% 80%,rgba(79,140,255,.06),transparent 24%),
+    linear-gradient(145deg,#030404,#090a0a 52%,#050606)!important;
+  color:var(--wow-text)!important
 }
-.v12Header,header{
- background:rgba(7,8,8,.96)!important;border-bottom:1px solid #443819!important;
- box-shadow:0 12px 34px rgba(0,0,0,.38)!important;backdrop-filter:blur(18px)
+
+/* Topbar */
+.wowTopbar{
+  position:sticky;top:0;z-index:110;
+  min-height:82px;padding:11px 18px;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;
+  background:rgba(5,6,6,.94);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(216,179,67,.36);
+  box-shadow:0 18px 45px rgba(0,0,0,.44)
 }
-.v12Header{min-height:74px!important;padding:10px 16px!important}
-.v12HeaderBrand h1,header h1{color:var(--v12-gold2)!important;font-weight:900!important;letter-spacing:.045em!important}
-.v12LogoBox,.brandmark{
- border:1px solid #7b6421!important;border-radius:14px!important;
- background:linear-gradient(145deg,#111,#090909)!important;
- box-shadow:0 10px 24px rgba(0,0,0,.35)!important
+.wowBrand{display:flex;align-items:center;gap:12px}
+.wowLogo{
+  width:54px;height:54px;border-radius:16px;overflow:hidden;
+  display:grid;place-items:center;border:1px solid #80671e;
+  background:linear-gradient(145deg,#171919,#080909);
+  box-shadow:0 0 0 1px rgba(216,179,67,.08),0 14px 28px rgba(0,0,0,.35)
 }
-.appShell{max-width:1850px!important;padding:12px!important;gap:12px!important}
-.appSidebar,.appContent,.appRightbar .rightPanel{border-color:var(--v12-border)!important;box-shadow:var(--v12-shadow)!important}
+.wowLogo img{width:100%;height:100%;object-fit:contain;background:#000}
+.wowLogo span{display:none;font-weight:900;color:#111;background:linear-gradient(145deg,var(--wow-gold-2),var(--wow-gold));width:100%;height:100%;place-items:center}
+.wowBrand h1{margin:0;color:var(--wow-gold-2);font-size:20px;letter-spacing:.06em}
+.wowBrand p{margin:2px 0 0;color:#ab913c;font-size:9px;letter-spacing:.22em;font-weight:800}
+.wowTopCenter{display:flex;justify-content:center;gap:10px}
+.wowSystemState,.wowWorkspaceLabel{
+  min-height:48px;padding:8px 12px;border:1px solid #2d3131;border-radius:13px;
+  display:flex;align-items:center;gap:9px;background:linear-gradient(145deg,#121414,#0b0d0d)
+}
+.wowSystemState b,.wowWorkspaceLabel b{display:block;font-size:11px;color:#ece8d9}
+.wowSystemState small,.wowWorkspaceLabel small{display:block;font-size:9px;color:#838a8a}
+.wowPulse{width:9px;height:9px;border-radius:50%;background:#2acb73;box-shadow:0 0 0 6px rgba(42,203,115,.08),0 0 14px rgba(42,203,115,.8);animation:wowPulse 1.8s infinite}
+@keyframes wowPulse{50%{box-shadow:0 0 0 10px rgba(42,203,115,0),0 0 18px rgba(42,203,115,.8)}}
+.wowTopActions{display:flex;align-items:center;gap:7px}
+.wowTopActions>button{
+  width:39px;height:39px;min-height:39px!important;padding:0!important;border-radius:11px!important;
+  display:grid!important;place-items:center!important;background:#111313!important;border:1px solid #303434!important
+}
+.wowTopActions>button:hover{transform:translateY(-2px);border-color:#725d20!important}
+.wowClock{padding:0 8px;text-align:right}
+.wowClock b{display:block;color:var(--wow-gold-2);font-size:18px}
+.wowClock small{display:block;color:#878e8e;font-size:9px}
+.wowLogout{background:#511717!important;border-color:#7a2525!important}
+
+/* Layout global */
+.appShell{
+  max-width:1880px!important;
+  grid-template-columns:215px minmax(0,1fr) 255px!important;
+  gap:12px!important;padding:12px!important
+}
+.appSidebar,.appContent,.appRightbar .rightPanel{
+  border:1px solid #292d2d!important;
+  box-shadow:0 18px 45px rgba(0,0,0,.34)!important
+}
 .appSidebar{
- background:linear-gradient(180deg,#111313,#090a0a)!important;border-radius:18px!important;padding:11px!important
+  top:94px!important;max-height:calc(100vh - 108px)!important;
+  border-radius:18px!important;padding:11px!important;
+  background:linear-gradient(180deg,#101212,#080909)!important
 }
 #nav{gap:5px!important}
 #nav button{
- min-height:42px!important;height:42px!important;border-radius:10px!important;padding:6px 9px!important;
- background:transparent!important;border:1px solid transparent!important;color:#e9e8df!important
+  height:43px!important;min-height:43px!important;border-radius:10px!important;
+  padding:6px 8px!important;background:transparent!important;border:1px solid transparent!important
 }
 #nav button:hover{
- background:linear-gradient(90deg,rgba(212,175,55,.12),rgba(212,175,55,.03))!important;
- border-color:#5e4d20!important;transform:translateX(3px)!important
+  transform:translateX(3px)!important;
+  background:linear-gradient(90deg,rgba(216,179,67,.13),transparent)!important;
+  border-color:#5e4e22!important
 }
 #nav .navIcon{
- width:29px!important;min-width:29px!important;height:29px!important;flex-basis:29px!important;
- border-radius:9px!important;border:1px solid #343737!important;
- background:linear-gradient(145deg,#202222,#111313)!important
+  width:29px!important;height:29px!important;min-width:29px!important;flex-basis:29px!important;
+  border-radius:9px!important;background:linear-gradient(145deg,#202323,#111313)!important;
+  border:1px solid #353939!important
 }
-#nav .navTitle{color:#ece8d7!important;font-size:11.5px!important;font-weight:800!important}
+#nav .navTitle{font-size:11.5px!important;color:#e9e5d7!important}
 .appContent{
- background:radial-gradient(circle at 92% 0%,rgba(212,175,55,.055),transparent 25%),
- linear-gradient(180deg,rgba(15,17,17,.96),rgba(8,9,9,.98))!important;
- border-radius:18px!important;padding:15px!important;min-height:calc(100vh - 100px)!important
+  border-radius:20px!important;padding:15px!important;
+  background:
+    radial-gradient(circle at 90% 0%,rgba(216,179,67,.08),transparent 28%),
+    linear-gradient(180deg,#101212,#090a0a)!important;
+  min-height:calc(100vh - 108px)!important
 }
-.v12AtelierTitle{
- padding:4px 3px 13px!important;border-bottom:1px solid #242727!important;margin-bottom:12px!important
+
+/* Hero */
+.wowDashboard{max-width:1500px;margin:auto;animation:wowEnter .35s ease-out}
+@keyframes wowEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.wowHero{
+  position:relative;overflow:hidden;
+  min-height:218px;margin-bottom:12px;padding:24px;
+  display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:20px;
+  border:1px solid rgba(216,179,67,.42);border-radius:22px;
+  background:
+    radial-gradient(circle at 82% 40%,rgba(216,179,67,.21),transparent 25%),
+    radial-gradient(circle at 15% 100%,rgba(79,140,255,.08),transparent 30%),
+    linear-gradient(135deg,#171913,#0d0f0f 65%);
+  box-shadow:0 24px 55px rgba(0,0,0,.36)
 }
-.v12AtelierTitle h2{color:var(--v12-gold2)!important;font-size:28px!important;letter-spacing:.025em!important}
-.v12DateClock{
- color:#b9a55f!important;background:#0f1111;border:1px solid #2c3030;border-radius:12px;padding:8px 11px
+.wowHero:before{
+  content:"";position:absolute;inset:auto -8% -55% 38%;height:220px;border-radius:50%;
+  background:linear-gradient(90deg,transparent,rgba(216,179,67,.08));transform:rotate(-9deg)
 }
-.v12DateClock b{color:var(--v12-gold2)!important}
-.v12StatusRow{
- border:1px solid #3a321b!important;border-radius:16px!important;
- background:linear-gradient(180deg,#0c0e0e,#090a0a)!important;
- box-shadow:0 12px 28px rgba(0,0,0,.24)!important;padding:11px!important
+.wowEyebrow{font-size:9px;letter-spacing:.25em;color:#b6973d;font-weight:900}
+.wowHero h2{margin:7px 0 5px;font-size:31px;color:#fff;letter-spacing:-.02em}
+.wowHero p{margin:0;color:#aeb4b4;font-size:14px}
+.wowHeroActions{display:flex;gap:8px;margin-top:18px}
+.wowHeroActions button{min-height:42px!important;border-radius:11px!important}
+.wowPrimary{
+  background:linear-gradient(145deg,#f0d16b,#bd9025)!important;color:#0a0a0a!important;border-color:#f0d16b!important;
+  box-shadow:0 10px 22px rgba(216,179,67,.2)
 }
-.v12StatusCard{
- min-height:96px!important;border-radius:14px!important;border:1px solid #2d3030!important;
- background:linear-gradient(145deg,#181a1a,#101212)!important;
- box-shadow:0 10px 24px rgba(0,0,0,.24)!important;transition:.18s ease!important
+.wowHeroVisual{position:relative;display:grid;place-items:center;min-height:170px}
+.wowOrbit{
+  position:absolute;width:170px;height:170px;border-radius:50%;
+  border:1px solid rgba(216,179,67,.18);
+  box-shadow:0 0 0 26px rgba(216,179,67,.025),0 0 0 52px rgba(216,179,67,.015);
+  animation:wowOrbit 12s linear infinite
 }
-.v12StatusCard:hover{
- transform:translateY(-3px)!important;border-color:#635121!important;
- box-shadow:0 16px 30px rgba(0,0,0,.34)!important
+.wowOrbit:before,.wowOrbit:after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:var(--wow-gold-2);box-shadow:0 0 15px var(--wow-gold)}
+.wowOrbit:before{left:15px;top:22px}.wowOrbit:after{right:12px;bottom:29px}
+@keyframes wowOrbit{to{transform:rotate(360deg)}}
+.wowHeroLogo{
+  width:102px;height:102px;border-radius:25px;overflow:hidden;display:grid;place-items:center;
+  border:1px solid #856b20;background:#090a0a;box-shadow:0 22px 45px rgba(0,0,0,.42),0 0 40px rgba(216,179,67,.11)
 }
-.v12StatusCard .icon{
- width:42px;height:42px;display:grid;place-items:center;border-radius:12px;
- background:#0b0c0c;border:1px solid #303333
+.wowHeroLogo img{width:100%;height:100%;object-fit:contain;background:#000}
+.wowHeroLogo span{display:none;width:100%;height:100%;place-items:center;color:#111;font-size:25px;font-weight:900;background:linear-gradient(145deg,#f0d16b,#bd9025)}
+.wowHeroDate{
+  position:absolute;right:5px;bottom:4px;padding:9px 11px;border:1px solid #303434;border-radius:12px;
+  background:rgba(9,10,10,.72);backdrop-filter:blur(8px);text-align:right
 }
-.v12StatusCard b{font-size:26px!important}
-.v12CenterGrid{gap:11px!important}
-.v12DashboardPanel{
- border:1px solid #2d3030!important;border-radius:16px!important;
- background:linear-gradient(180deg,#151717,#0d0f0f)!important;
- box-shadow:0 14px 32px rgba(0,0,0,.28)!important;overflow:hidden
+.wowHeroDate span{display:block;color:#9ca2a2;font-size:9px;text-transform:capitalize}
+.wowHeroDate b{display:block;color:var(--wow-gold-2);font-size:19px}
+
+/* Metrics */
+.wowMetrics{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:9px;margin-bottom:12px}
+.wowMetric{
+  position:relative;overflow:hidden;min-height:104px!important;padding:13px!important;
+  display:flex!important;align-items:center!important;gap:11px!important;text-align:left!important;
+  border:1px solid #2d3131!important;border-radius:16px!important;
+  background:linear-gradient(145deg,#171919,#0e1010)!important;
+  box-shadow:0 12px 26px rgba(0,0,0,.25)!important;transition:.18s ease!important
 }
-.v12PanelHeader{
- padding:13px 14px!important;background:linear-gradient(180deg,#171919,#121414)!important;
- border-bottom:1px solid #2a2d2d!important
+.wowMetric:after{content:"";position:absolute;inset:auto -24px -45px auto;width:95px;height:95px;border-radius:50%;background:currentColor;opacity:.045}
+.wowMetric:hover{transform:translateY(-4px)!important;box-shadow:0 18px 34px rgba(0,0,0,.35)!important}
+.wowMetricIcon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#090a0a;border:1px solid #303434;font-size:22px}
+.wowMetric small{display:block;font-size:9px;letter-spacing:.06em;color:#8f9696}
+.wowMetric b{display:block;font-size:27px;line-height:1.05;color:#fff;margin-top:3px}
+.wowMetric em{font-size:9px;color:#7f8585;font-style:normal}
+.wowMetric.blue{color:var(--wow-blue);border-left:3px solid var(--wow-blue)!important}
+.wowMetric.orange{color:var(--wow-orange);border-left:3px solid var(--wow-orange)!important}
+.wowMetric.green{color:var(--wow-green);border-left:3px solid var(--wow-green)!important}
+.wowMetric.slate{color:#818a8a;border-left:3px solid #818a8a!important}
+.wowMetric.gold{color:var(--wow-gold);border-left:3px solid var(--wow-gold)!important}
+
+/* Panels */
+.wowMainGrid{display:grid;grid-template-columns:1.05fr 1fr .95fr;gap:10px;margin-bottom:12px}
+.wowPanel{
+  min-height:330px;display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid #2b2f2f;border-radius:18px;background:linear-gradient(180deg,#141616,#0c0e0e);
+  box-shadow:0 18px 38px rgba(0,0,0,.28)
 }
-.v12PanelHeader h3{color:var(--v12-gold2)!important;font-size:14px!important}
-.v12PanelContent{padding:11px!important}
-.v12PanelFooter{color:#d9b94c!important;background:#101212!important;border-top:1px solid #292c2c!important}
-.v12PinnedNote{
- border-radius:12px!important;background:linear-gradient(145deg,#161818,#101212)!important;
- border-color:#303333!important;box-shadow:0 8px 18px rgba(0,0,0,.18)
+.wowPanelHead{
+  min-height:64px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:9px;
+  border-bottom:1px solid #292d2d;background:linear-gradient(180deg,#171919,#121414)
 }
-.v12QuickBox{
- border:1px solid #373019!important;border-radius:16px!important;
- background:linear-gradient(180deg,#111313,#0b0d0d)!important;
- box-shadow:0 14px 30px rgba(0,0,0,.24)!important;padding:12px!important
+.wowPanelHead span{display:block;font-size:8px;letter-spacing:.18em;color:#8a763a;font-weight:900}
+.wowPanelHead h3{margin:3px 0 0;color:#eee8d2;font-size:14px}
+.wowPanelHead button{min-height:29px!important;padding:5px 8px!important;font-size:9px!important;border-radius:8px!important}
+.wowPanelBody{flex:1;padding:10px}
+.wowPanelLink{
+  min-height:40px!important;border:0!important;border-top:1px solid #292d2d!important;border-radius:0 0 18px 18px!important;
+  background:#101212!important;color:#d9b94c!important;text-align:left!important
 }
-.v12QuickBox h3{color:var(--v12-gold2)!important}
-.v12QuickActions button{
- min-height:68px!important;border-radius:12px!important;border:1px solid #303333!important;
- background:linear-gradient(145deg,#181a1a,#101212)!important;
- box-shadow:0 8px 18px rgba(0,0,0,.22)!important
+
+/* Quick */
+.wowQuickZone{
+  padding:13px;border:1px solid #373019;border-radius:18px;
+  background:linear-gradient(180deg,#121414,#0c0e0e);box-shadow:0 16px 34px rgba(0,0,0,.25)
 }
-.v12QuickActions button:hover{transform:translateY(-2px)!important;border-color:#665421!important}
-.v12QuickActions button.primary{
- background:linear-gradient(145deg,#e2c257,#b88d26)!important;color:#080909!important;border-color:#e6c95f!important
+.wowQuickHeading{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:10px}
+.wowQuickHeading span{font-size:8px;letter-spacing:.2em;color:#8d783a;font-weight:900}
+.wowQuickHeading h3{margin:3px 0 0;color:var(--wow-gold-2);font-size:15px}
+.wowQuickHeading p{margin:0;color:#7f8585;font-size:10px}
+.wowQuickGrid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:8px}
+.wowQuickGrid button{
+  min-height:76px!important;padding:11px!important;display:flex!important;align-items:center!important;gap:10px!important;
+  text-align:left!important;border-radius:13px!important;background:linear-gradient(145deg,#181a1a,#101212)!important;
+  border:1px solid #303434!important;box-shadow:0 9px 20px rgba(0,0,0,.22)!important
 }
-.appRightbar .rightPanel{
- border-radius:16px!important;padding:13px!important;
- background:linear-gradient(180deg,#141616,#0d0f0f)!important
-}
-.rightPanel h3{color:var(--v12-gold2)!important}
+.wowQuickGrid button:hover{transform:translateY(-3px)!important;border-color:#6f5b20!important}
+.wowQuickGrid button.accent{background:linear-gradient(145deg,#e4c256,#b88a22)!important;color:#090909!important;border-color:#e7c95f!important}
+.wowQuickGrid button>span{font-size:22px}
+.wowQuickGrid b{display:block;font-size:11.5px}
+.wowQuickGrid small{display:block;color:#868d8d;font-size:9px;margin-top:3px}
+.wowQuickGrid .accent small{color:#4c3b0d}
+
+/* Right */
+.appRightbar{top:94px!important;max-height:calc(100vh - 108px)!important}
+.appRightbar .rightPanel{border-radius:18px!important;background:linear-gradient(180deg,#141616,#0c0e0e)!important}
 .v12RightGoogleList button,.socialRightList button{
- border-radius:10px!important;background:#111313!important;border:1px solid #2d3030!important
+  border-radius:11px!important;background:#111313!important;border:1px solid #2d3131!important
 }
-.v12RightGoogleList button:hover,.socialRightList button:hover{
- transform:translateX(2px);border-color:#665421!important;background:#171919!important
-}
+.v12RightGoogleList button:hover,.socialRightList button:hover{transform:translateX(3px);border-color:#6c5820!important}
+
+/* General components */
 .card{
- border-radius:16px!important;border-color:#2d3030!important;
- background:linear-gradient(180deg,#151717,#0d0f0f)!important;
- box-shadow:0 14px 32px rgba(0,0,0,.26)!important
+  border-radius:18px!important;background:linear-gradient(180deg,#151717,#0d0f0f)!important;
+  border-color:#2d3131!important;box-shadow:0 18px 40px rgba(0,0,0,.28)!important
 }
-input,select,textarea{border-radius:11px!important;border-color:#343737!important;background:#0b0d0d!important}
+input,select,textarea{
+  background:#0a0c0c!important;border-color:#333737!important;border-radius:11px!important
+}
 input:focus,select:focus,textarea:focus{
- outline:none!important;border-color:#7b6421!important;box-shadow:0 0 0 3px rgba(212,175,55,.08)!important
+  outline:none!important;border-color:#7a6320!important;box-shadow:0 0 0 3px rgba(216,179,67,.08)!important
 }
-table{border-radius:14px!important;overflow:hidden!important;border:1px solid #292c2c!important}
-th{background:#111313!important;color:#e4cd7a!important}
-td{border-bottom-color:#272a2a!important}
-.v12AtelierPage{animation:v12VisualIn .26s ease-out}
-@keyframes v12VisualIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+table{border:1px solid #292d2d!important;border-radius:14px!important;overflow:hidden!important}
+th{background:#111313!important;color:#e4cc75!important}
+td{border-bottom-color:#272b2b!important}
+
+@media(max-width:1320px){
+  .wowTopCenter{display:none}
+  .wowMetrics{grid-template-columns:repeat(3,1fr)}
+  .wowMainGrid{grid-template-columns:1fr 1fr}
+  .wowNotes{grid-column:1/-1}
+  .wowQuickGrid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:980px){
+  .appShell{grid-template-columns:190px minmax(0,1fr)!important}
+  .appRightbar{grid-column:1/-1;position:static!important;display:grid!important;grid-template-columns:1fr 1fr!important;max-height:none!important}
+  .wowHero{grid-template-columns:1fr}.wowHeroVisual{display:none}
+}
+@media(max-width:720px){
+  .wowTopbar{grid-template-columns:1fr auto}.wowTopActions>button:nth-child(-n+2){display:none!important}
+  .appShell{display:block!important}.appSidebar{position:static!important;max-height:none!important;margin-bottom:10px}
+  .wowMetrics{grid-template-columns:repeat(2,1fr)}
+  .wowMainGrid{grid-template-columns:1fr}.wowNotes{grid-column:auto}
+  .wowQuickGrid{grid-template-columns:repeat(2,1fr)}
+  .appRightbar{display:block!important}
+}
+@media(max-width:480px){
+  .wowBrand h1{font-size:16px}.wowClock{display:none}
+  .wowHero{padding:18px}.wowHero h2{font-size:25px}
+  .wowMetrics,.wowQuickGrid{grid-template-columns:1fr}
+}
 
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
@@ -1250,44 +1386,43 @@ td{border-bottom-color:#272a2a!important}
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
 
-<header class="v12Header">
-  <div class="v12HeaderBrand">
-    <div class="v12LogoBox">
-      <img id="v12HeaderLogo" src="logo.png" alt="Logo TECH42SERVICE" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-      <div class="v12LogoFallback">T42</div>
+
+<header class="wowTopbar">
+  <div class="wowBrand">
+    <div class="wowLogo">
+      <img src="logo.png" alt="TECH42SERVICE"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <span>T42</span>
     </div>
     <div>
       <h1>TECH42SERVICE</h1>
-      <span>GESTION ATELIER</span>
+      <p>ATELIER DIGITAL</p>
     </div>
   </div>
 
-  <div class="v12HeaderRight">
-    <div class="v12SaveBadge">
-      <b>🛡 Sauvegarde OK</b>
-      <small id="v12SaveTime">Dernière : --:--</small>
+  <div class="wowTopCenter">
+    <div class="wowSystemState">
+      <span class="wowPulse"></span>
+      <div><b>Système opérationnel</b><small>Sauvegarde locale active</small></div>
     </div>
-
-    <div class="v12GoogleBadge">
-      <span class="googleG">G</span>
-      <div>
-        <b>Connecté à Google</b>
-        <small>tech42service@gmail.com</small>
-      </div>
+    <div class="wowWorkspaceLabel">
+      <small>ESPACE DE TRAVAIL</small>
+      <b>Atelier principal</b>
     </div>
+  </div>
 
-    <div class="v12GoogleApps">
-      <button onclick="window.open('https://mail.google.com','_blank')" title="Gmail">✉️</button>
-      <button onclick="window.open('https://calendar.google.com','_blank')" title="Google Agenda">📅</button>
-      <button onclick="window.open('https://drive.google.com','_blank')" title="Google Drive">🔺</button>
-      <button onclick="window.open('https://contacts.google.com','_blank')" title="Google Contacts">👥</button>
+  <div class="wowTopActions">
+    <button onclick="window.open('https://mail.google.com','_blank')" title="Gmail">✉️</button>
+    <button onclick="window.open('https://calendar.google.com','_blank')" title="Google Agenda">📅</button>
+    <button onclick="show('settings')" title="Paramètres">⚙️</button>
+    <div class="wowClock">
+      <b id="wowClockTime">--:--</b>
+      <small id="wowClockDate">--</small>
     </div>
-
-    <button class="v12IconButton" onclick="show('settings')" title="Paramètres">⚙️</button>
-    <button class="v12IconButton" onclick="alert('Aide TECH42SERVICE bientôt disponible.')" title="Aide">❔</button>
-    <button class="v12PowerButton" onclick="logout()" title="Déconnexion">⏻</button>
+    <button class="wowLogout" onclick="logout()" title="Déconnexion">⏻</button>
   </div>
 </header>
+
 
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar">
@@ -1295,51 +1430,110 @@ td{border-bottom-color:#272a2a!important}
 </aside><div class="appContent"><div id="moduleBar"><button onclick="goBackModule()">← Retour</button><div id="moduleTitle" class="moduleTitle">Atelier</div></div><main>
 
 
+
 <section id="home" class="active">
-  <div class="v12AtelierPage">
-    <div class="v12AtelierTitle">
-      <div>
-        <h2>🔧 ATELIER</h2>
-        <p id="atelierGreeting">Bonjour, bonne journée !</p>
-      </div>
-      <div class="v12DateClock">
-        <span id="atelierDate">--</span>
-        <b id="atelierTime">--:--</b>
-      </div>
-    </div>
+  <div class="wowDashboard">
 
-    <div class="v12StatusRow">
-      <button class="v12StatusCard progress" onclick="show('repairs')">
-        <span class="icon">🔧</span>
-        <div><small>En cours</small><b id="dashInProgress">0</b><em>Réparations</em></div>
-      </button>
-      <button class="v12StatusCard waiting" onclick="show('repairs')">
-        <span class="icon">📦</span>
-        <div><small>Attente de pièces</small><b id="dashWaiting">0</b><em>Dossiers</em></div>
-      </button>
-      <button class="v12StatusCard ready" onclick="show('repairs')">
-        <span class="icon">✅</span>
-        <div><small>Terminées / prêtes</small><b id="dashReady">0</b><em>À récupérer</em></div>
-      </button>
-      <button class="v12StatusCard delivered" onclick="show('repairs')">
-        <span class="icon">🚚</span>
-        <div><small>Livrées</small><b id="dashDelivered">0</b><em>Terminées</em></div>
-      </button>
-      <button class="v12StatusCard suppliers" onclick="show('suppliers')">
-        <span class="icon">🤝</span>
-        <div><small>Fournisseurs</small><b id="dashSuppliers">0</b><em>Partenaires</em></div>
-      </button>
-    </div>
-
-    <div class="v12CenterGrid">
-      <section class="v12DashboardPanel">
-        <div class="v12PanelHeader">
-          <h3>📅 Rendez-vous du jour</h3>
-          <button onclick="show('agenda')">Ouvrir l’agenda</button>
+    <div class="wowHero">
+      <div class="wowHeroCopy">
+        <span class="wowEyebrow">CENTRE DE PILOTAGE</span>
+        <h2>Bonjour Christophe 👋</h2>
+        <p id="atelierGreeting">Votre atelier est prêt pour une nouvelle journée.</p>
+        <div class="wowHeroActions">
+          <button class="wowPrimary" onclick="show('repairs')">＋ Nouvelle réparation</button>
+          <button onclick="show('agenda')">Voir l’agenda</button>
         </div>
-        <div id="dashTodayAgenda" class="v12PanelContent"></div>
-        <button class="v12PanelFooter" onclick="show('agenda')">Voir tous les rendez-vous →</button>
-      </section>
+      </div>
+      <div class="wowHeroVisual">
+        <div class="wowOrbit"></div>
+        <div class="wowHeroLogo">
+          <img src="logo.png" alt=""
+               onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+          <span>T42</span>
+        </div>
+        <div class="wowHeroDate">
+          <span id="atelierDate">--</span>
+          <b id="atelierTime">--:--</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="wowMetrics">
+      <button class="wowMetric blue" onclick="show('repairs')">
+        <span class="wowMetricIcon">🔧</span>
+        <div><small>RÉPARATIONS EN COURS</small><b id="dashInProgress">0</b><em>Atelier actif</em></div>
+      </button>
+      <button class="wowMetric orange" onclick="show('repairs')">
+        <span class="wowMetricIcon">📦</span>
+        <div><small>ATTENTE DE PIÈCES</small><b id="dashWaiting">0</b><em>À surveiller</em></div>
+      </button>
+      <button class="wowMetric green" onclick="show('repairs')">
+        <span class="wowMetricIcon">✅</span>
+        <div><small>PRÊTES À RÉCUPÉRER</small><b id="dashReady">0</b><em>Clients à prévenir</em></div>
+      </button>
+      <button class="wowMetric slate" onclick="show('repairs')">
+        <span class="wowMetricIcon">🚚</span>
+        <div><small>LIVRÉES</small><b id="dashDelivered">0</b><em>Dossiers terminés</em></div>
+      </button>
+      <button class="wowMetric gold" onclick="show('suppliers')">
+        <span class="wowMetricIcon">🤝</span>
+        <div><small>FOURNISSEURS</small><b id="dashSuppliers">0</b><em>Partenaires actifs</em></div>
+      </button>
+    </div>
+
+    <div class="wowMainGrid">
+      <article class="wowPanel wowAgenda">
+        <header class="wowPanelHead">
+          <div><span>AUJOURD’HUI</span><h3>📅 Rendez-vous</h3></div>
+          <button onclick="show('agenda')">Ouvrir</button>
+        </header>
+        <div id="dashTodayAgenda" class="wowPanelBody"></div>
+        <button class="wowPanelLink" onclick="show('agenda')">Voir tous les rendez-vous →</button>
+      </article>
+
+      <article class="wowPanel wowTasks">
+        <header class="wowPanelHead">
+          <div><span>PRIORITÉS</span><h3>⚠️ Tâches atelier</h3></div>
+          <button onclick="show('notes')">Ajouter</button>
+        </header>
+        <div id="dashAlerts" class="wowPanelBody"></div>
+        <button class="wowPanelLink" onclick="show('notes')">Voir toutes les tâches →</button>
+      </article>
+
+      <article class="wowPanel wowNotes">
+        <header class="wowPanelHead">
+          <div><span>MÉMO</span><h3>📌 Notes importantes</h3></div>
+          <button onclick="show('notes')">Voir tout</button>
+        </header>
+        <div id="v12PinnedNotes" class="wowPanelBody"></div>
+      </article>
+    </div>
+
+    <div class="wowQuickZone">
+      <div class="wowQuickHeading">
+        <div><span>ACTIONS RAPIDES</span><h3>Accès instantané</h3></div>
+        <p>Les fonctions les plus utilisées, accessibles en un clic.</p>
+      </div>
+      <div class="wowQuickGrid">
+        <button class="accent" onclick="show('repairs')"><span>🔧</span><div><b>Nouvelle réparation</b><small>Créer un dossier atelier</small></div></button>
+        <button onclick="show('clients')"><span>👥</span><div><b>Clients</b><small>Fiches et historique</small></div></button>
+        <button onclick="show('stock')"><span>📦</span><div><b>Stock</b><small>Pièces et outillage</small></div></button>
+        <button onclick="show('agenda')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous du jour</small></div></button>
+        <button onclick="show('docs')"><span>📄</span><div><b>Devis / Factures</b><small>Documents professionnels</small></div></button>
+        <button onclick="show('notes')"><span>📝</span><div><b>Notes</b><small>Rappels et priorités</small></div></button>
+      </div>
+    </div>
+
+    <div aria-hidden="true" style="display:none">
+      <div id="dashToday">0</div><div id="dashLowStock">0</div>
+      <div id="kpis"></div><div id="quickLinks"></div>
+      <table><tbody id="alerts"></tbody></table>
+      <table><tbody id="recentLog"></tbody></table>
+      <span id="atelierTaskCount">0</span>
+    </div>
+  </div>
+</section>
+
 
       <section class="v12DashboardPanel">
         <div class="v12PanelHeader">
@@ -2690,6 +2884,8 @@ function updateAtelierClock(){
   const dateEl=$('atelierDate'),timeEl=$('atelierTime'),greeting=$('atelierGreeting');
   if(dateEl)dateEl.textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   if(timeEl)timeEl.textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  if($('wowClockTime'))$('wowClockTime').textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  if($('wowClockDate'))$('wowClockDate').textContent=now.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
   if($('v12SaveTime'))$('v12SaveTime').textContent='Dernière : '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   if(greeting){
     const h=now.getHours();
