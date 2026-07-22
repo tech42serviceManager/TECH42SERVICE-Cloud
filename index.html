@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 ALPHA 2 2</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — BUILD VISUEL 001</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1096,6 +1096,139 @@ body{
 @media(max-width:650px){
   .appRightbar{display:block!important}
 }
+
+
+/* V12 PRO BUILD VISUEL 001 — VISUEL UNIQUEMENT */
+:root{
+ --v12-bg:#070808;--v12-panel:#121414;--v12-panel2:#171919;
+ --v12-border:#2d3030;--v12-gold:#d4af37;--v12-gold2:#f1d477;
+ --v12-text:#f3f1e8;--v12-muted:#989e9e;--v12-shadow:0 16px 40px rgba(0,0,0,.34)
+}
+body{
+ background:radial-gradient(circle at 83% -8%,rgba(212,175,55,.10),transparent 24%),
+ linear-gradient(145deg,#050606,#0a0b0b 52%,#070808)!important;
+ color:var(--v12-text)!important;font-family:Segoe UI,Arial,sans-serif!important
+}
+.v12Header,header{
+ background:rgba(7,8,8,.96)!important;border-bottom:1px solid #443819!important;
+ box-shadow:0 12px 34px rgba(0,0,0,.38)!important;backdrop-filter:blur(18px)
+}
+.v12Header{min-height:74px!important;padding:10px 16px!important}
+.v12HeaderBrand h1,header h1{color:var(--v12-gold2)!important;font-weight:900!important;letter-spacing:.045em!important}
+.v12LogoBox,.brandmark{
+ border:1px solid #7b6421!important;border-radius:14px!important;
+ background:linear-gradient(145deg,#111,#090909)!important;
+ box-shadow:0 10px 24px rgba(0,0,0,.35)!important
+}
+.appShell{max-width:1850px!important;padding:12px!important;gap:12px!important}
+.appSidebar,.appContent,.appRightbar .rightPanel{border-color:var(--v12-border)!important;box-shadow:var(--v12-shadow)!important}
+.appSidebar{
+ background:linear-gradient(180deg,#111313,#090a0a)!important;border-radius:18px!important;padding:11px!important
+}
+#nav{gap:5px!important}
+#nav button{
+ min-height:42px!important;height:42px!important;border-radius:10px!important;padding:6px 9px!important;
+ background:transparent!important;border:1px solid transparent!important;color:#e9e8df!important
+}
+#nav button:hover{
+ background:linear-gradient(90deg,rgba(212,175,55,.12),rgba(212,175,55,.03))!important;
+ border-color:#5e4d20!important;transform:translateX(3px)!important
+}
+#nav .navIcon{
+ width:29px!important;min-width:29px!important;height:29px!important;flex-basis:29px!important;
+ border-radius:9px!important;border:1px solid #343737!important;
+ background:linear-gradient(145deg,#202222,#111313)!important
+}
+#nav .navTitle{color:#ece8d7!important;font-size:11.5px!important;font-weight:800!important}
+.appContent{
+ background:radial-gradient(circle at 92% 0%,rgba(212,175,55,.055),transparent 25%),
+ linear-gradient(180deg,rgba(15,17,17,.96),rgba(8,9,9,.98))!important;
+ border-radius:18px!important;padding:15px!important;min-height:calc(100vh - 100px)!important
+}
+.v12AtelierTitle{
+ padding:4px 3px 13px!important;border-bottom:1px solid #242727!important;margin-bottom:12px!important
+}
+.v12AtelierTitle h2{color:var(--v12-gold2)!important;font-size:28px!important;letter-spacing:.025em!important}
+.v12DateClock{
+ color:#b9a55f!important;background:#0f1111;border:1px solid #2c3030;border-radius:12px;padding:8px 11px
+}
+.v12DateClock b{color:var(--v12-gold2)!important}
+.v12StatusRow{
+ border:1px solid #3a321b!important;border-radius:16px!important;
+ background:linear-gradient(180deg,#0c0e0e,#090a0a)!important;
+ box-shadow:0 12px 28px rgba(0,0,0,.24)!important;padding:11px!important
+}
+.v12StatusCard{
+ min-height:96px!important;border-radius:14px!important;border:1px solid #2d3030!important;
+ background:linear-gradient(145deg,#181a1a,#101212)!important;
+ box-shadow:0 10px 24px rgba(0,0,0,.24)!important;transition:.18s ease!important
+}
+.v12StatusCard:hover{
+ transform:translateY(-3px)!important;border-color:#635121!important;
+ box-shadow:0 16px 30px rgba(0,0,0,.34)!important
+}
+.v12StatusCard .icon{
+ width:42px;height:42px;display:grid;place-items:center;border-radius:12px;
+ background:#0b0c0c;border:1px solid #303333
+}
+.v12StatusCard b{font-size:26px!important}
+.v12CenterGrid{gap:11px!important}
+.v12DashboardPanel{
+ border:1px solid #2d3030!important;border-radius:16px!important;
+ background:linear-gradient(180deg,#151717,#0d0f0f)!important;
+ box-shadow:0 14px 32px rgba(0,0,0,.28)!important;overflow:hidden
+}
+.v12PanelHeader{
+ padding:13px 14px!important;background:linear-gradient(180deg,#171919,#121414)!important;
+ border-bottom:1px solid #2a2d2d!important
+}
+.v12PanelHeader h3{color:var(--v12-gold2)!important;font-size:14px!important}
+.v12PanelContent{padding:11px!important}
+.v12PanelFooter{color:#d9b94c!important;background:#101212!important;border-top:1px solid #292c2c!important}
+.v12PinnedNote{
+ border-radius:12px!important;background:linear-gradient(145deg,#161818,#101212)!important;
+ border-color:#303333!important;box-shadow:0 8px 18px rgba(0,0,0,.18)
+}
+.v12QuickBox{
+ border:1px solid #373019!important;border-radius:16px!important;
+ background:linear-gradient(180deg,#111313,#0b0d0d)!important;
+ box-shadow:0 14px 30px rgba(0,0,0,.24)!important;padding:12px!important
+}
+.v12QuickBox h3{color:var(--v12-gold2)!important}
+.v12QuickActions button{
+ min-height:68px!important;border-radius:12px!important;border:1px solid #303333!important;
+ background:linear-gradient(145deg,#181a1a,#101212)!important;
+ box-shadow:0 8px 18px rgba(0,0,0,.22)!important
+}
+.v12QuickActions button:hover{transform:translateY(-2px)!important;border-color:#665421!important}
+.v12QuickActions button.primary{
+ background:linear-gradient(145deg,#e2c257,#b88d26)!important;color:#080909!important;border-color:#e6c95f!important
+}
+.appRightbar .rightPanel{
+ border-radius:16px!important;padding:13px!important;
+ background:linear-gradient(180deg,#141616,#0d0f0f)!important
+}
+.rightPanel h3{color:var(--v12-gold2)!important}
+.v12RightGoogleList button,.socialRightList button{
+ border-radius:10px!important;background:#111313!important;border:1px solid #2d3030!important
+}
+.v12RightGoogleList button:hover,.socialRightList button:hover{
+ transform:translateX(2px);border-color:#665421!important;background:#171919!important
+}
+.card{
+ border-radius:16px!important;border-color:#2d3030!important;
+ background:linear-gradient(180deg,#151717,#0d0f0f)!important;
+ box-shadow:0 14px 32px rgba(0,0,0,.26)!important
+}
+input,select,textarea{border-radius:11px!important;border-color:#343737!important;background:#0b0d0d!important}
+input:focus,select:focus,textarea:focus{
+ outline:none!important;border-color:#7b6421!important;box-shadow:0 0 0 3px rgba(212,175,55,.08)!important
+}
+table{border-radius:14px!important;overflow:hidden!important;border:1px solid #292c2c!important}
+th{background:#111313!important;color:#e4cd7a!important}
+td{border-bottom-color:#272a2a!important}
+.v12AtelierPage{animation:v12VisualIn .26s ease-out}
+@keyframes v12VisualIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
