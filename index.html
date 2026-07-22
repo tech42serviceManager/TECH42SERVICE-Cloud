@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — ÉLÉGANCE</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — ÉLÉGANCE 2</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1133,6 +1133,104 @@ body{font-family:Inter,Segoe UI,Arial,sans-serif!important;background:#080909!im
 button{border-radius:9px!important;box-shadow:none!important}input,select,textarea{border-radius:9px!important;border-color:#303434!important;background:#0b0d0d!important}
 table{border:1px solid var(--pro-line)!important;border-radius:11px!important;overflow:hidden!important;background:#0d0f0f!important}th{background:#121414!important;color:#d9c57b!important}td{border-bottom-color:#252929!important}
 
+
+/* V12 PRO ÉLÉGANCE 2 — date en haut + accès rapide dans Atelier */
+.v12HeaderDate{
+  min-height:42px;
+  padding:6px 11px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #5a481a;
+  border-radius:10px;
+  background:#111313;
+  white-space:nowrap;
+}
+.v12HeaderDate>span{font-size:17px}
+.v12HeaderDate small{
+  display:block;
+  color:#d4cab0;
+  font-size:10px;
+  text-transform:capitalize;
+}
+.v12HeaderDate b{
+  display:block;
+  margin-top:1px;
+  color:var(--pro-gold2,#e4cc7a);
+  font-size:17px;
+  text-align:right;
+}
+.v12AtelierTitle{
+  align-items:stretch!important;
+}
+.v12AtelierTitle>div:first-child{
+  min-width:190px;
+  align-self:center;
+}
+.v12TopQuick{
+  flex:1;
+  max-width:760px;
+  padding:8px 10px;
+  border:1px solid #292d2d;
+  border-radius:12px;
+  background:#101212;
+}
+.v12TopQuickTitle{
+  margin-bottom:6px;
+  color:#d9c57b;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+.v12TopQuickActions{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(110px,1fr));
+  gap:6px;
+}
+.v12TopQuickActions button{
+  min-height:42px!important;
+  padding:6px 8px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  border-radius:8px!important;
+  font-size:10px!important;
+  background:#151717!important;
+  border:1px solid #303434!important;
+  color:#e8e4d6!important;
+}
+.v12TopQuickActions button:hover{
+  background:#191b1b!important;
+  border-color:#5a481a!important;
+}
+.v12TopQuickActions button.primary{
+  background:#b9952d!important;
+  border-color:#d1ad43!important;
+  color:#090909!important;
+}
+.v12TopQuickActions span{
+  line-height:1.15;
+}
+.v12RightGoogleList button{
+  min-height:55px!important;
+}
+.v12RightGoogleList button small{
+  line-height:1.35!important;
+}
+@media(max-width:1320px){
+  .v12HeaderDate small{font-size:9px}
+  .v12TopQuickActions{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:1000px){
+  .v12HeaderDate{display:none}
+  .v12AtelierTitle{display:block!important}
+  .v12TopQuick{max-width:none;margin-top:10px}
+}
+@media(max-width:620px){
+  .v12TopQuickActions{grid-template-columns:repeat(2,1fr)}
+}
+
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -1166,6 +1264,14 @@ table{border:1px solid var(--pro-line)!important;border-radius:11px!important;ov
   </div>
 
   <div class="v12HeaderRight">
+    <div class="v12HeaderDate">
+      <span>📅</span>
+      <div>
+        <small id="atelierDate">--</small>
+        <b id="atelierTime">--:--</b>
+      </div>
+    </div>
+
     <div class="v12SaveBadge">
       <b>🛡 Sauvegarde OK</b>
       <small id="v12SaveTime">Dernière : --:--</small>
@@ -1180,10 +1286,10 @@ table{border:1px solid var(--pro-line)!important;border-radius:11px!important;ov
     </div>
 
     <div class="v12GoogleApps">
-      <button onclick="window.open('https://mail.google.com','_blank')" title="Gmail">✉️</button>
-      <button onclick="window.open('https://calendar.google.com','_blank')" title="Google Agenda">📅</button>
-      <button onclick="window.open('https://drive.google.com','_blank')" title="Google Drive">🔺</button>
-      <button onclick="window.open('https://contacts.google.com','_blank')" title="Google Contacts">👥</button>
+      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')" title="Gmail">✉️</button>
+      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')" title="Google Agenda">📅</button>
+      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')" title="Google Drive">🔺</button>
+      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')" title="Google Contacts">👥</button>
     </div>
 
     <button class="v12IconButton" onclick="show('settings')" title="Paramètres">⚙️</button>
@@ -1205,9 +1311,15 @@ table{border:1px solid var(--pro-line)!important;border-radius:11px!important;ov
         <h2>🔧 ATELIER</h2>
         <p id="atelierGreeting">Bonjour, bonne journée !</p>
       </div>
-      <div class="v12DateClock">
-        <span id="atelierDate">--</span>
-        <b id="atelierTime">--:--</b>
+      <div class="v12TopQuick">
+        <div class="v12TopQuickTitle">⚡ Accès rapide</div>
+        <div class="v12TopQuickActions">
+          <button class="primary" onclick="show('repairs')">🔧 <span>Nouvelle réparation</span></button>
+          <button onclick="show('clients')">👤 <span>Nouveau client</span></button>
+          <button onclick="show('docs')">📄 <span>Nouveau devis</span></button>
+          <button onclick="show('agenda')">📅 <span>Agenda du jour</span></button>
+          <button onclick="show('stock')">📦 <span>Stock faible</span></button>
+        </div>
       </div>
     </div>
 
@@ -1262,19 +1374,7 @@ table{border:1px solid var(--pro-line)!important;border-radius:11px!important;ov
       </section>
     </div>
 
-    <div class="v12QuickBox">
-      <h3>🔧 Accès rapide</h3>
-      <div class="v12QuickActions">
-        <button class="primary" onclick="show('repairs')"><span>🔧</span><b>Nouvelle réparation</b></button>
-        <button onclick="show('clients')"><span>👥</span><b>Clients</b></button>
-        <button onclick="show('stock')"><span>📦</span><b>Stock</b></button>
-        <button onclick="show('agenda')"><span>📅</span><b>Agenda</b></button>
-        <button onclick="show('docs')"><span>📄</span><b>Devis / Factures</b></button>
-        <button onclick="show('notes')"><span>📝</span><b>Notes</b></button>
-      </div>
-    </div>
-
-    <div aria-hidden="true" style="display:none">
+        <div aria-hidden="true" style="display:none">
       <div id="dashToday">0</div><div id="dashLowStock">0</div>
       <div id="kpis"></div><div id="quickLinks"></div>
       <table><tbody id="alerts"></tbody></table>
@@ -1481,10 +1581,10 @@ table{border:1px solid var(--pro-line)!important;border-radius:11px!important;ov
       </div>
     </div>
     <div class="v12RightGoogleList">
-      <button onclick="window.open('https://mail.google.com','_blank')"><span>✉️</span><div><b>Gmail</b><small>Messagerie</small></div></button>
-      <button onclick="window.open('https://calendar.google.com','_blank')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous Google</small></div></button>
-      <button onclick="window.open('https://drive.google.com','_blank')"><span>🔺</span><div><b>Google Drive</b><small>Fichiers cloud</small></div></button>
-      <button onclick="window.open('https://contacts.google.com','_blank')"><span>👥</span><div><b>Contacts</b><small>Carnet Google</small></div></button>
+      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')"><span>✉️</span><div><b>Gmail</b><small>Messagerie<br>tech42service@gmail.com</small></div></button>
+      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous Google<br>tech42service@gmail.com</small></div></button>
+      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')"><span>🔺</span><div><b>Google Drive</b><small>Fichiers cloud<br>tech42service@gmail.com</small></div></button>
+      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')"><span>👥</span><div><b>Contacts</b><small>Carnet Google<br>tech42service@gmail.com</small></div></button>
       <button class="v12AllGoogle" onclick="window.open('https://www.google.com/intl/fr/about/products/','_blank')">Tous les services Google →</button>
     </div>
   </div>
