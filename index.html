@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE — ATELIER</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -881,7 +881,7 @@ font-weight:700;border:1px solid #333;background:#111;
 /* V11.3 — version allégée */
 .versionNotice{font-size:11px;color:var(--muted)}
 
-/* V11.6 — MODE ATELIER */
+/* V12 PRO — MODE ATELIER */
 .atelierDashboard{max-width:1320px;margin:0 auto;animation:atelierEnter .28s ease-out}
 .atelierHero{
   position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;
@@ -943,7 +943,7 @@ font-weight:700;border:1px solid #333;background:#111;
 }
 
 
-/* V11.6 — Notes et Drive */
+/* V12 PRO — Notes et Drive */
 .notesLayout{display:grid;grid-template-columns:370px minmax(0,1fr);gap:12px;align-items:start}
 .notesComposer{position:sticky;top:132px}
 .notesTitleRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -978,7 +978,7 @@ font-weight:700;border:1px solid #333;background:#111;
 @media(max-width:600px){.notesToolbar select{width:100%}.notesGrid{grid-template-columns:1fr}}
 
 
-/* V11.6 — Notes améliorées + Fournisseurs Atelier */
+/* V12 PRO — Notes améliorées + Fournisseurs Atelier */
 .atelierStatus.suppliers{border-left:3px solid #f97316!important}
 .notePriority{display:inline-block;margin-left:4px;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:900}
 .notePriority.normal{background:#202020;color:#cfcfcf;border:1px solid #444}
@@ -990,6 +990,23 @@ font-weight:700;border:1px solid #333;background:#111;
 .notesSummary button span{font-size:11px;color:var(--muted)}
 .urgentNoteAlert{border-left:3px solid #ef4444!important;background:rgba(239,68,68,.08)}
 @media(max-width:680px){.notesSummary{grid-template-columns:repeat(2,1fr)}}
+
+
+/* V12 PRO */
+:root{--v12-gold:#d7b24a;--v12-gold2:#f2d884}
+body{background:radial-gradient(circle at 85% -10%,rgba(215,178,74,.12),transparent 25%),linear-gradient(145deg,#050606,#0a0b0b 55%,#070808)}
+.v12Topbar{position:sticky;top:0;z-index:80;display:flex;justify-content:space-between;align-items:center;min-height:72px!important;padding:11px 18px!important;background:rgba(7,8,8,.95)!important;border-bottom:1px solid #36301d!important;backdrop-filter:blur(18px)}
+.v12Brand,.v12TopStatus{display:flex;align-items:center;gap:10px}.v12Brand .brandmark{width:46px!important;height:46px!important}.v12Brand h1{font-size:19px!important}.v12Brand .brandVersion{font-size:10px;letter-spacing:2px}
+.v12StatusChip{display:flex;align-items:center;gap:7px;padding:0 11px;height:34px;border:1px solid #323535;border-radius:999px;background:#101212;color:#b5bbbb;font-size:11px}.v12StatusChip span{width:7px;height:7px;border-radius:50%;background:#28c76f;box-shadow:0 0 10px rgba(40,199,111,.7)}
+.v12TopClock{text-align:right}.v12TopClock b{display:block;color:var(--v12-gold2);font-size:18px}.v12TopClock small{font-size:10px;color:#8f9696}
+.appShell{grid-template-columns:238px minmax(0,1fr)!important;gap:14px!important;max-width:1800px!important}.appSidebar{top:86px!important;max-height:calc(100vh - 100px)!important;background:linear-gradient(180deg,#111313,#0b0c0c)!important;border-color:#252828!important}
+#nav button{height:44px!important;min-height:44px!important;border-radius:10px!important}#nav button:hover{background:#1b1d1d!important;border-color:#4c4327!important}.appContent{padding:17px!important;background:rgba(11,12,12,.88)!important;border-color:#252828!important}
+.v12Dashboard{max-width:1450px;margin:auto}.v12Welcome{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;margin-bottom:13px;border:1px solid #343022;border-radius:18px;background:radial-gradient(circle at 88% 10%,rgba(215,178,74,.18),transparent 25%),linear-gradient(135deg,#171814,#101111 65%)}.v12Overline,.v12PanelHead small,.v12QuickTitle small{font-size:9px;letter-spacing:1.7px;color:#9c8540;font-weight:900}.v12Welcome h2{margin:5px 0 4px;font-size:25px;color:#fff}.v12Welcome p{margin:0;color:#aeb3b3}.v12Today{text-align:right;color:#a9aeae}.v12Today b{display:block;color:var(--v12-gold2);font-size:27px;margin-top:3px}
+.v12Kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}.v12Kpi{display:flex!important;align-items:center!important;gap:12px!important;min-height:92px!important;padding:13px!important;text-align:left!important;border:1px solid #292c2c!important;border-radius:15px!important;background:linear-gradient(145deg,#161818,#0e0f0f)!important}.v12Kpi>span{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:#090a0a;font-size:22px}.v12Kpi small{display:block;color:#929999;font-size:10px;text-transform:uppercase}.v12Kpi b{display:block;color:#fff;font-size:25px;margin-top:3px}.v12Kpi.diagnostic{border-left:3px solid #d6a82e!important}.v12Kpi.progress{border-left:3px solid #4d8cf5!important}.v12Kpi.waiting{border-left:3px solid #a86bee!important}.v12Kpi.ready{border-left:3px solid #28c76f!important}.v12Kpi.delivered{border-left:3px solid #8d9494!important}
+.v12MainGrid{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:11px;margin-bottom:13px}.v12Panel{min-height:275px;padding:14px;border:1px solid #282b2b;border-radius:16px;background:linear-gradient(180deg,#151717,#0e0f0f)}.v12PanelHead{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:10px;border-bottom:1px solid #282b2b}.v12PanelHead h3{margin:3px 0 0;color:#f0e7c3;font-size:15px}.v12PanelHead button{min-height:30px!important;padding:5px 8px!important;font-size:10px!important}.v12Counter{min-width:31px;height:31px;display:grid;place-items:center;border:1px solid #6b5720;border-radius:999px;color:var(--v12-gold2);font-weight:900}
+.v12NoteItem{display:flex;gap:9px;padding:9px 3px;border-bottom:1px solid #242626;cursor:pointer}.v12NoteItem b{display:block;color:#ebe4ca;font-size:11.5px}.v12NoteItem small{display:block;color:#919797;font-size:10px;margin-top:2px}
+.v12QuickTitle{margin:3px 2px 8px}.v12QuickTitle h3{margin:2px 0;color:#eee6ca}.v12QuickGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.v12QuickGrid button{display:flex!important;align-items:center!important;gap:11px!important;min-height:78px!important;padding:12px!important;text-align:left!important;border-radius:14px!important;background:linear-gradient(145deg,#171919,#101111)!important;border:1px solid #292c2c!important}.v12QuickGrid button.primary{background:linear-gradient(145deg,#d8b84e,#b58b24)!important;color:#080909!important}.v12QuickGrid button>span{font-size:23px}.v12QuickGrid button b{display:block;font-size:12px}.v12QuickGrid button small{display:block;color:#919797;font-size:9.5px;margin-top:3px}
+@media(max-width:1180px){.v12Kpis{grid-template-columns:repeat(3,1fr)}.v12MainGrid{grid-template-columns:1fr 1fr}.v12Panel:last-child{grid-column:1/-1}.v12QuickGrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:780px){.v12StatusChip{display:none}.v12Kpis{grid-template-columns:repeat(2,1fr)}.v12MainGrid{grid-template-columns:1fr}.v12Panel:last-child{grid-column:auto}.v12QuickGrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.v12Welcome{display:block}.v12Today{text-align:left;margin-top:12px}.v12Kpis,.v12QuickGrid{grid-template-columns:1fr}}
 
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
@@ -1010,79 +1027,59 @@ font-weight:700;border:1px solid #333;background:#111;
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
 <div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
-<header><div class="brand"><div class="brandmark" id="brandLogo">T42</div><div><h1>TECH42SERVICE</h1><div class="brandVersion">ATELIER</div></div></div><div class="headerActions"><button onclick="show('backup')">☁️ Cloud</button><button class="danger powerButton" onclick="logout()" title="Déconnexion">⏻</button></div></header>
+
+<header class="v12Topbar">
+  <div class="v12Brand">
+    <div class="brandmark" id="brandMark"><span>T42</span></div>
+    <div><h1 id="brandTitle">TECH42SERVICE</h1><div class="brandVersion">ATELIER</div></div>
+  </div>
+  <div class="v12TopStatus">
+    <div class="v12StatusChip ok"><span></span>Sauvegarde OK</div>
+    <div class="v12TopClock"><b id="topClockTime">--:--</b><small id="topClockDate">--</small></div>
+    <button class="powerButton" onclick="logout()" title="Déconnexion">⏻</button>
+  </div>
+</header>
 <div id="autoSaveBadge" class="autoSaveBadge">☁️ Initialisation cloud…</div>
 <div class="appShell"><aside class="appSidebar">
 <nav id="nav"></nav>
 </aside><div class="appContent"><div id="moduleBar"><button onclick="goBackModule()">← Retour</button><div id="moduleTitle" class="moduleTitle">Atelier</div></div><main>
 
+
 <section id="home" class="active">
-  <div class="atelierDashboard">
-    <div class="atelierHero">
-      <div>
-        <div class="atelierEyebrow">TECH42SERVICE</div>
-        <h2>🔧 Atelier</h2>
-        <div id="atelierGreeting" class="atelierGreeting">Bonjour, bonne journée.</div>
-      </div>
-      <div class="atelierClock">
-        <div id="atelierDate"></div>
-        <strong id="atelierTime">--:--</strong>
-      </div>
+  <div class="v12Dashboard">
+    <div class="v12Welcome">
+      <div><span class="v12Overline">CENTRE DE PILOTAGE</span><h2>Bonjour Christophe 👋</h2><p id="atelierGreeting">Bienvenue dans votre atelier.</p></div>
+      <div class="v12Today"><span id="atelierDate">--</span><b id="atelierTime">--:--</b></div>
     </div>
 
-    <div class="atelierStatusGrid">
-      <button class="atelierStatus diagnostic" onclick="show('repairs')">
-        <span>🔍</span><div><small>Diagnostics</small><b id="dashDiagnostic">0</b></div>
-      </button>
-      <button class="atelierStatus progress" onclick="show('repairs')">
-        <span>🔧</span><div><small>En cours</small><b id="dashInProgress">0</b></div>
-      </button>
-      <button class="atelierStatus waiting" onclick="show('repairs')">
-        <span>📦</span><div><small>Attente de pièces</small><b id="dashWaiting">0</b></div>
-      </button>
-      <button class="atelierStatus ready" onclick="show('repairs')">
-        <span>✅</span><div><small>Terminées / prêtes</small><b id="dashReady">0</b></div>
-      </button>
-      <button class="atelierStatus delivered" onclick="show('repairs')">
-        <span>📤</span><div><small>Livrées</small><b id="dashDelivered">0</b></div>
-      </button>
-      <button class="atelierStatus suppliers" onclick="show('suppliers')">
-        <span>🚚</span><div><small>Fournisseurs</small><b id="dashSuppliers">0</b></div>
-      </button>
+    <div class="v12Kpis">
+      <button class="v12Kpi diagnostic" onclick="show('repairs')"><span>🔍</span><div><small>Diagnostics</small><b id="dashDiagnostic">0</b></div></button>
+      <button class="v12Kpi progress" onclick="show('repairs')"><span>🔧</span><div><small>En cours</small><b id="dashInProgress">0</b></div></button>
+      <button class="v12Kpi waiting" onclick="show('repairs')"><span>📦</span><div><small>Attente de pièces</small><b id="dashWaiting">0</b></div></button>
+      <button class="v12Kpi ready" onclick="show('repairs')"><span>✅</span><div><small>Prêtes</small><b id="dashReady">0</b></div></button>
+      <button class="v12Kpi delivered" onclick="show('repairs')"><span>📤</span><div><small>Livrées</small><b id="dashDelivered">0</b></div></button>
     </div>
 
-    <div class="atelierPanels">
-      <div class="atelierPanel">
-        <div class="atelierPanelHead">
-          <h3>📅 Rendez-vous du jour</h3>
-          <button onclick="show('agenda')">Ouvrir l’agenda</button>
-        </div>
-        <div id="dashTodayAgenda"></div>
-      </div>
-
-      <div class="atelierPanel">
-        <div class="atelierPanelHead">
-          <h3>⚠️ À faire aujourd’hui</h3>
-          <span id="atelierTaskCount" class="atelierCount">0</span>
-        </div>
-        <div id="dashAlerts"></div>
-      </div>
+    <div class="v12MainGrid">
+      <div class="v12Panel"><div class="v12PanelHead"><div><small>AUJOURD’HUI</small><h3>📅 Rendez-vous</h3></div><button onclick="show('agenda')">Voir l’agenda</button></div><div id="dashTodayAgenda"></div></div>
+      <div class="v12Panel"><div class="v12PanelHead"><div><small>PRIORITÉS</small><h3>⚠️ À faire</h3></div><span id="atelierTaskCount" class="v12Counter">0</span></div><div id="dashAlerts"></div></div>
+      <div class="v12Panel"><div class="v12PanelHead"><div><small>MÉMO</small><h3>📝 Notes importantes</h3></div><button onclick="show('notes')">Toutes les notes</button></div><div id="v12PinnedNotes"></div></div>
     </div>
 
-    <div class="atelierActions">
-      <button class="primary" onclick="show('repairs')"><span>🔧</span><b>Nouvelle réparation</b></button>
-      <button onclick="show('clients')"><span>👥</span><b>Clients</b></button>
-      <button onclick="show('stock')"><span>📦</span><b>Stock</b></button>
-      <button onclick="show('agenda')"><span>📅</span><b>Agenda</b></button>
-      <button onclick="show('notes')"><span>📝</span><b>Notes</b></button>
-      <button onclick="show('suppliers')"><span>🚚</span><b>Fournisseurs</b></button>
+    <div class="v12QuickTitle"><small>RACCOURCIS</small><h3>Accès rapide</h3></div>
+    <div class="v12QuickGrid">
+      <button class="primary" onclick="show('repairs')"><span>🔧</span><div><b>Nouvelle réparation</b><small>Créer un dossier</small></div></button>
+      <button onclick="show('clients')"><span>👥</span><div><b>Clients</b><small>Fiches et historique</small></div></button>
+      <button onclick="show('stock')"><span>📦</span><div><b>Stock</b><small>Pièces et outillage</small></div></button>
+      <button onclick="show('agenda')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous</small></div></button>
+      <button onclick="show('notes')"><span>📝</span><div><b>Notes</b><small>Rappels et tâches</small></div></button>
+      <button onclick="show('docs')"><span>📄</span><div><b>Documents</b><small>Devis et factures</small></div></button>
     </div>
 
-    <div aria-hidden="true" style="display:none">
-      <div id="dashToday">0</div><div id="dashLowStock">0</div>
+    <div style="display:none">
+      <div id="dashToday">0</div><div id="dashLowStock">0</div><div id="dashSuppliers">0</div>
       <div id="kpis"></div><div id="quickLinks"></div>
-      <table><tbody id="alerts"></tbody></table>
-      <table><tbody id="recentLog"></tbody></table>
+      <table><tbody id="alerts"></tbody></table><table><tbody id="recentLog"></tbody></table>
     </div>
   </div>
 </section>
@@ -2377,7 +2374,7 @@ function updateAtelierClock(){
   const now=new Date();
   const dateEl=$('atelierDate'),timeEl=$('atelierTime'),greeting=$('atelierGreeting');
   if(dateEl)dateEl.textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  if(timeEl)timeEl.textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  if(timeEl)timeEl.textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});if($('topClockTime'))$('topClockTime').textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});if($('topClockDate'))$('topClockDate').textContent=now.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
   if(greeting){
     const h=now.getHours();
     greeting.textContent=(h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir')+', bonne journée.';
@@ -2452,6 +2449,10 @@ function updateLiveDashboard(){
   repairs.filter(r=>!['Livré','Annulé'].includes(r.status)&&days(r.date)>7).slice(0,3).forEach(r=>alerts.push(`<div class="dashboardAlert"><b class="late">🕒 Dossier ancien</b><br>${esc(r.id||'')} — ${days(r.date)} jours</div>`));
   if($('dashAlerts'))$('dashAlerts').innerHTML=alerts.length?alerts.join(''):'<div class="dashboardEmpty">Aucune tâche urgente. Tout est sous contrôle.</div>';
   if($('atelierTaskCount'))$('atelierTaskCount').textContent=alerts.length;
+  if($('v12PinnedNotes')){
+    const pinned=(Array.isArray(db.notes)?db.notes:[]).filter(n=>n.pinned&&!n.done).slice(0,5);
+    $('v12PinnedNotes').innerHTML=pinned.length?pinned.map(n=>`<div class="v12NoteItem" onclick="show('notes')"><span>📌</span><div><b>${esc(n.title||'Note')}</b><small>${esc(n.text||'').slice(0,90)}</small></div></div>`).join(''):'<div class="dashboardEmpty">Aucune note épinglée.</div>';
+  }
 }
 
 function render(){updateAtelierClock();renderSocialRightPanel();renderSocialManager();ensureClientIds();if(!Array.isArray(db.usedParts))db.usedParts=[];if(!Array.isArray(db.agenda))db.agenda=[];if(!Array.isArray(db.sheets))db.sheets=[];if(!Array.isArray(db.writerDocs))db.writerDocs=[];if(!Array.isArray(db.managedFiles))db.managedFiles=[];if(!Array.isArray(db.contacts))db.contacts=[];renderAgenda();renderContacts();renderRepairHelp();renderNotes();renderV51Home();updateLiveDashboard();bindRepairContext();fillSettings();fillTwoUsers();refreshLoginUsers();renderUsedParts();$('clientList').innerHTML=db.clients.map(c=>`<option value="${esc(c.nom+' '+c.pre)}">`).join(''); if($('supplierList')) $('supplierList').innerHTML=db.suppliers.map(f=>`<option value="${esc(f.name)}">`).join('');let active=db.repairs.filter(r=>!['Livré','Annulé'].includes(r.status)),late=active.filter(r=>days(r.date)>7),ca=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+d.amount,0),mrep=db.repairs.reduce((s,r)=>s+r.price-r.cost,0),msales=db.sales.reduce((s,x)=>s+x.sell-x.buy-x.cost-(x.shipping||0),0),stockVal=db.stock.reduce((s,x)=>s+x.sell*x.qty,0),lowStock=db.stock.filter(x=>Number(x.qty||0)<=Number(x.min??1)),invoiceMargin=db.docs.filter(d=>d.type==='Facture').reduce((s,d)=>s+Number(d.margin??(d.amount-(d.cost||0))),0);if($('kpis'))$('kpis').innerHTML=[['Réparations en cours',active.length],['Alertes stock',lowStock.length],['CA facturé',euro(ca)],['Marge factures',euro(invoiceMargin)],['Valeur stock',euro(stockVal)],['Garanties actives',db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0).length]].map(k=>`<div class="card"><h3>${k[0]}</h3><div class="big">${k[1]}</div></div>`).join('');renderQuickLinks();renderBrandLogo();if($('alerts'))$('alerts').innerHTML=[...late.map(r=>`<tr><td class="late">Retard atelier</td><td>${r.id} - ${esc(r.client)}</td></tr>`),...db.repairs.filter(r=>r.warranty>0&&warranty(r).left>=0&&warranty(r).left<30).map(r=>`<tr><td class="warn">Garantie proche</td><td>${r.id} - ${warranty(r).left} jours</td></tr>`),...lowStock.map(x=>`<tr><td class="late">Stock faible</td><td>${esc(x.name)} : ${x.qty} restant(s), seuil ${Number(x.min??1)}</td></tr>`)].join('')||'<tr><td class="muted">Aucune alerte</td></tr>';if($('recentLog'))$('recentLog').innerHTML=db.log.slice(-8).reverse().map(l=>`<tr><td>${l.date}</td><td>${esc(l.action)}</td></tr>`).join('')||'<tr><td class="muted">Aucune activité</td></tr>';
