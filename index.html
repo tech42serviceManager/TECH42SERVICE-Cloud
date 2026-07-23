@@ -1388,7 +1388,7 @@ table{background:#11151a!important;border:1px solid var(--line)!important;border
     </div>
     <div>
       <h1>TECH42SERVICE</h1>
-      <span>GESTION ATELIER</span>
+      <span>GESTION ATELIER · V14.0</span>
     </div>
   </div>
 
@@ -1422,7 +1422,6 @@ table{background:#11151a!important;border:1px solid var(--line)!important;border
     </div>
 
     <button class="v12IconButton" onclick="show('settings')" title="Paramètres">⚙️</button>
-    <button class="v12IconButton" onclick="alert('Aide TECH42SERVICE bientôt disponible.')" title="Aide">❔</button>
     <button class="v12PowerButton" onclick="logout()" title="Déconnexion">⏻</button>
   </div>
 </header>
@@ -1449,6 +1448,23 @@ table{background:#11151a!important;border:1px solid var(--line)!important;border
           <button onclick="show('agenda')">📅 <span>Agenda du jour</span></button>
           <button onclick="show('stock')">📦 <span>Stock faible</span></button>
         </div>
+      </div>
+    </div>
+
+    <div class="v14GoogleModule">
+      <div class="v14GoogleHead">
+        <div>
+          <span class="v14Eyebrow">ESPACE CONNECTÉ</span>
+          <h3><span class="googleG">G</span> Google</h3>
+          <p>Accédez à vos outils professionnels sans quitter le tableau de bord.</p>
+        </div>
+        <span class="v14GoogleAccount">tech42service@gmail.com</span>
+      </div>
+      <div class="v14GoogleGrid">
+        <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')"><span class="v14GoogleIcon">✉️</span><div><b>Gmail</b><small>Messagerie professionnelle</small></div><em>↗</em></button>
+        <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')"><span class="v14GoogleIcon">📅</span><div><b>Agenda</b><small>Rendez-vous et planning</small></div><em>↗</em></button>
+        <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')"><span class="v14GoogleIcon">🔺</span><div><b>Drive</b><small>Documents et sauvegardes</small></div><em>↗</em></button>
+        <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')"><span class="v14GoogleIcon">👥</span><div><b>Contacts</b><small>Carnet d’adresses Google</small></div><em>↗</em></button>
       </div>
     </div>
 
@@ -1702,22 +1718,6 @@ table{background:#11151a!important;border:1px solid var(--line)!important;border
 </main></div>
 
 <aside class="appRightbar">
-  <div class="rightPanel v12RightGoogle">
-    <div class="rightPanelHead">
-      <div>
-        <h3><span class="googleG">G</span> Google</h3>
-        <div class="muted">Raccourcis rapides</div>
-      </div>
-    </div>
-    <div class="v12RightGoogleList">
-      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')"><span>✉️</span><div><b>Gmail</b><small>Messagerie<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous Google<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')"><span>🔺</span><div><b>Google Drive</b><small>Fichiers cloud<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')"><span>👥</span><div><b>Contacts</b><small>Carnet Google<br>tech42service@gmail.com</small></div></button>
-      <button class="v12AllGoogle" onclick="window.open('https://www.google.com/intl/fr/about/products/','_blank')">Tous les services Google →</button>
-    </div>
-  </div>
-
   <div class="rightPanel">
     <div class="rightPanelHead">
       <div>
@@ -2736,6 +2736,55 @@ table{box-shadow:0 12px 28px rgba(0,0,0,.27)!important}th{background:linear-grad
 
 @media(max-width:900px){.v12AtelierTitle{padding:12px!important}.v12StatusCard b{font-size:23px!important}}
 
+
+
+/* ===== TECH42SERVICE V14.0 — BUSINESS INTERFACE ===== */
+:root{
+  --v14-bg:#f3f4f6;--v14-surface:#ffffff;--v14-soft:#f7f7f8;
+  --v14-text:#171717;--v14-muted:#6b7280;--v14-line:#e5e7eb;
+  --v14-accent:#b48a18;--v14-accent-soft:#f7efd2;--v14-blue:#2563eb;
+  --v14-shadow:0 12px 35px rgba(15,23,42,.08);
+}
+body{background:var(--v14-bg)!important;color:var(--v14-text)!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif!important}
+header.v12Header{background:rgba(255,255,255,.92)!important;border-bottom:1px solid var(--v14-line)!important;box-shadow:0 1px 12px rgba(15,23,42,.06)!important;backdrop-filter:blur(18px)!important}
+.v12HeaderBrand h1{color:#111827!important;letter-spacing:-.35px!important}.v12HeaderBrand span{color:#8a6b14!important}
+.v12LogoBox{background:#111827!important;border-color:#d5b04b!important;box-shadow:none!important}
+.v12HeaderDate,.v12SaveBadge,.v12GoogleBadge{background:#fff!important;border-color:var(--v14-line)!important;color:#111827!important;box-shadow:none!important}
+.v12HeaderDate small,.v12HeaderDate b,.v12SaveBadge b{color:#111827!important}.v12HeaderDate span{filter:none!important}
+.v12SaveBadge small,.v12GoogleBadge small{color:var(--v14-muted)!important}
+.v12GoogleApps button,.v12IconButton,.v12PowerButton{background:#fff!important;border:1px solid var(--v14-line)!important;color:#111827!important;box-shadow:none!important}
+.v12GoogleApps button:hover,.v12IconButton:hover{background:#f8fafc!important;border-color:#cbd5e1!important}
+.v12PowerButton{background:#111827!important;color:#fff!important;border-color:#111827!important}
+.appShell{grid-template-columns:232px minmax(0,1fr) 240px!important;gap:16px!important;max-width:1760px!important;padding:16px!important}
+.appSidebar,.appRightbar .rightPanel,.appContent{background:var(--v14-surface)!important;border:1px solid var(--v14-line)!important;box-shadow:var(--v14-shadow)!important}
+.appSidebar{border-radius:20px!important;padding:12px!important}.appContent{border-radius:22px!important;padding:20px!important}.appRightbar .rightPanel{border-radius:18px!important}
+#nav button{color:#374151!important;background:transparent!important;border:1px solid transparent!important}
+#nav button:hover{background:#f6f7f9!important;border-color:#eceff2!important;transform:none!important}
+#nav button.active,#nav button[aria-current="page"]{background:#111827!important;color:#fff!important;border-color:#111827!important}
+#nav .navTitle{color:inherit!important;font-weight:700!important}.navIcon{background:#f3f4f6!important;border:1px solid #e5e7eb!important}
+.appContent .card,.dashboardPanel,.todayPanel,.dashboardKpi,.v12StatusCard{background:#fff!important;border:1px solid var(--v14-line)!important;box-shadow:0 8px 24px rgba(15,23,42,.055)!important;color:var(--v14-text)!important}
+.card h3,.dashboardPanel h3,.todayPanel h3,.dashboardTitle h2,.v12AtelierTitle h2{color:#111827!important}
+.muted,.dashboardDate,.dashboardKpiLabel{color:var(--v14-muted)!important}
+.v12AtelierTitle{background:linear-gradient(135deg,#ffffff,#fafafa)!important;border:1px solid var(--v14-line)!important;border-radius:22px!important;padding:22px!important;box-shadow:var(--v14-shadow)!important}
+.v12TopQuick{background:#f8fafc!important;border:1px solid var(--v14-line)!important;border-radius:16px!important}
+.v12TopQuickTitle{color:#374151!important}.v12TopQuickActions button{background:#fff!important;color:#111827!important;border:1px solid var(--v14-line)!important;box-shadow:none!important}
+.v12TopQuickActions button.primary{background:#111827!important;color:#fff!important;border-color:#111827!important}
+.v12TopQuickActions button:hover{transform:translateY(-1px)!important;box-shadow:0 8px 20px rgba(15,23,42,.08)!important}
+.v12StatusCard{border-radius:18px!important}.v12StatusCard small,.v12StatusCard em{color:var(--v14-muted)!important}.v12StatusCard b{color:#111827!important}
+input,select,textarea{background:#fff!important;color:#111827!important;border:1px solid #d8dde5!important;box-shadow:inset 0 1px 2px rgba(15,23,42,.025)!important}
+input:focus,select:focus,textarea:focus{outline:3px solid rgba(37,99,235,.12)!important;border-color:#7aa2ef!important}
+button{font-family:inherit}.primary{background:#111827!important;color:#fff!important;border-color:#111827!important;box-shadow:none!important}.primary:hover{background:#000!important}
+table{background:#fff!important;color:#111827!important;border:1px solid var(--v14-line)!important}th{background:#f8fafc!important;color:#374151!important;border-color:var(--v14-line)!important}td{border-color:var(--v14-line)!important}
+.rightPanel h3{color:#111827!important}.socialRightList button{background:#fff!important;border:1px solid var(--v14-line)!important;color:#111827!important}.socialRightList button:hover{background:#f8fafc!important;border-color:#d1d5db!important}
+#moduleBar{background:#fff!important;border:1px solid var(--v14-line)!important;color:#111827!important}.moduleTitle{color:#111827!important}
+.autoSaveBadge{background:#fff!important;color:#166534!important;border:1px solid #bbf7d0!important;box-shadow:0 8px 22px rgba(15,23,42,.08)!important}
+
+.v14GoogleModule{margin:14px 0;background:#fff;border:1px solid var(--v14-line);border-radius:22px;padding:18px 20px;box-shadow:var(--v14-shadow)}
+.v14GoogleHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.v14GoogleHead h3{margin:3px 0 3px;color:#111827;font-size:19px}.v14GoogleHead p{margin:0;color:var(--v14-muted);font-size:12px}.v14Eyebrow{font-size:10px;letter-spacing:1.4px;font-weight:800;color:#8a6b14}.v14GoogleAccount{padding:7px 10px;border-radius:999px;background:#f8fafc;border:1px solid var(--v14-line);color:#64748b;font-size:11px;white-space:nowrap}
+.v14GoogleGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.v14GoogleGrid button{min-height:70px;display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:10px;text-align:left;background:#fbfbfc!important;border:1px solid var(--v14-line)!important;border-radius:15px!important;padding:11px 12px!important;color:#111827!important;box-shadow:none!important}.v14GoogleGrid button:hover{background:#fff!important;border-color:#cbd5e1!important;transform:translateY(-1px)!important;box-shadow:0 10px 22px rgba(15,23,42,.07)!important}.v14GoogleIcon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#fff;border:1px solid var(--v14-line);font-size:20px}.v14GoogleGrid b{display:block;font-size:13px}.v14GoogleGrid small{display:block;color:var(--v14-muted);font-size:10px;margin-top:2px}.v14GoogleGrid em{font-style:normal;color:#9ca3af;font-size:14px}
+.lock{background:radial-gradient(circle at 50% 15%,#eef2f7,#dfe4eb)!important}.lockbox{background:rgba(255,255,255,.96)!important;border:1px solid #d8dde5!important;box-shadow:0 30px 90px rgba(15,23,42,.16)!important;color:#111827!important}.loginPremiumTitle{color:#111827!important}.loginSlogan{color:#374151!important;text-shadow:none!important}.loginSlogan strong{color:#8a6b14!important}.loginInstruction,.lockbox .loginHint{color:#6b7280!important}.loginField select,.loginField input{background:#fff!important;color:#111827!important;border-color:#d8dde5!important}
+@media(max-width:1250px){.appShell{grid-template-columns:210px minmax(0,1fr)!important}.appRightbar{display:none!important}.v14GoogleGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.appShell{display:block!important;padding:8px!important}.appContent{padding:12px!important;border-radius:16px!important}.v14GoogleHead{display:block}.v14GoogleAccount{display:inline-block;margin-top:10px}.v14GoogleGrid{grid-template-columns:1fr}.v12AtelierTitle{padding:15px!important}}
 </style></head><body><div class="print-root">${printable.innerHTML}</div><script>
     (function(){
       function fit(){
