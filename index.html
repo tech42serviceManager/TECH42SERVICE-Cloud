@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — ÉLÉGANCE 2</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TECH42SERVICE V12 PRO — INTERFACE PRO 01</title>
 <meta name="theme-color" content="#d4af37">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1230,6 +1230,48 @@ table{border:1px solid var(--pro-line)!important;border-radius:11px!important;ov
 @media(max-width:620px){
   .v12TopQuickActions{grid-template-columns:repeat(2,1fr)}
 }
+
+
+/* V12 PRO — INTERFACE PRO 01 — visuel uniquement */
+:root{--pbg:#0a0b0c;--ps:#121416;--pl:#2a2f33;--pg:#c6a452;--pg2:#e0c97f;--pt:#f3f4f4;--pm:#98a0a6}
+body{font-family:Segoe UI,Arial,sans-serif!important;background:linear-gradient(180deg,#090a0b,#0b0d0e)!important;color:var(--pt)!important}
+.v12Header,header{min-height:66px!important;padding:9px 14px!important;background:#0a0b0c!important;border-bottom:1px solid #322b19!important;box-shadow:0 8px 20px rgba(0,0,0,.25)!important}
+.v12HeaderBrand h1,header h1{color:var(--pg2)!important;font-size:18px!important;font-weight:800!important;letter-spacing:.035em!important}
+.v12LogoBox,.brandmark{width:42px!important;height:42px!important;border-radius:10px!important;border:1px solid #6b5828!important;background:#0b0d0e!important;box-shadow:none!important}
+.appShell{max-width:1780px!important;grid-template-columns:200px minmax(0,1fr) 240px!important;gap:10px!important;padding:10px!important}
+.appSidebar{top:78px!important;max-height:calc(100vh - 88px)!important;padding:8px!important;border-radius:12px!important;border:1px solid var(--pl)!important;background:#0d0f10!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
+#nav{gap:3px!important}
+#nav button{min-height:38px!important;height:38px!important;padding:4px 7px!important;gap:7px!important;border-radius:7px!important;border:1px solid transparent!important;background:transparent!important;box-shadow:none!important}
+#nav button:hover{background:#171a1c!important;border-color:#3b3421!important;transform:none!important}
+#nav .navIcon{width:25px!important;min-width:25px!important;height:25px!important;flex-basis:25px!important;border-radius:7px!important;font-size:14px!important;background:#1a1d20!important;border:1px solid #30353a!important}
+#nav .navTitle{font-size:11px!important;color:#e8e9e9!important;font-weight:700!important}
+.appContent{min-height:calc(100vh - 88px)!important;padding:12px!important;border-radius:12px!important;border:1px solid var(--pl)!important;background:#0d0f10!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
+.v12AtelierTitle{padding:2px 0 10px!important;margin-bottom:9px!important;border-bottom:1px solid #202427!important}
+.v12AtelierTitle h2{color:var(--pg2)!important;font-size:22px!important;font-weight:750!important}
+.v12AtelierTitle p{color:var(--pm)!important;font-size:11px!important}
+.v12TopQuick{padding:7px 8px!important;border-radius:10px!important;border:1px solid var(--pl)!important;background:#111315!important}
+.v12TopQuickActions button{min-height:38px!important;padding:5px 7px!important;border-radius:7px!important;border:1px solid #30353a!important;background:#16191b!important;font-size:9.5px!important}
+.v12TopQuickActions button.primary{background:#b3913a!important;border-color:#c8aa59!important;color:#0b0c0d!important}
+.v12StatusRow{padding:7px!important;gap:6px!important;margin-bottom:9px!important;border-radius:11px!important;border:1px solid var(--pl)!important;background:#0d0f10!important;box-shadow:none!important}
+.v12StatusCard{min-height:74px!important;padding:9px!important;gap:8px!important;border-radius:9px!important;border:1px solid var(--pl)!important;background:#131618!important;box-shadow:none!important}
+.v12StatusCard:hover{transform:none!important;background:#181b1e!important;border-color:#4b4126!important}
+.v12StatusCard .icon{width:32px!important;height:32px!important;border-radius:8px!important;background:#0d0f10!important;border:1px solid #2d3236!important;font-size:17px!important}
+.v12StatusCard b{font-size:20px!important}.v12StatusCard small{font-size:9px!important;color:#b6b8b8!important}.v12StatusCard em{font-size:8px!important;color:#7f868b!important}
+.v12CenterGrid{gap:8px!important;margin-bottom:9px!important}
+.v12DashboardPanel{min-height:285px!important;border-radius:11px!important;border:1px solid var(--pl)!important;background:#111315!important;box-shadow:none!important}
+.v12PanelHeader{min-height:52px!important;padding:9px 11px!important;border-bottom:1px solid #202427!important;background:#141719!important}
+.v12PanelHeader h3{color:#ece7d6!important;font-size:12.5px!important}
+.v12PanelContent{padding:8px!important}.v12PanelFooter{min-height:34px!important;background:#0e1012!important;border-top:1px solid #202427!important;color:#bfa34e!important}
+.appRightbar{top:78px!important;max-height:calc(100vh - 88px)!important;gap:8px!important}
+.appRightbar .rightPanel{padding:10px!important;border-radius:12px!important;border:1px solid var(--pl)!important;background:#101214!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
+.v12RightGoogleList button,.socialRightList button{min-height:42px!important;padding:6px 7px!important;border-radius:8px!important;border:1px solid var(--pl)!important;background:#15181a!important}
+.v12RightGoogleList button:hover,.socialRightList button:hover{transform:none!important;background:#191d1f!important;border-color:#4b4126!important}
+.card{padding:14px!important;border-radius:12px!important;border:1px solid var(--pl)!important;background:#111315!important;box-shadow:none!important}
+button{border-radius:8px!important;box-shadow:none!important}
+input,select,textarea{min-height:42px!important;border-radius:8px!important;border-color:#31363a!important;background:#0c0e0f!important}
+table{border-radius:9px!important;overflow:hidden!important;border:1px solid var(--pl)!important;background:#0d0f10!important}
+th{background:#131618!important;color:#d9c582!important;font-size:11px!important}
+td{border-bottom-color:#25292c!important}
 
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
