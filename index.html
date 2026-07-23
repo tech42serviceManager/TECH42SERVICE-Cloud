@@ -1323,14 +1323,13 @@ table{border:1px solid var(--s-line)!important;border-radius:9px!important;overf
     </div>
 
     <div class="v12GoogleApps">
-      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')" title="Gmail">✉️</button>
-      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')" title="Google Agenda">📅</button>
+      <button onclick="window.open('https://mail.google.com/mail/?authuser=tech42service@gmail.com','_blank')" title="Gmail">✉️</button>
+      <button onclick="window.open('https://calendar.google.com/calendar/u/0/r?authuser=tech42service@gmail.com','_blank')" title="Google Agenda">📅</button>
       <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')" title="Google Drive">🔺</button>
       <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')" title="Google Contacts">👥</button>
     </div>
 
     <button class="v12IconButton" onclick="show('settings')" title="Paramètres">⚙️</button>
-    <button class="v12IconButton" onclick="alert('Aide TECH42SERVICE bientôt disponible.')" title="Aide">❔</button>
     <button class="v12PowerButton" onclick="logout()" title="Déconnexion">⏻</button>
   </div>
 </header>
@@ -1610,22 +1609,6 @@ table{border:1px solid var(--s-line)!important;border-radius:9px!important;overf
 </main></div>
 
 <aside class="appRightbar">
-  <div class="rightPanel v12RightGoogle">
-    <div class="rightPanelHead">
-      <div>
-        <h3><span class="googleG">G</span> Google</h3>
-        <div class="muted">Raccourcis rapides</div>
-      </div>
-    </div>
-    <div class="v12RightGoogleList">
-      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')"><span>✉️</span><div><b>Gmail</b><small>Messagerie<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous Google<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')"><span>🔺</span><div><b>Google Drive</b><small>Fichiers cloud<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')"><span>👥</span><div><b>Contacts</b><small>Carnet Google<br>tech42service@gmail.com</small></div></button>
-      <button class="v12AllGoogle" onclick="window.open('https://www.google.com/intl/fr/about/products/','_blank')">Tous les services Google →</button>
-    </div>
-  </div>
-
   <div class="rightPanel">
     <div class="rightPanelHead">
       <div>
@@ -2961,7 +2944,7 @@ function clearAgenda(){['ag_i','ag_title','ag_date','ag_time','ag_client','ag_te
 function saveAgenda(){if(!val('ag_title')){alert('Indiquez un titre.');return}let i=val('ag_i'),o={title:val('ag_title'),date:val('ag_date')||today(),time:val('ag_time'),type:val('ag_type'),client:val('ag_client'),tel:val('ag_tel'),notes:val('ag_notes')};if(i==='')db.agenda.push(o);else db.agenda[+i]=o;clearAgenda();save('Agenda : '+o.title)}
 function editAgenda(i){let a=db.agenda[i];setv('ag_i',i);Object.keys(a).forEach(k=>setv('ag_'+k,a[k]));show('agenda')}
 function delAgenda(i){if(confirm('Supprimer ce rendez-vous ?')){db.agenda.splice(i,1);save('Événement agenda supprimé')}}
-function googleAgendaUrl(a){let start=(a.date||today()).replaceAll('-','')+'T'+(a.time||'09:00').replace(':','')+'00';let end=(a.date||today()).replaceAll('-','')+'T'+String(Number((a.time||'09:00').slice(0,2))+1).padStart(2,'0')+(a.time||'09:00').slice(3,5)+'00';return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(a.title)+'&dates='+start+'/'+end+'&details='+encodeURIComponent((a.type||'')+'\n'+(a.client||'')+'\n'+(a.notes||''))}
+function googleAgendaUrl(a){let start=(a.date||today()).replaceAll('-','')+'T'+(a.time||'09:00').replace(':','')+'00';let end=(a.date||today()).replaceAll('-','')+'T'+String(Number((a.time||'09:00').slice(0,2))+1).padStart(2,'0')+(a.time||'09:00').slice(3,5)+'00';return 'https://calendar.google.com/calendar/render?action=TEMPLATE&authuser=tech42service@gmail.com&text='+encodeURIComponent(a.title)+'&dates='+start+'/'+end+'&details='+encodeURIComponent((a.type||'')+'\n'+(a.client||'')+'\n'+(a.notes||''))}
 function openGoogleAgenda(i){let a=typeof i==='number'?db.agenda[i]:{title:val('ag_title')||'Rendez-vous TECH42SERVICE',date:val('ag_date')||today(),time:val('ag_time')||'09:00',type:val('ag_type'),client:val('ag_client'),notes:val('ag_notes')};window.open(googleAgendaUrl(a),'_blank')}
 function renderAgenda(){if(!$('agendaView'))return;let arr=db.agenda.map((a,i)=>({...a,i})).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));if(agendaMode==='list'){$('agendaView').innerHTML='<table><thead><tr><th>Date</th><th>Heure</th><th>Type</th><th>Objet</th><th>Client</th><th>Actions</th></tr></thead><tbody>'+arr.map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.time)}</td><td>${esc(a.type)}</td><td>${esc(a.title)}</td><td>${esc(a.client||'')}</td><td><button class="small" onclick="editAgenda(${a.i})">Modifier</button> <button class="small" onclick="openGoogleAgenda(${a.i})">Google</button> <button class="small danger" onclick="delAgenda(${a.i})">X</button></td></tr>`).join('')+'</tbody></table>';return}let d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));let days7=[...Array(7)].map((_,j)=>{let x=new Date(d);x.setDate(d.getDate()+j);return x.toISOString().slice(0,10)});$('agendaView').innerHTML='<div class="calendarGrid">'+days7.map(date=>`<div class="calendarDay"><b>${new Date(date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})}</b>${arr.filter(a=>a.date===date).map(a=>`<div class="eventItem">${esc(a.time)} ${esc(a.title)}</div>`).join('')}</div>`).join('')+'</div>'}
 function newSheet(){currentSheetIndex=-1;sheetData=[['Colonne A','Colonne B','Colonne C'],['','','']];setv('sheet_name','Nouveau tableau');renderSheetTable()}
