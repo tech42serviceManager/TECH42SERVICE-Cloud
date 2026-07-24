@@ -89,6 +89,24 @@
     .notice{padding:10px;border-radius:9px;background:#0e2515;color:#74ef8b;margin-top:12px}
     .demo-banner{padding:12px;margin-bottom:18px;border:1px solid #8a6b00;border-radius:10px;background:#241d00;color:#ffd95a;text-align:center;font-weight:800}.readonly-note{padding:12px;border:1px solid #574515;border-radius:10px;background:#1c1708;color:#ffd769;margin-bottom:18px}
     .page-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .repair-toolbar{display:grid;grid-template-columns:1fr 220px;gap:12px;margin-bottom:14px}
+    .repair-toolbar input,.repair-toolbar select{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .table-wrap{overflow:auto}
+    .table-actions{display:flex;gap:7px;flex-wrap:wrap}
+    .mini-btn{padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
+    .mini-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .mini-btn.danger{border-color:#6e2424;color:#ff7777}
+    .repair-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .repair-details .full{grid-column:1/-1}
+    .detail-box{background:#101010;border:1px solid #2c2c2c;border-radius:9px;padding:10px}
+    .detail-box small{display:block;color:var(--muted);margin-bottom:4px}
+    .modal-backdrop{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:18px;z-index:50}
+    .modal-card{width:min(850px,100%);max-height:90vh;overflow:auto;background:#101010;border:1px solid var(--border);border-radius:15px;padding:20px}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:15px}
+    .modal-head h2{margin:0}
+    .close-btn{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 11px;cursor:pointer}
     .action-btn{padding:11px 14px;border:0;border-radius:9px;background:var(--accent);color:#080808;font-weight:800;cursor:pointer}
     .action-btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
     .repair-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -111,7 +129,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -192,12 +210,11 @@
         </section>
       </section>
 
-
       <section id="repairsPage" class="hidden">
         <header class="topbar">
           <div>
             <h1>Réparations</h1>
-            <p>Gestion des dossiers de réparation</p>
+            <p>Gestion complète des dossiers de réparation</p>
           </div>
         </header>
 
@@ -212,6 +229,8 @@
           </div>
 
           <form id="repairForm" class="repair-form hidden">
+            <input id="repairEditId" type="hidden">
+
             <div class="field">
               <label>Client</label>
               <input id="repairClient" type="text" required>
@@ -220,29 +239,48 @@
               <label>Téléphone</label>
               <input id="repairPhone" type="tel">
             </div>
+
             <div class="field">
-              <label>Appareil</label>
+              <label>Type d'appareil</label>
               <select id="repairDevice" required>
                 <option value="">Choisir</option>
                 <option>Téléphone</option>
                 <option>Tablette</option>
-                <option>PC</option>
+                <option>Ordinateur</option>
                 <option>Console</option>
+                <option>Autre</option>
               </select>
             </div>
             <div class="field">
-              <label>Marque / Modèle</label>
+              <label>Marque</label>
+              <input id="repairBrand" type="text" required>
+            </div>
+
+            <div class="field">
+              <label>Modèle</label>
               <input id="repairModel" type="text" required>
             </div>
+            <div class="field">
+              <label>IMEI / N° de série</label>
+              <input id="repairSerial" type="text">
+            </div>
+
             <div class="field full">
               <label>Panne déclarée</label>
               <textarea id="repairIssue" required></textarea>
             </div>
+
+            <div class="field full">
+              <label>Diagnostic</label>
+              <textarea id="repairDiagnosis"></textarea>
+            </div>
+
             <div class="field">
               <label>Statut</label>
               <select id="repairStatus">
                 <option>En attente</option>
                 <option>Diagnostic</option>
+                <option>Pièce commandée</option>
                 <option>En réparation</option>
                 <option>Terminé</option>
                 <option>Restitué</option>
@@ -252,26 +290,74 @@
               <label>Prix estimé (€)</label>
               <input id="repairPrice" type="number" min="0" step="0.01">
             </div>
+
+            <div class="field">
+              <label>Acompte (€)</label>
+              <input id="repairDeposit" type="number" min="0" step="0.01">
+            </div>
+            <div class="field">
+              <label>Date de dépôt</label>
+              <input id="repairDepositDate" type="date" required>
+            </div>
+
+            <div class="field">
+              <label>Date prévue</label>
+              <input id="repairDueDate" type="date">
+            </div>
+            <div class="field">
+              <label>Pièces utilisées</label>
+              <input id="repairParts" type="text" placeholder="Ex. écran OLED, batterie...">
+            </div>
+
             <div class="full">
-              <button class="save-btn" type="submit">Enregistrer la réparation</button>
+              <button id="saveRepairBtn" class="save-btn" type="submit">Enregistrer la réparation</button>
             </div>
           </form>
 
-          <table class="repair-table">
-            <thead>
-              <tr>
-                <th>Dossier</th>
-                <th>Client</th>
-                <th>Appareil</th>
-                <th>Panne</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody id="repairTableBody"></tbody>
-          </table>
+          <div class="repair-toolbar">
+            <input id="repairSearch" type="search" placeholder="Rechercher un dossier, client, téléphone, appareil...">
+            <select id="repairFilter">
+              <option value="">Tous les statuts</option>
+              <option>En attente</option>
+              <option>Diagnostic</option>
+              <option>Pièce commandée</option>
+              <option>En réparation</option>
+              <option>Terminé</option>
+              <option>Restitué</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table class="repair-table">
+              <thead>
+                <tr>
+                  <th>Dossier</th>
+                  <th>Client</th>
+                  <th>Appareil</th>
+                  <th>Panne</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="repairTableBody"></tbody>
+            </table>
+          </div>
           <div id="repairEmpty" class="empty-state">Aucune réparation enregistrée.</div>
         </section>
       </section>
+
+      <div id="repairModal" class="modal-backdrop hidden">
+        <div class="modal-card">
+          <div class="modal-head">
+            <h2 id="repairModalTitle">Dossier de réparation</h2>
+            <button id="closeRepairModal" class="close-btn">Fermer</button>
+          </div>
+          <div id="repairModalContent" class="repair-details"></div>
+          <div class="page-actions" style="margin-top:16px">
+            <button id="printRepairBtn" class="action-btn">Imprimer la prise en charge</button>
+          </div>
+        </div>
+      </div>
 
       <section id="settingsPage" class="hidden">
         <header class="topbar">
@@ -333,7 +419,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V4 réparations</footer>
+      <footer>TECH42SERVICE Gestion — V5 réparations complet</footer>
     </main>
   </div>
 
@@ -482,77 +568,309 @@
       event.target.reset();
     });
 
-
     const demoRepairs = [
-      {id:"REP-2026-001",client:"Jean Martin",device:"iPhone 13",issue:"Écran cassé",status:"En réparation"},
-      {id:"REP-2026-002",client:"Sophie Bernard",device:"PC Asus",issue:"Ne démarre plus",status:"Diagnostic"},
-      {id:"REP-2026-003",client:"Lucas Petit",device:"PS5",issue:"Port HDMI endommagé",status:"En attente"}
+      {
+        id:"REP-2026-0001", client:"Jean Martin", phone:"06 12 34 56 78",
+        deviceType:"Téléphone", brand:"Apple", model:"iPhone 13", serial:"356789012345678",
+        issue:"Écran cassé et tactile instable", diagnosis:"Écran OLED à remplacer",
+        status:"En réparation", price:"189", deposit:"50",
+        depositDate:"2026-07-22", dueDate:"2026-07-26", parts:"Écran OLED"
+      },
+      {
+        id:"REP-2026-0002", client:"Sophie Bernard", phone:"06 44 22 18 90",
+        deviceType:"Ordinateur", brand:"Asus", model:"VivoBook 15", serial:"ASU-88421",
+        issue:"Ne démarre plus", diagnosis:"Diagnostic alimentation en cours",
+        status:"Diagnostic", price:"79", deposit:"0",
+        depositDate:"2026-07-23", dueDate:"2026-07-29", parts:""
+      },
+      {
+        id:"REP-2026-0003", client:"Lucas Petit", phone:"07 61 82 40 11",
+        deviceType:"Console", brand:"Sony", model:"PlayStation 5", serial:"PS5-240711",
+        issue:"Port HDMI endommagé", diagnosis:"Remplacement du connecteur HDMI",
+        status:"Pièce commandée", price:"129", deposit:"40",
+        depositDate:"2026-07-24", dueDate:"2026-07-31", parts:"Connecteur HDMI"
+      }
     ];
 
     function getAdminRepairs(){
-      try{return JSON.parse(localStorage.getItem("tech42-repairs") || "[]")}catch{return []}
+      try{
+        return JSON.parse(localStorage.getItem("tech42-repairs") || "[]");
+      }catch{
+        return [];
+      }
     }
 
     function saveAdminRepairs(list){
       localStorage.setItem("tech42-repairs", JSON.stringify(list));
     }
 
+    function currentRepairList(){
+      return activeRole === "visuel" ? demoRepairs : getAdminRepairs();
+    }
+
+    function formatDate(value){
+      if(!value) return "—";
+      return new Date(value + "T00:00:00").toLocaleDateString("fr-FR");
+    }
+
+    function escapeHtml(value){
+      return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
+
+    function filteredRepairs(){
+      const search = document.getElementById("repairSearch").value.trim().toLowerCase();
+      const filter = document.getElementById("repairFilter").value;
+
+      return currentRepairList().filter(item => {
+        const text = [
+          item.id,item.client,item.phone,item.deviceType,item.brand,item.model,
+          item.serial,item.issue,item.diagnosis,item.status,item.parts
+        ].join(" ").toLowerCase();
+
+        return (!search || text.includes(search)) && (!filter || item.status === filter);
+      });
+    }
+
     function renderRepairs(){
       const tbody = document.getElementById("repairTableBody");
       const empty = document.getElementById("repairEmpty");
-      const list = activeRole === "visuel" ? demoRepairs : getAdminRepairs();
+      const list = filteredRepairs();
 
       tbody.innerHTML = "";
+
       list.forEach(item => {
         const tr = document.createElement("tr");
+        const adminActions = activeRole === "admin"
+          ? `<button class="mini-btn" data-edit="${escapeHtml(item.id)}">Modifier</button>
+             <button class="mini-btn danger" data-delete="${escapeHtml(item.id)}">Supprimer</button>`
+          : "";
+
         tr.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.client}</td>
-          <td>${item.device}</td>
-          <td>${item.issue}</td>
-          <td><span class="status">${item.status}</span></td>
+          <td>${escapeHtml(item.id)}</td>
+          <td>${escapeHtml(item.client)}<br><small>${escapeHtml(item.phone || "")}</small></td>
+          <td>${escapeHtml(item.brand)} ${escapeHtml(item.model)}</td>
+          <td>${escapeHtml(item.issue)}</td>
+          <td><span class="status">${escapeHtml(item.status)}</span></td>
+          <td>
+            <div class="table-actions">
+              <button class="mini-btn" data-view="${escapeHtml(item.id)}">Voir</button>
+              ${adminActions}
+            </div>
+          </td>
         `;
         tbody.appendChild(tr);
       });
 
       empty.classList.toggle("hidden", list.length > 0);
+
+      tbody.querySelectorAll("[data-view]").forEach(btn => {
+        btn.addEventListener("click", () => openRepairDetails(btn.dataset.view));
+      });
+
+      tbody.querySelectorAll("[data-edit]").forEach(btn => {
+        btn.addEventListener("click", () => editRepair(btn.dataset.edit));
+      });
+
+      tbody.querySelectorAll("[data-delete]").forEach(btn => {
+        btn.addEventListener("click", () => deleteRepair(btn.dataset.delete));
+      });
     }
 
-    document.getElementById("newRepairBtn").addEventListener("click", () => {
-      if(activeRole === "visuel"){
+    function resetRepairForm(){
+      document.getElementById("repairForm").reset();
+      document.getElementById("repairEditId").value = "";
+      document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("saveRepairBtn").textContent = "Enregistrer la réparation";
+    }
+
+    function showRepairForm(){
+      if(activeRole !== "admin"){
         alert("Action impossible en mode présentation.");
         return;
       }
       document.getElementById("repairForm").classList.remove("hidden");
       document.getElementById("cancelRepairBtn").classList.remove("hidden");
-    });
+    }
 
-    document.getElementById("cancelRepairBtn").addEventListener("click", () => {
+    function hideRepairForm(){
       document.getElementById("repairForm").classList.add("hidden");
       document.getElementById("cancelRepairBtn").classList.add("hidden");
-      document.getElementById("repairForm").reset();
+      resetRepairForm();
+    }
+
+    function nextRepairId(list){
+      const year = new Date().getFullYear();
+      const max = list.reduce((highest,item) => {
+        const match = String(item.id).match(/(\d+)$/);
+        return Math.max(highest, match ? Number(match[1]) : 0);
+      },0);
+      return `REP-${year}-${String(max + 1).padStart(4,"0")}`;
+    }
+
+    document.getElementById("newRepairBtn").addEventListener("click", () => {
+      resetRepairForm();
+      showRepairForm();
     });
+
+    document.getElementById("cancelRepairBtn").addEventListener("click", hideRepairForm);
+
+    document.getElementById("repairSearch").addEventListener("input", renderRepairs);
+    document.getElementById("repairFilter").addEventListener("change", renderRepairs);
 
     document.getElementById("repairForm").addEventListener("submit", (event) => {
       event.preventDefault();
       if(activeRole !== "admin") return;
 
       const list = getAdminRepairs();
-      const id = "REP-" + new Date().getFullYear() + "-" + String(list.length + 1).padStart(3,"0");
-      list.unshift({
-        id,
+      const editId = document.getElementById("repairEditId").value;
+      const item = {
+        id: editId || nextRepairId(list),
         client: document.getElementById("repairClient").value.trim(),
         phone: document.getElementById("repairPhone").value.trim(),
-        device: document.getElementById("repairDevice").value + " " + document.getElementById("repairModel").value.trim(),
+        deviceType: document.getElementById("repairDevice").value,
+        brand: document.getElementById("repairBrand").value.trim(),
+        model: document.getElementById("repairModel").value.trim(),
+        serial: document.getElementById("repairSerial").value.trim(),
         issue: document.getElementById("repairIssue").value.trim(),
+        diagnosis: document.getElementById("repairDiagnosis").value.trim(),
         status: document.getElementById("repairStatus").value,
-        price: document.getElementById("repairPrice").value
-      });
+        price: document.getElementById("repairPrice").value,
+        deposit: document.getElementById("repairDeposit").value,
+        depositDate: document.getElementById("repairDepositDate").value,
+        dueDate: document.getElementById("repairDueDate").value,
+        parts: document.getElementById("repairParts").value.trim()
+      };
+
+      if(editId){
+        const index = list.findIndex(r => r.id === editId);
+        if(index !== -1) list[index] = item;
+      }else{
+        list.unshift(item);
+      }
+
       saveAdminRepairs(list);
-      event.target.reset();
-      event.target.classList.add("hidden");
-      document.getElementById("cancelRepairBtn").classList.add("hidden");
+      hideRepairForm();
       renderRepairs();
+    });
+
+    function editRepair(id){
+      if(activeRole !== "admin") return;
+      const item = getAdminRepairs().find(r => r.id === id);
+      if(!item) return;
+
+      document.getElementById("repairEditId").value = item.id;
+      document.getElementById("repairClient").value = item.client || "";
+      document.getElementById("repairPhone").value = item.phone || "";
+      document.getElementById("repairDevice").value = item.deviceType || "";
+      document.getElementById("repairBrand").value = item.brand || "";
+      document.getElementById("repairModel").value = item.model || "";
+      document.getElementById("repairSerial").value = item.serial || "";
+      document.getElementById("repairIssue").value = item.issue || "";
+      document.getElementById("repairDiagnosis").value = item.diagnosis || "";
+      document.getElementById("repairStatus").value = item.status || "En attente";
+      document.getElementById("repairPrice").value = item.price || "";
+      document.getElementById("repairDeposit").value = item.deposit || "";
+      document.getElementById("repairDepositDate").value = item.depositDate || "";
+      document.getElementById("repairDueDate").value = item.dueDate || "";
+      document.getElementById("repairParts").value = item.parts || "";
+      document.getElementById("saveRepairBtn").textContent = "Enregistrer les modifications";
+      showRepairForm();
+      document.getElementById("repairForm").scrollIntoView({behavior:"smooth"});
+    }
+
+    function deleteRepair(id){
+      if(activeRole !== "admin") return;
+      if(!confirm("Supprimer définitivement ce dossier ?")) return;
+      saveAdminRepairs(getAdminRepairs().filter(r => r.id !== id));
+      renderRepairs();
+    }
+
+    let openedRepairId = null;
+
+    function openRepairDetails(id){
+      const item = currentRepairList().find(r => r.id === id);
+      if(!item) return;
+
+      openedRepairId = id;
+      document.getElementById("repairModalTitle").textContent = `Dossier ${item.id}`;
+      document.getElementById("repairModalContent").innerHTML = `
+        <div class="detail-box"><small>Client</small>${escapeHtml(item.client)}</div>
+        <div class="detail-box"><small>Téléphone</small>${escapeHtml(item.phone || "—")}</div>
+        <div class="detail-box"><small>Appareil</small>${escapeHtml(item.deviceType)} — ${escapeHtml(item.brand)} ${escapeHtml(item.model)}</div>
+        <div class="detail-box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
+        <div class="detail-box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
+        <div class="detail-box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
+        <div class="detail-box"><small>Statut</small>${escapeHtml(item.status)}</div>
+        <div class="detail-box"><small>Pièces utilisées</small>${escapeHtml(item.parts || "—")}</div>
+        <div class="detail-box"><small>Prix estimé</small>${escapeHtml(item.price || "0")} €</div>
+        <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
+        <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
+        <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+      `;
+      document.getElementById("repairModal").classList.remove("hidden");
+    }
+
+    document.getElementById("closeRepairModal").addEventListener("click", () => {
+      document.getElementById("repairModal").classList.add("hidden");
+    });
+
+    document.getElementById("repairModal").addEventListener("click", event => {
+      if(event.target.id === "repairModal"){
+        document.getElementById("repairModal").classList.add("hidden");
+      }
+    });
+
+    document.getElementById("printRepairBtn").addEventListener("click", () => {
+      const item = currentRepairList().find(r => r.id === openedRepairId);
+      if(!item) return;
+
+      const printWindow = window.open("", "_blank", "width=900,height=700");
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <title>${escapeHtml(item.id)}</title>
+          <style>
+            body{font-family:Arial,sans-serif;padding:35px;color:#111}
+            h1{margin-bottom:4px}
+            .sub{color:#555;margin-bottom:25px}
+            .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+            .box{border:1px solid #bbb;border-radius:8px;padding:10px}
+            .full{grid-column:1/-1}
+            small{display:block;color:#666;margin-bottom:4px}
+            .signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:60px}
+            .signature{border-top:1px solid #333;padding-top:8px}
+          </style>
+        </head>
+        <body>
+          <h1>TECH42SERVICE</h1>
+          <div class="sub">Fiche de prise en charge — ${escapeHtml(item.id)}</div>
+          <div class="grid">
+            <div class="box"><small>Client</small>${escapeHtml(item.client)}</div>
+            <div class="box"><small>Téléphone</small>${escapeHtml(item.phone || "—")}</div>
+            <div class="box"><small>Appareil</small>${escapeHtml(item.deviceType)} — ${escapeHtml(item.brand)} ${escapeHtml(item.model)}</div>
+            <div class="box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
+            <div class="box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
+            <div class="box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
+            <div class="box"><small>Prix estimé</small>${escapeHtml(item.price || "0")} €</div>
+            <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
+            <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
+            <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+          </div>
+          <div class="signatures">
+            <div class="signature">Signature du client</div>
+            <div class="signature">Signature TECH42SERVICE</div>
+          </div>
+          <script>window.onload=()=>window.print();<\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     });
 
     const themes = {
