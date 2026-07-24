@@ -2221,7 +2221,27 @@ header h1{font-size:20px;letter-spacing:.4px}
   .headerActions button{padding:6px 8px!important}
 }
 
-</style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`;
+</style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const sel=document.getElementById('profile')||document.querySelector('select');
+ if(!sel) return;
+ function applyDemo(){
+   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
+   if(!demo) return;
+   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
+      if(el===sel) return;
+      if(el.id==='loginBtn'||el.type==='submit') return;
+      if(el.closest('header')) return;
+      el.disabled=true;
+   });
+   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
+ }
+ sel.addEventListener('change',applyDemo);
+});
+</script>
+
+</body></html>`;
   const w=window.open('','_blank','width=700,height=500');if(!w){alert('Autorisez les fenêtres pop-up pour imprimer l’étiquette.');return;}w.document.open();w.document.write(html);w.document.close();
 }
 function fileToDataURL(input){return new Promise(res=>{let f=input&&input.files&&input.files[0];if(!f)return res('');let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)})}
@@ -2544,7 +2564,27 @@ header h1{font-size:20px;letter-spacing:.4px}
       }
       window.addEventListener('load',function(){fit();setTimeout(fit,120)});
     })();
-  <\/script></body></html>`);
+  <\/script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const sel=document.getElementById('profile')||document.querySelector('select');
+ if(!sel) return;
+ function applyDemo(){
+   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
+   if(!demo) return;
+   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
+      if(el===sel) return;
+      if(el.id==='loginBtn'||el.type==='submit') return;
+      if(el.closest('header')) return;
+      el.disabled=true;
+   });
+   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
+ }
+ sel.addEventListener('change',applyDemo);
+});
+</script>
+
+</body></html>`);
   w.document.close();
   w.focus();
   setTimeout(()=>{try{w.print()}catch(e){alert('Impossible de lancer l’impression.')}},650);
@@ -2983,8 +3023,48 @@ function saveWriterDoc(){let title=val('writer_title')||'Document sans titre',ex
 function loadWriter(i){let x=db.writerDocs[i];setv('writer_title',x.title);$('writer_editor').innerHTML=x.html;show('writer')}
 function deleteWriter(i){if(confirm('Supprimer ce document ?')){db.writerDocs.splice(i,1);save('Document texte supprimé')}}
 function renderWriterList(){if(!$('writerList'))return;$('writerList').innerHTML=db.writerDocs.map((x,i)=>`<div class="fileCard"><b>${esc(x.title)}</b><br><span class="muted">${esc(x.updated)}</span><br><button class="small" onclick="loadWriter(${i})">Ouvrir</button> <button class="small danger" onclick="deleteWriter(${i})">Supprimer</button></div>`).join('')||'<p class="muted">Aucun document enregistré.</p>'}
-function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'</body></html>');w.document.close();w.print()}
-function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'</body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
+function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const sel=document.getElementById('profile')||document.querySelector('select');
+ if(!sel) return;
+ function applyDemo(){
+   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
+   if(!demo) return;
+   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
+      if(el===sel) return;
+      if(el.id==='loginBtn'||el.type==='submit') return;
+      if(el.closest('header')) return;
+      el.disabled=true;
+   });
+   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
+ }
+ sel.addEventListener('change',applyDemo);
+});
+</script>
+
+</body></html>');w.document.close();w.print()}
+function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const sel=document.getElementById('profile')||document.querySelector('select');
+ if(!sel) return;
+ function applyDemo(){
+   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
+   if(!demo) return;
+   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
+      if(el===sel) return;
+      if(el.id==='loginBtn'||el.type==='submit') return;
+      if(el.closest('header')) return;
+      el.disabled=true;
+   });
+   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
+ }
+ sel.addEventListener('change',applyDemo);
+});
+</script>
+
+</body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
 function clearContact(){['ct_i','ct_nom','ct_pre','ct_societe','ct_tel','ct_mail','ct_adresse','ct_notes'].forEach(x=>setv(x,''))}
 function saveContact(){if(!val('ct_nom')){alert('Indiquez au minimum un nom.');return}let i=val('ct_i'),o={nom:val('ct_nom'),pre:val('ct_pre'),societe:val('ct_societe'),tel:val('ct_tel'),mail:val('ct_mail'),adresse:val('ct_adresse'),notes:val('ct_notes')};if(i==='')db.contacts.push(o);else db.contacts[+i]=o;clearContact();save('Contact enregistré : '+o.nom+' '+o.pre)}
 function editContact(i){let c=db.contacts[i];setv('ct_i',i);Object.keys(c).forEach(k=>setv('ct_'+k,c[k]));show('contacts')}
@@ -3241,6 +3321,26 @@ window.addEventListener('load',()=>{
       updateSaveBadge('💾 Mode local — cloud indisponible');
     }
   },80);
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const sel=document.getElementById('profile')||document.querySelector('select');
+ if(!sel) return;
+ function applyDemo(){
+   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
+   if(!demo) return;
+   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
+      if(el===sel) return;
+      if(el.id==='loginBtn'||el.type==='submit') return;
+      if(el.closest('header')) return;
+      el.disabled=true;
+   });
+   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
+ }
+ sel.addEventListener('change',applyDemo);
 });
 </script>
 
