@@ -3,329 +3,495 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TECH42SERVICE V15 PHOENIX</title>
+<title>TECH42SERVICE V15</title>
 <style>
 :root{
-  --bg:#050505;--panel:#0d0d0f;--panel2:#151518;--gold:#d8b74c;--gold2:#f4dc85;
-  --text:#f7f3e6;--muted:#aaa27f;--line:#3d341d;--danger:#ef4444;--ok:#22c55e;
+  --bg:#050505;
+  --panel:#0b0d10;
+  --panel2:#111419;
+  --line:#6d5410;
+  --gold:#e4b52f;
+  --gold2:#ffd85d;
+  --text:#f4f4f4;
+  --muted:#b6b6b6;
+  --green:#4ade4a;
+  --red:#ff564b;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:
-radial-gradient(circle at 50% 0,#221b08 0,transparent 28%),var(--bg);color:var(--text)}
-button,input,select{font:inherit}
+html,body{margin:0;min-height:100%;background:#020202;color:var(--text);font-family:Arial,Helvetica,sans-serif}
+button,a{font:inherit}
 button{cursor:pointer}
-.hidden{display:none!important}
-
-/* SPLASH */
-#splash{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#020202;transition:.7s}
-#splash.hide{opacity:0;visibility:hidden}
-.splashBox{text-align:center;width:min(520px,88vw)}
-.splashLogo{width:118px;height:118px;margin:auto;border:2px solid var(--gold);border-radius:28px;
-display:grid;place-items:center;font-size:34px;font-weight:900;color:var(--gold2);
-box-shadow:0 0 35px rgba(216,183,76,.25)}
-.splashTitle{font-size:30px;font-weight:900;color:var(--gold2);margin:22px 0 8px}
-.splashStatus{color:var(--muted);margin-top:16px}
-.lifeLine{height:74px;margin-top:22px;position:relative;overflow:hidden}
-.lifeLine svg{width:100%;height:100%}
-.lifePath{fill:none;stroke:#3f3517;stroke-width:3}
-.lifePulse{fill:none;stroke:var(--gold2);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;
-stroke-dasharray:620;stroke-dashoffset:620;animation:pulseLine 5.2s linear forwards;
-filter:drop-shadow(0 0 8px rgba(244,220,133,.75))}
-@keyframes pulseLine{to{stroke-dashoffset:0}}
-
-/* LOGIN */
-#login{position:fixed;inset:0;z-index:900;display:none;place-items:center;padding:20px;
-background:radial-gradient(circle at 50% 15%,rgba(216,183,76,.13),transparent 28%),#050505}
-.loginCard{width:min(460px,94vw);padding:28px;border:1px solid var(--gold);border-radius:24px;
-background:linear-gradient(145deg,#171719,#090909);box-shadow:0 28px 90px rgba(0,0,0,.7)}
-.loginCard h1{text-align:center;color:var(--gold2);margin:0 0 8px}
-.loginCard p{text-align:center;color:var(--muted);margin:0 0 22px}
-.loginCard label{display:block;color:var(--muted);font-size:13px;margin:12px 0 5px}
-.loginCard select,.loginCard input{width:100%;min-height:50px;border-radius:12px;border:1px solid var(--line);
-background:#050505;color:var(--text);padding:12px}
-.loginBtn{width:100%;min-height:50px;margin-top:18px;border:0;border-radius:12px;
-background:linear-gradient(135deg,var(--gold2),var(--gold));font-weight:900;color:#080808}
-.loginError{min-height:22px;color:#ff8d8d;text-align:center;margin-top:10px}
-
-/* APP */
-header{height:70px;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px 18px;
-border-bottom:1px solid var(--line);background:rgba(5,5,5,.94);position:sticky;top:0;z-index:30}
-.brand{display:flex;align-items:center;gap:11px}.brandLogo{width:42px;height:42px;border:1px solid var(--gold);
-border-radius:11px;display:grid;place-items:center;color:var(--gold2);font-weight:900}
-.brandName{font-size:18px;font-weight:900;color:var(--gold2)}.brandSub{font-size:11px;color:var(--muted)}
-.userArea{display:flex;align-items:center;gap:8px}.badge{padding:7px 11px;border:1px solid var(--line);
-border-radius:999px;color:var(--gold2);font-size:12px}.logout{border:1px solid var(--line);background:#151515;color:white;
-border-radius:10px;padding:8px 11px}
-
-.shell{display:grid;grid-template-columns:220px minmax(0,1fr) 270px;gap:12px;padding:12px;max-width:1700px;margin:auto}
-.sidebar,.rightbar,.content{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#121214,#080809)}
-.sidebar,.rightbar{padding:10px;position:sticky;top:82px;height:calc(100vh - 94px);overflow:auto}
-.navBtn{width:100%;min-height:44px;margin-bottom:6px;border:1px solid transparent;background:transparent;color:#f4ebc7;
-border-radius:10px;text-align:left;padding:9px 11px;font-weight:800}
-.navBtn:hover,.navBtn.active{background:#1b170a;border-color:#6d591d}
-.content{min-height:calc(100vh - 94px);padding:16px}
-
-.hero{text-align:center;border:1px solid var(--line);border-radius:18px;padding:26px 14px;
-background:linear-gradient(145deg,#111,#080808);margin-bottom:12px}
-.clock{font-size:clamp(48px,7vw,92px);font-weight:900;letter-spacing:3px;color:var(--gold2);line-height:1}
-.date{font-size:18px;color:#ddd1a4;margin-top:12px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
-.kpi{padding:15px;border:1px solid var(--line);border-radius:14px;background:#101012}
-.kpi span{color:var(--muted);font-size:12px}.kpi b{display:block;color:var(--gold2);font-size:27px;margin-top:5px}
-.grid2{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}
-.panel{border:1px solid var(--line);border-radius:15px;padding:14px;background:#0e0e10}
-.panel h3{margin:0 0 10px;color:var(--gold2)}
-.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.quick button{min-height:64px;border:1px solid var(--line);border-radius:12px;background:#151517;color:white;font-weight:900}
-.quick button:hover{border-color:var(--gold)}
-
-.rightPanel{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:#0e0e10}
-.rightPanel h3{margin:0 0 10px;color:var(--gold2);font-size:14px}
-.social a{display:block;text-decoration:none;color:white;padding:9px;border-radius:9px;margin-bottom:6px;background:#161618}
-.social a:hover{background:#24200f}
-.settingsGroup{margin-bottom:15px}
-.settingsGroup label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
-.settingsGroup input{width:100%;min-height:42px;border-radius:10px;border:1px solid var(--line);background:#080808;color:white;padding:9px}
-.saveBtn{border:0;border-radius:10px;padding:10px 14px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-weight:900}
-
-/* MODE DEMO */
-body.demo .adminOnly{display:none!important}
-body.demo button[data-write="true"]{display:none!important}
-.demoNotice{display:none;padding:10px 12px;border:1px solid #5e4c16;border-radius:11px;background:#171205;color:#f0d57c;margin-bottom:12px}
-body.demo .demoNotice{display:block}
-
-@media(max-width:1050px){
-  .shell{grid-template-columns:190px minmax(0,1fr)}
-  .rightbar{grid-column:1/-1;position:static;height:auto;display:grid;grid-template-columns:repeat(2,1fr)}
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  background:
+    radial-gradient(circle at 55% 0,rgba(228,181,47,.07),transparent 28%),
+    linear-gradient(180deg,#050607,#020202 65%);
 }
-@media(max-width:720px){
-  header{position:static}.shell{display:block}.sidebar,.rightbar{position:static;height:auto;margin-bottom:10px}
-  .sidebar{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.navBtn{margin:0}
-  .kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.rightbar{display:block}
+.sidebar{
+  border:1px solid var(--line);
+  border-radius:0 16px 16px 0;
+  margin:6px 0 6px 6px;
+  padding:18px 14px;
+  background:linear-gradient(180deg,#080a0c,#020304);
+  display:flex;
+  flex-direction:column;
+  min-height:calc(100vh - 12px);
+}
+.logoWrap{text-align:center;padding:4px 0 20px}
+.logoShield{
+  width:86px;height:96px;margin:auto;
+  border:4px solid var(--gold);
+  border-radius:28px 28px 34px 34px;
+  display:grid;place-items:center;
+  font-size:42px;
+  color:var(--gold2);
+  box-shadow:0 0 18px rgba(228,181,47,.18);
+}
+.logoTitle{font-size:24px;font-weight:900;margin-top:10px;letter-spacing:.3px}
+.logoTitle span{color:var(--gold)}
+.logoSub{color:var(--gold2);font-size:18px;margin-top:3px}
+
+.nav{display:flex;flex-direction:column;gap:5px}
+.nav button{
+  border:0;
+  background:transparent;
+  color:#f1f1f1;
+  min-height:48px;
+  border-radius:8px;
+  text-align:left;
+  padding:0 13px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  font-size:16px;
+}
+.nav button .ico{color:var(--gold2);font-size:22px;width:26px;text-align:center}
+.nav button.active{
+  background:linear-gradient(180deg,#f3c34b,#dca92d);
+  color:#111;
+  box-shadow:0 5px 16px rgba(228,181,47,.22);
+}
+.nav button.active .ico{color:#111}
+.nav button:hover:not(.active){background:#111317}
+.logout{
+  margin-top:auto;
+  border-top:1px solid var(--line);
+  padding-top:14px;
+}
+.logout button{color:#ff625b!important}
+
+.main{
+  padding:7px 8px 7px 10px;
+  min-width:0;
+}
+.topbar{
+  height:58px;
+  border:1px solid #555;
+  border-radius:12px;
+  background:linear-gradient(180deg,#0c0f12,#060708);
+  display:grid;
+  grid-template-columns:52px 1fr 90px 130px;
+  align-items:center;
+  padding:0 12px;
+  margin-bottom:8px;
+}
+.menuBtn{font-size:30px;color:var(--gold2);background:none;border:0}
+.welcome{text-align:center;font-size:18px}
+.bell{text-align:center;font-size:24px;position:relative}
+.bell b{
+  position:absolute;top:-9px;right:17px;
+  background:var(--gold);color:#111;
+  width:22px;height:22px;border-radius:50%;
+  display:grid;place-items:center;font-size:12px;
+}
+.modeBtn{
+  background:#17191d;border:1px solid #26292e;color:#fff;
+  border-radius:8px;padding:9px 12px;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 338px;
+  gap:10px;
+}
+.center{min-width:0}
+.hero{
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:
+    radial-gradient(circle at 0 50%,rgba(255,196,0,.26),transparent 23%),
+    radial-gradient(circle at 100% 50%,rgba(255,196,0,.2),transparent 23%),
+    linear-gradient(180deg,#07090b,#030405);
+  padding:22px 16px 16px;
+  text-align:center;
+}
+.clock{
+  font-size:clamp(58px,7vw,108px);
+  line-height:1;
+  font-weight:900;
+  letter-spacing:2px;
+  background:linear-gradient(180deg,#ffe57a,#c48b00);
+  -webkit-background-clip:text;
+  color:transparent;
+  text-shadow:0 0 24px rgba(228,181,47,.15);
+}
+.date{font-size:26px;margin-top:12px}
+.goldMini{width:92px;height:3px;background:var(--gold);margin:20px auto 24px;border-radius:99px}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+}
+.kpi{
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(145deg,#171a1f,#090b0e);
+  padding:14px 10px 12px;
+  min-height:255px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.kpiIcon{
+  width:68px;height:68px;
+  border:1px solid var(--gold);
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:var(--gold2);
+  font-size:35px;
+  margin-bottom:10px;
+}
+.kpiValue{font-size:37px;font-weight:900}
+.kpiLabel{font-size:16px;line-height:1.25;margin-top:4px}
+.trend{margin-top:8px;font-size:14px}
+.trend.up{color:var(--green)}
+.trend.down{color:var(--red)}
+.detail{
+  margin-top:auto;
+  color:var(--gold2);
+  font-weight:800;
+  font-size:14px;
+}
+
+.section{
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(180deg,#0b0d10,#050607);
+  margin-top:10px;
+  padding:12px;
+}
+.sectionTitle{
+  color:var(--gold2);
+  font-size:20px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+.shortcutGrid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:10px;
+}
+.shortcut{
+  min-height:120px;
+  border:1px solid #50545a;
+  border-radius:8px;
+  background:linear-gradient(145deg,#16191e,#0b0d10);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+.shortcut:hover{border-color:var(--gold);transform:translateY(-1px)}
+.shortcut .sico{font-size:38px;color:var(--gold2)}
+.shortcut span{font-size:15px;text-align:center}
+
+.communication{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.commCard{
+  border:1px solid #555a61;
+  border-radius:8px;
+  background:linear-gradient(145deg,#16191d,#0a0c0e);
+  min-height:106px;
+  display:flex;
+  align-items:center;
+  gap:22px;
+  padding:14px 28px;
+}
+.commLogo{font-size:52px}
+.commInfo b{font-size:22px}
+.commInfo span{display:block;color:#ddd;margin:4px 0 8px}
+.commInfo button{
+  border:0;border-radius:7px;
+  background:linear-gradient(180deg,#f6c747,#dba92b);
+  color:#111;padding:8px 16px;font-weight:800;
+}
+
+.rightbar{display:flex;flex-direction:column;gap:10px}
+.sidePanel{
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(180deg,#0c0f12,#050607);
+  padding:12px;
+}
+.sidePanel h3{
+  margin:0 0 10px;
+  color:var(--gold2);
+  font-size:20px;
+  padding-bottom:7px;
+  border-bottom:1px solid var(--line);
+}
+.quickRight{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.quickRight button{
+  min-height:104px;
+  border:1px solid #555a61;
+  border-radius:8px;
+  background:linear-gradient(145deg,#16191e,#0a0c0f);
+  color:white;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+}
+.quickRight button:hover{border-color:var(--gold)}
+.quickRight .qico{font-size:38px;color:var(--gold2)}
+.social a{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:51px;
+  padding:0 10px;
+  margin-bottom:6px;
+  border:1px solid #383b40;
+  border-radius:6px;
+  background:#090b0d;
+  color:#fff;
+  text-decoration:none;
+}
+.social a:hover{border-color:var(--gold)}
+.social .left{display:flex;align-items:center;gap:10px}
+.social .brandIcon{font-size:26px}
+.footer{
+  margin-top:8px;
+  min-height:42px;
+  border:1px solid #30343a;
+  border-radius:8px;
+  background:#07090b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  font-size:13px;
+}
+.footer .leftFoot{color:#d8d8d8}
+.footer .leftFoot b{color:var(--gold2)}
+.saveArea{display:flex;align-items:center;gap:14px}
+.dot{width:10px;height:10px;border-radius:50%;background:#18d75a;box-shadow:0 0 8px rgba(24,215,90,.5)}
+.saveBtn{
+  border:0;border-radius:7px;
+  background:linear-gradient(180deg,#f6c747,#dba92b);
+  color:#111;padding:8px 14px;font-weight:900;
+}
+
+@media(max-width:1200px){
+  .layout{grid-template-columns:1fr}
+  .rightbar{display:grid;grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  .app{grid-template-columns:180px minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .shortcutGrid{grid-template-columns:repeat(3,1fr)}
+  .communication{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .app{display:block}
+  .sidebar{margin:0;border-radius:0;min-height:auto}
+  .nav{display:grid;grid-template-columns:repeat(2,1fr)}
+  .logout{margin-top:10px}
+  .topbar{grid-template-columns:46px 1fr 60px}
+  .modeBtn{display:none}
+  .rightbar{display:block}
+  .kpis{grid-template-columns:1fr}
+  .shortcutGrid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
 <body>
-<div id="splash">
-  <div class="splashBox">
-    <div class="splashLogo">T42</div>
-    <div class="splashTitle">TECH42SERVICE</div>
-    <div class="lifeLine">
-      <svg viewBox="0 0 620 80" preserveAspectRatio="none">
-        <path class="lifePath" d="M0 42 H115 L135 42 L151 14 L169 67 L188 30 L205 42 H315 L336 42 L353 17 L370 65 L389 31 L406 42 H620"/>
-        <path class="lifePulse" d="M0 42 H115 L135 42 L151 14 L169 67 L188 30 L205 42 H315 L336 42 L353 17 L370 65 L389 31 L406 42 H620"/>
-      </svg>
-    </div>
-    <div class="splashStatus" id="splashStatus">Initialisation sécurisée...</div>
-  </div>
-</div>
-
-<div id="login">
-  <div class="loginCard">
-    <h1>TECH42SERVICE</h1>
-    <p>Connexion à l’espace de gestion</p>
-    <label>Profil</label>
-    <select id="profile">
-      <option value="admin">Administrateur</option>
-      <option value="demo">Utilisateur 2 — Démonstration</option>
-    </select>
-    <label>Mot de passe</label>
-    <input id="password" type="password" placeholder="Mot de passe">
-    <button class="loginBtn" onclick="login()">Entrer</button>
-    <div class="loginError" id="loginError"></div>
-  </div>
-</div>
-
-<div id="app" class="hidden">
-<header>
-  <div class="brand">
-    <div class="brandLogo">T42</div>
-    <div><div class="brandName" id="brandName">TECH42SERVICE</div><div class="brandSub">V15 PHOENIX</div></div>
-  </div>
-  <div class="userArea">
-    <div class="badge" id="userBadge">Administrateur</div>
-    <button class="logout" onclick="logout()">Déconnexion</button>
-  </div>
-</header>
-
-<div class="shell">
+<div class="app">
   <aside class="sidebar">
-    <button class="navBtn active" onclick="showView('dashboard',this)">🏠 Tableau de bord</button>
-    <button class="navBtn" onclick="showView('repairs',this)">🔧 Réparations</button>
-    <button class="navBtn" onclick="showView('stock',this)">📦 Stock</button>
-    <button class="navBtn" onclick="showView('clients',this)">👥 Clients</button>
-    <button class="navBtn" onclick="showView('agenda',this)">📅 Agenda</button>
-    <button class="navBtn adminOnly" onclick="showView('settings',this)">⚙️ Paramètres</button>
+    <div class="logoWrap">
+      <div class="logoShield">🛠</div>
+      <div class="logoTitle">TECH<span>42</span>SERVICE</div>
+      <div class="logoSub">Gestion</div>
+    </div>
+
+    <nav class="nav">
+      <button class="active"><span class="ico">⌂</span>Accueil</button>
+      <button><span class="ico">🛠</span>Réparations</button>
+      <button><span class="ico">♙</span>Clients</button>
+      <button><span class="ico">◫</span>Stock</button>
+      <button><span class="ico">🛒</span>Achats / Ventes</button>
+      <button><span class="ico">▦</span>Rendez-vous</button>
+      <button><span class="ico">▤</span>Factures / Devis</button>
+      <button><span class="ico">♢</span>Garanties</button>
+      <button><span class="ico">🏛</span>Comptes</button>
+      <button><span class="ico">▥</span>Journal</button>
+      <button><span class="ico">⚙</span>Outils PRO</button>
+      <button><span class="ico">⚙</span>Paramètres</button>
+    </nav>
+
+    <div class="logout">
+      <button><span class="ico">↪</span>Déconnexion</button>
+    </div>
   </aside>
 
-  <main class="content">
-    <div class="demoNotice">Mode démonstration actif : consultation uniquement.</div>
+  <main class="main">
+    <div class="topbar">
+      <button class="menuBtn">☰</button>
+      <div class="welcome">Bienvenue, Tech42Service</div>
+      <div class="bell">🔔<b>3</b></div>
+      <button class="modeBtn">◐ &nbsp; Mode sombre</button>
+    </div>
 
-    <section id="dashboard">
-      <div class="hero">
-        <div class="clock" id="clock">00:00:00</div>
-        <div class="date" id="date">—</div>
-      </div>
-      <div class="kpis">
-        <div class="kpi"><span>Réparations en cours</span><b>8</b></div>
-        <div class="kpi"><span>Rendez-vous aujourd’hui</span><b>4</b></div>
-        <div class="kpi"><span>Alertes stock</span><b>3</b></div>
-        <div class="kpi"><span>CA du mois</span><b>2 480 €</b></div>
-      </div>
-      <div class="grid2">
-        <div class="panel">
-          <h3>Activité récente</h3>
-          <p>• iPhone 13 — Diagnostic en cours</p>
-          <p>• Samsung A54 — Pièce commandée</p>
-          <p>• MacBook Air — Prêt à restituer</p>
-        </div>
-        <div class="panel">
-          <h3>Accès rapides</h3>
-          <div class="quick">
-            <button data-write="true">Nouvelle réparation</button>
-            <button data-write="true">Nouveau client</button>
-            <button data-write="true">Créer un devis</button>
-            <button data-write="true">Créer une facture</button>
+    <div class="layout">
+      <section class="center">
+        <div class="hero">
+          <div class="clock" id="clock">09:42:18</div>
+          <div class="date" id="date">Mercredi 23 juillet 2025</div>
+          <div class="goldMini"></div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpiIcon">🛠</div>
+              <div class="kpiValue">8</div>
+              <div class="kpiLabel">Réparations<br>en cours</div>
+              <div class="detail">Voir détails →</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiIcon">▦</div>
+              <div class="kpiValue">3</div>
+              <div class="kpiLabel">Rendez-vous<br>aujourd’hui</div>
+              <div class="detail">Voir détails →</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiIcon">◫</div>
+              <div class="kpiValue">152</div>
+              <div class="kpiLabel">Articles en stock</div>
+              <div class="trend up">↑ 12 ce mois</div>
+              <div class="detail">Voir détails →</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiIcon">▤</div>
+              <div class="kpiValue">5</div>
+              <div class="kpiLabel">Devis<br>en attente</div>
+              <div class="trend down">↓ 2 ce mois</div>
+              <div class="detail">Voir détails →</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiIcon">€</div>
+              <div class="kpiValue">12 450 €</div>
+              <div class="kpiLabel">Chiffre d’affaires<br>ce mois</div>
+              <div class="trend up">↑ 8.5%</div>
+              <div class="detail">Voir détails →</div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <section id="repairs" class="hidden panel">
-      <h3>Réparations</h3><p>Module en lecture dans ce prototype.</p>
-      <button class="saveBtn" data-write="true">Ajouter une réparation</button>
-    </section>
-    <section id="stock" class="hidden panel">
-      <h3>Stock</h3><p>Module en lecture dans ce prototype.</p>
-      <button class="saveBtn" data-write="true">Ajouter une pièce</button>
-    </section>
-    <section id="clients" class="hidden panel">
-      <h3>Clients</h3><p>Module en lecture dans ce prototype.</p>
-      <button class="saveBtn" data-write="true">Ajouter un client</button>
-    </section>
-    <section id="agenda" class="hidden panel">
-      <h3>Agenda</h3><p>Vue agenda de démonstration.</p>
-      <button class="saveBtn" data-write="true">Ajouter un rendez-vous</button>
-    </section>
-    <section id="settings" class="hidden panel adminOnly">
-      <h3>Paramètres</h3>
-      <div class="settingsGroup"><label>Nom du logiciel</label><input id="settingName" value="TECH42SERVICE"></div>
-      <div class="settingsGroup"><label>Couleur principale</label><input id="settingColor" type="color" value="#d8b74c"></div>
-      <div class="settingsGroup"><label>Email</label><input value="tech42service@gmail.com"></div>
-      <div class="settingsGroup"><label>Téléphone</label><input value="07 43 26 24 15"></div>
-      <button class="saveBtn" onclick="saveSettings()">Enregistrer</button>
-    </section>
+        <div class="section">
+          <div class="sectionTitle">Raccourcis principaux</div>
+          <div class="shortcutGrid">
+            <button class="shortcut"><span class="sico">⊕</span><span>Nouvelle<br>Réparation</span></button>
+            <button class="shortcut"><span class="sico">♙+</span><span>Nouveau<br>Client</span></button>
+            <button class="shortcut"><span class="sico">▤+</span><span>Nouveau<br>Devis</span></button>
+            <button class="shortcut"><span class="sico">€▤</span><span>Nouvelle<br>Facture</span></button>
+            <button class="shortcut"><span class="sico">⌕</span><span>Recherche<br>Rapide</span></button>
+            <button class="shortcut"><span class="sico">☁</span><span>Sauvegarde<br>Manuelle</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">Communications</div>
+          <div class="communication">
+            <div class="commCard">
+              <div class="commLogo">📧</div>
+              <div class="commInfo">
+                <b>Gmail</b>
+                <span>tech42service@gmail.com</span>
+                <button onclick="window.open('https://mail.google.com','_blank')">Ouvrir Gmail ↗</button>
+              </div>
+            </div>
+            <div class="commCard">
+              <div class="commLogo">📅</div>
+              <div class="commInfo">
+                <b>Agenda</b>
+                <span>tech42service@gmail.com</span>
+                <button onclick="window.open('https://calendar.google.com','_blank')">Ouvrir Agenda ↗</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="rightbar">
+        <div class="sidePanel">
+          <h3>Accès rapide</h3>
+          <div class="quickRight">
+            <button><span class="qico">🛠</span>Réparations</button>
+            <button><span class="qico">♙</span>Clients</button>
+            <button><span class="qico">◫</span>Stock</button>
+            <button><span class="qico">▦</span>Rendez-vous</button>
+            <button><span class="qico">€▤</span>Factures</button>
+            <button><span class="qico">▤</span>Devis</button>
+            <button><span class="qico">♢</span>Garanties</button>
+            <button><span class="qico">▥</span>Journal</button>
+          </div>
+        </div>
+
+        <div class="sidePanel">
+          <h3>Réseaux</h3>
+          <div class="social">
+            <a href="#"><span class="left"><span class="brandIcon">📘</span>Facebook</span><span>↗</span></a>
+            <a href="#"><span class="left"><span class="brandIcon">📷</span>Instagram</span><span>↗</span></a>
+            <a href="#"><span class="left"><span class="brandIcon">▶️</span>YouTube</span><span>↗</span></a>
+            <a href="#"><span class="left"><span class="brandIcon">🟢</span>WhatsApp</span><span>↗</span></a>
+            <a href="mailto:tech42service@gmail.com"><span class="left"><span class="brandIcon">✉️</span>Envoyer un email</span><span>↗</span></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <div class="leftFoot"><b>TECH42SERVICE Gestion</b> &nbsp;•&nbsp; <b>V15 Cockpit</b> &nbsp;•&nbsp; Tous droits réservés</div>
+      <div class="saveArea">
+        <span id="saveTime">Sauvegarde automatique : 09:40:12</span>
+        <span class="dot"></span>
+        <button class="saveBtn">☁ &nbsp; Sauvegarder maintenant</button>
+      </div>
+    </div>
   </main>
-
-  <aside class="rightbar">
-    <div class="rightPanel">
-      <h3>Réseaux & Contact</h3>
-      <div class="social">
-        <a href="#" onclick="return false">WhatsApp</a>
-        <a href="#" onclick="return false">Facebook</a>
-        <a href="#" onclick="return false">Instagram</a>
-        <a href="mailto:tech42service@gmail.com">Gmail</a>
-      </div>
-    </div>
-    <div class="rightPanel">
-      <h3>Agenda</h3>
-      <p style="color:var(--muted)">Prochain rendez-vous : 10:30</p>
-      <p>Remplacement écran iPhone 12</p>
-    </div>
-  </aside>
-</div>
 </div>
 
 <script>
-const $ = s => document.querySelector(s);
-
-const splashSteps = [
-  "Vérification de la sécurité...",
-  "Chargement des données...",
-  "Initialisation des modules...",
-  "Préparation de l'atelier...",
-  "Ouverture de TECH42SERVICE..."
-];
-let step = 0;
-const splashTimer = setInterval(()=>{
-  step++;
-  if(step < splashSteps.length) $("#splashStatus").textContent = splashSteps[step];
-},1000);
-
-function openLoginSafely(){
-  try{
-    clearInterval(splashTimer);
-    const splash = document.getElementById("splash");
-    const login = document.getElementById("login");
-    if(splash) splash.classList.add("hide");
-    if(login) login.style.display = "grid";
-  }catch(e){
-    const splash = document.getElementById("splash");
-    const login = document.getElementById("login");
-    if(splash) splash.style.display = "none";
-    if(login) login.style.display = "grid";
-  }
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  setTimeout(openLoginSafely,5500);
-});
-
-/* Sécurité anti-blocage */
-setTimeout(openLoginSafely,7000);
-
-function login(){
-  const profile = $("#profile").value;
-  const pass = $("#password").value;
-  const valid = profile === "demo" || pass === "admin";
-  if(!valid){
-    $("#loginError").textContent = "Mot de passe administrateur incorrect.";
-    return;
-  }
-  document.body.classList.toggle("demo", profile === "demo");
-  $("#userBadge").textContent = profile === "demo" ? "Utilisateur 2 — Démonstration" : "Administrateur";
-  $("#login").style.display = "none";
-  $("#app").classList.remove("hidden");
-  $("#password").value = "";
-  showView("dashboard", document.querySelector(".navBtn"));
-}
-
-function logout(){
-  $("#app").classList.add("hidden");
-  $("#login").style.display = "grid";
-  $("#loginError").textContent = "";
-}
-
-function showView(id, btn){
-  document.querySelectorAll("main.content section").forEach(s=>s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-  document.querySelectorAll(".navBtn").forEach(b=>b.classList.remove("active"));
-  if(btn) btn.classList.add("active");
-}
-
-function updateClock(){
+function tick(){
   const now = new Date();
-  $("#clock").textContent = now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  $("#date").textContent = now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR');
+  document.getElementById('date').textContent = now.toLocaleDateString('fr-FR',{
+    weekday:'long',day:'numeric',month:'long',year:'numeric'
+  });
+  document.getElementById('saveTime').textContent =
+    'Sauvegarde automatique : ' + now.toLocaleTimeString('fr-FR');
 }
-setInterval(updateClock,1000); updateClock();
-
-function saveSettings(){
-  const name = $("#settingName").value.trim() || "TECH42SERVICE";
-  const color = $("#settingColor").value;
-  $("#brandName").textContent = name;
-  document.documentElement.style.setProperty("--gold",color);
-  localStorage.setItem("t42_name",name);
-  localStorage.setItem("t42_color",color);
-  alert("Paramètres enregistrés.");
-}
-
-(function loadSettings(){
-  const name = localStorage.getItem("t42_name");
-  const color = localStorage.getItem("t42_color");
-  if(name){ $("#brandName").textContent=name; $("#settingName").value=name; }
-  if(color){ document.documentElement.style.setProperty("--gold",color); $("#settingColor").value=color; }
-})();
+tick();
+setInterval(tick,1000);
 </script>
 </body>
 </html>
