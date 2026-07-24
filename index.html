@@ -1285,6 +1285,36 @@ body.collabReadonly::after{
   border:1px solid var(--gold);background:#171205;color:var(--gold2);
   font-size:12px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.45);
 }
+
+/* V15.1 — Collaborateur totalement visuel */
+body.collabReadonly .appShell,
+body.collabReadonly header,
+body.collabReadonly .appRightbar,
+body.collabReadonly #nav,
+body.collabReadonly main{
+  user-select:none!important;
+}
+body.collabReadonly .appShell *,
+body.collabReadonly header *{
+  cursor:not-allowed!important;
+}
+body.collabReadonly a,
+body.collabReadonly input,
+body.collabReadonly textarea,
+body.collabReadonly select,
+body.collabReadonly button:not(.powerButton):not([onclick*="logout"]){
+  pointer-events:none!important;
+}
+body.collabReadonly [contenteditable="true"]{
+  pointer-events:none!important;
+}
+body.collabReadonly .powerButton,
+body.collabReadonly [onclick*="logout"]{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  opacity:1!important;
+}
+
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -1303,7 +1333,7 @@ body.collabReadonly::after{
 </div>
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
-<div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" autocomplete="username"></select></div><div class="loginField pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
+<div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><input type="text" name="fake_username" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0"><input type="password" name="fake_password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0"><select id="loginUser" name="t42_profile_selector" autocomplete="off"></select></div><div class="loginField pass"><input id="loginPass" name="t42_password_no_save" type="password" autocomplete="new-password" placeholder="Mot de passe" readonly onfocus="this.removeAttribute('readonly');this.value='';" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
 
 <header class="v12Header">
   <div class="v12HeaderBrand">
@@ -2229,7 +2259,86 @@ header h1{font-size:20px;letter-spacing:.4px}
   .headerActions button{padding:6px 8px!important}
 }
 
-</style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`;
+
+/* V15.1 — Collaborateur totalement visuel */
+body.collabReadonly .appShell,
+body.collabReadonly header,
+body.collabReadonly .appRightbar,
+body.collabReadonly #nav,
+body.collabReadonly main{
+  user-select:none!important;
+}
+body.collabReadonly .appShell *,
+body.collabReadonly header *{
+  cursor:not-allowed!important;
+}
+body.collabReadonly a,
+body.collabReadonly input,
+body.collabReadonly textarea,
+body.collabReadonly select,
+body.collabReadonly button:not(.powerButton):not([onclick*="logout"]){
+  pointer-events:none!important;
+}
+body.collabReadonly [contenteditable="true"]{
+  pointer-events:none!important;
+}
+body.collabReadonly .powerButton,
+body.collabReadonly [onclick*="logout"]{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  opacity:1!important;
+}
+
+</style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script>
+<script id="v15CollabSecurity">
+(function(){
+  "use strict";
+
+  function isAllowedTarget(target){
+    return !!target.closest('.powerButton,[onclick*="logout"]');
+  }
+
+  function blockWhenCollab(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(isAllowedTarget(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  ['click','dblclick','contextmenu','submit','input','change','dragstart','drop'].forEach(function(type){
+    document.addEventListener(type, blockWhenCollab, true);
+  });
+
+  document.addEventListener('keydown', function(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(event.key === 'Tab' || event.key === 'Shift') return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
+
+  function clearLoginPassword(){
+    var pass = document.getElementById('loginPass');
+    if(pass){
+      pass.value = '';
+      pass.setAttribute('autocomplete','new-password');
+      pass.setAttribute('readonly','readonly');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    clearLoginPassword();
+    setTimeout(clearLoginPassword, 100);
+    setTimeout(clearLoginPassword, 700);
+  });
+
+  window.addEventListener('pageshow', clearLoginPassword);
+  window.addEventListener('beforeunload', clearLoginPassword);
+})();
+</script>
+
+</body></html>`;
   const w=window.open('','_blank','width=700,height=500');if(!w){alert('Autorisez les fenêtres pop-up pour imprimer l’étiquette.');return;}w.document.open();w.document.write(html);w.document.close();
 }
 function fileToDataURL(input){return new Promise(res=>{let f=input&&input.files&&input.files[0];if(!f)return res('');let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)})}
@@ -2539,6 +2648,36 @@ header h1{font-size:20px;letter-spacing:.4px}
   .headerActions button{padding:6px 8px!important}
 }
 
+
+/* V15.1 — Collaborateur totalement visuel */
+body.collabReadonly .appShell,
+body.collabReadonly header,
+body.collabReadonly .appRightbar,
+body.collabReadonly #nav,
+body.collabReadonly main{
+  user-select:none!important;
+}
+body.collabReadonly .appShell *,
+body.collabReadonly header *{
+  cursor:not-allowed!important;
+}
+body.collabReadonly a,
+body.collabReadonly input,
+body.collabReadonly textarea,
+body.collabReadonly select,
+body.collabReadonly button:not(.powerButton):not([onclick*="logout"]){
+  pointer-events:none!important;
+}
+body.collabReadonly [contenteditable="true"]{
+  pointer-events:none!important;
+}
+body.collabReadonly .powerButton,
+body.collabReadonly [onclick*="logout"]{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  opacity:1!important;
+}
+
 </style></head><body><div class="print-root">${printable.innerHTML}</div><script>
     (function(){
       function fit(){
@@ -2552,7 +2691,56 @@ header h1{font-size:20px;letter-spacing:.4px}
       }
       window.addEventListener('load',function(){fit();setTimeout(fit,120)});
     })();
-  <\/script></body></html>`);
+  <\/script>
+<script id="v15CollabSecurity">
+(function(){
+  "use strict";
+
+  function isAllowedTarget(target){
+    return !!target.closest('.powerButton,[onclick*="logout"]');
+  }
+
+  function blockWhenCollab(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(isAllowedTarget(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  ['click','dblclick','contextmenu','submit','input','change','dragstart','drop'].forEach(function(type){
+    document.addEventListener(type, blockWhenCollab, true);
+  });
+
+  document.addEventListener('keydown', function(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(event.key === 'Tab' || event.key === 'Shift') return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
+
+  function clearLoginPassword(){
+    var pass = document.getElementById('loginPass');
+    if(pass){
+      pass.value = '';
+      pass.setAttribute('autocomplete','new-password');
+      pass.setAttribute('readonly','readonly');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    clearLoginPassword();
+    setTimeout(clearLoginPassword, 100);
+    setTimeout(clearLoginPassword, 700);
+  });
+
+  window.addEventListener('pageshow', clearLoginPassword);
+  window.addEventListener('beforeunload', clearLoginPassword);
+})();
+</script>
+
+</body></html>`);
   w.document.close();
   w.focus();
   setTimeout(()=>{try{w.print()}catch(e){alert('Impossible de lancer l’impression.')}},650);
@@ -2991,8 +3179,106 @@ function saveWriterDoc(){let title=val('writer_title')||'Document sans titre',ex
 function loadWriter(i){let x=db.writerDocs[i];setv('writer_title',x.title);$('writer_editor').innerHTML=x.html;show('writer')}
 function deleteWriter(i){if(confirm('Supprimer ce document ?')){db.writerDocs.splice(i,1);save('Document texte supprimé')}}
 function renderWriterList(){if(!$('writerList'))return;$('writerList').innerHTML=db.writerDocs.map((x,i)=>`<div class="fileCard"><b>${esc(x.title)}</b><br><span class="muted">${esc(x.updated)}</span><br><button class="small" onclick="loadWriter(${i})">Ouvrir</button> <button class="small danger" onclick="deleteWriter(${i})">Supprimer</button></div>`).join('')||'<p class="muted">Aucun document enregistré.</p>'}
-function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'</body></html>');w.document.close();w.print()}
-function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'</body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
+function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'
+<script id="v15CollabSecurity">
+(function(){
+  "use strict";
+
+  function isAllowedTarget(target){
+    return !!target.closest('.powerButton,[onclick*="logout"]');
+  }
+
+  function blockWhenCollab(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(isAllowedTarget(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  ['click','dblclick','contextmenu','submit','input','change','dragstart','drop'].forEach(function(type){
+    document.addEventListener(type, blockWhenCollab, true);
+  });
+
+  document.addEventListener('keydown', function(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(event.key === 'Tab' || event.key === 'Shift') return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
+
+  function clearLoginPassword(){
+    var pass = document.getElementById('loginPass');
+    if(pass){
+      pass.value = '';
+      pass.setAttribute('autocomplete','new-password');
+      pass.setAttribute('readonly','readonly');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    clearLoginPassword();
+    setTimeout(clearLoginPassword, 100);
+    setTimeout(clearLoginPassword, 700);
+  });
+
+  window.addEventListener('pageshow', clearLoginPassword);
+  window.addEventListener('beforeunload', clearLoginPassword);
+})();
+</script>
+
+</body></html>');w.document.close();w.print()}
+function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'
+<script id="v15CollabSecurity">
+(function(){
+  "use strict";
+
+  function isAllowedTarget(target){
+    return !!target.closest('.powerButton,[onclick*="logout"]');
+  }
+
+  function blockWhenCollab(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(isAllowedTarget(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  ['click','dblclick','contextmenu','submit','input','change','dragstart','drop'].forEach(function(type){
+    document.addEventListener(type, blockWhenCollab, true);
+  });
+
+  document.addEventListener('keydown', function(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(event.key === 'Tab' || event.key === 'Shift') return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
+
+  function clearLoginPassword(){
+    var pass = document.getElementById('loginPass');
+    if(pass){
+      pass.value = '';
+      pass.setAttribute('autocomplete','new-password');
+      pass.setAttribute('readonly','readonly');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    clearLoginPassword();
+    setTimeout(clearLoginPassword, 100);
+    setTimeout(clearLoginPassword, 700);
+  });
+
+  window.addEventListener('pageshow', clearLoginPassword);
+  window.addEventListener('beforeunload', clearLoginPassword);
+})();
+</script>
+
+</body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
 function clearContact(){['ct_i','ct_nom','ct_pre','ct_societe','ct_tel','ct_mail','ct_adresse','ct_notes'].forEach(x=>setv(x,''))}
 function saveContact(){if(!val('ct_nom')){alert('Indiquez au minimum un nom.');return}let i=val('ct_i'),o={nom:val('ct_nom'),pre:val('ct_pre'),societe:val('ct_societe'),tel:val('ct_tel'),mail:val('ct_mail'),adresse:val('ct_adresse'),notes:val('ct_notes')};if(i==='')db.contacts.push(o);else db.contacts[+i]=o;clearContact();save('Contact enregistré : '+o.nom+' '+o.pre)}
 function editContact(i){let c=db.contacts[i];setv('ct_i',i);Object.keys(c).forEach(k=>setv('ct_'+k,c[k]));show('contacts')}
@@ -3250,6 +3536,55 @@ window.addEventListener('load',()=>{
     }
   },80);
 });
+</script>
+
+
+<script id="v15CollabSecurity">
+(function(){
+  "use strict";
+
+  function isAllowedTarget(target){
+    return !!target.closest('.powerButton,[onclick*="logout"]');
+  }
+
+  function blockWhenCollab(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(isAllowedTarget(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  ['click','dblclick','contextmenu','submit','input','change','dragstart','drop'].forEach(function(type){
+    document.addEventListener(type, blockWhenCollab, true);
+  });
+
+  document.addEventListener('keydown', function(event){
+    if(!document.body.classList.contains('collabReadonly')) return;
+    if(event.key === 'Tab' || event.key === 'Shift') return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
+
+  function clearLoginPassword(){
+    var pass = document.getElementById('loginPass');
+    if(pass){
+      pass.value = '';
+      pass.setAttribute('autocomplete','new-password');
+      pass.setAttribute('readonly','readonly');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    clearLoginPassword();
+    setTimeout(clearLoginPassword, 100);
+    setTimeout(clearLoginPassword, 700);
+  });
+
+  window.addEventListener('pageshow', clearLoginPassword);
+  window.addEventListener('beforeunload', clearLoginPassword);
+})();
 </script>
 
 </body></html>
