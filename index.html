@@ -1268,6 +1268,23 @@ body{background:#080909!important;color:var(--s-text)!important;font-family:Sego
 button{border-radius:8px!important;box-shadow:none!important}input,select,textarea{min-height:40px!important;padding:9px 10px!important;border-radius:8px!important;background:#0b0d0d!important;border-color:#303434!important}
 table{border:1px solid var(--s-line)!important;border-radius:9px!important;overflow:hidden!important;background:#0d0f0f!important}th{background:#131515!important;color:#d9c77e!important;font-size:11px!important}td{font-size:11.5px!important;border-bottom-color:#252929!important}
 
+
+/* V15 — Compte collaborateur strictement visuel */
+body.collabReadonly main{pointer-events:none;}
+body.collabReadonly main input,
+body.collabReadonly main select,
+body.collabReadonly main textarea,
+body.collabReadonly main button{opacity:.62;cursor:not-allowed!important;}
+body.collabReadonly #nav button[data-module="settings"],
+body.collabReadonly .v12IconButton[title="Paramètres"],
+body.collabReadonly .rightPanelHead button[onclick*="settings"]{display:none!important;}
+body.collabReadonly::after{
+  content:"MODE COLLABORATEUR — LECTURE SEULE";
+  position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
+  z-index:500;padding:8px 14px;border-radius:999px;
+  border:1px solid var(--gold);background:#171205;color:var(--gold2);
+  font-size:12px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.45);
+}
 </style></head><body>
 <div id="repairPhotoModal" class="repairPhotoModal" onclick="if(event.target===this)closeRepairPhotoModal()">
   <button class="danger" type="button" onclick="closeRepairPhotoModal()">✕ Fermer</button>
@@ -1325,12 +1342,9 @@ table{border:1px solid var(--s-line)!important;border-radius:9px!important;overf
     <div class="v12GoogleApps">
       <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')" title="Gmail">✉️</button>
       <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')" title="Google Agenda">📅</button>
-      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')" title="Google Drive">🔺</button>
-      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')" title="Google Contacts">👥</button>
     </div>
 
     <button class="v12IconButton" onclick="show('settings')" title="Paramètres">⚙️</button>
-    <button class="v12IconButton" onclick="alert('Aide TECH42SERVICE bientôt disponible.')" title="Aide">❔</button>
     <button class="v12PowerButton" onclick="logout()" title="Déconnexion">⏻</button>
   </div>
 </header>
@@ -1610,22 +1624,6 @@ table{border:1px solid var(--s-line)!important;border-radius:9px!important;overf
 </main></div>
 
 <aside class="appRightbar">
-  <div class="rightPanel v12RightGoogle">
-    <div class="rightPanelHead">
-      <div>
-        <h3><span class="googleG">G</span> Google</h3>
-        <div class="muted">Raccourcis rapides</div>
-      </div>
-    </div>
-    <div class="v12RightGoogleList">
-      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')"><span>✉️</span><div><b>Gmail</b><small>Messagerie<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous Google<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')"><span>🔺</span><div><b>Google Drive</b><small>Fichiers cloud<br>tech42service@gmail.com</small></div></button>
-      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')"><span>👥</span><div><b>Contacts</b><small>Carnet Google<br>tech42service@gmail.com</small></div></button>
-      <button class="v12AllGoogle" onclick="window.open('https://www.google.com/intl/fr/about/products/','_blank')">Tous les services Google →</button>
-    </div>
-  </div>
-
   <div class="rightPanel">
     <div class="rightPanelHead">
       <div>
@@ -1652,7 +1650,7 @@ const tabs=[
   {id:'notes',icon:'📝',title:'Notes',desc:'Notes, rappels et tâches'},
   {id:'settingsHub',icon:'⚙️',title:'Paramètres',desc:'Réglages, journal et garanties'}
 ];
-document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
+document.getElementById('nav').innerHTML=tabs.map(t=>`<button data-module="${t.id}" onclick="${`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
 
 
 const SOCIAL_ICONS={
@@ -1852,7 +1850,16 @@ function unlock(){
   const index=Number(val('loginUser')||0);
   const password=val('loginPass');
   const account=db.users[index];
-  if(account&&password===account.pass){currentUser=account.name;$('lock').style.display='none';$('loginErr').textContent='';setv('loginPass','');log('Connexion de '+currentUser);}
+  if(account&&password===account.pass){
+    currentUser=account.name;
+    const readOnly=index===1 || /employ|collab|demo|visiteur/i.test(String(account.role||''));
+    document.body.classList.toggle('collabReadonly',readOnly);
+    $('lock').style.display='none';
+    $('loginErr').textContent='';
+    setv('loginPass','');
+    show('home');
+    log('Connexion de '+currentUser+(readOnly?' — lecture seule':''));
+  }
   else $('loginErr').textContent='Utilisateur ou mot de passe incorrect';
 }
 function checkLock(){if(db.settings.pass)$('lock').style.display='flex'}
@@ -1860,6 +1867,7 @@ function logout(){
   if(!confirm('Voulez-vous vraiment vous déconnecter ?')) return;
   log('Déconnexion');
   currentUser='';
+  document.body.classList.remove('collabReadonly');
   setv('loginPass','');
   refreshLoginUsers();
   if($('loginErr')) $('loginErr').textContent='Vous êtes déconnecté.';
@@ -2221,27 +2229,7 @@ header h1{font-size:20px;letter-spacing:.4px}
   .headerActions button{padding:6px 8px!important}
 }
 
-</style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
- const sel=document.getElementById('profile')||document.querySelector('select');
- if(!sel) return;
- function applyDemo(){
-   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
-   if(!demo) return;
-   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
-      if(el===sel) return;
-      if(el.id==='loginBtn'||el.type==='submit') return;
-      if(el.closest('header')) return;
-      el.disabled=true;
-   });
-   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
- }
- sel.addEventListener('change',applyDemo);
-});
-</script>
-
-</body></html>`;
+</style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`;
   const w=window.open('','_blank','width=700,height=500');if(!w){alert('Autorisez les fenêtres pop-up pour imprimer l’étiquette.');return;}w.document.open();w.document.write(html);w.document.close();
 }
 function fileToDataURL(input){return new Promise(res=>{let f=input&&input.files&&input.files[0];if(!f)return res('');let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)})}
@@ -2564,27 +2552,7 @@ header h1{font-size:20px;letter-spacing:.4px}
       }
       window.addEventListener('load',function(){fit();setTimeout(fit,120)});
     })();
-  <\/script>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
- const sel=document.getElementById('profile')||document.querySelector('select');
- if(!sel) return;
- function applyDemo(){
-   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
-   if(!demo) return;
-   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
-      if(el===sel) return;
-      if(el.id==='loginBtn'||el.type==='submit') return;
-      if(el.closest('header')) return;
-      el.disabled=true;
-   });
-   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
- }
- sel.addEventListener('change',applyDemo);
-});
-</script>
-
-</body></html>`);
+  <\/script></body></html>`);
   w.document.close();
   w.focus();
   setTimeout(()=>{try{w.print()}catch(e){alert('Impossible de lancer l’impression.')}},650);
@@ -3023,48 +2991,8 @@ function saveWriterDoc(){let title=val('writer_title')||'Document sans titre',ex
 function loadWriter(i){let x=db.writerDocs[i];setv('writer_title',x.title);$('writer_editor').innerHTML=x.html;show('writer')}
 function deleteWriter(i){if(confirm('Supprimer ce document ?')){db.writerDocs.splice(i,1);save('Document texte supprimé')}}
 function renderWriterList(){if(!$('writerList'))return;$('writerList').innerHTML=db.writerDocs.map((x,i)=>`<div class="fileCard"><b>${esc(x.title)}</b><br><span class="muted">${esc(x.updated)}</span><br><button class="small" onclick="loadWriter(${i})">Ouvrir</button> <button class="small danger" onclick="deleteWriter(${i})">Supprimer</button></div>`).join('')||'<p class="muted">Aucun document enregistré.</p>'}
-function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
- const sel=document.getElementById('profile')||document.querySelector('select');
- if(!sel) return;
- function applyDemo(){
-   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
-   if(!demo) return;
-   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
-      if(el===sel) return;
-      if(el.id==='loginBtn'||el.type==='submit') return;
-      if(el.closest('header')) return;
-      el.disabled=true;
-   });
-   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
- }
- sel.addEventListener('change',applyDemo);
-});
-</script>
-
-</body></html>');w.document.close();w.print()}
-function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
- const sel=document.getElementById('profile')||document.querySelector('select');
- if(!sel) return;
- function applyDemo(){
-   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
-   if(!demo) return;
-   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
-      if(el===sel) return;
-      if(el.id==='loginBtn'||el.type==='submit') return;
-      if(el.closest('header')) return;
-      el.disabled=true;
-   });
-   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
- }
- sel.addEventListener('change',applyDemo);
-});
-</script>
-
-</body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
+function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'</body></html>');w.document.close();w.print()}
+function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'</body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
 function clearContact(){['ct_i','ct_nom','ct_pre','ct_societe','ct_tel','ct_mail','ct_adresse','ct_notes'].forEach(x=>setv(x,''))}
 function saveContact(){if(!val('ct_nom')){alert('Indiquez au minimum un nom.');return}let i=val('ct_i'),o={nom:val('ct_nom'),pre:val('ct_pre'),societe:val('ct_societe'),tel:val('ct_tel'),mail:val('ct_mail'),adresse:val('ct_adresse'),notes:val('ct_notes')};if(i==='')db.contacts.push(o);else db.contacts[+i]=o;clearContact();save('Contact enregistré : '+o.nom+' '+o.pre)}
 function editContact(i){let c=db.contacts[i];setv('ct_i',i);Object.keys(c).forEach(k=>setv('ct_'+k,c[k]));show('contacts')}
@@ -3321,26 +3249,6 @@ window.addEventListener('load',()=>{
       updateSaveBadge('💾 Mode local — cloud indisponible');
     }
   },80);
-});
-</script>
-
-
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
- const sel=document.getElementById('profile')||document.querySelector('select');
- if(!sel) return;
- function applyDemo(){
-   const demo=(sel.value||'').toLowerCase().includes('demo')||(sel.value||'').toLowerCase().includes('collab')||(sel.value||'').toLowerCase().includes('utilisateur');
-   if(!demo) return;
-   document.querySelectorAll('input,textarea,select,button').forEach(el=>{
-      if(el===sel) return;
-      if(el.id==='loginBtn'||el.type==='submit') return;
-      if(el.closest('header')) return;
-      el.disabled=true;
-   });
-   document.querySelectorAll('[contenteditable]').forEach(e=>e.contentEditable='false');
- }
- sel.addEventListener('change',applyDemo);
 });
 </script>
 
