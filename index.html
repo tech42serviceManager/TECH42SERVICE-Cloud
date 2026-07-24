@@ -1269,46 +1269,21 @@ button{border-radius:8px!important;box-shadow:none!important}input,select,textar
 table{border:1px solid var(--s-line)!important;border-radius:9px!important;overflow:hidden!important;background:#0d0f0f!important}th{background:#131515!important;color:#d9c77e!important;font-size:11px!important}td{font-size:11.5px!important;border-bottom-color:#252929!important}
 
 
-/* V15 — Compte collaborateur strictement visuel */
-body.collabReadonly main{pointer-events:none;}
-body.collabReadonly main input,
-body.collabReadonly main select,
-body.collabReadonly main textarea,
-body.collabReadonly main button{opacity:.62;cursor:not-allowed!important;}
-body.collabReadonly #nav button[data-module="settings"],
-body.collabReadonly .v12IconButton[title="Paramètres"],
-body.collabReadonly .rightPanelHead button[onclick*="settings"]{display:none!important;}
-body.collabReadonly::after{
-  content:"MODE COLLABORATEUR — LECTURE SEULE";
-  position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
-  z-index:500;padding:8px 14px;border-radius:999px;
-  border:1px solid var(--gold);background:#171205;color:var(--gold2);
-  font-size:12px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.45);
-}
-
-/* V15 — Collaborateur lecture seule stable */
-body.collabReadonly .appContent,
-body.collabReadonly .appSidebar,
-body.collabReadonly .appRightbar,
-body.collabReadonly #moduleBar,
-body.collabReadonly .headerSearch,
-body.collabReadonly .headerActions button:not(.v12PowerButton),
-body.collabReadonly header button:not(.v12PowerButton){
-  pointer-events:none!important;
+/* V15 — Collaborateur visuel uniquement */
+body.collabReadonly .appShell,
+body.collabReadonly header{
   user-select:none!important;
 }
-body.collabReadonly .v12PowerButton,
-body.collabReadonly button[onclick*="logout"]{
+body.collabReadonly .appContent *,
+body.collabReadonly .appSidebar *,
+body.collabReadonly .appRightbar *,
+body.collabReadonly header *{
+  pointer-events:none!important;
+}
+body.collabReadonly .powerButton,
+body.collabReadonly [onclick*="logout"]{
   pointer-events:auto!important;
   cursor:pointer!important;
-  opacity:1!important;
-}
-body.collabReadonly input,
-body.collabReadonly textarea,
-body.collabReadonly select,
-body.collabReadonly [contenteditable="true"]{
-  pointer-events:none!important;
-  user-select:none!important;
 }
 
 </style></head><body>
@@ -1329,7 +1304,7 @@ body.collabReadonly [contenteditable="true"]{
 </div>
 
 <div id="splash" class="splash"><div class="splashInner"><div id="splashLogo" class="splashLogo"><span class="splashLogoText">T42</span></div><div class="splashTitle">TECH42SERVICE</div><div class="splashSub">La gestion d'atelier pensée par un réparateur, pour les réparateurs.</div><div class="splashBar"><span></span></div></div></div>
-<div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" name="t42_profile" autocomplete="off"></select></div><div class="loginField pass"><input id="loginPass" name="t42_password" type="password" autocomplete="new-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
+<div id="lock" class="lock"><div class="lockbox"><div id="loginLogo" class="loginLogo">T42</div><h2 class="loginPremiumTitle">Connexion TECH42SERVICE</h2><div class="loginSlogan">La gestion d’atelier pensée par un <strong>réparateur</strong>, pour les <strong>réparateurs</strong>.</div><p class="loginInstruction">Choisissez votre utilisateur et saisissez votre mot de passe.</p><div class="loginField user"><select id="loginUser" name="t42_profile" autocomplete="off"></select></div><div class="loginField pass"><input id="loginPass" name="t42_password_no_store" type="password" autocomplete="new-password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')unlock()"></div><button class="primary" onclick="unlock()">Se connecter</button><p id="loginErr" class="late"></p><p class="loginHint">Les deux comptes sont modifiables dans ⚙️ Paramètres.</p></div></div>
 
 <header class="v12Header">
   <div class="v12HeaderBrand">
@@ -1368,9 +1343,12 @@ body.collabReadonly [contenteditable="true"]{
     <div class="v12GoogleApps">
       <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')" title="Gmail">✉️</button>
       <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')" title="Google Agenda">📅</button>
+      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')" title="Google Drive">🔺</button>
+      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')" title="Google Contacts">👥</button>
     </div>
 
     <button class="v12IconButton" onclick="show('settings')" title="Paramètres">⚙️</button>
+    <button class="v12IconButton" onclick="alert('Aide TECH42SERVICE bientôt disponible.')" title="Aide">❔</button>
     <button class="v12PowerButton" onclick="logout()" title="Déconnexion">⏻</button>
   </div>
 </header>
@@ -1650,6 +1628,22 @@ body.collabReadonly [contenteditable="true"]{
 </main></div>
 
 <aside class="appRightbar">
+  <div class="rightPanel v12RightGoogle">
+    <div class="rightPanelHead">
+      <div>
+        <h3><span class="googleG">G</span> Google</h3>
+        <div class="muted">Raccourcis rapides</div>
+      </div>
+    </div>
+    <div class="v12RightGoogleList">
+      <button onclick="window.open('https://mail.google.com/mail/u/tech42service@gmail.com/','_blank')"><span>✉️</span><div><b>Gmail</b><small>Messagerie<br>tech42service@gmail.com</small></div></button>
+      <button onclick="window.open('https://calendar.google.com/calendar/u/tech42service@gmail.com/r','_blank')"><span>📅</span><div><b>Agenda</b><small>Rendez-vous Google<br>tech42service@gmail.com</small></div></button>
+      <button onclick="window.open('https://drive.google.com/drive/u/tech42service@gmail.com/my-drive','_blank')"><span>🔺</span><div><b>Google Drive</b><small>Fichiers cloud<br>tech42service@gmail.com</small></div></button>
+      <button onclick="window.open('https://contacts.google.com/u/tech42service@gmail.com/','_blank')"><span>👥</span><div><b>Contacts</b><small>Carnet Google<br>tech42service@gmail.com</small></div></button>
+      <button class="v12AllGoogle" onclick="window.open('https://www.google.com/intl/fr/about/products/','_blank')">Tous les services Google →</button>
+    </div>
+  </div>
+
   <div class="rightPanel">
     <div class="rightPanelHead">
       <div>
@@ -1676,7 +1670,7 @@ const tabs=[
   {id:'notes',icon:'📝',title:'Notes',desc:'Notes, rappels et tâches'},
   {id:'settingsHub',icon:'⚙️',title:'Paramètres',desc:'Réglages, journal et garanties'}
 ];
-document.getElementById('nav').innerHTML=tabs.map(t=>`<button data-module="${t.id}" onclick="${`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
+document.getElementById('nav').innerHTML=tabs.map(t=>`<button onclick="${`show('${t.id}')`}"><span class="navIcon">${t.icon}</span><span class="navText"><span class="navTitle">${t.title}</span><span class="navDesc">${t.desc}</span></span></button>`).join('');
 
 
 const SOCIAL_ICONS={
@@ -1878,15 +1872,15 @@ function unlock(){
   const account=db.users[index];
   if(account&&password===account.pass){
     currentUser=account.name;
-    const readOnly=index===1 || /employ|collab|demo|visiteur/i.test(String(account.role||''));
-    document.body.classList.toggle('collabReadonly',readOnly);
+    const role=String(account.role||'').toLowerCase();
+    const name=String(account.name||'').toLowerCase();
+    const collaborator=index===1||role.includes('collab')||role.includes('demo')||role.includes('visiteur')||name.includes('collab');
+    document.body.classList.toggle('collabReadonly',collaborator);
     $('lock').style.display='none';
     $('loginErr').textContent='';
     setv('loginPass','');
-    show('home');
-    log('Connexion de '+currentUser+(readOnly?' — lecture seule':''));
-  }
-  else $('loginErr').textContent='Utilisateur ou mot de passe incorrect';
+    log('Connexion de '+currentUser+(collaborator?' — lecture seule':''));
+  } else $('loginErr').textContent='Utilisateur ou mot de passe incorrect';
 }
 function checkLock(){if(db.settings.pass)$('lock').style.display='flex'}
 function logout(){
@@ -2256,45 +2250,55 @@ header h1{font-size:20px;letter-spacing:.4px}
 }
 
 
-/* V15 — Collaborateur lecture seule stable */
-body.collabReadonly .appContent,
-body.collabReadonly .appSidebar,
-body.collabReadonly .appRightbar,
-body.collabReadonly #moduleBar,
-body.collabReadonly .headerSearch,
-body.collabReadonly .headerActions button:not(.v12PowerButton),
-body.collabReadonly header button:not(.v12PowerButton){
-  pointer-events:none!important;
+/* V15 — Collaborateur visuel uniquement */
+body.collabReadonly .appShell,
+body.collabReadonly header{
   user-select:none!important;
 }
-body.collabReadonly .v12PowerButton,
-body.collabReadonly button[onclick*="logout"]{
+body.collabReadonly .appContent *,
+body.collabReadonly .appSidebar *,
+body.collabReadonly .appRightbar *,
+body.collabReadonly header *{
+  pointer-events:none!important;
+}
+body.collabReadonly .powerButton,
+body.collabReadonly [onclick*="logout"]{
   pointer-events:auto!important;
   cursor:pointer!important;
-  opacity:1!important;
-}
-body.collabReadonly input,
-body.collabReadonly textarea,
-body.collabReadonly select,
-body.collabReadonly [contenteditable="true"]{
-  pointer-events:none!important;
-  user-select:none!important;
 }
 
 </style></head><body><div class="label"><div class="top"><div class="brand">TECH42SERVICE</div><div class="case">${esc(r.id)}</div></div><div class="client">${esc(r.client||'Client non renseigné')}</div><div class="device">${esc(device)}</div><div class="work">${esc(work)}</div><div class="barcode">${code39Svg(r.id)}</div><div class="code">${esc(r.id)}</div></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script>
-<script id="v15StableCollab">
-(function(){
-  function clearPassword(){
-    var p=document.getElementById('loginPass');
-    if(p){
-      p.value='';
-      p.setAttribute('autocomplete','new-password');
+<script id="v15CleanupStable">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    document.querySelectorAll('button,a').forEach(function(el){
+      const label=(el.textContent||'').trim().toLowerCase();
+      if(label==='?' || label==='❔' || label.includes('google contact') || label==='drive' || label.includes('google drive')){
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll('.rightPanel,.v12RightGoogle,.rightGooglePanel').forEach(function(panel){
+      const txt=(panel.textContent||'').toLowerCase();
+      if((txt.includes('module google') || txt.includes('raccourci google')) &&
+         !txt.includes('réseaux') && !txt.includes('facebook') && !txt.includes('instagram')){
+        panel.remove();
+      }
+    });
+
+    const pass=document.getElementById('loginPass');
+    if(pass){
+      pass.value='';
+      pass.setAttribute('autocomplete','new-password');
     }
+  }catch(e){
+    console.error('Nettoyage interface V15',e);
   }
-  document.addEventListener('DOMContentLoaded', clearPassword);
-  window.addEventListener('pageshow', clearPassword);
-  window.addEventListener('beforeunload', clearPassword);
-})();
+});
+window.addEventListener('pageshow',function(){
+  const p=document.getElementById('loginPass');
+  if(p) p.value='';
+});
 </script>
 
 </body></html>`;
@@ -2608,29 +2612,21 @@ header h1{font-size:20px;letter-spacing:.4px}
 }
 
 
-/* V15 — Collaborateur lecture seule stable */
-body.collabReadonly .appContent,
-body.collabReadonly .appSidebar,
-body.collabReadonly .appRightbar,
-body.collabReadonly #moduleBar,
-body.collabReadonly .headerSearch,
-body.collabReadonly .headerActions button:not(.v12PowerButton),
-body.collabReadonly header button:not(.v12PowerButton){
-  pointer-events:none!important;
+/* V15 — Collaborateur visuel uniquement */
+body.collabReadonly .appShell,
+body.collabReadonly header{
   user-select:none!important;
 }
-body.collabReadonly .v12PowerButton,
-body.collabReadonly button[onclick*="logout"]{
+body.collabReadonly .appContent *,
+body.collabReadonly .appSidebar *,
+body.collabReadonly .appRightbar *,
+body.collabReadonly header *{
+  pointer-events:none!important;
+}
+body.collabReadonly .powerButton,
+body.collabReadonly [onclick*="logout"]{
   pointer-events:auto!important;
   cursor:pointer!important;
-  opacity:1!important;
-}
-body.collabReadonly input,
-body.collabReadonly textarea,
-body.collabReadonly select,
-body.collabReadonly [contenteditable="true"]{
-  pointer-events:none!important;
-  user-select:none!important;
 }
 
 </style></head><body><div class="print-root">${printable.innerHTML}</div><script>
@@ -2647,19 +2643,37 @@ body.collabReadonly [contenteditable="true"]{
       window.addEventListener('load',function(){fit();setTimeout(fit,120)});
     })();
   <\/script>
-<script id="v15StableCollab">
-(function(){
-  function clearPassword(){
-    var p=document.getElementById('loginPass');
-    if(p){
-      p.value='';
-      p.setAttribute('autocomplete','new-password');
+<script id="v15CleanupStable">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    document.querySelectorAll('button,a').forEach(function(el){
+      const label=(el.textContent||'').trim().toLowerCase();
+      if(label==='?' || label==='❔' || label.includes('google contact') || label==='drive' || label.includes('google drive')){
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll('.rightPanel,.v12RightGoogle,.rightGooglePanel').forEach(function(panel){
+      const txt=(panel.textContent||'').toLowerCase();
+      if((txt.includes('module google') || txt.includes('raccourci google')) &&
+         !txt.includes('réseaux') && !txt.includes('facebook') && !txt.includes('instagram')){
+        panel.remove();
+      }
+    });
+
+    const pass=document.getElementById('loginPass');
+    if(pass){
+      pass.value='';
+      pass.setAttribute('autocomplete','new-password');
     }
+  }catch(e){
+    console.error('Nettoyage interface V15',e);
   }
-  document.addEventListener('DOMContentLoaded', clearPassword);
-  window.addEventListener('pageshow', clearPassword);
-  window.addEventListener('beforeunload', clearPassword);
-})();
+});
+window.addEventListener('pageshow',function(){
+  const p=document.getElementById('loginPass');
+  if(p) p.value='';
+});
 </script>
 
 </body></html>`);
@@ -3102,36 +3116,72 @@ function loadWriter(i){let x=db.writerDocs[i];setv('writer_title',x.title);$('wr
 function deleteWriter(i){if(confirm('Supprimer ce document ?')){db.writerDocs.splice(i,1);save('Document texte supprimé')}}
 function renderWriterList(){if(!$('writerList'))return;$('writerList').innerHTML=db.writerDocs.map((x,i)=>`<div class="fileCard"><b>${esc(x.title)}</b><br><span class="muted">${esc(x.updated)}</span><br><button class="small" onclick="loadWriter(${i})">Ouvrir</button> <button class="small danger" onclick="deleteWriter(${i})">Supprimer</button></div>`).join('')||'<p class="muted">Aucun document enregistré.</p>'}
 function printWriter(){let w=window.open('','_blank');w.document.write('<html><head><title>'+esc(val('writer_title'))+'</title></head><body>'+$('writer_editor').innerHTML+'
-<script id="v15StableCollab">
-(function(){
-  function clearPassword(){
-    var p=document.getElementById('loginPass');
-    if(p){
-      p.value='';
-      p.setAttribute('autocomplete','new-password');
+<script id="v15CleanupStable">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    document.querySelectorAll('button,a').forEach(function(el){
+      const label=(el.textContent||'').trim().toLowerCase();
+      if(label==='?' || label==='❔' || label.includes('google contact') || label==='drive' || label.includes('google drive')){
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll('.rightPanel,.v12RightGoogle,.rightGooglePanel').forEach(function(panel){
+      const txt=(panel.textContent||'').toLowerCase();
+      if((txt.includes('module google') || txt.includes('raccourci google')) &&
+         !txt.includes('réseaux') && !txt.includes('facebook') && !txt.includes('instagram')){
+        panel.remove();
+      }
+    });
+
+    const pass=document.getElementById('loginPass');
+    if(pass){
+      pass.value='';
+      pass.setAttribute('autocomplete','new-password');
     }
+  }catch(e){
+    console.error('Nettoyage interface V15',e);
   }
-  document.addEventListener('DOMContentLoaded', clearPassword);
-  window.addEventListener('pageshow', clearPassword);
-  window.addEventListener('beforeunload', clearPassword);
-})();
+});
+window.addEventListener('pageshow',function(){
+  const p=document.getElementById('loginPass');
+  if(p) p.value='';
+});
 </script>
 
 </body></html>');w.document.close();w.print()}
 function exportWriterDoc(){downloadBlob('<html><meta charset="utf-8"><body>'+$('writer_editor').innerHTML+'
-<script id="v15StableCollab">
-(function(){
-  function clearPassword(){
-    var p=document.getElementById('loginPass');
-    if(p){
-      p.value='';
-      p.setAttribute('autocomplete','new-password');
+<script id="v15CleanupStable">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    document.querySelectorAll('button,a').forEach(function(el){
+      const label=(el.textContent||'').trim().toLowerCase();
+      if(label==='?' || label==='❔' || label.includes('google contact') || label==='drive' || label.includes('google drive')){
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll('.rightPanel,.v12RightGoogle,.rightGooglePanel').forEach(function(panel){
+      const txt=(panel.textContent||'').toLowerCase();
+      if((txt.includes('module google') || txt.includes('raccourci google')) &&
+         !txt.includes('réseaux') && !txt.includes('facebook') && !txt.includes('instagram')){
+        panel.remove();
+      }
+    });
+
+    const pass=document.getElementById('loginPass');
+    if(pass){
+      pass.value='';
+      pass.setAttribute('autocomplete','new-password');
     }
+  }catch(e){
+    console.error('Nettoyage interface V15',e);
   }
-  document.addEventListener('DOMContentLoaded', clearPassword);
-  window.addEventListener('pageshow', clearPassword);
-  window.addEventListener('beforeunload', clearPassword);
-})();
+});
+window.addEventListener('pageshow',function(){
+  const p=document.getElementById('loginPass');
+  if(p) p.value='';
+});
 </script>
 
 </body></html>',(val('writer_title')||'document')+'.doc','application/msword')}
@@ -3355,7 +3405,16 @@ function openManagedFile(i){let x=db.managedFiles[i];let a=document.createElemen
 function deleteManagedFile(i){if(confirm('Supprimer ce document ?')){db.managedFiles.splice(i,1);save('Document supprimé')}}
 function renderFiles(){if(!$('fileList'))return;let q=val('q_files').toLowerCase();$('fileList').innerHTML=db.managedFiles.map((x,i)=>({...x,i})).filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q)).map(x=>`<div class="fileCard"><b>${esc(x.name)}</b><br><span class="pill">${esc(x.cat)}</span><p class="muted">${esc(x.client||'')} ${esc(x.repair||'')}<br>${esc(x.date||'')} — ${(x.size/1024).toFixed(0)} Ko</p><button class="small" onclick="gmailManagedFile(${x.i})">📧 Gmail</button> <button class="small" onclick="printManagedFile(${x.i})">🖨️ Imprimer</button> <button class="small" onclick="editManagedFile(${x.i})">✏️ Modifier</button> <button class="small danger" onclick="deleteManagedFile(${x.i})">Supprimer</button></div>`).join('')||'<p class="muted">Aucun document.</p>'}
 
-render();toggleSaleOrigin();updateSaveBadge('☁️ Connexion cloud en cours…');startSplash();setTimeout(()=>runHealthCheck(false),300);
+startSplash();
+setTimeout(()=>{
+  const splash=$('splash');
+  if(splash) splash.classList.add('hide');
+  try{checkLock()}catch(e){console.error('Ouverture connexion',e)}
+},7000);
+try{render()}catch(e){console.error('Rendu initial',e)}
+try{toggleSaleOrigin()}catch(e){console.error('Origine vente',e)}
+try{updateSaveBadge('☁️ Connexion cloud en cours…')}catch(e){console.error('Badge sauvegarde',e)}
+setTimeout(()=>{try{runHealthCheck(false)}catch(e){console.error('Contrôle santé',e)}},300);
 setInterval(autoSaveEvery5Min,300000);
 
 function openExternal(url){ window.open(url,'_blank'); }
@@ -3395,19 +3454,37 @@ window.addEventListener('load',()=>{
 </script>
 
 
-<script id="v15StableCollab">
-(function(){
-  function clearPassword(){
-    var p=document.getElementById('loginPass');
-    if(p){
-      p.value='';
-      p.setAttribute('autocomplete','new-password');
+<script id="v15CleanupStable">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    document.querySelectorAll('button,a').forEach(function(el){
+      const label=(el.textContent||'').trim().toLowerCase();
+      if(label==='?' || label==='❔' || label.includes('google contact') || label==='drive' || label.includes('google drive')){
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll('.rightPanel,.v12RightGoogle,.rightGooglePanel').forEach(function(panel){
+      const txt=(panel.textContent||'').toLowerCase();
+      if((txt.includes('module google') || txt.includes('raccourci google')) &&
+         !txt.includes('réseaux') && !txt.includes('facebook') && !txt.includes('instagram')){
+        panel.remove();
+      }
+    });
+
+    const pass=document.getElementById('loginPass');
+    if(pass){
+      pass.value='';
+      pass.setAttribute('autocomplete','new-password');
     }
+  }catch(e){
+    console.error('Nettoyage interface V15',e);
   }
-  document.addEventListener('DOMContentLoaded', clearPassword);
-  window.addEventListener('pageshow', clearPassword);
-  window.addEventListener('beforeunload', clearPassword);
-})();
+});
+window.addEventListener('pageshow',function(){
+  const p=document.getElementById('loginPass');
+  if(p) p.value='';
+});
 </script>
 
 </body></html>
