@@ -88,6 +88,20 @@
     }
     .notice{padding:10px;border-radius:9px;background:#0e2515;color:#74ef8b;margin-top:12px}
     .demo-banner{padding:12px;margin-bottom:18px;border:1px solid #8a6b00;border-radius:10px;background:#241d00;color:#ffd95a;text-align:center;font-weight:800}.readonly-note{padding:12px;border:1px solid #574515;border-radius:10px;background:#1c1708;color:#ffd769;margin-bottom:18px}
+    .page-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .action-btn{padding:11px 14px;border:0;border-radius:9px;background:var(--accent);color:#080808;font-weight:800;cursor:pointer}
+    .action-btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+    .repair-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .repair-form .full{grid-column:1/-1}
+    .repair-form input,.repair-form select,.repair-form textarea{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .repair-form textarea{min-height:90px;resize:vertical}
+    .repair-table{width:100%;border-collapse:collapse;margin-top:14px}
+    .repair-table th,.repair-table td{padding:12px;border-bottom:1px solid #2a2a2a;text-align:left}
+    .repair-table th{color:var(--accent)}
+    .status{display:inline-block;padding:5px 9px;border-radius:999px;background:#26200b;color:#ffd45c;border:1px solid #6d5714;font-size:12px}
+    .empty-state{color:var(--muted);text-align:center;padding:25px}
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -97,7 +111,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -133,7 +147,7 @@
 
       <nav class="menu">
         <button class="active" data-page="dashboard">Accueil</button>
-        <button>Réparations</button>
+        <button data-page="repairs">Réparations</button>
         <button>Clients</button>
         <button>Stock</button>
         <button>Rendez-vous</button>
@@ -150,13 +164,7 @@
             <h1>Tableau de bord</h1>
             <p>Bienvenue dans TECH42SERVICE Gestion</p>
           </div>
-          <select id="theme" class="theme-select" aria-label="Choisir le thème">
-            <option value="gold">Noir & Or</option>
-            <option value="blue">Noir & Bleu</option>
-            <option value="red">Noir & Rouge</option>
-            <option value="green">Noir & Vert</option>
-            <option value="purple">Noir & Violet</option>
-          </select>
+
         </header>
 
         <div id="readonlyNote" class="demo-banner hidden">MODE PRÉSENTATION — Données fictives — Aucune modification autorisée</div>
@@ -184,6 +192,87 @@
         </section>
       </section>
 
+
+      <section id="repairsPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Réparations</h1>
+            <p>Gestion des dossiers de réparation</p>
+          </div>
+        </header>
+
+        <div id="repairDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <div class="page-actions">
+            <button id="newRepairBtn" class="action-btn write-action">Nouvelle réparation</button>
+            <button id="cancelRepairBtn" class="action-btn secondary hidden">Fermer le formulaire</button>
+          </div>
+
+          <form id="repairForm" class="repair-form hidden">
+            <div class="field">
+              <label>Client</label>
+              <input id="repairClient" type="text" required>
+            </div>
+            <div class="field">
+              <label>Téléphone</label>
+              <input id="repairPhone" type="tel">
+            </div>
+            <div class="field">
+              <label>Appareil</label>
+              <select id="repairDevice" required>
+                <option value="">Choisir</option>
+                <option>Téléphone</option>
+                <option>Tablette</option>
+                <option>PC</option>
+                <option>Console</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Marque / Modèle</label>
+              <input id="repairModel" type="text" required>
+            </div>
+            <div class="field full">
+              <label>Panne déclarée</label>
+              <textarea id="repairIssue" required></textarea>
+            </div>
+            <div class="field">
+              <label>Statut</label>
+              <select id="repairStatus">
+                <option>En attente</option>
+                <option>Diagnostic</option>
+                <option>En réparation</option>
+                <option>Terminé</option>
+                <option>Restitué</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Prix estimé (€)</label>
+              <input id="repairPrice" type="number" min="0" step="0.01">
+            </div>
+            <div class="full">
+              <button class="save-btn" type="submit">Enregistrer la réparation</button>
+            </div>
+          </form>
+
+          <table class="repair-table">
+            <thead>
+              <tr>
+                <th>Dossier</th>
+                <th>Client</th>
+                <th>Appareil</th>
+                <th>Panne</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="repairTableBody"></tbody>
+          </table>
+          <div id="repairEmpty" class="empty-state">Aucune réparation enregistrée.</div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -194,6 +283,21 @@
 
         <div id="adminOnlySettings">
           <div class="settings-grid">
+
+          <div class="settings-card">
+            <h3>Apparence</h3>
+            <div class="field">
+              <label for="theme">Couleur du thème</label>
+              <select id="theme" class="theme-select">
+                <option value="gold">Noir & Or</option>
+                <option value="blue">Noir & Bleu</option>
+                <option value="red">Noir & Rouge</option>
+                <option value="green">Noir & Vert</option>
+                <option value="purple">Noir & Violet</option>
+              </select>
+            </div>
+          </div>
+
             <form id="adminPasswordForm" class="settings-card">
               <h3>Compte administrateur</h3>
               <div class="field">
@@ -229,7 +333,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V3 présentation</footer>
+      <footer>TECH42SERVICE Gestion — V4 réparations</footer>
     </main>
   </div>
 
@@ -247,6 +351,8 @@
     const readonlyNote = document.getElementById("readonlyNote");
     const dashboardPage = document.getElementById("dashboardPage");
     const settingsPage = document.getElementById("settingsPage");
+    const repairsPage = document.getElementById("repairsPage");
+    const repairDemoNote = document.getElementById("repairDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -273,6 +379,7 @@
       activeRole = role;
       currentUser.textContent = role === "admin" ? "Administrateur" : "Compte visuel";
       readonlyNote.classList.toggle("hidden", role !== "visuel");
+      repairDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -307,6 +414,7 @@
       password.value = "";
       loginError.textContent = "";
       showPage("dashboard");
+      renderRepairs();
     });
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -327,7 +435,10 @@
         page = "dashboard";
       }
       dashboardPage.classList.toggle("hidden", page !== "dashboard");
+      repairsPage.classList.toggle("hidden", page !== "repairs");
       settingsPage.classList.toggle("hidden", page !== "settings");
+
+      if(page === "repairs") renderRepairs();
 
       if(page === "settings"){
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
@@ -369,6 +480,79 @@
       msg.className = "notice";
       msg.textContent = "Mot de passe du compte visuel modifié.";
       event.target.reset();
+    });
+
+
+    const demoRepairs = [
+      {id:"REP-2026-001",client:"Jean Martin",device:"iPhone 13",issue:"Écran cassé",status:"En réparation"},
+      {id:"REP-2026-002",client:"Sophie Bernard",device:"PC Asus",issue:"Ne démarre plus",status:"Diagnostic"},
+      {id:"REP-2026-003",client:"Lucas Petit",device:"PS5",issue:"Port HDMI endommagé",status:"En attente"}
+    ];
+
+    function getAdminRepairs(){
+      try{return JSON.parse(localStorage.getItem("tech42-repairs") || "[]")}catch{return []}
+    }
+
+    function saveAdminRepairs(list){
+      localStorage.setItem("tech42-repairs", JSON.stringify(list));
+    }
+
+    function renderRepairs(){
+      const tbody = document.getElementById("repairTableBody");
+      const empty = document.getElementById("repairEmpty");
+      const list = activeRole === "visuel" ? demoRepairs : getAdminRepairs();
+
+      tbody.innerHTML = "";
+      list.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.client}</td>
+          <td>${item.device}</td>
+          <td>${item.issue}</td>
+          <td><span class="status">${item.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      empty.classList.toggle("hidden", list.length > 0);
+    }
+
+    document.getElementById("newRepairBtn").addEventListener("click", () => {
+      if(activeRole === "visuel"){
+        alert("Action impossible en mode présentation.");
+        return;
+      }
+      document.getElementById("repairForm").classList.remove("hidden");
+      document.getElementById("cancelRepairBtn").classList.remove("hidden");
+    });
+
+    document.getElementById("cancelRepairBtn").addEventListener("click", () => {
+      document.getElementById("repairForm").classList.add("hidden");
+      document.getElementById("cancelRepairBtn").classList.add("hidden");
+      document.getElementById("repairForm").reset();
+    });
+
+    document.getElementById("repairForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      if(activeRole !== "admin") return;
+
+      const list = getAdminRepairs();
+      const id = "REP-" + new Date().getFullYear() + "-" + String(list.length + 1).padStart(3,"0");
+      list.unshift({
+        id,
+        client: document.getElementById("repairClient").value.trim(),
+        phone: document.getElementById("repairPhone").value.trim(),
+        device: document.getElementById("repairDevice").value + " " + document.getElementById("repairModel").value.trim(),
+        issue: document.getElementById("repairIssue").value.trim(),
+        status: document.getElementById("repairStatus").value,
+        price: document.getElementById("repairPrice").value
+      });
+      saveAdminRepairs(list);
+      event.target.reset();
+      event.target.classList.add("hidden");
+      document.getElementById("cancelRepairBtn").classList.add("hidden");
+      renderRepairs();
     });
 
     const themes = {
