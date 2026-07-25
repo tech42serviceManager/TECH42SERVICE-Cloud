@@ -258,6 +258,27 @@
     .photo-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .photo-type-card{border:1px solid var(--border);border-radius:10px;padding:12px;background:#101010}
 
+    
+    .pro-repair-section{grid-column:1/-1;background:#101010;border:1px solid var(--border);border-radius:12px;padding:14px}
+    .pro-repair-section h3{margin:0 0 14px;color:var(--accent)}
+    .pro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .signature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .signature-box{background:#0b0b0b;border:1px solid var(--border);border-radius:10px;padding:12px}
+    .signature-box canvas{width:100%;height:150px;background:#fff;border-radius:8px;touch-action:none;display:block}
+    .signature-actions{display:flex;gap:8px;margin-top:8px}
+    .repair-finance-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+    .finance-card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px}
+    .finance-card small{display:block;color:var(--muted);margin-bottom:5px}
+    .finance-card strong{font-size:20px;color:var(--accent)}
+    .history-list{display:grid;gap:9px;margin-top:12px}
+    .history-item{border-left:3px solid var(--accent);background:#101010;border-radius:8px;padding:10px}
+    .history-item small{color:var(--muted)}
+    .history-form{display:grid;grid-template-columns:160px 1fr 110px auto;gap:8px;align-items:end;margin-top:12px}
+    .history-form input,.history-form select{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)}
+    .codes-grid{display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:center}
+    .codes-grid img{max-width:100%;background:#fff;padding:8px;border-radius:8px}
+    .closed-badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#13331b;color:#7cf195;border:1px solid #286d38;font-weight:800}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -267,7 +288,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form,.codes-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -450,6 +471,51 @@
               <label>Date prévue</label>
               <input id="repairDueDate" type="date">
             </div>
+            <div class="pro-repair-section">
+              <h3>Suivi professionnel</h3>
+              <div class="pro-grid">
+                <div class="field">
+                  <label>Technicien</label>
+                  <input id="repairTechnician" type="text" placeholder="Ex. Christophe">
+                </div>
+                <div class="field">
+                  <label>Temps passé (minutes)</label>
+                  <input id="repairMinutes" type="number" min="0" step="5" value="0">
+                </div>
+                <div class="field">
+                  <label>Coût horaire interne (€)</label>
+                  <input id="repairHourlyCost" type="number" min="0" step="0.01" value="25">
+                </div>
+              </div>
+
+              <div class="repair-finance-grid">
+                <div class="finance-card"><small>Coût des pièces TTC</small><strong id="repairPartsCost">0,00 €</strong></div>
+                <div class="finance-card"><small>Coût main-d'œuvre</small><strong id="repairLaborCost">0,00 €</strong></div>
+                <div class="finance-card"><small>Coût réel</small><strong id="repairRealCost">0,00 €</strong></div>
+                <div class="finance-card"><small>Marge estimée</small><strong id="repairMargin">0,00 €</strong></div>
+              </div>
+            </div>
+
+            <div class="pro-repair-section">
+              <h3>Signatures</h3>
+              <div class="signature-grid">
+                <div class="signature-box">
+                  <label>Signature du client</label>
+                  <canvas id="clientSignatureCanvas" width="520" height="180"></canvas>
+                  <div class="signature-actions">
+                    <button id="clearClientSignature" class="mini-btn danger" type="button">Effacer</button>
+                  </div>
+                </div>
+                <div class="signature-box">
+                  <label>Signature du technicien</label>
+                  <canvas id="technicianSignatureCanvas" width="520" height="180"></canvas>
+                  <div class="signature-actions">
+                    <button id="clearTechnicianSignature" class="mini-btn danger" type="button">Effacer</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="field full">
               <label>Photos du dossier</label>
               <div class="photo-type-grid">
@@ -531,6 +597,7 @@
             <button id="printRepairBtn" class="action-btn">Imprimer la prise en charge</button>
             <button id="repairToQuoteBtn" class="action-btn secondary">Basculer en devis</button>
             <button id="repairToInvoiceBtn" class="action-btn secondary">Basculer en facture</button>
+            <button id="closeRepairBtn" class="action-btn secondary">Clôturer la réparation</button>
           </div>
         </div>
       </div>
@@ -1373,7 +1440,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V17 appareils et tableau de bord PRO</footer>
+      <footer>TECH42SERVICE Gestion — V18.1 dossier réparation PRO</footer>
     </main>
   </div>
 
@@ -1707,6 +1774,7 @@
         </select>
         <button class="mini-btn danger repair-line-remove" type="button">×</button>
       `;
+      if(data.stockId) row.dataset.stockId=data.stockId;
       document.getElementById("repairLines").appendChild(row);
       row.querySelectorAll("input,select").forEach(input=>input.addEventListener("input",updateRepairLinesTotal));
       row.querySelector(".repair-line-label").addEventListener("change",()=>applyStockSuggestionToRepairLine(row));
@@ -1722,7 +1790,8 @@
         label:row.querySelector(".repair-line-label").value.trim(),
         qty:Number(row.querySelector(".repair-line-qty").value || 0),
         unit:Number(row.querySelector(".repair-line-unit").value || 0),
-        mode:row.querySelector(".repair-line-mode").value
+        mode:row.querySelector(".repair-line-mode").value,
+        stockId:row.dataset.stockId||""
       })).filter(line=>line.label);
     }
 
@@ -1735,6 +1804,7 @@
       document.getElementById("repairLinesTotal").textContent =
         total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       document.getElementById("repairPrice").value = total ? total.toFixed(2) : "";
+      if(document.getElementById("repairPartsCost")) updateRepairProTotals();
     }
 
     document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
@@ -1795,9 +1865,17 @@
       document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
       currentRepairPhotos = [];
       renderRepairPhotosPreview();
+      document.getElementById("repairTechnician").value="";
+      document.getElementById("repairMinutes").value="0";
+      document.getElementById("repairHourlyCost").value="25";
+      clientSignatureData="";
+      technicianSignatureData="";
+      clientSignaturePad.clear();
+      technicianSignaturePad.clear();
       document.getElementById("repairLines").innerHTML = "";
       addRepairLine();
       updateRepairLinesTotal();
+      updateRepairProTotals();
       document.getElementById("saveRepairBtn").textContent = "Enregistrer la réparation";
     }
 
@@ -1860,8 +1938,27 @@
         dueDate: document.getElementById("repairDueDate").value,
         parts: getRepairLines().map(line=>line.label).join(", "),
         lines: getRepairLines(),
-        photos: [...currentRepairPhotos]
+        photos: [...currentRepairPhotos],
+        technician: document.getElementById("repairTechnician").value.trim(),
+        minutes: Number(document.getElementById("repairMinutes").value||0),
+        hourlyCost: Number(document.getElementById("repairHourlyCost").value||0),
+        clientSignature: clientSignatureData,
+        technicianSignature: technicianSignatureData,
+        history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
+          date:new Date().toISOString().slice(0,10),
+          action:"Création du dossier",
+          note:"Dossier de réparation créé.",
+          technician:document.getElementById("repairTechnician").value.trim(),
+          minutes:0
+        }],
+        closed: editId ? Boolean(list.find(r=>r.id===editId)?.closed) : false,
+        closedDate: editId ? (list.find(r=>r.id===editId)?.closedDate||"") : ""
       };
+      const pro=calculateRepairPro(item.lines);
+      item.partsCost=pro.partsCost;
+      item.laborCost=pro.laborCost;
+      item.realCost=pro.realCost;
+      item.margin=pro.margin;
 
       if(editId){
         const index = list.findIndex(r => r.id === editId);
@@ -1897,6 +1994,13 @@
       currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
       renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
+      document.getElementById("repairTechnician").value=item.technician||"";
+      document.getElementById("repairMinutes").value=Number(item.minutes||0);
+      document.getElementById("repairHourlyCost").value=Number(item.hourlyCost||25);
+      clientSignatureData=item.clientSignature||"";
+      technicianSignatureData=item.technicianSignature||"";
+      clientSignaturePad.load(clientSignatureData);
+      technicianSignaturePad.load(technicianSignatureData);
       document.getElementById("repairLines").innerHTML = "";
       const existingLines = Array.isArray(item.lines) && item.lines.length
         ? item.lines
@@ -1904,6 +2008,7 @@
       existingLines.forEach(addRepairLine);
       if(!existingLines.length) addRepairLine();
       updateRepairLinesTotal();
+      updateRepairProTotals();
       document.getElementById("saveRepairBtn").textContent = "Enregistrer les modifications";
       showRepairForm();
       document.getElementById("repairForm").scrollIntoView({behavior:"smooth"});
@@ -1942,6 +2047,44 @@
         <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+        <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
+        <div class="detail-box"><small>Temps passé</small>${Number(item.minutes||0)} min</div>
+        <div class="detail-box"><small>Coût pièces</small>${formatMoney(item.partsCost||0)}</div>
+        <div class="detail-box"><small>Coût main-d'œuvre</small>${formatMoney(item.laborCost||0)}</div>
+        <div class="detail-box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
+        <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
+        <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
+        <div class="detail-box full">
+          <small>QR Code et code-barres</small>
+          <div class="codes-grid">
+            <img src="${repairQrUrl(item)}" alt="QR Code dossier">
+            <img src="${repairBarcodeUrl(item)}" alt="Code-barres dossier">
+          </div>
+        </div>
+        <div class="detail-box full">
+          <small>Historique des interventions</small>
+          <div id="repairHistoryList" class="history-list">${renderRepairHistory(item)}</div>
+          ${activeRole==="admin" && !item.closed ? `
+          <div class="history-form">
+            <select id="historyAction">
+              <option>Diagnostic</option>
+              <option>Commande de pièce</option>
+              <option>Réparation</option>
+              <option>Test final</option>
+              <option>Contact client</option>
+              <option>Autre</option>
+            </select>
+            <input id="historyNote" type="text" placeholder="Note d'intervention">
+            <input id="historyMinutes" type="number" min="0" step="5" placeholder="Minutes">
+            <button id="addHistoryBtn" class="mini-btn" type="button">Ajouter</button>
+          </div>`:""}
+        </div>
+        <div class="detail-box full"><small>Signatures</small>
+          <div class="signature-grid">
+            <div>${item.clientSignature?`<img src="${item.clientSignature}" style="width:100%;max-height:150px;object-fit:contain;background:#fff;border-radius:8px">`:"Signature client absente"}</div>
+            <div>${item.technicianSignature?`<img src="${item.technicianSignature}" style="width:100%;max-height:150px;object-fit:contain;background:#fff;border-radius:8px">`:"Signature technicien absente"}</div>
+          </div>
+        </div>
         <div class="detail-box full"><small>Photos</small>
           <div class="repair-photo-gallery">
             ${(Array.isArray(item.photos) && item.photos.length)
@@ -1951,6 +2094,23 @@
         </div>
       `;
       document.getElementById("repairModal").classList.remove("hidden");
+      const addHistoryBtn=document.getElementById("addHistoryBtn");
+      if(addHistoryBtn){
+        addHistoryBtn.addEventListener("click",()=>{
+          const note=document.getElementById("historyNote").value.trim();
+          const action=document.getElementById("historyAction").value;
+          const minutes=Number(document.getElementById("historyMinutes").value||0);
+          appendRepairHistory(item.id,{
+            date:new Date().toISOString().slice(0,10),
+            action,note,minutes,
+            technician:item.technician||""
+          });
+          openRepairDetails(item.id);
+          renderRepairs();
+        });
+      }
+      document.getElementById("closeRepairBtn").disabled=Boolean(item.closed)||activeRole!=="admin";
+      document.getElementById("closeRepairBtn").style.opacity=(item.closed||activeRole!=="admin")?".45":"1";
     }
 
     document.getElementById("closeRepairModal").addEventListener("click", () => {
@@ -1961,6 +2121,31 @@
       if(event.target.id === "repairModal"){
         document.getElementById("repairModal").classList.add("hidden");
       }
+    });
+
+
+    document.getElementById("closeRepairBtn").addEventListener("click",()=>{
+      if(activeRole!=="admin"||!openedRepairId) return;
+      if(!confirm("Clôturer définitivement ce dossier de réparation ?")) return;
+      const list=getAdminRepairs();
+      const index=list.findIndex(r=>r.id===openedRepairId);
+      if(index===-1) return;
+      list[index].closed=true;
+      list[index].closedDate=new Date().toISOString().slice(0,10);
+      list[index].status="Restitué";
+      const history=getRepairHistory(list[index]);
+      history.unshift({
+        date:list[index].closedDate,
+        action:"Clôture du dossier",
+        note:"Réparation clôturée et appareil restitué.",
+        technician:list[index].technician||"",
+        minutes:0
+      });
+      list[index].history=history;
+      saveAdminRepairs(list);
+      renderRepairs();
+      openRepairDetails(openedRepairId);
+      updateDashboardStats();
     });
 
     document.getElementById("printRepairBtn").addEventListener("click", () => {
@@ -2005,13 +2190,24 @@
             <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
             <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
             <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+            <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
+            <div class="box"><small>Temps passé</small>${Number(item.minutes||0)} min</div>
+            <div class="box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
+            <div class="box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
+            <div class="box full"><small>QR Code / Code-barres</small>
+              <div style="display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:center">
+                <img src="${repairQrUrl(item)}" style="width:150px">
+                <img src="${repairBarcodeUrl(item)}" style="max-width:100%">
+              </div>
+            </div>
+            <div class="box full"><small>Historique</small>${getRepairHistory(item).map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)} — ${escapeHtml(h.note||"")} (${Number(h.minutes||0)} min)`).join("<br>")||"Aucun historique"}</div>
           </div>
           ${(Array.isArray(item.photos) && item.photos.length)
-            ? `<h3>Photos du dossier</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${item.photos.map(src=>`<img src="${src}" style="width:100%;height:150px;object-fit:cover;border:1px solid #bbb;border-radius:8px">`).join("")}</div>`
+            ? `<h3>Photos du dossier</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${item.photos.map(photo=>`<img src="${typeof photo==="string"?photo:photo.src}" style="width:100%;height:150px;object-fit:cover;border:1px solid #bbb;border-radius:8px">`).join("")}</div>`
             : ""}
           <div class="signatures">
-            <div class="signature">Signature du client</div>
-            <div class="signature">Signature TECH42SERVICE</div>
+            <div class="signature">Signature du client<br>${item.clientSignature?`<img src="${item.clientSignature}" style="max-width:100%;height:110px;object-fit:contain">`:""}</div>
+            <div class="signature">Signature TECH42SERVICE<br>${item.technicianSignature?`<img src="${item.technicianSignature}" style="max-width:100%;height:110px;object-fit:contain">`:""}</div>
           </div>
           <script>window.onload=()=>window.print();<\/script>
         <datalist id="clientNamesList"></datalist>
@@ -3520,6 +3716,149 @@
       row.querySelector(".repair-line-mode").value=item.sellPriceMode||"TTC";
       row.dataset.stockId=item.id;
       updateRepairLinesTotal();
+    }
+
+
+    let clientSignatureData = "";
+    let technicianSignatureData = "";
+
+    function setupSignatureCanvas(canvasId, clearButtonId, setter){
+      const canvas=document.getElementById(canvasId);
+      const ctx=canvas.getContext("2d");
+      ctx.lineWidth=2.2;
+      ctx.lineCap="round";
+      ctx.strokeStyle="#111";
+      let drawing=false;
+
+      function point(event){
+        const rect=canvas.getBoundingClientRect();
+        const source=event.touches ? event.touches[0] : event;
+        return {
+          x:(source.clientX-rect.left)*(canvas.width/rect.width),
+          y:(source.clientY-rect.top)*(canvas.height/rect.height)
+        };
+      }
+      function start(event){
+        event.preventDefault();
+        drawing=true;
+        const p=point(event);
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+      }
+      function move(event){
+        if(!drawing) return;
+        event.preventDefault();
+        const p=point(event);
+        ctx.lineTo(p.x,p.y);
+        ctx.stroke();
+        setter(canvas.toDataURL("image/png"));
+      }
+      function stop(){
+        if(!drawing) return;
+        drawing=false;
+        setter(canvas.toDataURL("image/png"));
+      }
+
+      canvas.addEventListener("mousedown",start);
+      canvas.addEventListener("mousemove",move);
+      window.addEventListener("mouseup",stop);
+      canvas.addEventListener("touchstart",start,{passive:false});
+      canvas.addEventListener("touchmove",move,{passive:false});
+      canvas.addEventListener("touchend",stop);
+      document.getElementById(clearButtonId).addEventListener("click",()=>{
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        setter("");
+      });
+      return {
+        clear(){ctx.clearRect(0,0,canvas.width,canvas.height);},
+        load(data){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          if(!data) return;
+          const img=new Image();
+          img.onload=()=>ctx.drawImage(img,0,0,canvas.width,canvas.height);
+          img.src=data;
+        }
+      };
+    }
+
+    const clientSignaturePad=setupSignatureCanvas(
+      "clientSignatureCanvas","clearClientSignature",
+      value=>clientSignatureData=value
+    );
+    const technicianSignaturePad=setupSignatureCanvas(
+      "technicianSignatureCanvas","clearTechnicianSignature",
+      value=>technicianSignatureData=value
+    );
+
+    function getStockPurchaseCostTTC(stockItem){
+      if(!stockItem) return 0;
+      return amountToTTC(stockItem.buyPrice,stockItem.buyPriceMode||"TTC")
+        + amountToTTC(stockItem.shipping,stockItem.shippingMode||"TTC");
+    }
+
+    function calculateRepairPro(lines=getRepairLines()){
+      const stock=getAdminStock();
+      const partsCost=lines.reduce((sum,line)=>{
+        const match=stock.find(item =>
+          item.id===line.stockId ||
+          String(item.name||"").toLowerCase()===String(line.label||"").toLowerCase()
+        );
+        return sum+(match ? getStockPurchaseCostTTC(match)*Number(line.qty||0) : 0);
+      },0);
+      const minutes=Number(document.getElementById("repairMinutes").value||0);
+      const hourly=Number(document.getElementById("repairHourlyCost").value||0);
+      const laborCost=(minutes/60)*hourly;
+      const realCost=partsCost+laborCost;
+      const sale=repairLinesTotal(lines);
+      const margin=sale-realCost;
+      return {partsCost,laborCost,realCost,margin};
+    }
+
+    function updateRepairProTotals(){
+      const p=calculateRepairPro();
+      document.getElementById("repairPartsCost").textContent=formatMoney(p.partsCost);
+      document.getElementById("repairLaborCost").textContent=formatMoney(p.laborCost);
+      document.getElementById("repairRealCost").textContent=formatMoney(p.realCost);
+      document.getElementById("repairMargin").textContent=formatMoney(p.margin);
+    }
+
+    document.getElementById("repairMinutes").addEventListener("input",updateRepairProTotals);
+    document.getElementById("repairHourlyCost").addEventListener("input",updateRepairProTotals);
+
+    function repairQrUrl(item){
+      const payload=`TECH42SERVICE|${item.id}|${item.client}|${item.brand} ${item.model}|${item.status}`;
+      return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payload)}`;
+    }
+
+    function repairBarcodeUrl(item){
+      return `https://bwipjs-api.metafloor.com/?bcid=code128&scale=2&height=12&includetext&text=${encodeURIComponent(item.id)}`;
+    }
+
+    function getRepairHistory(item){
+      return Array.isArray(item.history) ? item.history : [];
+    }
+
+    function renderRepairHistory(item){
+      const history=getRepairHistory(item);
+      return history.length
+        ? history.map(entry=>`
+          <div class="history-item">
+            <strong>${escapeHtml(entry.action)}</strong>
+            <div>${escapeHtml(entry.note||"")}</div>
+            <small>${formatDate(entry.date)} · ${escapeHtml(entry.technician||"Non précisé")} · ${Number(entry.minutes||0)} min</small>
+          </div>`).join("")
+        : '<div class="empty-state">Aucune intervention enregistrée.</div>';
+    }
+
+    function appendRepairHistory(repairId,entry){
+      const list=getAdminRepairs();
+      const index=list.findIndex(r=>r.id===repairId);
+      if(index===-1) return;
+      const history=getRepairHistory(list[index]);
+      history.unshift(entry);
+      list[index].history=history;
+      list[index].minutes=history.reduce((sum,h)=>sum+Number(h.minutes||0),0);
+      saveAdminRepairs(list);
     }
 
     const themes = {
