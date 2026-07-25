@@ -279,17 +279,6 @@
     .codes-grid img{max-width:100%;background:#fff;padding:8px;border-radius:8px}
     .closed-badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#13331b;color:#7cf195;border:1px solid #286d38;font-weight:800}
 
-    
-    .cloud-online{color:#74ef8b!important}
-    .cloud-offline{color:#ff8585!important}
-    #cloudLoginBtn,#cloudActivateBtn{min-height:48px;touch-action:manipulation}
-    @media(max-width:520px){
-      .login-screen{display:flex;align-items:flex-start;justify-content:center;padding:12px;overflow:auto}
-      .login-box{margin-top:8px;padding:18px}
-      .login-logo{max-height:125px}
-      .login-box input,.login-box select,.login-box button{font-size:16px}
-    }
-
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -302,7 +291,6 @@
       .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form,.codes-grid{grid-template-columns:1fr}
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <section id="loginScreen" class="login-screen">
@@ -312,12 +300,7 @@
       <p>TECH42SERVICE Gestion</p>
 
       <div class="field">
-        <label for="cloudEmail">Compte cloud</label>
-        <input id="cloudEmail" type="email" value="tech42service@gmail.com" readonly>
-      </div>
-
-      <div class="field">
-        <label for="accountType">Mode d'accès</label>
+        <label for="accountType">Compte</label>
         <select id="accountType">
           <option value="admin">Administrateur</option>
           <option value="visuel">Compte visuel</option>
@@ -329,10 +312,8 @@
         <input id="password" type="password" required autocomplete="current-password">
       </div>
 
-      <button id="cloudLoginBtn" class="primary" type="submit">Se connecter au cloud</button>
-      <button id="cloudActivateBtn" class="mini-btn" type="button" style="width:100%;margin-top:10px">Première activation du compte cloud</button>
+      <button class="primary" type="submit">Se connecter</button>
       <div id="loginError" class="error"></div>
-      <div id="cloudStatus" style="margin-top:8px;text-align:center;color:var(--muted);font-size:13px"></div>
     </form>
   </section>
 
@@ -1425,7 +1406,7 @@
           </div>
 
             <form id="adminPasswordForm" class="settings-card">
-              <h3>Mot de passe cloud unique</h3>
+              <h3>Compte administrateur</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
                 <input id="newAdminPassword" type="password" minlength="4" required>
@@ -1438,7 +1419,7 @@
               <div id="adminPasswordMessage"></div>
             </form>
 
-            <form id="visualPasswordForm" class="settings-card hidden">
+            <form id="visualPasswordForm" class="settings-card">
               <h3>Compte visuel</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
@@ -1459,7 +1440,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V18.2 Cloud Supabase</footer>
+      <footer>TECH42SERVICE Gestion — V18.1 dossier réparation PRO</footer>
     </main>
   </div>
 
@@ -1476,155 +1457,6 @@
     }
     function formatMoney(value){
       return Number(value || 0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
-    }
-
-
-    const SUPABASE_URL = "https://uenpjlqskauvcsndajyq.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q";
-    const CLOUD_EMAIL = "tech42service@gmail.com";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
-    });
-
-    const CLOUD_KEYS = [
-      "tech42-repairs","tech42-stock","tech42-documents","tech42-document-templates",
-      "tech42-appointments","tech42-clients","tech42-buy-sell","tech42-repair-help-links",
-      "tech42-sites-links","tech42-devices","tech42-theme"
-    ];
-
-    let cloudUser = null;
-    let cloudApplying = false;
-    let cloudTimer = null;
-    let cloudChannel = null;
-    const nativeLocalSet = (key,value) => setItem(key,value);
-
-    function setCloudStatus(message, online=false){
-      const el=document.getElementById("cloudStatus");
-      if(!el) return;
-      el.textContent=message;
-      el.className=online ? "cloud-online" : "cloud-offline";
-    }
-
-    function collectCloudState(){
-      const state={};
-      CLOUD_KEYS.forEach(key=>{
-        const value=localStorage.getItem(key);
-        if(value!==null) state[key]=value;
-      });
-      return state;
-    }
-
-    function applyCloudState(state){
-      if(!state || typeof state!=="object") return;
-      cloudApplying=true;
-      try{
-        CLOUD_KEYS.forEach(key=>{
-          if(Object.prototype.hasOwnProperty.call(state,key)){
-            nativeLocalSet(key,String(state[key]));
-          }
-        });
-      }finally{
-        cloudApplying=false;
-      }
-    }
-
-    async function saveCloudNow(){
-      if(!cloudUser || cloudApplying) return;
-      const payload={
-        user_id:cloudUser.id,
-        data:collectCloudState(),
-        updated_at:new Date().toISOString()
-      };
-      const {error}=await supabaseClient.from("app_state").upsert(payload,{onConflict:"user_id"});
-      if(error){
-        console.error("Cloud save error",error);
-        setCloudStatus("Sauvegarde cloud impossible",false);
-      }else{
-        setCloudStatus("Cloud synchronisé",true);
-      }
-    }
-
-    function scheduleCloudSave(){
-      if(!cloudUser || cloudApplying) return;
-      clearTimeout(cloudTimer);
-      cloudTimer=setTimeout(saveCloudNow,700);
-    }
-
-    function cloudLocalSet(key,value){
-      nativeLocalSet(key,value);
-      if(String(key).startsWith("tech42-")) scheduleCloudSave();
-    }
-
-    async function loadCloudState(){
-      if(!cloudUser) return;
-      const {data,error}=await supabaseClient
-        .from("app_state").select("data,updated_at").eq("user_id",cloudUser.id).maybeSingle();
-      if(error){
-        console.error("Cloud load error",error);
-        setCloudStatus("Lecture cloud impossible",false);
-        return;
-      }
-      if(data?.data && Object.keys(data.data).length){
-        applyCloudState(data.data);
-      }else{
-        await saveCloudNow();
-      }
-    }
-
-    function refreshAllModules(){
-      try{ renderRepairs(); }catch(e){console.warn(e)}
-      try{ renderStock(); refreshStockPartsList(); }catch(e){console.warn(e)}
-      try{ renderDocuments(); loadDocumentTemplates(); }catch(e){console.warn(e)}
-      try{ renderAppointments(); }catch(e){console.warn(e)}
-      try{ renderClients(); }catch(e){console.warn(e)}
-      try{ renderBuySell(); }catch(e){console.warn(e)}
-      try{ renderDevices(); refreshDeviceLists(); }catch(e){console.warn(e)}
-      try{ renderRepairHelp(); renderSites(); }catch(e){console.warn(e)}
-      try{ updateDashboardStats(); }catch(e){console.warn(e)}
-      try{
-        const savedTheme=localStorage.getItem("tech42-theme")||"gold";
-        theme.value=savedTheme;
-        applyTheme(savedTheme);
-      }catch(e){console.warn(e)}
-    }
-
-    function subscribeCloud(){
-      if(!cloudUser) return;
-      if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
-      cloudChannel=supabaseClient.channel("app-state-"+cloudUser.id)
-        .on("postgres_changes",{
-          event:"UPDATE",schema:"public",table:"app_state",filter:`user_id=eq.${cloudUser.id}`
-        },payload=>{
-          if(payload.new?.data){
-            applyCloudState(payload.new.data);
-            refreshAllModules();
-            setCloudStatus("Mise à jour reçue du cloud",true);
-          }
-        }).subscribe();
-    }
-
-    async function authenticateCloud(passwordValue){
-      const {data,error}=await supabaseClient.auth.signInWithPassword({
-        email:CLOUD_EMAIL,password:passwordValue
-      });
-      if(error) throw error;
-      cloudUser=data.user;
-      await loadCloudState();
-      subscribeCloud();
-      return data.user;
-    }
-
-    async function activateCloud(passwordValue){
-      const {data,error}=await supabaseClient.auth.signUp({
-        email:CLOUD_EMAIL,password:passwordValue
-      });
-      if(error) throw error;
-      if(data.session){
-        cloudUser=data.user;
-        await loadCloudState();
-        subscribeCloud();
-      }
-      return data;
     }
 
     const DEFAULT_ADMIN_PASSWORD = "Tech42";
@@ -1671,16 +1503,16 @@
       return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
     }
 
-    loginForm.addEventListener("submit", async (event) => {
+    loginForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const role = accountType.value;
-      const enteredPassword=password.value;
-      loginError.textContent="";
-      setCloudStatus("Connexion au cloud…",false);
-      document.getElementById("cloudLoginBtn").disabled=true;
-      try{
-        await authenticateCloud(enteredPassword);
-        setCloudStatus("Connecté et synchronisé",true);
+      const expected = role === "admin" ? getAdminPassword() : getVisualPassword();
+
+      if(password.value !== expected){
+        loginError.textContent = "Mot de passe incorrect.";
+        return;
+      }
+
       activeRole = role;
       currentUser.textContent = role === "admin" ? "Administrateur" : "Compte visuel";
       readonlyNote.classList.toggle("hidden", role !== "visuel");
@@ -1735,43 +1567,9 @@
       renderDevices();
       refreshDeviceLists();
       refreshStockPartsList();
-
-        refreshAllModules();
-      }catch(error){
-        console.error(error);
-        loginError.textContent = "Mot de passe cloud incorrect ou compte non activé.";
-        setCloudStatus("Connexion refusée",false);
-      }finally{
-        document.getElementById("cloudLoginBtn").disabled=false;
-      }
     });
 
-    document.getElementById("cloudActivateBtn").addEventListener("click", async ()=>{
-      const enteredPassword=password.value;
-      if(!enteredPassword || enteredPassword.length<6){
-        loginError.textContent="Choisis un mot de passe d'au moins 6 caractères.";
-        return;
-      }
-      loginError.textContent="";
-      setCloudStatus("Activation du compte cloud…",false);
-      try{
-        const data=await activateCloud(enteredPassword);
-        if(data.session){
-          setCloudStatus("Compte activé. Tu peux utiliser ce mot de passe partout.",true);
-        }else{
-          setCloudStatus("Compte créé : valide l'e-mail reçu, puis connecte-toi.",true);
-        }
-      }catch(error){
-        console.error(error);
-        loginError.textContent=error.message||"Activation impossible.";
-        setCloudStatus("Activation impossible",false);
-      }
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await saveCloudNow();
-      await supabaseClient.auth.signOut();
-      cloudUser = null;
+    document.getElementById("logoutBtn").addEventListener("click", () => {
       activeRole = null;
       app.classList.add("hidden");
       loginScreen.classList.remove("hidden");
@@ -1814,17 +1612,22 @@
       }
     }
 
-    document.getElementById("adminPasswordForm").addEventListener("submit", async (event) => {
+    document.getElementById("adminPasswordForm").addEventListener("submit", (event) => {
       event.preventDefault();
-      const a=document.getElementById("newAdminPassword").value;
-      const b=document.getElementById("confirmAdminPassword").value;
-      const box=document.getElementById("adminPasswordMessage");
-      if(a!==b){box.innerHTML='<div class="error">Les mots de passe ne correspondent pas.</div>';return;}
-      if(a.length<6){box.innerHTML='<div class="error">6 caractères minimum.</div>';return;}
-      const {error}=await supabaseClient.auth.updateUser({password:a});
-      if(error){box.innerHTML=`<div class="error">${escapeHtml(error.message)}</div>`;return;}
+      const a = document.getElementById("newAdminPassword").value;
+      const b = document.getElementById("confirmAdminPassword").value;
+      const msg = document.getElementById("adminPasswordMessage");
+
+      if(a !== b){
+        msg.className = "error";
+        msg.textContent = "Les mots de passe ne correspondent pas.";
+        return;
+      }
+
+      localStorage.setItem("tech42-admin-password", a);
+      msg.className = "notice";
+      msg.textContent = "Mot de passe administrateur modifié.";
       event.target.reset();
-      box.innerHTML='<div class="notice">Mot de passe cloud modifié pour tous les appareils.</div>';
     });
 
     document.getElementById("visualPasswordForm").addEventListener("submit", (event) => {
@@ -1839,7 +1642,7 @@
         return;
       }
 
-      cloudLocalSet("tech42-visual-password", a);
+      localStorage.setItem("tech42-visual-password", a);
       msg.className = "notice";
       msg.textContent = "Mot de passe du compte visuel modifié.";
       event.target.reset();
@@ -1878,7 +1681,7 @@
     }
 
     function saveAdminRepairs(list){
-      cloudLocalSet("tech42-repairs", JSON.stringify(list));
+      localStorage.setItem("tech42-repairs", JSON.stringify(list));
     }
 
     function currentRepairList(){
@@ -2430,7 +2233,7 @@
     }
 
     function saveAdminStock(list){
-      cloudLocalSet("tech42-stock", JSON.stringify(list));
+      localStorage.setItem("tech42-stock", JSON.stringify(list));
     }
 
     function currentStockList(){
@@ -2644,7 +2447,7 @@
     }
 
     function saveAdminDocuments(list){
-      cloudLocalSet("tech42-documents", JSON.stringify(list));
+      localStorage.setItem("tech42-documents", JSON.stringify(list));
     }
 
     function currentDocuments(){
@@ -2697,7 +2500,7 @@
           footer:document.getElementById("nonRepairFooter").value.trim()
         }
       };
-      cloudLocalSet("tech42-document-templates",JSON.stringify(templates));
+      localStorage.setItem("tech42-document-templates",JSON.stringify(templates));
       const msg = document.getElementById("documentTemplatesMessage");
       msg.className = "notice";
       msg.textContent = "Personnalisation enregistrée.";
@@ -3042,7 +2845,7 @@
     }
 
     function saveAdminAppointments(list){
-      cloudLocalSet("tech42-appointments", JSON.stringify(list));
+      localStorage.setItem("tech42-appointments", JSON.stringify(list));
     }
 
     function currentAppointments(){
@@ -3307,7 +3110,7 @@
     }
 
     function saveAdminClients(list){
-      cloudLocalSet("tech42-clients", JSON.stringify(list));
+      localStorage.setItem("tech42-clients", JSON.stringify(list));
     }
 
     function currentClients(){
@@ -3511,7 +3314,7 @@
     }
 
     function saveAdminBuySell(list){
-      cloudLocalSet("tech42-buy-sell", JSON.stringify(list));
+      localStorage.setItem("tech42-buy-sell", JSON.stringify(list));
     }
 
     function currentBuySell(){
@@ -3685,7 +3488,7 @@
     }
 
     function saveStoredLinks(key,list){
-      cloudLocalSet(key,JSON.stringify(list));
+      localStorage.setItem(key,JSON.stringify(list));
     }
 
     function nextLinkId(prefix,list){
@@ -3826,7 +3629,7 @@
       try{return JSON.parse(localStorage.getItem("tech42-devices") || "[]")}catch{return []}
     }
     function saveAdminDevices(list){
-      cloudLocalSet("tech42-devices",JSON.stringify(list));
+      localStorage.setItem("tech42-devices",JSON.stringify(list));
     }
     function currentDevices(){
       return activeRole==="visuel" ? demoDevices : getAdminDevices();
@@ -4058,18 +3861,6 @@
       saveAdminRepairs(list);
     }
 
-
-    supabaseClient.auth.getSession().then(async ({data})=>{
-      if(data?.session?.user){
-        cloudUser=data.session.user;
-        await loadCloudState();
-        subscribeCloud();
-        setCloudStatus("Session cloud prête",true);
-      }else{
-        setCloudStatus("Compte cloud non connecté",false);
-      }
-    });
-
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
       blue:{accent:"#3ea6ff",border:"#17374d"},
@@ -4082,7 +3873,7 @@
       const selected = themes[name] || themes.gold;
       document.documentElement.style.setProperty("--accent", selected.accent);
       document.documentElement.style.setProperty("--border", selected.border);
-      cloudLocalSet("tech42-theme", name);
+      localStorage.setItem("tech42-theme", name);
     }
 
     theme.addEventListener("change", () => applyTheme(theme.value));
