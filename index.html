@@ -153,7 +153,7 @@
     }
     .document-form textarea{min-height:90px;resize:vertical}
     .document-lines{display:grid;gap:10px}
-    .document-line{display:grid;grid-template-columns:2fr 90px 120px 120px 42px;gap:8px;align-items:center}
+    .document-line{display:grid;grid-template-columns:2fr 90px 140px 42px;gap:8px;align-items:center}
     .document-line input{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)}
     .document-total{margin-left:auto;width:min(360px,100%);display:grid;gap:8px}
     .document-total-row{display:flex;justify-content:space-between;gap:20px;padding:8px 0;border-bottom:1px solid #2a2a2a}
@@ -205,6 +205,14 @@
     .client-card h3{margin:0 0 6px}
     .client-meta{color:var(--muted);font-size:14px;line-height:1.5}
     .workflow-badge{display:inline-block;padding:5px 9px;border:1px solid var(--border);border-radius:999px;color:var(--accent);font-size:12px}
+
+    
+    .repair-photos-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}
+    .repair-photo-item{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#0b0b0b}
+    .repair-photo-item img{width:100%;height:120px;object-fit:cover;display:block}
+    .repair-photo-remove{position:absolute;top:6px;right:6px;width:28px;height:28px;border:0;border-radius:50%;background:#000c;color:#fff;cursor:pointer}
+    .repair-photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+    .repair-photo-gallery img{width:100%;height:170px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
 
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
@@ -373,7 +381,7 @@
               </select>
             </div>
             <div class="field">
-              <label>Prix estimé (€)</label>
+              <label>Prix estimé TTC (€)</label>
               <input id="repairPrice" type="number" min="0" step="0.01">
             </div>
 
@@ -390,6 +398,13 @@
               <label>Date prévue</label>
               <input id="repairDueDate" type="date">
             </div>
+            <div class="field full">
+              <label>Photos du dossier</label>
+              <input id="repairPhotosInput" type="file" accept="image/*" multiple>
+              <div id="repairPhotosPreview" class="repair-photos-preview"></div>
+              <small style="color:var(--muted)">Plusieurs photos peuvent être ajoutées.</small>
+            </div>
+
             <div class="field full">
               <label>Lignes de réparation</label>
               <div id="repairLines" class="repair-lines"></div>
@@ -527,7 +542,7 @@
             </div>
 
             <div class="field">
-              <label>Prix d'achat (€)</label>
+              <label>Prix d'achat TTC (€)</label>
               <input id="stockBuyPrice" type="number" min="0" step="0.01">
             </div>
             <div class="field">
@@ -535,7 +550,7 @@
               <input id="stockShipping" type="number" min="0" step="0.01">
             </div>
             <div class="field">
-              <label>Prix de vente (€)</label>
+              <label>Prix de vente TTC (€)</label>
               <input id="stockSellPrice" type="number" min="0" step="0.01">
             </div>
 
@@ -657,8 +672,8 @@
             </div>
 
             <div class="full document-total">
-              <div class="document-total-row"><span>Sous-total</span><strong id="documentSubtotal">0,00 €</strong></div>
-              <div class="document-total-row"><span>TVA</span><strong id="documentTax">0,00 €</strong></div>
+              <div class="document-total-row"><span>Total TTC</span><strong id="documentSubtotal">0,00 €</strong></div>
+              <div class="document-total-row"><span>TVA</span><strong>Incluse dans les prix TTC</strong></div>
               <div class="document-total-row"><span>Total</span><strong id="documentGrandTotal">0,00 €</strong></div>
               <div class="document-total-row"><span>Reste à payer</span><strong id="documentBalance">0,00 €</strong></div>
             </div>
@@ -938,7 +953,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V11 dossier client unique</footer>
+      <footer>TECH42SERVICE Gestion — V12 prix TTC et photos</footer>
     </main>
   </div>
 
@@ -1118,21 +1133,21 @@
         deviceType:"Téléphone", brand:"Apple", model:"iPhone 13", serial:"356789012345678",
         issue:"Écran cassé et tactile instable", diagnosis:"Écran OLED à remplacer",
         status:"En réparation", price:"189", deposit:"50",
-        depositDate:"2026-07-22", dueDate:"2026-07-26", parts:"Écran OLED", lines:[{label:"Écran OLED iPhone 13",qty:1,unit:149},{label:"Main d’œuvre",qty:1,unit:40}]
+        depositDate:"2026-07-22", dueDate:"2026-07-26", parts:"Écran OLED", lines:[{label:"Écran OLED iPhone 13",qty:1,unit:149},{label:"Main d’œuvre",qty:1,unit:40}],photos:[]
       },
       {
         id:"REP-2026-0002", client:"Sophie Bernard", phone:"06 44 22 18 90",
         deviceType:"Ordinateur", brand:"Asus", model:"VivoBook 15", serial:"ASU-88421",
         issue:"Ne démarre plus", diagnosis:"Diagnostic alimentation en cours",
         status:"Diagnostic", price:"79", deposit:"0",
-        depositDate:"2026-07-23", dueDate:"2026-07-29", parts:"", lines:[{label:"Diagnostic approfondi",qty:1,unit:49}]
+        depositDate:"2026-07-23", dueDate:"2026-07-29", parts:"", lines:[{label:"Diagnostic approfondi",qty:1,unit:49}],photos:[]
       },
       {
         id:"REP-2026-0003", client:"Lucas Petit", phone:"07 61 82 40 11",
         deviceType:"Console", brand:"Sony", model:"PlayStation 5", serial:"PS5-240711",
         issue:"Port HDMI endommagé", diagnosis:"Remplacement du connecteur HDMI",
         status:"Pièce commandée", price:"129", deposit:"40",
-        depositDate:"2026-07-24", dueDate:"2026-07-31", parts:"Connecteur HDMI", lines:[{label:"Connecteur HDMI PS5",qty:1,unit:29},{label:"Micro-soudure",qty:1,unit:100}]
+        depositDate:"2026-07-24", dueDate:"2026-07-31", parts:"Connecteur HDMI", lines:[{label:"Connecteur HDMI PS5",qty:1,unit:29},{label:"Micro-soudure",qty:1,unit:100}],photos:[]
       }
     ];
 
@@ -1264,10 +1279,57 @@
 
     document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
 
+
+    let currentRepairPhotos = [];
+
+    function fileToDataUrl(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = ()=>resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderRepairPhotosPreview(){
+      const box = document.getElementById("repairPhotosPreview");
+      box.innerHTML = "";
+      currentRepairPhotos.forEach((src,index)=>{
+        const item = document.createElement("div");
+        item.className = "repair-photo-item";
+        item.innerHTML = `
+          <img src="${src}" alt="Photo réparation ${index+1}">
+          <button class="repair-photo-remove" type="button" data-photo-index="${index}">×</button>
+        `;
+        box.appendChild(item);
+      });
+      box.querySelectorAll("[data-photo-index]").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          currentRepairPhotos.splice(Number(btn.dataset.photoIndex),1);
+          renderRepairPhotosPreview();
+        });
+      });
+    }
+
+    document.getElementById("repairPhotosInput").addEventListener("change",async(event)=>{
+      const files = [...event.target.files];
+      for(const file of files){
+        if(!file.type.startsWith("image/")) continue;
+        const dataUrl = await fileToDataUrl(file);
+        currentRepairPhotos.push(dataUrl);
+      }
+      event.target.value = "";
+      renderRepairPhotosPreview();
+    });
+
     function resetRepairForm(){
       document.getElementById("repairForm").reset();
       document.getElementById("repairEditId").value = "";
       document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
+      currentRepairPhotos = [];
+      renderRepairPhotosPreview();
+      currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
+      renderRepairPhotosPreview();
       document.getElementById("repairLines").innerHTML = "";
       addRepairLine();
       updateRepairLinesTotal();
@@ -1332,7 +1394,8 @@
         depositDate: document.getElementById("repairDepositDate").value,
         dueDate: document.getElementById("repairDueDate").value,
         parts: getRepairLines().map(line=>line.label).join(", "),
-        lines: getRepairLines()
+        lines: getRepairLines(),
+        photos: [...currentRepairPhotos]
       };
 
       if(editId){
@@ -1412,6 +1475,13 @@
         <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+        <div class="detail-box full"><small>Photos</small>
+          <div class="repair-photo-gallery">
+            ${(Array.isArray(item.photos) && item.photos.length)
+              ? item.photos.map((src,i)=>`<img src="${src}" alt="Photo ${i+1}">`).join("")
+              : "Aucune photo"}
+          </div>
+        </div>
       `;
       document.getElementById("repairModal").classList.remove("hidden");
     }
@@ -1469,6 +1539,9 @@
             <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
             <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
           </div>
+          ${(Array.isArray(item.photos) && item.photos.length)
+            ? `<h3>Photos du dossier</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${item.photos.map(src=>`<img src="${src}" style="width:100%;height:150px;object-fit:cover;border:1px solid #bbb;border-radius:8px">`).join("")}</div>`
+            : ""}
           <div class="signatures">
             <div class="signature">Signature du client</div>
             <div class="signature">Signature TECH42SERVICE</div>
@@ -1689,8 +1762,8 @@
     };
 
     const demoDocuments = [
-      {id:"DOC-0001",type:"facture",number:"FAC-2026-0001",date:"2026-07-20",client:"Jean Martin",contact:"06 12 34 56 78",subject:"Remplacement écran iPhone 13",lines:[{label:"Écran OLED iPhone 13",qty:1,unit:149,tax:20}],reason:"",deposit:50,status:"Payé"},
-      {id:"DOC-0002",type:"devis",number:"DEV-2026-0001",date:"2026-07-22",client:"Sophie Bernard",contact:"sophie@example.fr",subject:"Diagnostic et réparation PC Asus",lines:[{label:"Diagnostic approfondi",qty:1,unit:49,tax:20},{label:"Main d'œuvre estimée",qty:1,unit:60,tax:20}],reason:"",deposit:0,status:"Envoyé"},
+      {id:"DOC-0001",type:"facture",number:"FAC-2026-0001",date:"2026-07-20",client:"Jean Martin",contact:"06 12 34 56 78",subject:"Remplacement écran iPhone 13",lines:[{label:"Écran OLED iPhone 13",qty:1,unit:149,tax:0}],reason:"",deposit:50,status:"Payé"},
+      {id:"DOC-0002",type:"devis",number:"DEV-2026-0001",date:"2026-07-22",client:"Sophie Bernard",contact:"sophie@example.fr",subject:"Diagnostic et réparation PC Asus",lines:[{label:"Diagnostic approfondi",qty:1,unit:49,tax:0},{label:"Main d'œuvre estimée",qty:1,unit:60,tax:0}],reason:"",deposit:0,status:"Envoyé"},
       {id:"DOC-0003",type:"non-reparabilite",number:"NR-2026-0001",date:"2026-07-23",client:"Lucas Petit",contact:"07 61 82 40 11",subject:"PlayStation 4 Slim",lines:[],reason:"Carte mère oxydée et composants principaux endommagés. Réparation économiquement non viable.",deposit:0,status:"Envoyé"}
     ];
 
@@ -1758,14 +1831,13 @@
       msg.textContent = "Personnalisation enregistrée.";
     });
 
-    function addDocumentLine(data={label:"",qty:1,unit:0,tax:20}){
+    function addDocumentLine(data={label:"",qty:1,unit:0,tax:0}){
       const row = document.createElement("div");
       row.className = "document-line";
       row.innerHTML = `
         <input class="doc-line-label" type="text" placeholder="Désignation" value="${escapeHtml(data.label)}">
         <input class="doc-line-qty" type="number" min="0" step="1" value="${Number(data.qty||1)}">
         <input class="doc-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit||0)}">
-        <input class="doc-line-tax" type="number" min="0" step="0.01" value="${Number(data.tax??20)}">
         <button class="mini-btn danger doc-line-remove" type="button">×</button>
       `;
       document.getElementById("documentLines").appendChild(row);
@@ -1779,21 +1851,19 @@
         label:row.querySelector(".doc-line-label").value.trim(),
         qty:Number(row.querySelector(".doc-line-qty").value||0),
         unit:Number(row.querySelector(".doc-line-unit").value||0),
-        tax:Number(row.querySelector(".doc-line-tax").value||0)
+        tax:0
       })).filter(line=>line.label);
     }
 
     function calculateDocumentTotals(lines,deposit=0){
-      const subtotal = lines.reduce((sum,l)=>sum+(l.qty*l.unit),0);
-      const tax = lines.reduce((sum,l)=>sum+(l.qty*l.unit*l.tax/100),0);
-      const total = subtotal + tax;
-      return {subtotal,tax,total,balance:Math.max(0,total-Number(deposit||0))};
+      const total = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*Number(l.unit||0)),0);
+      return {subtotal:total,tax:0,total,balance:Math.max(0,total-Number(deposit||0))};
     }
 
     function updateDocumentTotals(){
       const totals = calculateDocumentTotals(getDocumentLines(),document.getElementById("documentDeposit").value);
       document.getElementById("documentSubtotal").textContent = totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
-      document.getElementById("documentTax").textContent = totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      
       document.getElementById("documentGrandTotal").textContent = totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       document.getElementById("documentBalance").textContent = totals.balance.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
     }
@@ -1978,17 +2048,16 @@
           <td>${escapeHtml(line.label)}</td>
           <td>${line.qty}</td>
           <td>${Number(line.unit).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
-          <td>${line.tax}%</td>
-          <td>${(line.qty*line.unit*(1+line.tax/100)).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
+          <td>${(line.qty*line.unit).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
         </tr>
       `).join("");
 
       const content = item.type==="non-reparabilite"
         ? `<div class="reason"><strong>Motif de non-réparabilité :</strong><br>${escapeHtml(item.reason||"Non précisé")}</div>`
-        : `<table><thead><tr><th>Désignation</th><th>Qté</th><th>PU HT</th><th>TVA</th><th>Total TTC</th></tr></thead><tbody>${linesHtml}</tbody></table>
+        : `<table><thead><tr><th>Désignation</th><th>Qté</th><th>Prix unitaire TTC</th><th>TVA incluse</th><th>Total TTC</th></tr></thead><tbody>${linesHtml}</tbody></table>
            <div class="totals">
-             <p><span>Sous-total :</span><strong>${totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
-             <p><span>TVA :</span><strong>${totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+             <p><span>Total TTC :</span><strong>${totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+             <p><span>TVA incluse :</span><strong>${totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
              <p><span>Total :</span><strong>${totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
              <p><span>Acompte :</span><strong>${Number(item.deposit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
              <p><span>Reste à payer :</span><strong>${totals.balance.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
@@ -2039,13 +2108,13 @@
             label:line.label,
             qty:Number(line.qty||1),
             unit:Number(line.unit||0),
-            tax:20
+            tax:0
           }))
         : [{
             label:repair.issue || "Réparation",
             qty:1,
             unit:Number(repair.price||0),
-            tax:20
+            tax:0
           }];
 
       const documentItem = {
