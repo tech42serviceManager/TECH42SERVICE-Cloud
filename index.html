@@ -68,7 +68,7 @@
     .clock{color:var(--accent);font-size:56px;font-weight:800;letter-spacing:2px}
     .date{margin-top:6px;font-size:20px;color:var(--muted)}
     .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}.dashboard-card{cursor:pointer;transition:.18s transform,.18s border-color}.dashboard-card:hover{transform:translateY(-2px);border-color:var(--accent)}
     .card .label{color:var(--muted);font-size:14px}
     .card .value{margin-top:10px;font-size:34px;font-weight:800;color:var(--accent)}
     .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px}
@@ -264,20 +264,20 @@
           <div id="date" class="date"></div>
         </section>
 
-        <section class="cards">
-          <article class="card"><div class="label">Réparations en cours</div><div id="statRepairs" class="value">0</div></article>
-          <article class="card"><div class="label">Rendez-vous aujourd'hui</div><div id="statAppointments" class="value">0</div></article>
-          <article class="card"><div class="label">Articles en stock</div><div id="statStock" class="value">0</div></article>
-          <article class="card"><div class="label">Chiffre d'affaires</div><div id="statRevenue" class="value">0 €</div></article>
+        <section class="cards dashboard-links">
+          <article class="card dashboard-card" data-open-page="repairs"><div class="label">Réparations en cours</div><div id="statRepairs" class="value">0</div></article>
+          <article class="card dashboard-card" data-open-page="appointments"><div class="label">Rendez-vous aujourd'hui</div><div id="statAppointments" class="value">0</div></article>
+          <article class="card dashboard-card" data-open-page="stock"><div class="label">Articles en stock</div><div id="statStock" class="value">0</div></article>
+          <article class="card dashboard-card" data-open-page="documents"><div class="label">Chiffre d'affaires</div><div id="statRevenue" class="value">0 €</div></article>
         </section>
 
         <section class="panel quick">
           <h2>Accès rapides</h2>
           <div class="quick-grid">
-            <button class="write-action">Nouvelle réparation</button>
-            <button class="write-action">Nouveau client</button>
-            <button class="write-action">Nouveau devis</button>
-            <button class="write-action">Nouveau rendez-vous</button>
+            <button id="quickRepair" class="write-action">Nouvelle réparation</button>
+            <button id="quickStock" class="write-action">Nouvel article stock</button>
+            <button id="quickQuote" class="write-action">Nouveau devis</button>
+            <button id="quickAppointment" class="write-action">Nouveau rendez-vous</button>
           </div>
         </section>
       </section>
@@ -864,7 +864,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V9 rendez-vous simple</footer>
+      <footer>TECH42SERVICE Gestion — V10 tableau de bord lié</footer>
     </main>
   </div>
 
@@ -978,6 +978,7 @@
         page = "dashboard";
       }
       dashboardPage.classList.toggle("hidden", page !== "dashboard");
+      if(page === "dashboard") updateDashboardStats();
       repairsPage.classList.toggle("hidden", page !== "repairs");
       stockPage.classList.toggle("hidden", page !== "stock");
       documentsPage.classList.toggle("hidden", page !== "documents");
@@ -987,7 +988,8 @@
       if(page === "repairs") renderRepairs();
       if(page === "stock") renderStock();
       if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
-      if(page === "appointments"){ renderAppointments(); resetAppointmentForm(); }
+      if(page === "appointments"){ renderAppointments();
+      updateDashboardStats(); resetAppointmentForm(); }
 
       if(page === "settings"){
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
@@ -1262,6 +1264,7 @@
       saveAdminRepairs(list);
       hideRepairForm();
       renderRepairs();
+      updateDashboardStats();
     });
 
     function editRepair(id){
@@ -1300,6 +1303,7 @@
       if(!confirm("Supprimer définitivement ce dossier ?")) return;
       saveAdminRepairs(getAdminRepairs().filter(r => r.id !== id));
       renderRepairs();
+      updateDashboardStats();
     }
 
     let openedRepairId = null;
@@ -1550,6 +1554,7 @@
       saveAdminStock(list);
       hideStockForm();
       renderStock();
+      updateDashboardStats();
     });
 
     function editStock(id){
@@ -1821,6 +1826,7 @@
 
       saveAdminDocuments(list);
       renderDocuments();
+      updateDashboardStats();
       resetDocumentForm();
     });
 
@@ -1853,6 +1859,7 @@
       if(!confirm("Supprimer définitivement ce document ?")) return;
       saveAdminDocuments(getAdminDocuments().filter(d=>d.id!==id));
       renderDocuments();
+      updateDashboardStats();
     }
 
     function currentFormDocument(){
@@ -2116,6 +2123,7 @@
       saveAdminAppointments(list);
       hideAppointmentForm();
       renderAppointments();
+      updateDashboardStats();
     });
 
     function editAppointment(id){
@@ -2143,6 +2151,7 @@
       if(!confirm("Supprimer définitivement ce rendez-vous ?")) return;
       saveAdminAppointments(getAdminAppointments().filter(i=>i.id!==id));
       renderAppointments();
+      updateDashboardStats();
     }
 
     function openGoogleCalendar(id){
@@ -2157,6 +2166,73 @@
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(details)}&ctz=Europe/Paris`;
       window.open(url,"_blank");
     }
+
+
+    function updateDashboardStats(){
+      if(activeRole === "visuel"){
+        document.getElementById("statRepairs").textContent = "8";
+        document.getElementById("statAppointments").textContent = "3";
+        document.getElementById("statStock").textContent = "152";
+        document.getElementById("statRevenue").textContent = "12 450 €";
+        return;
+      }
+
+      const repairs = getAdminRepairs();
+      const appointments = getAdminAppointments();
+      const stock = getAdminStock();
+      const documents = getAdminDocuments();
+
+      const activeRepairs = repairs.filter(item => !["Terminé","Restitué"].includes(item.status)).length;
+      const today = new Date().toISOString().slice(0,10);
+      const todayAppointments = appointments.filter(item => item.date === today && item.status !== "Annulé").length;
+      const totalStock = stock.reduce((sum,item)=>sum+Number(item.quantity||0),0);
+
+      const revenue = documents
+        .filter(item => item.type === "facture" && item.status === "Payé")
+        .reduce((sum,item)=>{
+          const totals = calculateDocumentTotals(item.lines||[], item.deposit||0);
+          return sum + totals.total;
+        },0);
+
+      document.getElementById("statRepairs").textContent = activeRepairs;
+      document.getElementById("statAppointments").textContent = todayAppointments;
+      document.getElementById("statStock").textContent = totalStock;
+      document.getElementById("statRevenue").textContent = revenue.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+    }
+
+    document.querySelectorAll("[data-open-page]").forEach(card=>{
+      card.addEventListener("click",()=>{
+        showPage(card.dataset.openPage);
+      });
+    });
+
+    document.getElementById("quickRepair").addEventListener("click",()=>{
+      if(activeRole !== "admin") return;
+      showPage("repairs");
+      resetRepairForm();
+      showRepairForm();
+    });
+
+    document.getElementById("quickStock").addEventListener("click",()=>{
+      if(activeRole !== "admin") return;
+      showPage("stock");
+      resetStockForm();
+      showStockForm();
+    });
+
+    document.getElementById("quickQuote").addEventListener("click",()=>{
+      if(activeRole !== "admin") return;
+      showPage("documents");
+      resetDocumentForm();
+      setDocumentType("devis");
+    });
+
+    document.getElementById("quickAppointment").addEventListener("click",()=>{
+      if(activeRole !== "admin") return;
+      showPage("appointments");
+      resetAppointmentForm();
+      showAppointmentForm();
+    });
 
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
