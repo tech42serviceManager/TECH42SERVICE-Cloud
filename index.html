@@ -279,17 +279,6 @@
     .codes-grid img{max-width:100%;background:#fff;padding:8px;border-radius:8px}
     .closed-badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#13331b;color:#7cf195;border:1px solid #286d38;font-weight:800}
 
-    
-    #loginButton{position:relative;z-index:5;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-    .login-box input,.login-box select,.login-box button{font-size:16px}
-    @media(max-width:520px){
-      .login-screen{display:flex;align-items:flex-start;justify-content:center;padding:12px;overflow:auto}
-      .login-box{margin-top:10px;padding:18px;border-radius:14px}
-      .login-logo{max-height:130px}
-      .login-box h1{margin-top:12px}
-      #loginButton{min-height:50px}
-    }
-
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -323,7 +312,7 @@
         <input id="password" type="password" required autocomplete="current-password">
       </div>
 
-      <button id="loginButton" class="primary" type="submit">Se connecter</button>
+      <button class="primary" type="submit">Se connecter</button>
       <div id="loginError" class="error"></div>
     </form>
   </section>
@@ -1426,7 +1415,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V18.1.1 mobile corrigé</footer>
+      <footer>TECH42SERVICE Gestion — V18.1.2 sans suivi professionnel</footer>
     </main>
   </div>
 
@@ -1489,14 +1478,12 @@
       return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
     }
 
-    function performLogin(event){
-      if(event) event.preventDefault();
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
       const role = accountType.value;
-      const entered = password.value;
       const expected = role === "admin" ? getAdminPassword() : getVisualPassword();
-      const defaultPassword = role === "admin" ? DEFAULT_ADMIN_PASSWORD : DEFAULT_VISUAL_PASSWORD;
 
-      if(entered !== expected && entered !== defaultPassword){
+      if(password.value !== expected){
         loginError.textContent = "Mot de passe incorrect.";
         return;
       }
@@ -1555,14 +1542,7 @@
       renderDevices();
       refreshDeviceLists();
       refreshStockPartsList();
-    }
-
-    loginForm.addEventListener("submit", performLogin);
-    document.getElementById("loginButton").addEventListener("click", performLogin);
-    document.getElementById("loginButton").addEventListener("touchend", (event)=>{
-      event.preventDefault();
-      performLogin(event);
-    }, {passive:false});
+    });
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
       activeRole = null;
