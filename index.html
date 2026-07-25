@@ -167,6 +167,14 @@
     .document-list th,.document-list td{padding:12px;border-bottom:1px solid #2a2a2a;text-align:left}
     .document-list th{color:var(--accent)}
 
+    
+    .repair-lines{display:grid;gap:10px}
+    .repair-line{display:grid;grid-template-columns:2fr 90px 120px 42px;gap:8px;align-items:center}
+    .repair-line input{
+      width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)
+    }
+    .repair-total{display:flex;justify-content:flex-end;gap:14px;align-items:center;margin-top:12px;font-size:18px}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -176,7 +184,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -351,9 +359,14 @@
               <label>Date prévue</label>
               <input id="repairDueDate" type="date">
             </div>
-            <div class="field">
-              <label>Pièces utilisées</label>
-              <input id="repairParts" type="text" placeholder="Ex. écran OLED, batterie...">
+            <div class="field full">
+              <label>Lignes de réparation</label>
+              <div id="repairLines" class="repair-lines"></div>
+              <button id="addRepairLineBtn" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne</button>
+              <div class="repair-total">
+                <span>Total estimé :</span>
+                <strong id="repairLinesTotal">0,00 €</strong>
+              </div>
             </div>
 
             <div class="full">
@@ -402,6 +415,8 @@
           <div id="repairModalContent" class="repair-details"></div>
           <div class="page-actions" style="margin-top:16px">
             <button id="printRepairBtn" class="action-btn">Imprimer la prise en charge</button>
+            <button id="repairToQuoteBtn" class="action-btn secondary">Basculer en devis</button>
+            <button id="repairToInvoiceBtn" class="action-btn secondary">Basculer en facture</button>
           </div>
         </div>
       </div>
@@ -733,7 +748,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V7 documents</footer>
+      <footer>TECH42SERVICE Gestion — V8 réparations lignes et conversion</footer>
     </main>
   </div>
 
@@ -901,21 +916,21 @@
         deviceType:"Téléphone", brand:"Apple", model:"iPhone 13", serial:"356789012345678",
         issue:"Écran cassé et tactile instable", diagnosis:"Écran OLED à remplacer",
         status:"En réparation", price:"189", deposit:"50",
-        depositDate:"2026-07-22", dueDate:"2026-07-26", parts:"Écran OLED"
+        depositDate:"2026-07-22", dueDate:"2026-07-26", parts:"Écran OLED", lines:[{label:"Écran OLED iPhone 13",qty:1,unit:149},{label:"Main d’œuvre",qty:1,unit:40}]
       },
       {
         id:"REP-2026-0002", client:"Sophie Bernard", phone:"06 44 22 18 90",
         deviceType:"Ordinateur", brand:"Asus", model:"VivoBook 15", serial:"ASU-88421",
         issue:"Ne démarre plus", diagnosis:"Diagnostic alimentation en cours",
         status:"Diagnostic", price:"79", deposit:"0",
-        depositDate:"2026-07-23", dueDate:"2026-07-29", parts:""
+        depositDate:"2026-07-23", dueDate:"2026-07-29", parts:"", lines:[{label:"Diagnostic approfondi",qty:1,unit:49}]
       },
       {
         id:"REP-2026-0003", client:"Lucas Petit", phone:"07 61 82 40 11",
         deviceType:"Console", brand:"Sony", model:"PlayStation 5", serial:"PS5-240711",
         issue:"Port HDMI endommagé", diagnosis:"Remplacement du connecteur HDMI",
         status:"Pièce commandée", price:"129", deposit:"40",
-        depositDate:"2026-07-24", dueDate:"2026-07-31", parts:"Connecteur HDMI"
+        depositDate:"2026-07-24", dueDate:"2026-07-31", parts:"Connecteur HDMI", lines:[{label:"Connecteur HDMI PS5",qty:1,unit:29},{label:"Micro-soudure",qty:1,unit:100}]
       }
     ];
 
@@ -1007,10 +1022,53 @@
       });
     }
 
+
+    function addRepairLine(data={label:"",qty:1,unit:0}){
+      const row = document.createElement("div");
+      row.className = "repair-line";
+      row.innerHTML = `
+        <input class="repair-line-label" type="text" placeholder="Désignation" value="${escapeHtml(data.label || "")}">
+        <input class="repair-line-qty" type="number" min="0" step="1" value="${Number(data.qty || 1)}">
+        <input class="repair-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit || 0)}">
+        <button class="mini-btn danger repair-line-remove" type="button">×</button>
+      `;
+      document.getElementById("repairLines").appendChild(row);
+      row.querySelectorAll("input").forEach(input=>input.addEventListener("input",updateRepairLinesTotal));
+      row.querySelector(".repair-line-remove").addEventListener("click",()=>{
+        row.remove();
+        updateRepairLinesTotal();
+      });
+      updateRepairLinesTotal();
+    }
+
+    function getRepairLines(){
+      return [...document.querySelectorAll(".repair-line")].map(row=>({
+        label:row.querySelector(".repair-line-label").value.trim(),
+        qty:Number(row.querySelector(".repair-line-qty").value || 0),
+        unit:Number(row.querySelector(".repair-line-unit").value || 0)
+      })).filter(line=>line.label);
+    }
+
+    function repairLinesTotal(lines=getRepairLines()){
+      return lines.reduce((sum,line)=>sum+(Number(line.qty||0)*Number(line.unit||0)),0);
+    }
+
+    function updateRepairLinesTotal(){
+      const total = repairLinesTotal();
+      document.getElementById("repairLinesTotal").textContent =
+        total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("repairPrice").value = total ? total.toFixed(2) : "";
+    }
+
+    document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
+
     function resetRepairForm(){
       document.getElementById("repairForm").reset();
       document.getElementById("repairEditId").value = "";
       document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("repairLines").innerHTML = "";
+      addRepairLine();
+      updateRepairLinesTotal();
       document.getElementById("saveRepairBtn").textContent = "Enregistrer la réparation";
     }
 
@@ -1069,7 +1127,8 @@
         deposit: document.getElementById("repairDeposit").value,
         depositDate: document.getElementById("repairDepositDate").value,
         dueDate: document.getElementById("repairDueDate").value,
-        parts: document.getElementById("repairParts").value.trim()
+        parts: getRepairLines().map(line=>line.label).join(", "),
+        lines: getRepairLines()
       };
 
       if(editId){
@@ -1103,7 +1162,13 @@
       document.getElementById("repairDeposit").value = item.deposit || "";
       document.getElementById("repairDepositDate").value = item.depositDate || "";
       document.getElementById("repairDueDate").value = item.dueDate || "";
-      document.getElementById("repairParts").value = item.parts || "";
+      document.getElementById("repairLines").innerHTML = "";
+      const existingLines = Array.isArray(item.lines) && item.lines.length
+        ? item.lines
+        : (item.parts ? [{label:item.parts,qty:1,unit:Number(item.price||0)}] : []);
+      existingLines.forEach(addRepairLine);
+      if(!existingLines.length) addRepairLine();
+      updateRepairLinesTotal();
       document.getElementById("saveRepairBtn").textContent = "Enregistrer les modifications";
       showRepairForm();
       document.getElementById("repairForm").scrollIntoView({behavior:"smooth"});
@@ -1132,7 +1197,11 @@
         <div class="detail-box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
         <div class="detail-box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
         <div class="detail-box"><small>Statut</small>${escapeHtml(item.status)}</div>
-        <div class="detail-box"><small>Pièces utilisées</small>${escapeHtml(item.parts || "—")}</div>
+        <div class="detail-box full"><small>Lignes de réparation</small>${
+          (Array.isArray(item.lines) && item.lines.length
+            ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
+            : escapeHtml(item.parts || "—"))
+        }</div>
         <div class="detail-box"><small>Prix estimé</small>${escapeHtml(item.price || "0")} €</div>
         <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
@@ -1184,6 +1253,11 @@
             <div class="box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
             <div class="box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
             <div class="box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
+            <div class="box full"><small>Lignes de réparation</small>${
+              (Array.isArray(item.lines) && item.lines.length
+                ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
+                : escapeHtml(item.parts || "—"))
+            }</div>
             <div class="box"><small>Prix estimé</small>${escapeHtml(item.price || "0")} €</div>
             <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
             <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
@@ -1735,6 +1809,57 @@
       `);
       w.document.close();
     }
+
+
+    function repairToDocument(type){
+      const repair = currentRepairList().find(r=>r.id===openedRepairId);
+      if(!repair) return;
+
+      if(activeRole !== "admin"){
+        alert("Action impossible en mode présentation.");
+        return;
+      }
+
+      const documents = getAdminDocuments();
+      const docLines = Array.isArray(repair.lines) && repair.lines.length
+        ? repair.lines.map(line=>({
+            label:line.label,
+            qty:Number(line.qty||1),
+            unit:Number(line.unit||0),
+            tax:20
+          }))
+        : [{
+            label:repair.issue || "Réparation",
+            qty:1,
+            unit:Number(repair.price||0),
+            tax:20
+          }];
+
+      const documentItem = {
+        id:`DOC-${Date.now()}`,
+        type,
+        number:nextDocumentNumber(type,documents),
+        date:new Date().toISOString().slice(0,10),
+        client:repair.client || "",
+        contact:repair.phone || "",
+        subject:`Réparation ${repair.brand || ""} ${repair.model || ""}`.trim(),
+        lines:docLines,
+        reason:"",
+        deposit:Number(repair.deposit||0),
+        status:"Brouillon",
+        repairId:repair.id
+      };
+
+      documents.unshift(documentItem);
+      saveAdminDocuments(documents);
+      document.getElementById("repairModal").classList.add("hidden");
+      showPage("documents");
+      renderDocuments();
+      editDocument(documentItem.id);
+    }
+
+    document.getElementById("repairToQuoteBtn").addEventListener("click",()=>repairToDocument("devis"));
+    document.getElementById("repairToInvoiceBtn").addEventListener("click",()=>repairToDocument("facture"));
 
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
