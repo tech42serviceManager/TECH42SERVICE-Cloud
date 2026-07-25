@@ -279,6 +279,16 @@
     .codes-grid img{max-width:100%;background:#fff;padding:8px;border-radius:8px}
     .closed-badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#13331b;color:#7cf195;border:1px solid #286d38;font-weight:800}
 
+    
+    #loginButton{min-height:50px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+    .cloud-ok{color:#74ef8b!important}.cloud-error{color:#ff8585!important}
+    @media(max-width:520px){
+      .login-screen{display:flex;align-items:flex-start;justify-content:center;padding:12px;overflow:auto}
+      .login-box{margin-top:8px;padding:18px;border-radius:14px}
+      .login-logo{max-height:125px}
+      .login-box input,.login-box select,.login-box button{font-size:16px}
+    }
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -291,6 +301,7 @@
       .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form,.codes-grid{grid-template-columns:1fr}
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <section id="loginScreen" class="login-screen">
@@ -300,7 +311,12 @@
       <p>TECH42SERVICE Gestion</p>
 
       <div class="field">
-        <label for="accountType">Compte</label>
+        <label>Compte cloud</label>
+        <input id="cloudEmail" type="email" value="tech42service@gmail.com" readonly>
+      </div>
+
+      <div class="field">
+        <label for="accountType">Mode d'accès</label>
         <select id="accountType">
           <option value="admin">Administrateur</option>
           <option value="visuel">Compte visuel</option>
@@ -312,8 +328,9 @@
         <input id="password" type="password" required autocomplete="current-password">
       </div>
 
-      <button class="primary" type="submit">Se connecter</button>
+      <button id="loginButton" class="primary" type="submit">Se connecter</button>
       <div id="loginError" class="error"></div>
+      <div id="cloudStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">Connexion cloud</div>
     </form>
   </section>
 
@@ -1406,7 +1423,7 @@
           </div>
 
             <form id="adminPasswordForm" class="settings-card">
-              <h3>Compte administrateur</h3>
+              <h3>Mot de passe cloud unique</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
                 <input id="newAdminPassword" type="password" minlength="4" required>
@@ -1419,7 +1436,7 @@
               <div id="adminPasswordMessage"></div>
             </form>
 
-            <form id="visualPasswordForm" class="settings-card">
+            <form id="visualPasswordForm" class="settings-card hidden">
               <h3>Compte visuel</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
@@ -1440,7 +1457,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V18.1 dossier réparation PRO</footer>
+      <footer>TECH42SERVICE Gestion — V18.3 Cloud simple</footer>
     </main>
   </div>
 
@@ -1457,6 +1474,174 @@
     }
     function formatMoney(value){
       return Number(value || 0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+    }
+
+
+    const SUPABASE_URL = "https://uenpjlqskauvcsndajyq.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q";
+    const CLOUD_EMAIL = "tech42service@gmail.com";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    const CLOUD_STORAGE_KEYS = [
+      "tech42-repairs",
+      "tech42-stock",
+      "tech42-documents",
+      "tech42-document-templates",
+      "tech42-appointments",
+      "tech42-clients",
+      "tech42-buy-sell",
+      "tech42-repair-help-links",
+      "tech42-sites-links",
+      "tech42-devices",
+      "tech42-theme"
+    ];
+
+    let cloudUser = null;
+    let cloudChannel = null;
+    let cloudSaveTimer = null;
+    let cloudApplying = false;
+    let lastCloudJson = "";
+
+    function setCloudStatus(message, ok=false){
+      const el = document.getElementById("cloudStatus");
+      if(!el) return;
+      el.textContent = message;
+      el.className = ok ? "cloud-ok" : "cloud-error";
+    }
+
+    function collectCloudData(){
+      const data = {};
+      CLOUD_STORAGE_KEYS.forEach(key => {
+        const value = localStorage.getItem(key);
+        if(value !== null) data[key] = value;
+      });
+      return data;
+    }
+
+    function applyCloudData(data){
+      if(!data || typeof data !== "object") return;
+      cloudApplying = true;
+      try{
+        CLOUD_STORAGE_KEYS.forEach(key => {
+          if(Object.prototype.hasOwnProperty.call(data, key)){
+            localStorage.setItem(key, String(data[key]));
+          }
+        });
+      }finally{
+        cloudApplying = false;
+      }
+      lastCloudJson = JSON.stringify(collectCloudData());
+    }
+
+    async function cloudLoadOrCreate(){
+      const {data, error} = await supabaseClient
+        .from("app_state")
+        .select("data")
+        .eq("user_id", cloudUser.id)
+        .maybeSingle();
+
+      if(error) throw error;
+
+      if(data && data.data && Object.keys(data.data).length){
+        applyCloudData(data.data);
+      }else{
+        await cloudSaveNow(true);
+      }
+    }
+
+    async function cloudSaveNow(force=false){
+      if(!cloudUser || cloudApplying) return;
+      const state = collectCloudData();
+      const json = JSON.stringify(state);
+      if(!force && json === lastCloudJson) return;
+
+      const {error} = await supabaseClient
+        .from("app_state")
+        .upsert({
+          user_id: cloudUser.id,
+          data: state,
+          updated_at: new Date().toISOString()
+        }, {onConflict: "user_id"});
+
+      if(error){
+        console.error("Erreur sauvegarde cloud", error);
+        setCloudStatus("Erreur de sauvegarde cloud", false);
+        return;
+      }
+
+      lastCloudJson = json;
+      setCloudStatus("Sauvegarde cloud à jour", true);
+    }
+
+    function scheduleCloudSave(){
+      if(!cloudUser || cloudApplying) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 700);
+    }
+
+    function startCloudAutoSave(){
+      setInterval(() => cloudSaveNow(false), 2500);
+      window.addEventListener("visibilitychange", () => {
+        if(document.visibilityState === "hidden") cloudSaveNow(false);
+      });
+      window.addEventListener("beforeunload", () => cloudSaveNow(false));
+    }
+
+    function subscribeCloud(){
+      if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
+      cloudChannel = supabaseClient
+        .channel("tech42-app-state-" + cloudUser.id)
+        .on("postgres_changes", {
+          event: "UPDATE",
+          schema: "public",
+          table: "app_state",
+          filter: `user_id=eq.${cloudUser.id}`
+        }, payload => {
+          const incoming = payload.new && payload.new.data;
+          if(!incoming) return;
+          const incomingJson = JSON.stringify(incoming);
+          if(incomingJson === lastCloudJson) return;
+          applyCloudData(incoming);
+          refreshAllCloudModules();
+          setCloudStatus("Données reçues du cloud", true);
+        })
+        .subscribe();
+    }
+
+    function refreshAllCloudModules(){
+      try{ renderRepairs(); }catch(e){ console.warn(e); }
+      try{ renderStock(); refreshStockPartsList(); }catch(e){ console.warn(e); }
+      try{ renderDocuments(); loadDocumentTemplates(); }catch(e){ console.warn(e); }
+      try{ renderAppointments(); }catch(e){ console.warn(e); }
+      try{ renderClients(); }catch(e){ console.warn(e); }
+      try{ renderBuySell(); }catch(e){ console.warn(e); }
+      try{ renderDevices(); refreshDeviceLists(); }catch(e){ console.warn(e); }
+      try{ renderRepairHelp(); renderSites(); }catch(e){ console.warn(e); }
+      try{ updateDashboardStats(); }catch(e){ console.warn(e); }
+      try{
+        const savedTheme = localStorage.getItem("tech42-theme") || "gold";
+        theme.value = savedTheme;
+        applyTheme(savedTheme);
+      }catch(e){ console.warn(e); }
+    }
+
+    async function cloudLogin(passwordValue){
+      const {data, error} = await supabaseClient.auth.signInWithPassword({
+        email: CLOUD_EMAIL,
+        password: passwordValue
+      });
+      if(error) throw error;
+      cloudUser = data.user;
+      await cloudLoadOrCreate();
+      subscribeCloud();
+      startCloudAutoSave();
+      return data.user;
     }
 
     const DEFAULT_ADMIN_PASSWORD = "Tech42";
@@ -1503,16 +1688,19 @@
       return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
     }
 
-    loginForm.addEventListener("submit", (event) => {
+    loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const role = accountType.value;
-      const expected = role === "admin" ? getAdminPassword() : getVisualPassword();
+      const enteredPassword = password.value;
+      const button = document.getElementById("loginButton");
 
-      if(password.value !== expected){
-        loginError.textContent = "Mot de passe incorrect.";
-        return;
-      }
+      loginError.textContent = "";
+      button.disabled = true;
+      button.textContent = "Connexion…";
+      setCloudStatus("Connexion à Supabase…", false);
 
+      try{
+        await cloudLogin(enteredPassword);
       activeRole = role;
       currentUser.textContent = role === "admin" ? "Administrateur" : "Compte visuel";
       readonlyNote.classList.toggle("hidden", role !== "visuel");
@@ -1567,9 +1755,25 @@
       renderDevices();
       refreshDeviceLists();
       refreshStockPartsList();
+
+        refreshAllCloudModules();
+        setCloudStatus("Connecté et synchronisé", true);
+      }catch(error){
+        console.error("Connexion cloud impossible", error);
+        loginError.textContent = "Mot de passe incorrect ou connexion cloud indisponible.";
+        setCloudStatus("Connexion refusée", false);
+      }finally{
+        button.disabled = false;
+        button.textContent = "Se connecter";
+      }
     });
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await cloudSaveNow(true);
+      await supabaseClient.auth.signOut();
+      cloudUser = null;
+      if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
+      cloudChannel = null;
       activeRole = null;
       app.classList.add("hidden");
       loginScreen.classList.remove("hidden");
@@ -1612,7 +1816,7 @@
       }
     }
 
-    document.getElementById("adminPasswordForm").addEventListener("submit", (event) => {
+    document.getElementById("adminPasswordForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const a = document.getElementById("newAdminPassword").value;
       const b = document.getElementById("confirmAdminPassword").value;
@@ -1623,10 +1827,21 @@
         msg.textContent = "Les mots de passe ne correspondent pas.";
         return;
       }
+      if(a.length < 6){
+        msg.className = "error";
+        msg.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
+        return;
+      }
 
-      localStorage.setItem("tech42-admin-password", a);
+      const {error} = await supabaseClient.auth.updateUser({password:a});
+      if(error){
+        msg.className = "error";
+        msg.textContent = error.message;
+        return;
+      }
+
       msg.className = "notice";
-      msg.textContent = "Mot de passe administrateur modifié.";
+      msg.textContent = "Mot de passe cloud modifié pour tous les appareils.";
       event.target.reset();
     });
 
@@ -1643,6 +1858,7 @@
       }
 
       localStorage.setItem("tech42-visual-password", a);
+      scheduleCloudSave();
       msg.className = "notice";
       msg.textContent = "Mot de passe du compte visuel modifié.";
       event.target.reset();
@@ -1682,6 +1898,7 @@
 
     function saveAdminRepairs(list){
       localStorage.setItem("tech42-repairs", JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function currentRepairList(){
@@ -2234,6 +2451,7 @@
 
     function saveAdminStock(list){
       localStorage.setItem("tech42-stock", JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function currentStockList(){
@@ -2448,6 +2666,7 @@
 
     function saveAdminDocuments(list){
       localStorage.setItem("tech42-documents", JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function currentDocuments(){
@@ -2501,6 +2720,7 @@
         }
       };
       localStorage.setItem("tech42-document-templates",JSON.stringify(templates));
+      scheduleCloudSave();
       const msg = document.getElementById("documentTemplatesMessage");
       msg.className = "notice";
       msg.textContent = "Personnalisation enregistrée.";
@@ -2846,6 +3066,7 @@
 
     function saveAdminAppointments(list){
       localStorage.setItem("tech42-appointments", JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function currentAppointments(){
@@ -3111,6 +3332,7 @@
 
     function saveAdminClients(list){
       localStorage.setItem("tech42-clients", JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function currentClients(){
@@ -3315,6 +3537,7 @@
 
     function saveAdminBuySell(list){
       localStorage.setItem("tech42-buy-sell", JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function currentBuySell(){
@@ -3489,6 +3712,7 @@
 
     function saveStoredLinks(key,list){
       localStorage.setItem(key,JSON.stringify(list));
+      scheduleCloudSave();
     }
 
     function nextLinkId(prefix,list){
@@ -3630,6 +3854,7 @@
     }
     function saveAdminDevices(list){
       localStorage.setItem("tech42-devices",JSON.stringify(list));
+      scheduleCloudSave();
     }
     function currentDevices(){
       return activeRole==="visuel" ? demoDevices : getAdminDevices();
@@ -3861,6 +4086,16 @@
       saveAdminRepairs(list);
     }
 
+
+    supabaseClient.auth.getSession().then(({data}) => {
+      if(data && data.session && data.session.user){
+        cloudUser = data.session.user;
+        setCloudStatus("Session cloud disponible", true);
+      }else{
+        setCloudStatus("Compte cloud prêt", true);
+      }
+    }).catch(() => setCloudStatus("Supabase indisponible", false));
+
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
       blue:{accent:"#3ea6ff",border:"#17374d"},
@@ -3874,6 +4109,7 @@
       document.documentElement.style.setProperty("--accent", selected.accent);
       document.documentElement.style.setProperty("--border", selected.border);
       localStorage.setItem("tech42-theme", name);
+      scheduleCloudSave();
     }
 
     theme.addEventListener("change", () => applyTheme(theme.value));
