@@ -214,6 +214,23 @@
     .repair-photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
     .repair-photo-gallery img{width:100%;height:170px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
 
+    
+    .buysell-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .buysell-form .full{grid-column:1/-1}
+    .buysell-form input,.buysell-form select,.buysell-form textarea{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .buysell-form textarea{min-height:90px;resize:vertical}
+    .buysell-toolbar{display:grid;grid-template-columns:1fr 220px;gap:12px;margin-bottom:14px}
+    .buysell-toolbar input,.buysell-toolbar select{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .buysell-list{display:grid;gap:12px}
+    .buysell-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .buysell-card-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+    .buysell-card h3{margin:0 0 6px}
+    .buysell-meta{color:var(--muted);font-size:14px;line-height:1.6}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -223,7 +240,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -264,6 +281,7 @@
         <button data-page="stock">Stock</button>
         <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
+        <button data-page="buySell">Rachat / Vente</button>
         <button data-page="settings">Paramètres</button>
         <button id="logoutBtn" class="logout">Déconnexion</button>
       </nav>
@@ -515,6 +533,15 @@
               </select>
             </div>
 
+
+            <div class="field">
+              <label>Mode de prix</label>
+              <select id="stockPriceMode" required>
+                <option value="TTC">TTC</option>
+                <option value="HT">HT</option>
+              </select>
+            </div>
+
             <div class="field">
               <label>Marque</label>
               <input id="stockBrand" type="text">
@@ -583,6 +610,7 @@
                   <th>Référence</th>
                   <th>Désignation</th>
                   <th>Catégorie</th>
+                  <th>Prix</th>
                   <th>Compatibilité</th>
                   <th>Rangement</th>
                   <th>Qté</th>
@@ -893,6 +921,135 @@
         </section>
       </section>
 
+
+      <section id="buySellPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Rachat / Vente</h1>
+            <p>Gestion des appareils achetés et revendus</p>
+          </div>
+        </header>
+
+        <div id="buySellDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <div class="page-actions">
+            <button id="newBuySellBtn" class="action-btn write-action">Nouvelle opération</button>
+            <button id="cancelBuySellBtn" class="action-btn secondary hidden">Fermer le formulaire</button>
+          </div>
+
+          <form id="buySellForm" class="buysell-form hidden">
+            <input id="buySellEditId" type="hidden">
+
+            <div class="field">
+              <label>Type d'opération</label>
+              <select id="buySellType" required>
+                <option value="Rachat">Rachat</option>
+                <option value="Vente">Vente</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Origine / Client</label>
+              <select id="buySellSourceType">
+                <option value="Particulier">Particulier</option>
+                <option value="Fournisseur">Fournisseur</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Nom / Société</label>
+              <input id="buySellContactName" type="text" required>
+            </div>
+
+            <div class="field">
+              <label>Téléphone</label>
+              <input id="buySellPhone" type="tel">
+            </div>
+
+            <div class="field">
+              <label>E-mail</label>
+              <input id="buySellEmail" type="email">
+            </div>
+
+            <div class="field">
+              <label>Date</label>
+              <input id="buySellDate" type="date" required>
+            </div>
+
+            <div class="field">
+              <label>Type d'appareil</label>
+              <select id="buySellDeviceType">
+                <option>Téléphone</option>
+                <option>Tablette</option>
+                <option>Ordinateur</option>
+                <option>Console</option>
+                <option>Autre</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Marque / Modèle</label>
+              <input id="buySellModel" type="text" required>
+            </div>
+
+            <div class="field">
+              <label>IMEI / N° de série</label>
+              <input id="buySellSerial" type="text">
+            </div>
+
+            <div class="field">
+              <label>État</label>
+              <select id="buySellCondition">
+                <option>Comme neuf</option>
+                <option>Bon état</option>
+                <option>État correct</option>
+                <option>À réparer</option>
+                <option>Pour pièces</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Prix de rachat TTC (€)</label>
+              <input id="buySellBuyPrice" type="number" min="0" step="0.01">
+            </div>
+
+            <div class="field">
+              <label>Prix de vente TTC (€)</label>
+              <input id="buySellSellPrice" type="number" min="0" step="0.01">
+            </div>
+
+            <div class="field full">
+              <label>Accessoires fournis</label>
+              <input id="buySellAccessories" type="text" placeholder="Chargeur, boîte, câble...">
+            </div>
+
+            <div class="field full">
+              <label>Notes</label>
+              <textarea id="buySellNotes"></textarea>
+            </div>
+
+            <div class="full">
+              <button id="saveBuySellBtn" class="save-btn" type="submit">Enregistrer l'opération</button>
+            </div>
+          </form>
+
+          <div class="buysell-toolbar">
+            <input id="buySellSearch" type="search" placeholder="Rechercher nom, modèle, IMEI...">
+            <select id="buySellFilter">
+              <option value="">Toutes les opérations</option>
+              <option value="Rachat">Rachat</option>
+              <option value="Vente">Vente</option>
+            </select>
+          </div>
+
+          <div id="buySellList" class="buysell-list"></div>
+          <div id="buySellEmpty" class="empty-state">Aucune opération enregistrée.</div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -953,7 +1110,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V12 prix TTC et photos</footer>
+      <footer>TECH42SERVICE Gestion — V13 stock HT/TTC et rachat-vente</footer>
     </main>
   </div>
 
@@ -976,11 +1133,13 @@
     const documentsPage = document.getElementById("documentsPage");
     const appointmentsPage = document.getElementById("appointmentsPage");
     const clientsPage = document.getElementById("clientsPage");
+    const buySellPage = document.getElementById("buySellPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
     const documentsDemoNote = document.getElementById("documentsDemoNote");
     const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
     const clientsDemoNote = document.getElementById("clientsDemoNote");
+    const buySellDemoNote = document.getElementById("buySellDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -1012,6 +1171,7 @@
       documentsDemoNote.classList.toggle("hidden", role !== "visuel");
       appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
+      buySellDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -1077,6 +1237,7 @@
       documentsPage.classList.toggle("hidden", page !== "documents");
       appointmentsPage.classList.toggle("hidden", page !== "appointments");
       clientsPage.classList.toggle("hidden", page !== "clients");
+      buySellPage.classList.toggle("hidden", page !== "buySell");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
@@ -1556,10 +1717,10 @@
 
 
     const demoStock = [
-      {id:"STK-0001",reference:"IPH13-OLED",name:"Écran OLED iPhone 13",category:"Pièce neuve",brand:"Apple",compatible:"iPhone 13",supplier:"MobileParts",location:"Bac A1",quantity:4,minimum:2,buyPrice:72,shipping:4,sellPrice:149},
-      {id:"STK-0002",reference:"PS5-HDMI",name:"Connecteur HDMI PS5",category:"Pièce neuve",brand:"Sony",compatible:"PlayStation 5",supplier:"ConsoleFix",location:"Tiroir C2",quantity:1,minimum:2,buyPrice:8,shipping:2,sellPrice:29},
-      {id:"STK-0003",reference:"USB-C-2M",name:"Câble USB-C 2 mètres",category:"Accessoire",brand:"Générique",compatible:"Universel",supplier:"AccessPro",location:"Présentoir 1",quantity:18,minimum:5,buyPrice:3.5,shipping:0.5,sellPrice:12.9},
-      {id:"STK-0004",reference:"TOURNEVIS-P5",name:"Tournevis Pentalobe P5",category:"Outillage",brand:"iFixit",compatible:"Apple",supplier:"iFixit",location:"Atelier O2",quantity:2,minimum:1,buyPrice:9,shipping:1,sellPrice:0}
+      {id:"STK-0001",reference:"IPH13-OLED",name:"Écran OLED iPhone 13",category:"Pièce neuve",priceMode:"TTC",brand:"Apple",compatible:"iPhone 13",supplier:"MobileParts",location:"Bac A1",quantity:4,minimum:2,buyPrice:72,shipping:4,sellPrice:149},
+      {id:"STK-0002",reference:"PS5-HDMI",name:"Connecteur HDMI PS5",category:"Pièce neuve",priceMode:"HT",brand:"Sony",compatible:"PlayStation 5",supplier:"ConsoleFix",location:"Tiroir C2",quantity:1,minimum:2,buyPrice:8,shipping:2,sellPrice:29},
+      {id:"STK-0003",reference:"USB-C-2M",name:"Câble USB-C 2 mètres",category:"Accessoire",priceMode:"TTC",brand:"Générique",compatible:"Universel",supplier:"AccessPro",location:"Présentoir 1",quantity:18,minimum:5,buyPrice:3.5,shipping:0.5,sellPrice:12.9},
+      {id:"STK-0004",reference:"TOURNEVIS-P5",name:"Tournevis Pentalobe P5",category:"Outillage",priceMode:"HT",brand:"iFixit",compatible:"Apple",supplier:"iFixit",location:"Atelier O2",quantity:2,minimum:1,buyPrice:9,shipping:1,sellPrice:0}
     ];
 
     function getAdminStock(){
@@ -1620,6 +1781,7 @@
           <td>${escapeHtml(item.reference)}</td>
           <td>${escapeHtml(item.name)}<br><small>${escapeHtml(item.supplier || "")}</small></td>
           <td>${escapeHtml(item.category)}</td>
+          <td>${escapeHtml(item.priceMode || "TTC")}</td>
           <td>${escapeHtml(item.brand || "")} ${escapeHtml(item.compatible || "")}</td>
           <td>${escapeHtml(item.location || "—")}</td>
           <td>${Number(item.quantity || 0)}</td>
@@ -1688,6 +1850,7 @@
         reference: document.getElementById("stockReference").value.trim(),
         name: document.getElementById("stockName").value.trim(),
         category: document.getElementById("stockCategory").value,
+        priceMode: document.getElementById("stockPriceMode").value,
         brand: document.getElementById("stockBrand").value.trim(),
         compatible: document.getElementById("stockCompatible").value.trim(),
         supplier: document.getElementById("stockSupplier").value.trim(),
@@ -1721,6 +1884,7 @@
       document.getElementById("stockReference").value = item.reference || "";
       document.getElementById("stockName").value = item.name || "";
       document.getElementById("stockCategory").value = item.category || "";
+      document.getElementById("stockPriceMode").value = item.priceMode || "TTC";
       document.getElementById("stockBrand").value = item.brand || "";
       document.getElementById("stockCompatible").value = item.compatible || "";
       document.getElementById("stockSupplier").value = item.supplier || "";
@@ -2596,6 +2760,169 @@
       showPage("repairs");
       renderRepairs();
       updateDashboardStats();
+    }
+
+
+    const demoBuySell = [
+      {id:"RV-0001",type:"Rachat",sourceType:"Particulier",contactName:"Marc Durand",phone:"06 10 20 30 40",email:"",date:"2026-07-20",deviceType:"Téléphone",model:"Samsung Galaxy S22",serial:"356789000001111",condition:"Bon état",buyPrice:180,sellPrice:299,accessories:"Boîte, câble",notes:"Batterie à contrôler"},
+      {id:"RV-0002",type:"Vente",sourceType:"Particulier",contactName:"Claire Robert",phone:"06 22 33 44 55",email:"claire@example.fr",date:"2026-07-22",deviceType:"Téléphone",model:"iPhone 12 128 Go",serial:"356789000002222",condition:"Comme neuf",buyPrice:220,sellPrice:389,accessories:"Chargeur",notes:"Garantie 3 mois"}
+    ];
+
+    function getAdminBuySell(){
+      try{return JSON.parse(localStorage.getItem("tech42-buy-sell") || "[]")}catch{return []}
+    }
+
+    function saveAdminBuySell(list){
+      localStorage.setItem("tech42-buy-sell", JSON.stringify(list));
+    }
+
+    function currentBuySell(){
+      return activeRole === "visuel" ? demoBuySell : getAdminBuySell();
+    }
+
+    function nextBuySellId(list){
+      const max = list.reduce((highest,item)=>{
+        const match = String(item.id).match(/(\d+)$/);
+        return Math.max(highest, match ? Number(match[1]) : 0);
+      },0);
+      return `RV-${String(max+1).padStart(4,"0")}`;
+    }
+
+    function filteredBuySell(){
+      const q = document.getElementById("buySellSearch").value.trim().toLowerCase();
+      const type = document.getElementById("buySellFilter").value;
+      return currentBuySell().filter(item=>{
+        const text = [item.contactName,item.phone,item.email,item.deviceType,item.model,item.serial,item.condition,item.accessories,item.notes].join(" ").toLowerCase();
+        return (!q || text.includes(q)) && (!type || item.type===type);
+      });
+    }
+
+    function renderBuySell(){
+      const box = document.getElementById("buySellList");
+      const empty = document.getElementById("buySellEmpty");
+      const list = filteredBuySell();
+
+      box.innerHTML = "";
+      list.forEach(item=>{
+        const margin = Number(item.sellPrice||0) - Number(item.buyPrice||0);
+        const actions = activeRole==="admin"
+          ? `<button class="mini-btn" data-rv-edit="${escapeHtml(item.id)}">Modifier</button>
+             <button class="mini-btn danger" data-rv-delete="${escapeHtml(item.id)}">Supprimer</button>`
+          : "";
+
+        const card = document.createElement("article");
+        card.className = "buysell-card";
+        card.innerHTML = `
+          <div class="buysell-card-head">
+            <div>
+              <h3>${escapeHtml(item.type)} — ${escapeHtml(item.model)}</h3>
+              <div class="buysell-meta">
+                ${escapeHtml(item.contactName)} · ${escapeHtml(item.sourceType)}<br>
+                ${escapeHtml(item.deviceType)} · ${escapeHtml(item.condition)}<br>
+                IMEI / Série : ${escapeHtml(item.serial||"—")}<br>
+                Rachat : ${Number(item.buyPrice||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})} ·
+                Vente : ${Number(item.sellPrice||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})} ·
+                Marge : ${margin.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
+              </div>
+            </div>
+            <div class="table-actions">${actions}</div>
+          </div>
+        `;
+        box.appendChild(card);
+      });
+
+      empty.classList.toggle("hidden", list.length>0);
+      box.querySelectorAll("[data-rv-edit]").forEach(btn=>btn.addEventListener("click",()=>editBuySell(btn.dataset.rvEdit)));
+      box.querySelectorAll("[data-rv-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteBuySell(btn.dataset.rvDelete)));
+    }
+
+    function resetBuySellForm(){
+      document.getElementById("buySellForm").reset();
+      document.getElementById("buySellEditId").value="";
+      document.getElementById("buySellDate").value=new Date().toISOString().slice(0,10);
+      document.getElementById("saveBuySellBtn").textContent="Enregistrer l'opération";
+    }
+
+    function showBuySellForm(){
+      if(activeRole!=="admin"){alert("Action impossible en mode présentation.");return;}
+      document.getElementById("buySellForm").classList.remove("hidden");
+      document.getElementById("cancelBuySellBtn").classList.remove("hidden");
+    }
+
+    function hideBuySellForm(){
+      document.getElementById("buySellForm").classList.add("hidden");
+      document.getElementById("cancelBuySellBtn").classList.add("hidden");
+      resetBuySellForm();
+    }
+
+    document.getElementById("newBuySellBtn").addEventListener("click",()=>{resetBuySellForm();showBuySellForm();});
+    document.getElementById("cancelBuySellBtn").addEventListener("click",hideBuySellForm);
+    document.getElementById("buySellSearch").addEventListener("input",renderBuySell);
+    document.getElementById("buySellFilter").addEventListener("change",renderBuySell);
+
+    document.getElementById("buySellForm").addEventListener("submit",(event)=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+
+      const list=getAdminBuySell();
+      const editId=document.getElementById("buySellEditId").value;
+      const item={
+        id:editId||nextBuySellId(list),
+        type:document.getElementById("buySellType").value,
+        sourceType:document.getElementById("buySellSourceType").value,
+        contactName:document.getElementById("buySellContactName").value.trim(),
+        phone:document.getElementById("buySellPhone").value.trim(),
+        email:document.getElementById("buySellEmail").value.trim(),
+        date:document.getElementById("buySellDate").value,
+        deviceType:document.getElementById("buySellDeviceType").value,
+        model:document.getElementById("buySellModel").value.trim(),
+        serial:document.getElementById("buySellSerial").value.trim(),
+        condition:document.getElementById("buySellCondition").value,
+        buyPrice:Number(document.getElementById("buySellBuyPrice").value||0),
+        sellPrice:Number(document.getElementById("buySellSellPrice").value||0),
+        accessories:document.getElementById("buySellAccessories").value.trim(),
+        notes:document.getElementById("buySellNotes").value.trim()
+      };
+
+      if(editId){
+        const index=list.findIndex(i=>i.id===editId);
+        if(index!==-1) list[index]=item;
+      }else{
+        list.unshift(item);
+      }
+
+      saveAdminBuySell(list);
+      hideBuySellForm();
+      renderBuySell();
+    });
+
+    function editBuySell(id){
+      const item=getAdminBuySell().find(i=>i.id===id);
+      if(!item) return;
+
+      document.getElementById("buySellEditId").value=item.id;
+      document.getElementById("buySellType").value=item.type||"Rachat";
+      document.getElementById("buySellSourceType").value=item.sourceType||"Particulier";
+      document.getElementById("buySellContactName").value=item.contactName||"";
+      document.getElementById("buySellPhone").value=item.phone||"";
+      document.getElementById("buySellEmail").value=item.email||"";
+      document.getElementById("buySellDate").value=item.date||"";
+      document.getElementById("buySellDeviceType").value=item.deviceType||"Téléphone";
+      document.getElementById("buySellModel").value=item.model||"";
+      document.getElementById("buySellSerial").value=item.serial||"";
+      document.getElementById("buySellCondition").value=item.condition||"Bon état";
+      document.getElementById("buySellBuyPrice").value=item.buyPrice??0;
+      document.getElementById("buySellSellPrice").value=item.sellPrice??0;
+      document.getElementById("buySellAccessories").value=item.accessories||"";
+      document.getElementById("buySellNotes").value=item.notes||"";
+      document.getElementById("saveBuySellBtn").textContent="Enregistrer les modifications";
+      showBuySellForm();
+    }
+
+    function deleteBuySell(id){
+      if(!confirm("Supprimer définitivement cette opération ?")) return;
+      saveAdminBuySell(getAdminBuySell().filter(i=>i.id!==id));
+      renderBuySell();
     }
 
     const themes = {
