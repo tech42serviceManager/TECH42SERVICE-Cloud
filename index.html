@@ -153,7 +153,7 @@
     }
     .document-form textarea{min-height:90px;resize:vertical}
     .document-lines{display:grid;gap:10px}
-    .document-line{display:grid;grid-template-columns:2fr 90px 140px 42px;gap:8px;align-items:center}
+    .document-line{display:grid;grid-template-columns:2fr 90px 140px 90px 42px;gap:8px;align-items:center}
     .document-line input{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)}
     .document-total{margin-left:auto;width:min(360px,100%);display:grid;gap:8px}
     .document-total-row{display:flex;justify-content:space-between;gap:20px;padding:8px 0;border-bottom:1px solid #2a2a2a}
@@ -169,7 +169,7 @@
 
     
     .repair-lines{display:grid;gap:10px}
-    .repair-line{display:grid;grid-template-columns:2fr 90px 120px 42px;gap:8px;align-items:center}
+    .repair-line{display:grid;grid-template-columns:2fr 90px 120px 90px 42px;gap:8px;align-items:center}
     .repair-line input{
       width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)
     }
@@ -399,7 +399,7 @@
               </select>
             </div>
             <div class="field">
-              <label>Prix estimé TTC (€)</label>
+              <label>Prix estimé calculé TTC (€)</label>
               <input id="repairPrice" type="number" min="0" step="0.01">
             </div>
 
@@ -428,7 +428,7 @@
               <div id="repairLines" class="repair-lines"></div>
               <button id="addRepairLineBtn" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne</button>
               <div class="repair-total">
-                <span>Total estimé :</span>
+                <span>Total estimé TTC :</span>
                 <strong id="repairLinesTotal">0,00 €</strong>
               </div>
             </div>
@@ -535,11 +535,16 @@
 
 
             <div class="field">
-              <label>Mode de prix</label>
-              <select id="stockPriceMode" required>
-                <option value="TTC">TTC</option>
-                <option value="HT">HT</option>
-              </select>
+              <label>Prix d'achat saisi en</label>
+              <select id="stockBuyPriceMode"><option value="TTC">TTC</option><option value="HT">HT</option></select>
+            </div>
+            <div class="field">
+              <label>Frais de port saisis en</label>
+              <select id="stockShippingMode"><option value="TTC">TTC</option><option value="HT">HT</option></select>
+            </div>
+            <div class="field">
+              <label>Prix de vente saisi en</label>
+              <select id="stockSellPriceMode"><option value="TTC">TTC</option><option value="HT">HT</option></select>
             </div>
 
             <div class="field">
@@ -569,7 +574,7 @@
             </div>
 
             <div class="field">
-              <label>Prix d'achat TTC (€)</label>
+              <label>Prix d'achat (€)</label>
               <input id="stockBuyPrice" type="number" min="0" step="0.01">
             </div>
             <div class="field">
@@ -577,7 +582,7 @@
               <input id="stockShipping" type="number" min="0" step="0.01">
             </div>
             <div class="field">
-              <label>Prix de vente TTC (€)</label>
+              <label>Prix de vente (€)</label>
               <input id="stockSellPrice" type="number" min="0" step="0.01">
             </div>
 
@@ -700,9 +705,9 @@
             </div>
 
             <div class="full document-total">
-              <div class="document-total-row"><span>Total TTC</span><strong id="documentSubtotal">0,00 €</strong></div>
-              <div class="document-total-row"><span>TVA</span><strong>Incluse dans les prix TTC</strong></div>
-              <div class="document-total-row"><span>Total</span><strong id="documentGrandTotal">0,00 €</strong></div>
+              <div class="document-total-row"><span>Total HT</span><strong id="documentSubtotal">0,00 €</strong></div>
+              <div class="document-total-row"><span>TVA</span><strong id="documentTax">0,00 €</strong></div>
+              <div class="document-total-row"><span>Total TTC</span><strong id="documentGrandTotal">0,00 €</strong></div>
               <div class="document-total-row"><span>Reste à payer</span><strong id="documentBalance">0,00 €</strong></div>
             </div>
 
@@ -1017,7 +1022,7 @@
             </div>
 
             <div class="field">
-              <label>Prix de vente TTC (€)</label>
+              <label>Prix de vente (€)</label>
               <input id="buySellSellPrice" type="number" min="0" step="0.01">
             </div>
 
@@ -1110,11 +1115,25 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V13 stock HT/TTC et rachat-vente</footer>
+      <footer>TECH42SERVICE Gestion — V15 correction réparations et prix HT/TTC</footer>
     </main>
   </div>
 
   <script>
+
+    const TVA_RATE = 20;
+    function amountToTTC(value, mode){
+      const amount = Number(value || 0);
+      return mode === "HT" ? amount * 1.20 : amount;
+    }
+    function amountToHT(value, mode){
+      const amount = Number(value || 0);
+      return mode === "TTC" ? amount / 1.20 : amount;
+    }
+    function formatMoney(value){
+      return Number(value || 0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+    }
+
     const DEFAULT_ADMIN_PASSWORD = "Tech42";
     const DEFAULT_VISUAL_PASSWORD = "Visuel42";
 
@@ -1408,10 +1427,14 @@
         <input class="repair-line-label" type="text" placeholder="Désignation" value="${escapeHtml(data.label || "")}">
         <input class="repair-line-qty" type="number" min="0" step="1" value="${Number(data.qty || 1)}">
         <input class="repair-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit || 0)}">
+        <select class="repair-line-mode">
+          <option value="TTC" ${data.mode !== "HT" ? "selected" : ""}>TTC</option>
+          <option value="HT" ${data.mode === "HT" ? "selected" : ""}>HT</option>
+        </select>
         <button class="mini-btn danger repair-line-remove" type="button">×</button>
       `;
       document.getElementById("repairLines").appendChild(row);
-      row.querySelectorAll("input").forEach(input=>input.addEventListener("input",updateRepairLinesTotal));
+      row.querySelectorAll("input,select").forEach(input=>input.addEventListener("input",updateRepairLinesTotal));
       row.querySelector(".repair-line-remove").addEventListener("click",()=>{
         row.remove();
         updateRepairLinesTotal();
@@ -1423,12 +1446,13 @@
       return [...document.querySelectorAll(".repair-line")].map(row=>({
         label:row.querySelector(".repair-line-label").value.trim(),
         qty:Number(row.querySelector(".repair-line-qty").value || 0),
-        unit:Number(row.querySelector(".repair-line-unit").value || 0)
+        unit:Number(row.querySelector(".repair-line-unit").value || 0),
+        mode:row.querySelector(".repair-line-mode").value
       })).filter(line=>line.label);
     }
 
     function repairLinesTotal(lines=getRepairLines()){
-      return lines.reduce((sum,line)=>sum+(Number(line.qty||0)*Number(line.unit||0)),0);
+      return lines.reduce((sum,line)=>sum+(Number(line.qty||0)*amountToTTC(line.unit,line.mode||"TTC")),0);
     }
 
     function updateRepairLinesTotal(){
@@ -1488,8 +1512,6 @@
       document.getElementById("repairEditId").value = "";
       document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
       currentRepairPhotos = [];
-      renderRepairPhotosPreview();
-      currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
       renderRepairPhotosPreview();
       document.getElementById("repairLines").innerHTML = "";
       addRepairLine();
@@ -1590,6 +1612,8 @@
       document.getElementById("repairPrice").value = item.price || "";
       document.getElementById("repairDeposit").value = item.deposit || "";
       document.getElementById("repairDepositDate").value = item.depositDate || "";
+      currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
+      renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairLines").innerHTML = "";
       const existingLines = Array.isArray(item.lines) && item.lines.length
@@ -1744,8 +1768,10 @@
     }
 
     function stockMargin(item){
-      const cost = Number(item.buyPrice || 0) + Number(item.shipping || 0);
-      return Number(item.sellPrice || 0) - cost;
+      const buyTTC=amountToTTC(item.buyPrice,item.buyPriceMode||item.priceMode||"TTC");
+      const shippingTTC=amountToTTC(item.shipping,item.shippingMode||item.priceMode||"TTC");
+      const sellTTC=amountToTTC(item.sellPrice,item.sellPriceMode||"TTC");
+      return sellTTC-buyTTC-shippingTTC;
     }
 
     function filteredStock(){
@@ -1850,7 +1876,9 @@
         reference: document.getElementById("stockReference").value.trim(),
         name: document.getElementById("stockName").value.trim(),
         category: document.getElementById("stockCategory").value,
-        priceMode: document.getElementById("stockPriceMode").value,
+        buyPriceMode:document.getElementById("stockBuyPriceMode").value,
+        shippingMode:document.getElementById("stockShippingMode").value,
+        sellPriceMode:document.getElementById("stockSellPriceMode").value,
         brand: document.getElementById("stockBrand").value.trim(),
         compatible: document.getElementById("stockCompatible").value.trim(),
         supplier: document.getElementById("stockSupplier").value.trim(),
@@ -1884,7 +1912,9 @@
       document.getElementById("stockReference").value = item.reference || "";
       document.getElementById("stockName").value = item.name || "";
       document.getElementById("stockCategory").value = item.category || "";
-      document.getElementById("stockPriceMode").value = item.priceMode || "TTC";
+      document.getElementById("stockBuyPriceMode").value=item.buyPriceMode||item.priceMode||"TTC";
+      document.getElementById("stockShippingMode").value=item.shippingMode||item.priceMode||"TTC";
+      document.getElementById("stockSellPriceMode").value=item.sellPriceMode||"TTC";
       document.getElementById("stockBrand").value = item.brand || "";
       document.getElementById("stockCompatible").value = item.compatible || "";
       document.getElementById("stockSupplier").value = item.supplier || "";
@@ -2002,6 +2032,10 @@
         <input class="doc-line-label" type="text" placeholder="Désignation" value="${escapeHtml(data.label)}">
         <input class="doc-line-qty" type="number" min="0" step="1" value="${Number(data.qty||1)}">
         <input class="doc-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit||0)}">
+        <select class="doc-line-mode">
+          <option value="TTC" ${data.mode !== "HT" ? "selected" : ""}>TTC</option>
+          <option value="HT" ${data.mode === "HT" ? "selected" : ""}>HT</option>
+        </select>
         <button class="mini-btn danger doc-line-remove" type="button">×</button>
       `;
       document.getElementById("documentLines").appendChild(row);
@@ -2015,18 +2049,22 @@
         label:row.querySelector(".doc-line-label").value.trim(),
         qty:Number(row.querySelector(".doc-line-qty").value||0),
         unit:Number(row.querySelector(".doc-line-unit").value||0),
+        mode:row.querySelector(".doc-line-mode").value,
         tax:0
       })).filter(line=>line.label);
     }
 
     function calculateDocumentTotals(lines,deposit=0){
-      const total = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*Number(l.unit||0)),0);
-      return {subtotal:total,tax:0,total,balance:Math.max(0,total-Number(deposit||0))};
+      const totalHT = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*amountToHT(l.unit,l.mode||"TTC")),0);
+      const totalTTC = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*amountToTTC(l.unit,l.mode||"TTC")),0);
+      const tax = totalTTC - totalHT;
+      return {subtotal:totalHT,tax,total:totalTTC,balance:Math.max(0,totalTTC-Number(deposit||0))};
     }
 
     function updateDocumentTotals(){
       const totals = calculateDocumentTotals(getDocumentLines(),document.getElementById("documentDeposit").value);
       document.getElementById("documentSubtotal").textContent = totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("documentTax").textContent = totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       
       document.getElementById("documentGrandTotal").textContent = totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       document.getElementById("documentBalance").textContent = totals.balance.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
@@ -2272,6 +2310,7 @@
             label:line.label,
             qty:Number(line.qty||1),
             unit:Number(line.unit||0),
+            mode:line.mode||"TTC",
             tax:0
           }))
         : [{
@@ -2804,7 +2843,7 @@
 
       box.innerHTML = "";
       list.forEach(item=>{
-        const margin = Number(item.sellPrice||0) - Number(item.buyPrice||0);
+        const margin=amountToTTC(item.sellPrice,item.sellMode||"TTC")-amountToTTC(item.buyPrice,item.buyMode||"TTC");
         const actions = activeRole==="admin"
           ? `<button class="mini-btn" data-rv-edit="${escapeHtml(item.id)}">Modifier</button>
              <button class="mini-btn danger" data-rv-delete="${escapeHtml(item.id)}">Supprimer</button>`
@@ -2879,7 +2918,9 @@
         serial:document.getElementById("buySellSerial").value.trim(),
         condition:document.getElementById("buySellCondition").value,
         buyPrice:Number(document.getElementById("buySellBuyPrice").value||0),
+        buyMode:document.getElementById("buySellBuyMode").value,
         sellPrice:Number(document.getElementById("buySellSellPrice").value||0),
+        sellMode:document.getElementById("buySellSellMode").value,
         accessories:document.getElementById("buySellAccessories").value.trim(),
         notes:document.getElementById("buySellNotes").value.trim()
       };
@@ -2912,7 +2953,9 @@
       document.getElementById("buySellSerial").value=item.serial||"";
       document.getElementById("buySellCondition").value=item.condition||"Bon état";
       document.getElementById("buySellBuyPrice").value=item.buyPrice??0;
+      document.getElementById("buySellBuyMode").value=item.buyMode||"TTC";
       document.getElementById("buySellSellPrice").value=item.sellPrice??0;
+      document.getElementById("buySellSellMode").value=item.sellMode||"TTC";
       document.getElementById("buySellAccessories").value=item.accessories||"";
       document.getElementById("buySellNotes").value=item.notes||"";
       document.getElementById("saveBuySellBtn").textContent="Enregistrer les modifications";
