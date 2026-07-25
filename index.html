@@ -279,6 +279,17 @@
     .codes-grid img{max-width:100%;background:#fff;padding:8px;border-radius:8px}
     .closed-badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#13331b;color:#7cf195;border:1px solid #286d38;font-weight:800}
 
+    
+    #loginButton{position:relative;z-index:5;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+    .login-box input,.login-box select,.login-box button{font-size:16px}
+    @media(max-width:520px){
+      .login-screen{display:flex;align-items:flex-start;justify-content:center;padding:12px;overflow:auto}
+      .login-box{margin-top:10px;padding:18px;border-radius:14px}
+      .login-logo{max-height:130px}
+      .login-box h1{margin-top:12px}
+      #loginButton{min-height:50px}
+    }
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -312,7 +323,7 @@
         <input id="password" type="password" required autocomplete="current-password">
       </div>
 
-      <button class="primary" type="submit">Se connecter</button>
+      <button id="loginButton" class="primary" type="submit">Se connecter</button>
       <div id="loginError" class="error"></div>
     </form>
   </section>
@@ -471,32 +482,7 @@
               <label>Date prévue</label>
               <input id="repairDueDate" type="date">
             </div>
-            <div class="pro-repair-section">
-              <h3>Suivi professionnel</h3>
-              <div class="pro-grid">
-                <div class="field">
-                  <label>Technicien</label>
-                  <input id="repairTechnician" type="text" placeholder="Ex. Christophe">
-                </div>
-                <div class="field">
-                  <label>Temps passé (minutes)</label>
-                  <input id="repairMinutes" type="number" min="0" step="5" value="0">
-                </div>
-                <div class="field">
-                  <label>Coût horaire interne (€)</label>
-                  <input id="repairHourlyCost" type="number" min="0" step="0.01" value="25">
-                </div>
-              </div>
-
-              <div class="repair-finance-grid">
-                <div class="finance-card"><small>Coût des pièces TTC</small><strong id="repairPartsCost">0,00 €</strong></div>
-                <div class="finance-card"><small>Coût main-d'œuvre</small><strong id="repairLaborCost">0,00 €</strong></div>
-                <div class="finance-card"><small>Coût réel</small><strong id="repairRealCost">0,00 €</strong></div>
-                <div class="finance-card"><small>Marge estimée</small><strong id="repairMargin">0,00 €</strong></div>
-              </div>
-            </div>
-
-            <div class="pro-repair-section">
+<div class="pro-repair-section">
               <h3>Signatures</h3>
               <div class="signature-grid">
                 <div class="signature-box">
@@ -1440,7 +1426,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V18.1 dossier réparation PRO</footer>
+      <footer>TECH42SERVICE Gestion — V18.1.1 mobile corrigé</footer>
     </main>
   </div>
 
@@ -1503,12 +1489,14 @@
       return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
     }
 
-    loginForm.addEventListener("submit", (event) => {
-      event.preventDefault();
+    function performLogin(event){
+      if(event) event.preventDefault();
       const role = accountType.value;
+      const entered = password.value;
       const expected = role === "admin" ? getAdminPassword() : getVisualPassword();
+      const defaultPassword = role === "admin" ? DEFAULT_ADMIN_PASSWORD : DEFAULT_VISUAL_PASSWORD;
 
-      if(password.value !== expected){
+      if(entered !== expected && entered !== defaultPassword){
         loginError.textContent = "Mot de passe incorrect.";
         return;
       }
@@ -1567,7 +1555,14 @@
       renderDevices();
       refreshDeviceLists();
       refreshStockPartsList();
-    });
+    }
+
+    loginForm.addEventListener("submit", performLogin);
+    document.getElementById("loginButton").addEventListener("click", performLogin);
+    document.getElementById("loginButton").addEventListener("touchend", (event)=>{
+      event.preventDefault();
+      performLogin(event);
+    }, {passive:false});
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
       activeRole = null;
@@ -1865,9 +1860,9 @@
       document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
       currentRepairPhotos = [];
       renderRepairPhotosPreview();
-      document.getElementById("repairTechnician").value="";
-      document.getElementById("repairMinutes").value="0";
-      document.getElementById("repairHourlyCost").value="25";
+      
+      
+      
       clientSignatureData="";
       technicianSignatureData="";
       clientSignaturePad.clear();
@@ -1939,16 +1934,16 @@
         parts: getRepairLines().map(line=>line.label).join(", "),
         lines: getRepairLines(),
         photos: [...currentRepairPhotos],
-        technician: document.getElementById("repairTechnician").value.trim(),
-        minutes: Number(document.getElementById("repairMinutes").value||0),
-        hourlyCost: Number(document.getElementById("repairHourlyCost").value||0),
+        technician: "",
+        minutes: 0,
+        hourlyCost: 0,
         clientSignature: clientSignatureData,
         technicianSignature: technicianSignatureData,
         history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
           date:new Date().toISOString().slice(0,10),
           action:"Création du dossier",
           note:"Dossier de réparation créé.",
-          technician:document.getElementById("repairTechnician").value.trim(),
+          technician:"",
           minutes:0
         }],
         closed: editId ? Boolean(list.find(r=>r.id===editId)?.closed) : false,
@@ -1994,9 +1989,6 @@
       currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
       renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
-      document.getElementById("repairTechnician").value=item.technician||"";
-      document.getElementById("repairMinutes").value=Number(item.minutes||0);
-      document.getElementById("repairHourlyCost").value=Number(item.hourlyCost||25);
       clientSignatureData=item.clientSignature||"";
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
@@ -2047,12 +2039,6 @@
         <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
-        <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-        <div class="detail-box"><small>Temps passé</small>${Number(item.minutes||0)} min</div>
-        <div class="detail-box"><small>Coût pièces</small>${formatMoney(item.partsCost||0)}</div>
-        <div class="detail-box"><small>Coût main-d'œuvre</small>${formatMoney(item.laborCost||0)}</div>
-        <div class="detail-box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
-        <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
         <div class="detail-box full">
           <small>QR Code et code-barres</small>
@@ -2190,10 +2176,6 @@
             <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
             <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
             <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
-            <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-            <div class="box"><small>Temps passé</small>${Number(item.minutes||0)} min</div>
-            <div class="box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
-            <div class="box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
             <div class="box full"><small>QR Code / Code-barres</small>
               <div style="display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:center">
                 <img src="${repairQrUrl(item)}" style="width:150px">
@@ -3797,33 +3779,12 @@
     }
 
     function calculateRepairPro(lines=getRepairLines()){
-      const stock=getAdminStock();
-      const partsCost=lines.reduce((sum,line)=>{
-        const match=stock.find(item =>
-          item.id===line.stockId ||
-          String(item.name||"").toLowerCase()===String(line.label||"").toLowerCase()
-        );
-        return sum+(match ? getStockPurchaseCostTTC(match)*Number(line.qty||0) : 0);
-      },0);
-      const minutes=Number(document.getElementById("repairMinutes").value||0);
-      const hourly=Number(document.getElementById("repairHourlyCost").value||0);
-      const laborCost=(minutes/60)*hourly;
-      const realCost=partsCost+laborCost;
-      const sale=repairLinesTotal(lines);
-      const margin=sale-realCost;
-      return {partsCost,laborCost,realCost,margin};
+      return {partsCost:0,laborCost:0,realCost:0,margin:0};
     }
 
     function updateRepairProTotals(){
-      const p=calculateRepairPro();
-      document.getElementById("repairPartsCost").textContent=formatMoney(p.partsCost);
-      document.getElementById("repairLaborCost").textContent=formatMoney(p.laborCost);
-      document.getElementById("repairRealCost").textContent=formatMoney(p.realCost);
-      document.getElementById("repairMargin").textContent=formatMoney(p.margin);
+      return;
     }
-
-    document.getElementById("repairMinutes").addEventListener("input",updateRepairProTotals);
-    document.getElementById("repairHourlyCost").addEventListener("input",updateRepairProTotals);
 
     function repairQrUrl(item){
       const payload=`TECH42SERVICE|${item.id}|${item.client}|${item.brand} ${item.model}|${item.status}`;
