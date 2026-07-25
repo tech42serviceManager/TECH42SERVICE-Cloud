@@ -289,6 +289,13 @@
       .login-box input,.login-box select,.login-box button{font-size:16px}
     }
 
+    
+    .cloud-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+    .cloud-sync-badge{display:inline-block;padding:8px 11px;border-radius:999px;border:1px solid var(--border);background:#171717;color:var(--muted);font-size:13px;font-weight:700}
+    .cloud-sync-badge.syncing{color:#ffd66b;border-color:#755a13;background:#2c2108}
+    .cloud-sync-badge.online{color:#74ef8b;border-color:#245f35;background:#102518}
+    .cloud-sync-badge.offline{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -362,7 +369,10 @@
             <h1>Tableau de bord</h1>
             <p>Bienvenue dans TECH42SERVICE Gestion</p>
           </div>
-
+          <div class="cloud-toolbar">
+            <span id="cloudSyncBadge" class="cloud-sync-badge">Cloud en attente</span>
+            <button id="manualCloudSyncBtn" class="mini-btn" type="button">Synchroniser</button>
+          </div>
         </header>
 
         <div id="readonlyNote" class="demo-banner hidden">MODE PRÉSENTATION — Données fictives — Aucune modification autorisée</div>
@@ -1457,7 +1467,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V18.3 Cloud simple</footer>
+      <footer>TECH42SERVICE Gestion — V18.4 synchronisation complète</footer>
     </main>
   </div>
 
@@ -1499,7 +1509,8 @@
       "tech42-repair-help-links",
       "tech42-sites-links",
       "tech42-devices",
-      "tech42-theme"
+      "tech42-theme",
+      "tech42-visual-password"
     ];
 
     let cloudUser = null;
@@ -1510,9 +1521,23 @@
 
     function setCloudStatus(message, ok=false){
       const el = document.getElementById("cloudStatus");
-      if(!el) return;
-      el.textContent = message;
-      el.className = ok ? "cloud-ok" : "cloud-error";
+      if(el){
+        el.textContent = message;
+        el.className = ok ? "cloud-ok" : "cloud-error";
+      }
+      const badge = document.getElementById("cloudSyncBadge");
+      if(badge){
+        badge.textContent = message;
+        badge.className = "cloud-sync-badge " + (ok ? "online" : "offline");
+      }
+    }
+
+    function setCloudSyncing(message="Synchronisation…"){
+      const badge = document.getElementById("cloudSyncBadge");
+      if(badge){
+        badge.textContent = message;
+        badge.className = "cloud-sync-badge syncing";
+      }
     }
 
     function collectCloudData(){
@@ -1557,6 +1582,11 @@
 
     async function cloudSaveNow(force=false){
       if(!cloudUser || cloudApplying) return;
+      if(!navigator.onLine){
+        setCloudStatus("Hors connexion — sauvegarde en attente", false);
+        return;
+      }
+      setCloudSyncing("Sauvegarde cloud…");
       const state = collectCloudData();
       const json = JSON.stringify(state);
       if(!force && json === lastCloudJson) return;
@@ -1576,21 +1606,43 @@
       }
 
       lastCloudJson = json;
-      setCloudStatus("Sauvegarde cloud à jour", true);
+      setCloudStatus("Cloud synchronisé", true);
     }
 
     function scheduleCloudSave(){
       if(!cloudUser || cloudApplying) return;
       clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 700);
+      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 250);
     }
 
     function startCloudAutoSave(){
-      setInterval(() => cloudSaveNow(false), 2500);
+      setInterval(() => cloudSaveNow(false), 4000);
       window.addEventListener("visibilitychange", () => {
         if(document.visibilityState === "hidden") cloudSaveNow(false);
       });
       window.addEventListener("beforeunload", () => cloudSaveNow(false));
+      window.addEventListener("offline", () => setCloudStatus("Hors connexion — données conservées localement", false));
+      window.addEventListener("online", async () => {
+        setCloudSyncing("Connexion retrouvée…");
+        await cloudSaveNow(true);
+      });
+    }
+
+    async function manualCloudSync(){
+      if(!cloudUser){
+        setCloudStatus("Connecte-toi au cloud", false);
+        return;
+      }
+      try{
+        setCloudSyncing("Synchronisation manuelle…");
+        await cloudSaveNow(true);
+        await cloudLoadOrCreate();
+        refreshAllCloudModules();
+        setCloudStatus("Synchronisation terminée", true);
+      }catch(error){
+        console.error(error);
+        setCloudStatus("Synchronisation impossible", false);
+      }
     }
 
     function subscribeCloud(){
@@ -1609,7 +1661,7 @@
           if(incomingJson === lastCloudJson) return;
           applyCloudData(incoming);
           refreshAllCloudModules();
-          setCloudStatus("Données reçues du cloud", true);
+          setCloudStatus("Données mises à jour", true);
         })
         .subscribe();
     }
@@ -4086,6 +4138,8 @@
       saveAdminRepairs(list);
     }
 
+
+    document.getElementById("manualCloudSyncBtn")?.addEventListener("click", manualCloudSync);
 
     supabaseClient.auth.getSession().then(({data}) => {
       if(data && data.session && data.session.user){
