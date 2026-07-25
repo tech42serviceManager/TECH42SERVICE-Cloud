@@ -175,6 +175,23 @@
     }
     .repair-total{display:flex;justify-content:flex-end;gap:14px;align-items:center;margin-top:12px;font-size:18px}
 
+    
+    .appt-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .appt-form .full{grid-column:1/-1}
+    .appt-form input,.appt-form select,.appt-form textarea{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .appt-form textarea{min-height:90px;resize:vertical}
+    .appt-toolbar{display:grid;grid-template-columns:1fr 220px;gap:12px;margin-bottom:14px}
+    .appt-toolbar input,.appt-toolbar select{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .appt-list{display:grid;gap:12px}
+    .appt-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .appt-card-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+    .appt-card h3{margin:0 0 6px}
+    .appt-meta{color:var(--muted);font-size:14px;line-height:1.5}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -184,7 +201,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -223,7 +240,7 @@
         <button data-page="repairs">Réparations</button>
         <button>Clients</button>
         <button data-page="stock">Stock</button>
-        <button>Rendez-vous</button>
+        <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
         <button data-page="settings">Paramètres</button>
         <button id="logoutBtn" class="logout">Déconnexion</button>
@@ -688,6 +705,105 @@
         </section>
       </section>
 
+
+      <section id="appointmentsPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Rendez-vous</h1>
+            <p>Planning TECH42SERVICE</p>
+          </div>
+        </header>
+
+        <div id="appointmentsDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <div class="page-actions">
+            <button id="newAppointmentBtn" class="action-btn write-action">Nouveau rendez-vous</button>
+            <button id="cancelAppointmentBtn" class="action-btn secondary hidden">Fermer le formulaire</button>
+          </div>
+
+          <form id="appointmentForm" class="appt-form hidden">
+            <input id="appointmentEditId" type="hidden">
+
+            <div class="field">
+              <label>Client</label>
+              <input id="appointmentClient" type="text" required>
+            </div>
+            <div class="field">
+              <label>Téléphone</label>
+              <input id="appointmentPhone" type="tel">
+            </div>
+
+            <div class="field">
+              <label>E-mail</label>
+              <input id="appointmentEmail" type="email">
+            </div>
+            <div class="field">
+              <label>Appareil</label>
+              <input id="appointmentDevice" type="text" placeholder="Ex. iPhone 13">
+            </div>
+
+            <div class="field">
+              <label>Date</label>
+              <input id="appointmentDate" type="date" required>
+            </div>
+            <div class="field">
+              <label>Heure</label>
+              <input id="appointmentTime" type="time" required>
+            </div>
+
+            <div class="field">
+              <label>Durée</label>
+              <select id="appointmentDuration">
+                <option value="30">30 min</option>
+                <option value="60">1 h</option>
+                <option value="90">1 h 30</option>
+                <option value="120">2 h</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Statut</label>
+              <select id="appointmentStatus">
+                <option>Prévu</option>
+                <option>Confirmé</option>
+                <option>Terminé</option>
+                <option>Annulé</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label>Motif</label>
+              <textarea id="appointmentReason" required></textarea>
+            </div>
+
+            <div class="field full">
+              <label>Notes</label>
+              <textarea id="appointmentNotes"></textarea>
+            </div>
+
+            <div class="full">
+              <button id="saveAppointmentBtn" class="save-btn" type="submit">Enregistrer le rendez-vous</button>
+            </div>
+          </form>
+
+          <div class="appt-toolbar">
+            <input id="appointmentSearch" type="search" placeholder="Rechercher client, téléphone, appareil...">
+            <select id="appointmentFilter">
+              <option value="">Tous les statuts</option>
+              <option>Prévu</option>
+              <option>Confirmé</option>
+              <option>Terminé</option>
+              <option>Annulé</option>
+            </select>
+          </div>
+
+          <div id="appointmentsList" class="appt-list"></div>
+          <div id="appointmentsEmpty" class="empty-state">Aucun rendez-vous enregistré.</div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -748,7 +864,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V8 réparations lignes et conversion</footer>
+      <footer>TECH42SERVICE Gestion — V9 rendez-vous simple</footer>
     </main>
   </div>
 
@@ -769,9 +885,11 @@
     const repairsPage = document.getElementById("repairsPage");
     const stockPage = document.getElementById("stockPage");
     const documentsPage = document.getElementById("documentsPage");
+    const appointmentsPage = document.getElementById("appointmentsPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
     const documentsDemoNote = document.getElementById("documentsDemoNote");
+    const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -801,6 +919,7 @@
       repairDemoNote.classList.toggle("hidden", role !== "visuel");
       stockDemoNote.classList.toggle("hidden", role !== "visuel");
       documentsDemoNote.classList.toggle("hidden", role !== "visuel");
+      appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -862,11 +981,13 @@
       repairsPage.classList.toggle("hidden", page !== "repairs");
       stockPage.classList.toggle("hidden", page !== "stock");
       documentsPage.classList.toggle("hidden", page !== "documents");
+      appointmentsPage.classList.toggle("hidden", page !== "appointments");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
       if(page === "stock") renderStock();
       if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
+      if(page === "appointments"){ renderAppointments(); resetAppointmentForm(); }
 
       if(page === "settings"){
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
@@ -1860,6 +1981,182 @@
 
     document.getElementById("repairToQuoteBtn").addEventListener("click",()=>repairToDocument("devis"));
     document.getElementById("repairToInvoiceBtn").addEventListener("click",()=>repairToDocument("facture"));
+
+
+    const demoAppointments = [
+      {id:"RDV-0001",client:"Jean Martin",phone:"06 12 34 56 78",email:"jean@example.fr",device:"iPhone 13",date:"2026-07-25",time:"09:30",duration:60,status:"Confirmé",reason:"Écran cassé",notes:"Prévoir écran OLED"},
+      {id:"RDV-0002",client:"Sophie Bernard",phone:"06 44 22 18 90",email:"sophie@example.fr",device:"PC Asus",date:"2026-07-25",time:"14:00",duration:30,status:"Prévu",reason:"Diagnostic démarrage",notes:""},
+      {id:"RDV-0003",client:"Lucas Petit",phone:"07 61 82 40 11",email:"lucas@example.fr",device:"PS5",date:"2026-07-26",time:"11:00",duration:90,status:"Prévu",reason:"Port HDMI",notes:""}
+    ];
+
+    function getAdminAppointments(){
+      try{return JSON.parse(localStorage.getItem("tech42-appointments") || "[]")}catch{return []}
+    }
+
+    function saveAdminAppointments(list){
+      localStorage.setItem("tech42-appointments", JSON.stringify(list));
+    }
+
+    function currentAppointments(){
+      return activeRole === "visuel" ? demoAppointments : getAdminAppointments();
+    }
+
+    function filteredAppointments(){
+      const q = document.getElementById("appointmentSearch").value.trim().toLowerCase();
+      const status = document.getElementById("appointmentFilter").value;
+      return currentAppointments()
+        .filter(item => {
+          const text = [item.client,item.phone,item.email,item.device,item.reason,item.notes].join(" ").toLowerCase();
+          return (!q || text.includes(q)) && (!status || item.status === status);
+        })
+        .sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+    }
+
+    function renderAppointments(){
+      const list = document.getElementById("appointmentsList");
+      const empty = document.getElementById("appointmentsEmpty");
+      const items = filteredAppointments();
+      list.innerHTML = "";
+
+      items.forEach(item=>{
+        const card = document.createElement("article");
+        card.className = "appt-card";
+        const actions = activeRole === "admin"
+          ? `<button class="mini-btn" data-appt-edit="${escapeHtml(item.id)}">Modifier</button>
+             <button class="mini-btn danger" data-appt-delete="${escapeHtml(item.id)}">Supprimer</button>`
+          : "";
+
+        card.innerHTML = `
+          <div class="appt-card-head">
+            <div>
+              <h3>${formatDate(item.date)} à ${escapeHtml(item.time)} — ${escapeHtml(item.client)}</h3>
+              <div class="appt-meta">
+                ${escapeHtml(item.phone || "—")} · ${escapeHtml(item.email || "—")}<br>
+                ${escapeHtml(item.device || "Appareil non précisé")} · ${escapeHtml(item.reason)}<br>
+                Durée : ${Number(item.duration || 30)} min · Statut : ${escapeHtml(item.status)}
+              </div>
+            </div>
+            <div class="table-actions">
+              <button class="mini-btn" data-appt-google="${escapeHtml(item.id)}">Google Agenda</button>
+              ${actions}
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      empty.classList.toggle("hidden", items.length > 0);
+      list.querySelectorAll("[data-appt-edit]").forEach(btn=>btn.addEventListener("click",()=>editAppointment(btn.dataset.apptEdit)));
+      list.querySelectorAll("[data-appt-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteAppointment(btn.dataset.apptDelete)));
+      list.querySelectorAll("[data-appt-google]").forEach(btn=>btn.addEventListener("click",()=>openGoogleCalendar(btn.dataset.apptGoogle)));
+    }
+
+    function nextAppointmentId(list){
+      const max = list.reduce((highest,item)=>{
+        const match = String(item.id).match(/(\d+)$/);
+        return Math.max(highest, match ? Number(match[1]) : 0);
+      },0);
+      return `RDV-${String(max+1).padStart(4,"0")}`;
+    }
+
+    function resetAppointmentForm(){
+      document.getElementById("appointmentForm").reset();
+      document.getElementById("appointmentEditId").value = "";
+      document.getElementById("appointmentDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("saveAppointmentBtn").textContent = "Enregistrer le rendez-vous";
+    }
+
+    function showAppointmentForm(){
+      if(activeRole !== "admin"){
+        alert("Action impossible en mode présentation.");
+        return;
+      }
+      document.getElementById("appointmentForm").classList.remove("hidden");
+      document.getElementById("cancelAppointmentBtn").classList.remove("hidden");
+    }
+
+    function hideAppointmentForm(){
+      document.getElementById("appointmentForm").classList.add("hidden");
+      document.getElementById("cancelAppointmentBtn").classList.add("hidden");
+      resetAppointmentForm();
+    }
+
+    document.getElementById("newAppointmentBtn").addEventListener("click",()=>{resetAppointmentForm();showAppointmentForm();});
+    document.getElementById("cancelAppointmentBtn").addEventListener("click",hideAppointmentForm);
+    document.getElementById("appointmentSearch").addEventListener("input",renderAppointments);
+    document.getElementById("appointmentFilter").addEventListener("change",renderAppointments);
+
+    document.getElementById("appointmentForm").addEventListener("submit",(event)=>{
+      event.preventDefault();
+      if(activeRole !== "admin") return;
+
+      const list = getAdminAppointments();
+      const editId = document.getElementById("appointmentEditId").value;
+      const item = {
+        id:editId || nextAppointmentId(list),
+        client:document.getElementById("appointmentClient").value.trim(),
+        phone:document.getElementById("appointmentPhone").value.trim(),
+        email:document.getElementById("appointmentEmail").value.trim(),
+        device:document.getElementById("appointmentDevice").value.trim(),
+        date:document.getElementById("appointmentDate").value,
+        time:document.getElementById("appointmentTime").value,
+        duration:Number(document.getElementById("appointmentDuration").value||30),
+        status:document.getElementById("appointmentStatus").value,
+        reason:document.getElementById("appointmentReason").value.trim(),
+        notes:document.getElementById("appointmentNotes").value.trim()
+      };
+
+      if(editId){
+        const index = list.findIndex(i=>i.id===editId);
+        if(index !== -1) list[index] = item;
+      }else{
+        list.unshift(item);
+      }
+
+      saveAdminAppointments(list);
+      hideAppointmentForm();
+      renderAppointments();
+    });
+
+    function editAppointment(id){
+      if(activeRole !== "admin") return;
+      const item = getAdminAppointments().find(i=>i.id===id);
+      if(!item) return;
+
+      document.getElementById("appointmentEditId").value = item.id;
+      document.getElementById("appointmentClient").value = item.client || "";
+      document.getElementById("appointmentPhone").value = item.phone || "";
+      document.getElementById("appointmentEmail").value = item.email || "";
+      document.getElementById("appointmentDevice").value = item.device || "";
+      document.getElementById("appointmentDate").value = item.date || "";
+      document.getElementById("appointmentTime").value = item.time || "";
+      document.getElementById("appointmentDuration").value = String(item.duration || 30);
+      document.getElementById("appointmentStatus").value = item.status || "Prévu";
+      document.getElementById("appointmentReason").value = item.reason || "";
+      document.getElementById("appointmentNotes").value = item.notes || "";
+      document.getElementById("saveAppointmentBtn").textContent = "Enregistrer les modifications";
+      showAppointmentForm();
+    }
+
+    function deleteAppointment(id){
+      if(activeRole !== "admin") return;
+      if(!confirm("Supprimer définitivement ce rendez-vous ?")) return;
+      saveAdminAppointments(getAdminAppointments().filter(i=>i.id!==id));
+      renderAppointments();
+    }
+
+    function openGoogleCalendar(id){
+      const item = currentAppointments().find(i=>i.id===id);
+      if(!item) return;
+
+      const start = new Date(`${item.date}T${item.time}:00`);
+      const end = new Date(start.getTime() + Number(item.duration||30)*60000);
+      const fmt = d => d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}Z$/,"Z");
+      const title = `RDV TECH42SERVICE - ${item.client}`;
+      const details = `${item.reason}\nAppareil: ${item.device || "Non précisé"}\nTéléphone: ${item.phone || "—"}\nEmail: ${item.email || "—"}\n${item.notes || ""}`;
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(details)}&ctz=Europe/Paris`;
+      window.open(url,"_blank");
+    }
 
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
