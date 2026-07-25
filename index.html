@@ -64,9 +64,9 @@
     .topbar h1{margin:0;font-size:28px}
     .topbar p{margin:6px 0 0;color:var(--muted)}
     .theme-select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:10px}
-    .hero{background:linear-gradient(145deg,#111,#080808);border:1px solid var(--border);border-radius:16px;padding:26px;margin-bottom:20px}
+    .hero{background:linear-gradient(145deg,#111,#080808);border:1px solid var(--border);border-radius:16px;padding:26px;margin-bottom:20px;text-align:center;display:grid;place-items:center}
     .clock{color:var(--accent);font-size:56px;font-weight:800;letter-spacing:2px}
-    .date{margin-top:6px;font-size:20px;color:var(--muted)}
+    .date{margin-top:6px;font-size:20px;color:var(--muted);text-align:center}
     .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}.dashboard-card{cursor:pointer;transition:.18s transform,.18s border-color}.dashboard-card:hover{transform:translateY(-2px);border-color:var(--accent)}
     .card .label{color:var(--muted);font-size:14px}
@@ -246,6 +246,18 @@
     .doc-pro-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
     .doc-pro-card h3{margin:0 0 10px;color:var(--accent)}
 
+    
+    .device-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .device-form input,.device-form select{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+    .device-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:15px}
+    .device-card h3{margin:0 0 8px;color:var(--accent)}
+    .device-meta{color:var(--muted);font-size:14px;line-height:1.5}
+    .photo-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .photo-type-card{border:1px solid var(--border);border-radius:10px;padding:12px;background:#101010}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -255,7 +267,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -297,6 +309,7 @@
         <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
         <button data-page="buySell">Rachat / Vente</button>
+        <button data-page="devices">Appareils</button>
         <button data-page="repairHelp">Aide réparations</button>
         <button data-page="sites">Sites</button>
         <button data-page="settings">Paramètres</button>
@@ -325,7 +338,11 @@
           <article class="card dashboard-card" data-open-page="repairs"><div class="label">Réparations en cours</div><div id="statRepairs" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="appointments"><div class="label">Rendez-vous aujourd'hui</div><div id="statAppointments" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="stock"><div class="label">Articles en stock</div><div id="statStock" class="value">0</div></article>
-          <article class="card dashboard-card" data-open-page="documents"><div class="label">Chiffre d'affaires</div><div id="statRevenue" class="value">0 €</div></article>
+          <article class="card dashboard-card" data-open-page="documents"><div class="label">CA payé</div><div id="statRevenue" class="value">0 €</div></article>
+          <article class="card dashboard-card" data-open-page="stock"><div class="label">Stock faible</div><div id="statLowStock" class="value">0</div></article>
+          <article class="card dashboard-card" data-open-page="buySell"><div class="label">Rachats du mois</div><div id="statMonthlyPurchases" class="value">0 €</div></article>
+          <article class="card dashboard-card" data-open-page="buySell"><div class="label">Ventes du mois</div><div id="statMonthlySales" class="value">0 €</div></article>
+          <article class="card dashboard-card" data-open-page="devices"><div class="label">Modèles enregistrés</div><div id="statDevices" class="value">0</div></article>
         </section>
 
         <section class="panel quick">
@@ -382,12 +399,12 @@
             </div>
             <div class="field">
               <label>Marque</label>
-              <input id="repairBrand" type="text" required>
+              <input id="repairBrand" type="text" list="deviceBrandsList" required>
             </div>
 
             <div class="field">
               <label>Modèle</label>
-              <input id="repairModel" type="text" required>
+              <input id="repairModel" type="text" list="deviceModelsList" required>
             </div>
             <div class="field">
               <label>IMEI / N° de série</label>
@@ -435,9 +452,25 @@
             </div>
             <div class="field full">
               <label>Photos du dossier</label>
-              <input id="repairPhotosInput" type="file" accept="image/*" multiple>
+              <div class="photo-type-grid">
+                <div class="photo-type-card">
+                  <label>Avant réparation</label>
+                  <input id="repairPhotosBefore" type="file" accept="image/*" multiple>
+                </div>
+                <div class="photo-type-card">
+                  <label>Après réparation</label>
+                  <input id="repairPhotosAfter" type="file" accept="image/*" multiple>
+                </div>
+                <div class="photo-type-card">
+                  <label>IMEI / Série</label>
+                  <input id="repairPhotosImei" type="file" accept="image/*" multiple>
+                </div>
+                <div class="photo-type-card">
+                  <label>Accessoires / État</label>
+                  <input id="repairPhotosAccessories" type="file" accept="image/*" multiple>
+                </div>
+              </div>
               <div id="repairPhotosPreview" class="repair-photos-preview"></div>
-              <small style="color:var(--muted)">Plusieurs photos peuvent être ajoutées.</small>
             </div>
 
             <div class="field full">
@@ -1089,6 +1122,70 @@
       </section>
 
 
+
+      <section id="devicesPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Appareils</h1>
+            <p>Catalogue des marques, gammes et modèles</p>
+          </div>
+        </header>
+
+        <div id="devicesDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <form id="deviceForm" class="device-form">
+            <div class="field">
+              <label>Type</label>
+              <select id="deviceTypeCatalog">
+                <option>Téléphone</option>
+                <option>Tablette</option>
+                <option>Ordinateur</option>
+                <option>Console</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Marque</label>
+              <input id="deviceBrandCatalog" type="text" required>
+            </div>
+            <div class="field">
+              <label>Gamme</label>
+              <input id="deviceRangeCatalog" type="text" placeholder="Ex. iPhone, Galaxy S">
+            </div>
+            <div class="field">
+              <label>Modèle</label>
+              <input id="deviceModelCatalog" type="text" required>
+            </div>
+            <div class="field">
+              <label>Capacité / Variante</label>
+              <input id="deviceVariantCatalog" type="text" placeholder="Ex. 128 Go, Slim">
+            </div>
+            <div>
+              <button class="save-btn write-action" type="submit">Ajouter le modèle</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="repair-toolbar">
+            <input id="deviceSearch" type="search" placeholder="Rechercher marque, gamme ou modèle...">
+            <select id="deviceTypeFilter">
+              <option value="">Tous les types</option>
+              <option>Téléphone</option>
+              <option>Tablette</option>
+              <option>Ordinateur</option>
+              <option>Console</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div id="deviceGrid" class="device-grid"></div>
+          <div id="deviceEmpty" class="empty-state">Aucun modèle enregistré.</div>
+        </section>
+      </section>
+
       <section id="repairHelpPage" class="hidden">
         <header class="topbar">
           <div>
@@ -1276,7 +1373,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V16 aide, sites et documents pro</footer>
+      <footer>TECH42SERVICE Gestion — V17 appareils et tableau de bord PRO</footer>
     </main>
   </div>
 
@@ -1314,6 +1411,7 @@
     const appointmentsPage = document.getElementById("appointmentsPage");
     const clientsPage = document.getElementById("clientsPage");
     const buySellPage = document.getElementById("buySellPage");
+    const devicesPage = document.getElementById("devicesPage");
     const repairHelpPage = document.getElementById("repairHelpPage");
     const sitesPage = document.getElementById("sitesPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
@@ -1322,6 +1420,7 @@
     const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
     const clientsDemoNote = document.getElementById("clientsDemoNote");
     const buySellDemoNote = document.getElementById("buySellDemoNote");
+    const devicesDemoNote = document.getElementById("devicesDemoNote");
     const repairHelpDemoNote = document.getElementById("repairHelpDemoNote");
     const sitesDemoNote = document.getElementById("sitesDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
@@ -1356,6 +1455,7 @@
       appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
       buySellDemoNote.classList.toggle("hidden", role !== "visuel");
+      devicesDemoNote.classList.toggle("hidden", role !== "visuel");
       repairHelpDemoNote.classList.toggle("hidden", role !== "visuel");
       sitesDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
@@ -1394,8 +1494,12 @@
       showPage("dashboard");
       renderRepairs();
       renderStock();
+      refreshStockPartsList();
       renderDocuments();
       loadDocumentTemplates();
+      renderDevices();
+      refreshDeviceLists();
+      refreshStockPartsList();
     });
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -1424,6 +1528,7 @@
       appointmentsPage.classList.toggle("hidden", page !== "appointments");
       clientsPage.classList.toggle("hidden", page !== "clients");
       buySellPage.classList.toggle("hidden", page !== "buySell");
+      devicesPage.classList.toggle("hidden", page !== "devices");
       repairHelpPage.classList.toggle("hidden", page !== "repairHelp");
       sitesPage.classList.toggle("hidden", page !== "sites");
       settingsPage.classList.toggle("hidden", page !== "settings");
@@ -1593,7 +1698,7 @@
       const row = document.createElement("div");
       row.className = "repair-line";
       row.innerHTML = `
-        <input class="repair-line-label" type="text" placeholder="Désignation" value="${escapeHtml(data.label || "")}">
+        <input class="repair-line-label" type="text" list="stockPartsList" placeholder="Désignation" value="${escapeHtml(data.label || "")}">
         <input class="repair-line-qty" type="number" min="0" step="1" value="${Number(data.qty || 1)}">
         <input class="repair-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit || 0)}">
         <select class="repair-line-mode">
@@ -1604,6 +1709,7 @@
       `;
       document.getElementById("repairLines").appendChild(row);
       row.querySelectorAll("input,select").forEach(input=>input.addEventListener("input",updateRepairLinesTotal));
+      row.querySelector(".repair-line-label").addEventListener("change",()=>applyStockSuggestionToRepairLine(row));
       row.querySelector(".repair-line-remove").addEventListener("click",()=>{
         row.remove();
         updateRepairLinesTotal();
@@ -1635,6 +1741,7 @@
 
 
     let currentRepairPhotos = [];
+    let currentRepairPhotoCategory = "avant";
 
     function fileToDataUrl(file){
       return new Promise((resolve,reject)=>{
@@ -1652,7 +1759,7 @@
         const item = document.createElement("div");
         item.className = "repair-photo-item";
         item.innerHTML = `
-          <img src="${src}" alt="Photo réparation ${index+1}">
+          <img src="${typeof src==="string"?src:src.src}" alt="Photo réparation ${index+1}"><small style="display:block;padding:6px;color:var(--muted)">${typeof src==="string"?"Photo":escapeHtml(src.category||"Photo")}</small>
           <button class="repair-photo-remove" type="button" data-photo-index="${index}">×</button>
         `;
         box.appendChild(item);
@@ -1665,15 +1772,21 @@
       });
     }
 
-    document.getElementById("repairPhotosInput").addEventListener("change",async(event)=>{
-      const files = [...event.target.files];
-      for(const file of files){
-        if(!file.type.startsWith("image/")) continue;
-        const dataUrl = await fileToDataUrl(file);
-        currentRepairPhotos.push(dataUrl);
-      }
-      event.target.value = "";
-      renderRepairPhotosPreview();
+    ["Before","After","Imei","Accessories"].forEach(name=>{
+      const input=document.getElementById("repairPhotos"+name);
+      if(!input) return;
+      input.addEventListener("change",async(event)=>{
+        const map={Before:"avant",After:"après",Imei:"imei",Accessories:"accessoires"};
+        currentRepairPhotoCategory=map[name];
+        const files=[...event.target.files];
+        for(const file of files){
+          if(!file.type.startsWith("image/")) continue;
+          const dataUrl=await fileToDataUrl(file);
+          currentRepairPhotos.push({src:dataUrl,category:currentRepairPhotoCategory});
+        }
+        event.target.value="";
+        renderRepairPhotosPreview();
+      });
     });
 
     function resetRepairForm(){
@@ -1832,7 +1945,7 @@
         <div class="detail-box full"><small>Photos</small>
           <div class="repair-photo-gallery">
             ${(Array.isArray(item.photos) && item.photos.length)
-              ? item.photos.map((src,i)=>`<img src="${src}" alt="Photo ${i+1}">`).join("")
+              ? item.photos.map((photo,i)=>`<img src="${typeof photo==="string"?photo:photo.src}" alt="Photo ${i+1}">`).join("")
               : "Aucune photo"}
           </div>
         </div>
@@ -1902,6 +2015,9 @@
           </div>
           <script>window.onload=()=>window.print();<\/script>
         <datalist id="clientNamesList"></datalist>
+  <datalist id="deviceBrandsList"></datalist>
+  <datalist id="deviceModelsList"></datalist>
+  <datalist id="stockPartsList"></datalist>
 </body>
         </html>
       `);
@@ -2460,6 +2576,9 @@
           <footer>${escapeHtml(t.footer)}</footer>
           <script>window.onload=()=>window.print();<\/script>
         <datalist id="clientNamesList"></datalist>
+  <datalist id="deviceBrandsList"></datalist>
+  <datalist id="deviceModelsList"></datalist>
+  <datalist id="stockPartsList"></datalist>
 </body></html>
       `);
       w.document.close();
@@ -2707,6 +2826,10 @@
         document.getElementById("statAppointments").textContent = "3";
         document.getElementById("statStock").textContent = "152";
         document.getElementById("statRevenue").textContent = "12 450 €";
+        document.getElementById("statLowStock").textContent = "6";
+        document.getElementById("statMonthlyPurchases").textContent = "1 240 €";
+        document.getElementById("statMonthlySales").textContent = "2 980 €";
+        document.getElementById("statDevices").textContent = currentDevices().length;
         return;
       }
 
@@ -2714,23 +2837,35 @@
       const appointments = getAdminAppointments();
       const stock = getAdminStock();
       const documents = getAdminDocuments();
+      const buySell = getAdminBuySell();
 
       const activeRepairs = repairs.filter(item => !["Terminé","Restitué"].includes(item.status)).length;
       const today = new Date().toISOString().slice(0,10);
+      const month = today.slice(0,7);
       const todayAppointments = appointments.filter(item => item.date === today && item.status !== "Annulé").length;
       const totalStock = stock.reduce((sum,item)=>sum+Number(item.quantity||0),0);
+      const lowStock = stock.filter(item=>["low","out"].includes(stockState(item).key)).length;
 
       const revenue = documents
         .filter(item => item.type === "facture" && item.status === "Payé")
-        .reduce((sum,item)=>{
-          const totals = calculateDocumentTotals(item.lines||[], item.deposit||0);
-          return sum + totals.total;
-        },0);
+        .reduce((sum,item)=>sum+calculateDocumentTotals(item.lines||[],item.deposit||0).total,0);
+
+      const monthlyPurchases = buySell
+        .filter(item=>item.type==="Rachat" && String(item.date||"").startsWith(month))
+        .reduce((sum,item)=>sum+amountToTTC(item.buyPrice,item.buyMode||"TTC"),0);
+
+      const monthlySales = buySell
+        .filter(item=>item.type==="Vente" && String(item.date||"").startsWith(month))
+        .reduce((sum,item)=>sum+amountToTTC(item.sellPrice,item.sellMode||"TTC"),0);
 
       document.getElementById("statRepairs").textContent = activeRepairs;
       document.getElementById("statAppointments").textContent = todayAppointments;
       document.getElementById("statStock").textContent = totalStock;
-      document.getElementById("statRevenue").textContent = revenue.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("statRevenue").textContent = formatMoney(revenue);
+      document.getElementById("statLowStock").textContent = lowStock;
+      document.getElementById("statMonthlyPurchases").textContent = formatMoney(monthlyPurchases);
+      document.getElementById("statMonthlySales").textContent = formatMoney(monthlySales);
+      document.getElementById("statDevices").textContent = getAdminDevices().length;
     }
 
     document.querySelectorAll("[data-open-page]").forEach(card=>{
@@ -3286,6 +3421,107 @@
     document.getElementById("sitesSearch").addEventListener("input",renderSites);
     document.getElementById("sitesFilter").addEventListener("change",renderSites);
 
+
+    const demoDevices = [
+      {id:"DEV-001",type:"Téléphone",brand:"Apple",range:"iPhone",model:"iPhone 13",variant:"128 Go"},
+      {id:"DEV-002",type:"Téléphone",brand:"Samsung",range:"Galaxy S",model:"Galaxy S22",variant:"128 Go"},
+      {id:"DEV-003",type:"Console",brand:"Sony",range:"PlayStation",model:"PlayStation 5",variant:"Standard"},
+      {id:"DEV-004",type:"Ordinateur",brand:"Asus",range:"VivoBook",model:"VivoBook 15",variant:""}
+    ];
+
+    function getAdminDevices(){
+      try{return JSON.parse(localStorage.getItem("tech42-devices") || "[]")}catch{return []}
+    }
+    function saveAdminDevices(list){
+      localStorage.setItem("tech42-devices",JSON.stringify(list));
+    }
+    function currentDevices(){
+      return activeRole==="visuel" ? demoDevices : getAdminDevices();
+    }
+    function nextDeviceId(list){
+      const max=list.reduce((highest,item)=>{
+        const match=String(item.id).match(/(\d+)$/);
+        return Math.max(highest,match?Number(match[1]):0);
+      },0);
+      return `DEV-${String(max+1).padStart(3,"0")}`;
+    }
+    function refreshDeviceLists(){
+      const devices=currentDevices();
+      document.getElementById("deviceBrandsList").innerHTML=
+        [...new Set(devices.map(i=>i.brand).filter(Boolean))].map(v=>`<option value="${escapeHtml(v)}"></option>`).join("");
+      document.getElementById("deviceModelsList").innerHTML=
+        devices.map(i=>`<option value="${escapeHtml(i.model)}">${escapeHtml(i.brand)} ${escapeHtml(i.range||"")}</option>`).join("");
+    }
+    function renderDevices(){
+      const q=document.getElementById("deviceSearch").value.trim().toLowerCase();
+      const type=document.getElementById("deviceTypeFilter").value;
+      const list=currentDevices().filter(i=>{
+        const text=[i.type,i.brand,i.range,i.model,i.variant].join(" ").toLowerCase();
+        return (!q||text.includes(q))&&(!type||i.type===type);
+      });
+      const grid=document.getElementById("deviceGrid");
+      grid.innerHTML="";
+      list.forEach(item=>{
+        const card=document.createElement("article");
+        card.className="device-card";
+        card.innerHTML=`
+          <h3>${escapeHtml(item.brand)} ${escapeHtml(item.model)}</h3>
+          <div class="device-meta">${escapeHtml(item.type)} · ${escapeHtml(item.range||"—")}<br>${escapeHtml(item.variant||"")}</div>
+          ${activeRole==="admin" ? `<div class="link-card-actions"><button class="mini-btn danger" data-device-delete="${escapeHtml(item.id)}">Supprimer</button></div>` : ""}
+        `;
+        grid.appendChild(card);
+      });
+      document.getElementById("deviceEmpty").classList.toggle("hidden",list.length>0);
+      grid.querySelectorAll("[data-device-delete]").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          if(!confirm("Supprimer ce modèle ?")) return;
+          saveAdminDevices(getAdminDevices().filter(i=>i.id!==btn.dataset.deviceDelete));
+          renderDevices();
+          refreshDeviceLists();
+          updateDashboardStats();
+        });
+      });
+      refreshDeviceLists();
+    }
+
+    document.getElementById("deviceForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const list=getAdminDevices();
+      list.unshift({
+        id:nextDeviceId(list),
+        type:document.getElementById("deviceTypeCatalog").value,
+        brand:document.getElementById("deviceBrandCatalog").value.trim(),
+        range:document.getElementById("deviceRangeCatalog").value.trim(),
+        model:document.getElementById("deviceModelCatalog").value.trim(),
+        variant:document.getElementById("deviceVariantCatalog").value.trim()
+      });
+      saveAdminDevices(list);
+      event.target.reset();
+      renderDevices();
+      updateDashboardStats();
+    });
+    document.getElementById("deviceSearch").addEventListener("input",renderDevices);
+    document.getElementById("deviceTypeFilter").addEventListener("change",renderDevices);
+
+    function refreshStockPartsList(){
+      const stock=currentStockList();
+      document.getElementById("stockPartsList").innerHTML=stock
+        .filter(i=>Number(i.quantity||0)>0)
+        .map(i=>`<option value="${escapeHtml(i.name)}">${escapeHtml(i.reference||"")} · ${Number(i.quantity||0)} en stock</option>`)
+        .join("");
+    }
+
+    function applyStockSuggestionToRepairLine(row){
+      const label=row.querySelector(".repair-line-label").value.trim().toLowerCase();
+      const item=currentStockList().find(i=>String(i.name||"").toLowerCase()===label);
+      if(!item) return;
+      row.querySelector(".repair-line-unit").value=Number(item.sellPrice||0);
+      row.querySelector(".repair-line-mode").value=item.sellPriceMode||"TTC";
+      row.dataset.stockId=item.id;
+      updateRepairLinesTotal();
+    }
+
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
       blue:{accent:"#3ea6ff",border:"#17374d"},
@@ -3317,5 +3553,8 @@
     setInterval(updateClock,1000);
   </script>
 <datalist id="clientNamesList"></datalist>
+  <datalist id="deviceBrandsList"></datalist>
+  <datalist id="deviceModelsList"></datalist>
+  <datalist id="stockPartsList"></datalist>
 </body>
 </html>
