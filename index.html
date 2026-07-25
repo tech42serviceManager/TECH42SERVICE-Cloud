@@ -231,6 +231,21 @@
     .buysell-card h3{margin:0 0 6px}
     .buysell-meta{color:var(--muted);font-size:14px;line-height:1.6}
 
+    
+    .links-form{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px;align-items:end}
+    .links-form input,.links-form select{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+    .link-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:15px}
+    .link-card h3{margin:0 0 8px;color:var(--accent)}
+    .link-card p{color:var(--muted);font-size:14px;min-height:38px}
+    .link-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .link-open{display:inline-block;padding:9px 11px;border-radius:8px;background:var(--accent);color:#080808;text-decoration:none;font-weight:800}
+    .doc-pro-header{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .doc-pro-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .doc-pro-card h3{margin:0 0 10px;color:var(--accent)}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -240,7 +255,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -282,6 +297,8 @@
         <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
         <button data-page="buySell">Rachat / Vente</button>
+        <button data-page="repairHelp">Aide réparations</button>
+        <button data-page="sites">Sites</button>
         <button data-page="settings">Paramètres</button>
         <button id="logoutBtn" class="logout">Déconnexion</button>
       </nav>
@@ -426,7 +443,7 @@
             <div class="field full">
               <label>Lignes de réparation</label>
               <div id="repairLines" class="repair-lines"></div>
-              <button id="addRepairLineBtn" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne</button>
+              <button id="addRepairLineBtn" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne au document</button>
               <div class="repair-total">
                 <span>Total estimé TTC :</span>
                 <strong id="repairLinesTotal">0,00 €</strong>
@@ -651,6 +668,22 @@
             <button class="document-tab" data-doc-type="non-reparabilite">Non-réparabilité</button>
           </div>
 
+          
+          <div class="doc-pro-header">
+            <div class="doc-pro-card">
+              <h3>Émetteur</h3>
+              <div>TECH42SERVICE</div>
+              <div>Réparation téléphone, tablette, ordinateur et console</div>
+              <div>tech42service@gmail.com</div>
+            </div>
+            <div class="doc-pro-card">
+              <h3>Document</h3>
+              <div>Facture / Devis / Non-réparabilité</div>
+              <div>Numérotation automatique</div>
+              <div>Prix HT ou TTC par ligne</div>
+            </div>
+          </div>
+
           <form id="documentForm" class="document-form">
             <input id="documentEditId" type="hidden">
             <input id="documentType" type="hidden" value="facture">
@@ -681,7 +714,7 @@
             <div id="documentLinesBlock" class="full">
               <label>Lignes du document</label>
               <div id="documentLines" class="document-lines"></div>
-              <button id="addDocumentLine" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne</button>
+              <button id="addDocumentLine" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne au document</button>
             </div>
 
             <div id="nonRepairBlock" class="field full hidden">
@@ -1055,6 +1088,134 @@
         </section>
       </section>
 
+
+      <section id="repairHelpPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Aide réparations</h1>
+            <p>Liens utiles pour les diagnostics et réparations</p>
+          </div>
+        </header>
+
+        <div id="repairHelpDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <form id="repairHelpForm" class="links-form">
+            <div class="field">
+              <label>Nom du site</label>
+              <input id="repairHelpName" type="text" required>
+            </div>
+            <div class="field">
+              <label>Lien</label>
+              <input id="repairHelpUrl" type="url" placeholder="https://..." required>
+            </div>
+            <div class="field">
+              <label>Catégorie</label>
+              <select id="repairHelpCategory">
+                <option>Diagnostic</option>
+                <option>Smartphone</option>
+                <option>Ordinateur</option>
+                <option>Console</option>
+                <option>IMEI / Série</option>
+                <option>Schémas / Documentation</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <input id="repairHelpDescription" type="text">
+            </div>
+            <div>
+              <button class="save-btn write-action" type="submit">Ajouter le lien</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="repair-toolbar">
+            <input id="repairHelpSearch" type="search" placeholder="Rechercher un lien d'aide...">
+            <select id="repairHelpFilter">
+              <option value="">Toutes les catégories</option>
+              <option>Diagnostic</option>
+              <option>Smartphone</option>
+              <option>Ordinateur</option>
+              <option>Console</option>
+              <option>IMEI / Série</option>
+              <option>Schémas / Documentation</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div id="repairHelpGrid" class="links-grid"></div>
+          <div id="repairHelpEmpty" class="empty-state">Aucun lien enregistré.</div>
+        </section>
+      </section>
+
+
+      <section id="sitesPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Sites</h1>
+            <p>Accès rapide à tous tes sites professionnels</p>
+          </div>
+        </header>
+
+        <div id="sitesDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <form id="sitesForm" class="links-form">
+            <div class="field">
+              <label>Nom du site</label>
+              <input id="siteName" type="text" required>
+            </div>
+            <div class="field">
+              <label>Lien</label>
+              <input id="siteUrl" type="url" placeholder="https://..." required>
+            </div>
+            <div class="field">
+              <label>Catégorie</label>
+              <select id="siteCategory">
+                <option>Fournisseur</option>
+                <option>Administration</option>
+                <option>Banque</option>
+                <option>Marketplace</option>
+                <option>Communication</option>
+                <option>Outil professionnel</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <input id="siteDescription" type="text">
+            </div>
+            <div>
+              <button class="save-btn write-action" type="submit">Ajouter le site</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="repair-toolbar">
+            <input id="sitesSearch" type="search" placeholder="Rechercher un site...">
+            <select id="sitesFilter">
+              <option value="">Toutes les catégories</option>
+              <option>Fournisseur</option>
+              <option>Administration</option>
+              <option>Banque</option>
+              <option>Marketplace</option>
+              <option>Communication</option>
+              <option>Outil professionnel</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div id="sitesGrid" class="links-grid"></div>
+          <div id="sitesEmpty" class="empty-state">Aucun site enregistré.</div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -1115,7 +1276,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V15 correction réparations et prix HT/TTC</footer>
+      <footer>TECH42SERVICE Gestion — V16 aide, sites et documents pro</footer>
     </main>
   </div>
 
@@ -1153,12 +1314,16 @@
     const appointmentsPage = document.getElementById("appointmentsPage");
     const clientsPage = document.getElementById("clientsPage");
     const buySellPage = document.getElementById("buySellPage");
+    const repairHelpPage = document.getElementById("repairHelpPage");
+    const sitesPage = document.getElementById("sitesPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
     const documentsDemoNote = document.getElementById("documentsDemoNote");
     const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
     const clientsDemoNote = document.getElementById("clientsDemoNote");
     const buySellDemoNote = document.getElementById("buySellDemoNote");
+    const repairHelpDemoNote = document.getElementById("repairHelpDemoNote");
+    const sitesDemoNote = document.getElementById("sitesDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -1191,6 +1356,8 @@
       appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
       buySellDemoNote.classList.toggle("hidden", role !== "visuel");
+      repairHelpDemoNote.classList.toggle("hidden", role !== "visuel");
+      sitesDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -1257,6 +1424,8 @@
       appointmentsPage.classList.toggle("hidden", page !== "appointments");
       clientsPage.classList.toggle("hidden", page !== "clients");
       buySellPage.classList.toggle("hidden", page !== "buySell");
+      repairHelpPage.classList.toggle("hidden", page !== "repairHelp");
+      sitesPage.classList.toggle("hidden", page !== "sites");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
@@ -2269,16 +2438,18 @@
       w.document.write(`
         <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${escapeHtml(item.number)}</title>
         <style>
-          body{font-family:Arial,sans-serif;padding:35px;color:#111}
-          header{display:flex;justify-content:space-between;gap:30px;border-bottom:3px solid #111;padding-bottom:18px;margin-bottom:24px}
-          h1{margin:0;font-size:28px}.meta{text-align:right}.intro{margin:18px 0;color:#444}
-          .client,.subject,.reason{border:1px solid #bbb;border-radius:8px;padding:14px;margin:14px 0}
-          table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #bbb;padding:10px;text-align:left}
-          th{background:#eee}.totals{width:360px;margin-left:auto;margin-top:18px}
-          .totals p{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:7px 0}
-          footer{margin-top:40px;padding-top:18px;border-top:1px solid #aaa;color:#555;font-size:13px}
-          .signatures{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:60px}
-          .signature{border-top:1px solid #333;padding-top:8px}
+          @page{size:A4;margin:14mm}
+          body{font-family:Arial,sans-serif;padding:0;color:#111;background:#fff}
+          header{display:grid;grid-template-columns:1fr 1fr;gap:30px;border-bottom:4px solid #111;padding-bottom:18px;margin-bottom:24px}
+          h1{margin:0;font-size:30px;letter-spacing:.5px}.meta{text-align:right;line-height:1.6}.intro{margin:18px 0;color:#444;font-size:14px}
+          .client,.subject,.reason{border:1px solid #aaa;border-radius:8px;padding:14px;margin:14px 0;background:#fafafa}
+          table{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}th,td{border:1px solid #aaa;padding:10px;text-align:left}
+          th{background:#111;color:#fff}.totals{width:360px;margin-left:auto;margin-top:18px}
+          .totals p{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:8px 0;margin:0}
+          .totals p:nth-last-child(-n+2){font-size:16px}
+          footer{margin-top:40px;padding-top:18px;border-top:1px solid #aaa;color:#555;font-size:12px;line-height:1.5}
+          .signatures{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:70px}
+          .signature{border-top:1px solid #333;padding-top:8px;min-height:55px}
         </style></head><body>
           <header><div><h1>TECH42SERVICE</h1><div>${escapeHtml(t.title)}</div></div><div class="meta"><strong>${escapeHtml(item.number)}</strong><br>${formatDate(item.date)}<br>Statut : ${escapeHtml(item.status)}</div></header>
           <div class="intro">${escapeHtml(t.intro)}</div>
@@ -2967,6 +3138,153 @@
       saveAdminBuySell(getAdminBuySell().filter(i=>i.id!==id));
       renderBuySell();
     }
+
+
+    const demoRepairHelpLinks = [
+      {id:"HELP-001",name:"iFixit",url:"https://www.ifixit.com",category:"Schémas / Documentation",description:"Guides de démontage et réparation"},
+      {id:"HELP-002",name:"Testeur manette",url:"https://hardwaretester.com/gamepad",category:"Console",description:"Test des boutons et joysticks"},
+      {id:"HELP-003",name:"IMEI.info",url:"https://www.imei.info",category:"IMEI / Série",description:"Informations IMEI et appareil"}
+    ];
+
+    const demoSitesLinks = [
+      {id:"SITE-001",name:"Netlify",url:"https://www.netlify.com",category:"Outil professionnel",description:"Hébergement du logiciel"},
+      {id:"SITE-002",name:"Supabase",url:"https://supabase.com",category:"Outil professionnel",description:"Base de données cloud"},
+      {id:"SITE-003",name:"GitHub",url:"https://github.com",category:"Outil professionnel",description:"Gestion des fichiers du projet"}
+    ];
+
+    function getStoredLinks(key){
+      try{return JSON.parse(localStorage.getItem(key) || "[]")}catch{return []}
+    }
+
+    function saveStoredLinks(key,list){
+      localStorage.setItem(key,JSON.stringify(list));
+    }
+
+    function nextLinkId(prefix,list){
+      const max=list.reduce((highest,item)=>{
+        const match=String(item.id).match(/(\d+)$/);
+        return Math.max(highest,match?Number(match[1]):0);
+      },0);
+      return `${prefix}-${String(max+1).padStart(3,"0")}`;
+    }
+
+    function safeExternalUrl(url){
+      try{
+        const parsed=new URL(url);
+        return ["http:","https:"].includes(parsed.protocol) ? parsed.href : "#";
+      }catch{
+        return "#";
+      }
+    }
+
+    function renderLinkCards({gridId,emptyId,searchId,filterId,list,key,deleteAttr}){
+      const q=document.getElementById(searchId).value.trim().toLowerCase();
+      const category=document.getElementById(filterId).value;
+      const filtered=list.filter(item=>{
+        const text=[item.name,item.url,item.category,item.description].join(" ").toLowerCase();
+        return (!q||text.includes(q))&&(!category||item.category===category);
+      });
+
+      const grid=document.getElementById(gridId);
+      grid.innerHTML="";
+      filtered.forEach(item=>{
+        const card=document.createElement("article");
+        card.className="link-card";
+        const deleteButton=activeRole==="admin"
+          ? `<button class="mini-btn danger" ${deleteAttr}="${escapeHtml(item.id)}">Supprimer</button>`
+          : "";
+        card.innerHTML=`
+          <h3>${escapeHtml(item.name)}</h3>
+          <span class="workflow-badge">${escapeHtml(item.category)}</span>
+          <p>${escapeHtml(item.description||"Aucune description")}</p>
+          <div class="link-card-actions">
+            <a class="link-open" href="${safeExternalUrl(item.url)}" target="_blank" rel="noopener noreferrer">Ouvrir le site</a>
+            ${deleteButton}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      document.getElementById(emptyId).classList.toggle("hidden",filtered.length>0);
+      return grid;
+    }
+
+    function currentRepairHelpLinks(){
+      return activeRole==="visuel" ? demoRepairHelpLinks : getStoredLinks("tech42-repair-help-links");
+    }
+
+    function renderRepairHelp(){
+      const grid=renderLinkCards({
+        gridId:"repairHelpGrid",emptyId:"repairHelpEmpty",
+        searchId:"repairHelpSearch",filterId:"repairHelpFilter",
+        list:currentRepairHelpLinks(),key:"tech42-repair-help-links",
+        deleteAttr:"data-help-delete"
+      });
+      grid.querySelectorAll("[data-help-delete]").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          if(!confirm("Supprimer ce lien ?")) return;
+          saveStoredLinks("tech42-repair-help-links",getStoredLinks("tech42-repair-help-links").filter(i=>i.id!==btn.dataset.helpDelete));
+          renderRepairHelp();
+        });
+      });
+    }
+
+    document.getElementById("repairHelpForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const list=getStoredLinks("tech42-repair-help-links");
+      list.unshift({
+        id:nextLinkId("HELP",list),
+        name:document.getElementById("repairHelpName").value.trim(),
+        url:document.getElementById("repairHelpUrl").value.trim(),
+        category:document.getElementById("repairHelpCategory").value,
+        description:document.getElementById("repairHelpDescription").value.trim()
+      });
+      saveStoredLinks("tech42-repair-help-links",list);
+      event.target.reset();
+      renderRepairHelp();
+    });
+
+    document.getElementById("repairHelpSearch").addEventListener("input",renderRepairHelp);
+    document.getElementById("repairHelpFilter").addEventListener("change",renderRepairHelp);
+
+    function currentSitesLinks(){
+      return activeRole==="visuel" ? demoSitesLinks : getStoredLinks("tech42-sites-links");
+    }
+
+    function renderSites(){
+      const grid=renderLinkCards({
+        gridId:"sitesGrid",emptyId:"sitesEmpty",
+        searchId:"sitesSearch",filterId:"sitesFilter",
+        list:currentSitesLinks(),key:"tech42-sites-links",
+        deleteAttr:"data-site-delete"
+      });
+      grid.querySelectorAll("[data-site-delete]").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          if(!confirm("Supprimer ce site ?")) return;
+          saveStoredLinks("tech42-sites-links",getStoredLinks("tech42-sites-links").filter(i=>i.id!==btn.dataset.siteDelete));
+          renderSites();
+        });
+      });
+    }
+
+    document.getElementById("sitesForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const list=getStoredLinks("tech42-sites-links");
+      list.unshift({
+        id:nextLinkId("SITE",list),
+        name:document.getElementById("siteName").value.trim(),
+        url:document.getElementById("siteUrl").value.trim(),
+        category:document.getElementById("siteCategory").value,
+        description:document.getElementById("siteDescription").value.trim()
+      });
+      saveStoredLinks("tech42-sites-links",list);
+      event.target.reset();
+      renderSites();
+    });
+
+    document.getElementById("sitesSearch").addEventListener("input",renderSites);
+    document.getElementById("sitesFilter").addEventListener("change",renderSites);
 
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
