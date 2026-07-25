@@ -142,6 +142,31 @@
     .summary-card small{display:block;color:var(--muted);margin-bottom:7px}
     .summary-card strong{font-size:24px;color:var(--accent)}
 
+    
+    .document-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .document-tab{padding:10px 14px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);cursor:pointer}
+    .document-tab.active{background:var(--accent);color:#080808;font-weight:800}
+    .document-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .document-form .full{grid-column:1/-1}
+    .document-form input,.document-form select,.document-form textarea{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .document-form textarea{min-height:90px;resize:vertical}
+    .document-lines{display:grid;gap:10px}
+    .document-line{display:grid;grid-template-columns:2fr 90px 120px 120px 42px;gap:8px;align-items:center}
+    .document-line input{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)}
+    .document-total{margin-left:auto;width:min(360px,100%);display:grid;gap:8px}
+    .document-total-row{display:flex;justify-content:space-between;gap:20px;padding:8px 0;border-bottom:1px solid #2a2a2a}
+    .template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .template-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .template-card h3{margin-top:0;color:var(--accent)}
+    .template-card textarea,.template-card input{
+      width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text);margin-bottom:10px
+    }
+    .document-list{width:100%;border-collapse:collapse}
+    .document-list th,.document-list td{padding:12px;border-bottom:1px solid #2a2a2a;text-align:left}
+    .document-list th{color:var(--accent)}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -151,7 +176,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -191,7 +216,7 @@
         <button>Clients</button>
         <button data-page="stock">Stock</button>
         <button>Rendez-vous</button>
-        <button>Factures / Devis</button>
+        <button data-page="documents">Documents</button>
         <button data-page="settings">Paramètres</button>
         <button id="logoutBtn" class="logout">Déconnexion</button>
       </nav>
@@ -512,6 +537,142 @@
         </section>
       </section>
 
+
+      <section id="documentsPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Documents</h1>
+            <p>Factures, devis et certificats de non-réparabilité</p>
+          </div>
+        </header>
+
+        <div id="documentsDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <div class="document-tabs">
+            <button class="document-tab active" data-doc-type="facture">Facture</button>
+            <button class="document-tab" data-doc-type="devis">Devis</button>
+            <button class="document-tab" data-doc-type="non-reparabilite">Non-réparabilité</button>
+          </div>
+
+          <form id="documentForm" class="document-form">
+            <input id="documentEditId" type="hidden">
+            <input id="documentType" type="hidden" value="facture">
+
+            <div class="field">
+              <label>Numéro</label>
+              <input id="documentNumber" type="text" readonly>
+            </div>
+            <div class="field">
+              <label>Date</label>
+              <input id="documentDate" type="date" required>
+            </div>
+
+            <div class="field">
+              <label>Client</label>
+              <input id="documentClient" type="text" required>
+            </div>
+            <div class="field">
+              <label>Téléphone / Email</label>
+              <input id="documentContact" type="text">
+            </div>
+
+            <div class="field full">
+              <label>Objet</label>
+              <input id="documentSubject" type="text" required>
+            </div>
+
+            <div id="documentLinesBlock" class="full">
+              <label>Lignes du document</label>
+              <div id="documentLines" class="document-lines"></div>
+              <button id="addDocumentLine" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne</button>
+            </div>
+
+            <div id="nonRepairBlock" class="field full hidden">
+              <label>Motif de non-réparabilité</label>
+              <textarea id="nonRepairReason"></textarea>
+            </div>
+
+            <div class="field">
+              <label>Acompte (€)</label>
+              <input id="documentDeposit" type="number" min="0" step="0.01" value="0">
+            </div>
+            <div class="field">
+              <label>Statut</label>
+              <select id="documentStatus">
+                <option>Brouillon</option>
+                <option>Envoyé</option>
+                <option>Accepté</option>
+                <option>Payé</option>
+                <option>Refusé</option>
+              </select>
+            </div>
+
+            <div class="full document-total">
+              <div class="document-total-row"><span>Sous-total</span><strong id="documentSubtotal">0,00 €</strong></div>
+              <div class="document-total-row"><span>TVA</span><strong id="documentTax">0,00 €</strong></div>
+              <div class="document-total-row"><span>Total</span><strong id="documentGrandTotal">0,00 €</strong></div>
+              <div class="document-total-row"><span>Reste à payer</span><strong id="documentBalance">0,00 €</strong></div>
+            </div>
+
+            <div class="full page-actions">
+              <button id="saveDocumentBtn" class="save-btn write-action" type="submit">Enregistrer</button>
+              <button id="printCurrentDocumentBtn" class="action-btn secondary" type="button">Aperçu / Imprimer</button>
+              <button id="resetDocumentBtn" class="action-btn secondary" type="button">Nouveau</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Documents enregistrés</h2>
+          <div class="table-wrap">
+            <table class="document-list">
+              <thead>
+                <tr>
+                  <th>Numéro</th>
+                  <th>Type</th>
+                  <th>Client</th>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="documentsTableBody"></tbody>
+            </table>
+          </div>
+          <div id="documentsEmpty" class="empty-state">Aucun document enregistré.</div>
+        </section>
+
+        <section id="documentTemplatesPanel" class="panel">
+          <h2>Personnalisation des documents</h2>
+          <div class="template-grid">
+            <div class="template-card">
+              <h3>Facture</h3>
+              <input id="invoiceTitle" type="text" placeholder="Titre">
+              <textarea id="invoiceIntro" placeholder="Texte d'introduction"></textarea>
+              <textarea id="invoiceFooter" placeholder="Pied de page / conditions"></textarea>
+            </div>
+            <div class="template-card">
+              <h3>Devis</h3>
+              <input id="quoteTitle" type="text" placeholder="Titre">
+              <textarea id="quoteIntro" placeholder="Texte d'introduction"></textarea>
+              <textarea id="quoteFooter" placeholder="Pied de page / conditions"></textarea>
+            </div>
+            <div class="template-card">
+              <h3>Non-réparabilité</h3>
+              <input id="nonRepairTitle" type="text" placeholder="Titre">
+              <textarea id="nonRepairIntro" placeholder="Texte d'introduction"></textarea>
+              <textarea id="nonRepairFooter" placeholder="Pied de page / conditions"></textarea>
+            </div>
+          </div>
+          <button id="saveDocumentTemplates" class="save-btn write-action" type="button">Enregistrer la personnalisation</button>
+          <div id="documentTemplatesMessage"></div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -572,7 +733,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V6 stock</footer>
+      <footer>TECH42SERVICE Gestion — V7 documents</footer>
     </main>
   </div>
 
@@ -592,8 +753,10 @@
     const settingsPage = document.getElementById("settingsPage");
     const repairsPage = document.getElementById("repairsPage");
     const stockPage = document.getElementById("stockPage");
+    const documentsPage = document.getElementById("documentsPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
+    const documentsDemoNote = document.getElementById("documentsDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -622,6 +785,7 @@
       readonlyNote.classList.toggle("hidden", role !== "visuel");
       repairDemoNote.classList.toggle("hidden", role !== "visuel");
       stockDemoNote.classList.toggle("hidden", role !== "visuel");
+      documentsDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -658,6 +822,8 @@
       showPage("dashboard");
       renderRepairs();
       renderStock();
+      renderDocuments();
+      loadDocumentTemplates();
     });
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -680,10 +846,12 @@
       dashboardPage.classList.toggle("hidden", page !== "dashboard");
       repairsPage.classList.toggle("hidden", page !== "repairs");
       stockPage.classList.toggle("hidden", page !== "stock");
+      documentsPage.classList.toggle("hidden", page !== "documents");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
       if(page === "stock") renderStock();
+      if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
 
       if(page === "settings"){
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
@@ -1217,6 +1385,355 @@
       if(!confirm("Supprimer définitivement cet article ?")) return;
       saveAdminStock(getAdminStock().filter(i=>i.id!==id));
       renderStock();
+    }
+
+
+    const DEFAULT_DOCUMENT_TEMPLATES = {
+      facture:{
+        title:"FACTURE",
+        intro:"Merci pour votre confiance.",
+        footer:"Paiement à réception. Les pièces remplacées restent la propriété de TECH42SERVICE sauf demande contraire."
+      },
+      devis:{
+        title:"DEVIS",
+        intro:"Ce devis est établi sous réserve du diagnostic complet de l'appareil.",
+        footer:"Devis valable 30 jours. Les travaux débutent après acceptation du devis."
+      },
+      "non-reparabilite":{
+        title:"CERTIFICAT DE NON-RÉPARABILITÉ",
+        intro:"Après diagnostic, l'appareil mentionné ci-dessous est déclaré non réparable.",
+        footer:"Ce document est établi à la demande du client et ne constitue pas une facture."
+      }
+    };
+
+    const demoDocuments = [
+      {id:"DOC-0001",type:"facture",number:"FAC-2026-0001",date:"2026-07-20",client:"Jean Martin",contact:"06 12 34 56 78",subject:"Remplacement écran iPhone 13",lines:[{label:"Écran OLED iPhone 13",qty:1,unit:149,tax:20}],reason:"",deposit:50,status:"Payé"},
+      {id:"DOC-0002",type:"devis",number:"DEV-2026-0001",date:"2026-07-22",client:"Sophie Bernard",contact:"sophie@example.fr",subject:"Diagnostic et réparation PC Asus",lines:[{label:"Diagnostic approfondi",qty:1,unit:49,tax:20},{label:"Main d'œuvre estimée",qty:1,unit:60,tax:20}],reason:"",deposit:0,status:"Envoyé"},
+      {id:"DOC-0003",type:"non-reparabilite",number:"NR-2026-0001",date:"2026-07-23",client:"Lucas Petit",contact:"07 61 82 40 11",subject:"PlayStation 4 Slim",lines:[],reason:"Carte mère oxydée et composants principaux endommagés. Réparation économiquement non viable.",deposit:0,status:"Envoyé"}
+    ];
+
+    function getAdminDocuments(){
+      try{return JSON.parse(localStorage.getItem("tech42-documents") || "[]")}catch{return []}
+    }
+
+    function saveAdminDocuments(list){
+      localStorage.setItem("tech42-documents", JSON.stringify(list));
+    }
+
+    function currentDocuments(){
+      return activeRole === "visuel" ? demoDocuments : getAdminDocuments();
+    }
+
+    function getDocumentTemplates(){
+      try{
+        return {...DEFAULT_DOCUMENT_TEMPLATES,...JSON.parse(localStorage.getItem("tech42-document-templates") || "{}")};
+      }catch{
+        return DEFAULT_DOCUMENT_TEMPLATES;
+      }
+    }
+
+    function loadDocumentTemplates(){
+      const t = getDocumentTemplates();
+      document.getElementById("invoiceTitle").value = t.facture.title;
+      document.getElementById("invoiceIntro").value = t.facture.intro;
+      document.getElementById("invoiceFooter").value = t.facture.footer;
+      document.getElementById("quoteTitle").value = t.devis.title;
+      document.getElementById("quoteIntro").value = t.devis.intro;
+      document.getElementById("quoteFooter").value = t.devis.footer;
+      document.getElementById("nonRepairTitle").value = t["non-reparabilite"].title;
+      document.getElementById("nonRepairIntro").value = t["non-reparabilite"].intro;
+      document.getElementById("nonRepairFooter").value = t["non-reparabilite"].footer;
+
+      const canEdit = activeRole === "admin";
+      document.querySelectorAll("#documentTemplatesPanel input,#documentTemplatesPanel textarea,#saveDocumentTemplates").forEach(el=>{
+        el.disabled = !canEdit;
+        el.style.opacity = canEdit ? "1" : ".55";
+      });
+    }
+
+    document.getElementById("saveDocumentTemplates").addEventListener("click",()=>{
+      if(activeRole !== "admin") return;
+      const templates = {
+        facture:{
+          title:document.getElementById("invoiceTitle").value.trim(),
+          intro:document.getElementById("invoiceIntro").value.trim(),
+          footer:document.getElementById("invoiceFooter").value.trim()
+        },
+        devis:{
+          title:document.getElementById("quoteTitle").value.trim(),
+          intro:document.getElementById("quoteIntro").value.trim(),
+          footer:document.getElementById("quoteFooter").value.trim()
+        },
+        "non-reparabilite":{
+          title:document.getElementById("nonRepairTitle").value.trim(),
+          intro:document.getElementById("nonRepairIntro").value.trim(),
+          footer:document.getElementById("nonRepairFooter").value.trim()
+        }
+      };
+      localStorage.setItem("tech42-document-templates",JSON.stringify(templates));
+      const msg = document.getElementById("documentTemplatesMessage");
+      msg.className = "notice";
+      msg.textContent = "Personnalisation enregistrée.";
+    });
+
+    function addDocumentLine(data={label:"",qty:1,unit:0,tax:20}){
+      const row = document.createElement("div");
+      row.className = "document-line";
+      row.innerHTML = `
+        <input class="doc-line-label" type="text" placeholder="Désignation" value="${escapeHtml(data.label)}">
+        <input class="doc-line-qty" type="number" min="0" step="1" value="${Number(data.qty||1)}">
+        <input class="doc-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit||0)}">
+        <input class="doc-line-tax" type="number" min="0" step="0.01" value="${Number(data.tax??20)}">
+        <button class="mini-btn danger doc-line-remove" type="button">×</button>
+      `;
+      document.getElementById("documentLines").appendChild(row);
+      row.querySelectorAll("input").forEach(input=>input.addEventListener("input",updateDocumentTotals));
+      row.querySelector(".doc-line-remove").addEventListener("click",()=>{row.remove();updateDocumentTotals();});
+      updateDocumentTotals();
+    }
+
+    function getDocumentLines(){
+      return [...document.querySelectorAll(".document-line")].map(row=>({
+        label:row.querySelector(".doc-line-label").value.trim(),
+        qty:Number(row.querySelector(".doc-line-qty").value||0),
+        unit:Number(row.querySelector(".doc-line-unit").value||0),
+        tax:Number(row.querySelector(".doc-line-tax").value||0)
+      })).filter(line=>line.label);
+    }
+
+    function calculateDocumentTotals(lines,deposit=0){
+      const subtotal = lines.reduce((sum,l)=>sum+(l.qty*l.unit),0);
+      const tax = lines.reduce((sum,l)=>sum+(l.qty*l.unit*l.tax/100),0);
+      const total = subtotal + tax;
+      return {subtotal,tax,total,balance:Math.max(0,total-Number(deposit||0))};
+    }
+
+    function updateDocumentTotals(){
+      const totals = calculateDocumentTotals(getDocumentLines(),document.getElementById("documentDeposit").value);
+      document.getElementById("documentSubtotal").textContent = totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("documentTax").textContent = totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("documentGrandTotal").textContent = totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("documentBalance").textContent = totals.balance.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+    }
+
+    function nextDocumentNumber(type,list){
+      const year = new Date().getFullYear();
+      const prefix = type === "facture" ? "FAC" : type === "devis" ? "DEV" : "NR";
+      const max = list.filter(d=>d.type===type).reduce((highest,item)=>{
+        const match = String(item.number).match(/(\d+)$/);
+        return Math.max(highest,match?Number(match[1]):0);
+      },0);
+      return `${prefix}-${year}-${String(max+1).padStart(4,"0")}`;
+    }
+
+    function setDocumentType(type){
+      document.getElementById("documentType").value = type;
+      document.querySelectorAll(".document-tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.docType===type));
+      const nonRepair = type === "non-reparabilite";
+      document.getElementById("documentLinesBlock").classList.toggle("hidden",nonRepair);
+      document.getElementById("nonRepairBlock").classList.toggle("hidden",!nonRepair);
+      document.getElementById("documentDeposit").closest(".field").classList.toggle("hidden",nonRepair);
+      if(!document.getElementById("documentEditId").value){
+        document.getElementById("documentNumber").value = nextDocumentNumber(type,getAdminDocuments());
+      }
+      updateDocumentTotals();
+    }
+
+    document.querySelectorAll(".document-tab").forEach(btn=>btn.addEventListener("click",()=>setDocumentType(btn.dataset.docType)));
+    document.getElementById("addDocumentLine").addEventListener("click",()=>addDocumentLine());
+    document.getElementById("documentDeposit").addEventListener("input",updateDocumentTotals);
+
+    function resetDocumentForm(){
+      document.getElementById("documentForm").reset();
+      document.getElementById("documentEditId").value = "";
+      document.getElementById("documentDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("documentLines").innerHTML = "";
+      addDocumentLine();
+      setDocumentType("facture");
+      document.getElementById("saveDocumentBtn").textContent = "Enregistrer";
+      document.querySelectorAll("#documentForm input,#documentForm select,#documentForm textarea,#documentForm button").forEach(el=>{
+        if(!["printCurrentDocumentBtn","resetDocumentBtn"].includes(el.id)){
+          el.disabled = activeRole !== "admin";
+        }
+      });
+    }
+
+    document.getElementById("resetDocumentBtn").addEventListener("click",resetDocumentForm);
+
+    function renderDocuments(){
+      const tbody = document.getElementById("documentsTableBody");
+      const empty = document.getElementById("documentsEmpty");
+      const list = currentDocuments();
+      tbody.innerHTML = "";
+
+      list.forEach(item=>{
+        const totals = calculateDocumentTotals(item.lines||[],item.deposit||0);
+        const typeLabel = item.type==="facture"?"Facture":item.type==="devis"?"Devis":"Non-réparabilité";
+        const actions = activeRole === "admin"
+          ? `<button class="mini-btn" data-doc-edit="${escapeHtml(item.id)}">Modifier</button>
+             <button class="mini-btn danger" data-doc-delete="${escapeHtml(item.id)}">Supprimer</button>`
+          : "";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(item.number)}</td>
+          <td>${typeLabel}</td>
+          <td>${escapeHtml(item.client)}</td>
+          <td>${formatDate(item.date)}</td>
+          <td>${item.type==="non-reparabilite"?"—":totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
+          <td>${escapeHtml(item.status)}</td>
+          <td><div class="table-actions">
+            <button class="mini-btn" data-doc-print="${escapeHtml(item.id)}">Voir / Imprimer</button>
+            ${actions}
+          </div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      empty.classList.toggle("hidden",list.length>0);
+      tbody.querySelectorAll("[data-doc-print]").forEach(btn=>btn.addEventListener("click",()=>printDocumentById(btn.dataset.docPrint)));
+      tbody.querySelectorAll("[data-doc-edit]").forEach(btn=>btn.addEventListener("click",()=>editDocument(btn.dataset.docEdit)));
+      tbody.querySelectorAll("[data-doc-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteDocument(btn.dataset.docDelete)));
+    }
+
+    document.getElementById("documentForm").addEventListener("submit",(event)=>{
+      event.preventDefault();
+      if(activeRole !== "admin") return;
+
+      const list = getAdminDocuments();
+      const editId = document.getElementById("documentEditId").value;
+      const type = document.getElementById("documentType").value;
+      const item = {
+        id:editId || `DOC-${Date.now()}`,
+        type,
+        number:document.getElementById("documentNumber").value,
+        date:document.getElementById("documentDate").value,
+        client:document.getElementById("documentClient").value.trim(),
+        contact:document.getElementById("documentContact").value.trim(),
+        subject:document.getElementById("documentSubject").value.trim(),
+        lines:type==="non-reparabilite"?[]:getDocumentLines(),
+        reason:document.getElementById("nonRepairReason").value.trim(),
+        deposit:Number(document.getElementById("documentDeposit").value||0),
+        status:document.getElementById("documentStatus").value
+      };
+
+      if(editId){
+        const index = list.findIndex(d=>d.id===editId);
+        if(index!==-1) list[index]=item;
+      }else{
+        list.unshift(item);
+      }
+
+      saveAdminDocuments(list);
+      renderDocuments();
+      resetDocumentForm();
+    });
+
+    function editDocument(id){
+      if(activeRole!=="admin") return;
+      const item = getAdminDocuments().find(d=>d.id===id);
+      if(!item) return;
+
+      document.getElementById("documentEditId").value=item.id;
+      document.getElementById("documentType").value=item.type;
+      document.getElementById("documentNumber").value=item.number;
+      document.getElementById("documentDate").value=item.date;
+      document.getElementById("documentClient").value=item.client;
+      document.getElementById("documentContact").value=item.contact||"";
+      document.getElementById("documentSubject").value=item.subject;
+      document.getElementById("nonRepairReason").value=item.reason||"";
+      document.getElementById("documentDeposit").value=item.deposit||0;
+      document.getElementById("documentStatus").value=item.status||"Brouillon";
+      document.getElementById("documentLines").innerHTML="";
+      (item.lines||[]).forEach(addDocumentLine);
+      if(!(item.lines||[]).length && item.type!=="non-reparabilite") addDocumentLine();
+      setDocumentType(item.type);
+      document.getElementById("saveDocumentBtn").textContent="Enregistrer les modifications";
+      updateDocumentTotals();
+      document.getElementById("documentForm").scrollIntoView({behavior:"smooth"});
+    }
+
+    function deleteDocument(id){
+      if(activeRole!=="admin") return;
+      if(!confirm("Supprimer définitivement ce document ?")) return;
+      saveAdminDocuments(getAdminDocuments().filter(d=>d.id!==id));
+      renderDocuments();
+    }
+
+    function currentFormDocument(){
+      return {
+        id:"preview",
+        type:document.getElementById("documentType").value,
+        number:document.getElementById("documentNumber").value,
+        date:document.getElementById("documentDate").value,
+        client:document.getElementById("documentClient").value.trim(),
+        contact:document.getElementById("documentContact").value.trim(),
+        subject:document.getElementById("documentSubject").value.trim(),
+        lines:getDocumentLines(),
+        reason:document.getElementById("nonRepairReason").value.trim(),
+        deposit:Number(document.getElementById("documentDeposit").value||0),
+        status:document.getElementById("documentStatus").value
+      };
+    }
+
+    document.getElementById("printCurrentDocumentBtn").addEventListener("click",()=>printDocument(currentFormDocument()));
+
+    function printDocumentById(id){
+      const item = currentDocuments().find(d=>d.id===id);
+      if(item) printDocument(item);
+    }
+
+    function printDocument(item){
+      const templates = getDocumentTemplates();
+      const t = templates[item.type];
+      const totals = calculateDocumentTotals(item.lines||[],item.deposit||0);
+      const linesHtml = (item.lines||[]).map(line=>`
+        <tr>
+          <td>${escapeHtml(line.label)}</td>
+          <td>${line.qty}</td>
+          <td>${Number(line.unit).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
+          <td>${line.tax}%</td>
+          <td>${(line.qty*line.unit*(1+line.tax/100)).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
+        </tr>
+      `).join("");
+
+      const content = item.type==="non-reparabilite"
+        ? `<div class="reason"><strong>Motif de non-réparabilité :</strong><br>${escapeHtml(item.reason||"Non précisé")}</div>`
+        : `<table><thead><tr><th>Désignation</th><th>Qté</th><th>PU HT</th><th>TVA</th><th>Total TTC</th></tr></thead><tbody>${linesHtml}</tbody></table>
+           <div class="totals">
+             <p><span>Sous-total :</span><strong>${totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+             <p><span>TVA :</span><strong>${totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+             <p><span>Total :</span><strong>${totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+             <p><span>Acompte :</span><strong>${Number(item.deposit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+             <p><span>Reste à payer :</span><strong>${totals.balance.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</strong></p>
+           </div>`;
+
+      const w = window.open("","_blank","width=950,height=760");
+      w.document.write(`
+        <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${escapeHtml(item.number)}</title>
+        <style>
+          body{font-family:Arial,sans-serif;padding:35px;color:#111}
+          header{display:flex;justify-content:space-between;gap:30px;border-bottom:3px solid #111;padding-bottom:18px;margin-bottom:24px}
+          h1{margin:0;font-size:28px}.meta{text-align:right}.intro{margin:18px 0;color:#444}
+          .client,.subject,.reason{border:1px solid #bbb;border-radius:8px;padding:14px;margin:14px 0}
+          table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #bbb;padding:10px;text-align:left}
+          th{background:#eee}.totals{width:360px;margin-left:auto;margin-top:18px}
+          .totals p{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:7px 0}
+          footer{margin-top:40px;padding-top:18px;border-top:1px solid #aaa;color:#555;font-size:13px}
+          .signatures{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:60px}
+          .signature{border-top:1px solid #333;padding-top:8px}
+        </style></head><body>
+          <header><div><h1>TECH42SERVICE</h1><div>${escapeHtml(t.title)}</div></div><div class="meta"><strong>${escapeHtml(item.number)}</strong><br>${formatDate(item.date)}<br>Statut : ${escapeHtml(item.status)}</div></header>
+          <div class="intro">${escapeHtml(t.intro)}</div>
+          <div class="client"><strong>Client :</strong> ${escapeHtml(item.client)}<br><strong>Contact :</strong> ${escapeHtml(item.contact||"—")}</div>
+          <div class="subject"><strong>Objet :</strong> ${escapeHtml(item.subject)}</div>
+          ${content}
+          <div class="signatures"><div class="signature">Signature du client</div><div class="signature">Signature TECH42SERVICE</div></div>
+          <footer>${escapeHtml(t.footer)}</footer>
+          <script>window.onload=()=>window.print();<\/script>
+        </body></html>
+      `);
+      w.document.close();
     }
 
     const themes = {
