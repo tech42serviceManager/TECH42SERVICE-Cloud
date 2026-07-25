@@ -192,6 +192,20 @@
     .appt-card h3{margin:0 0 6px}
     .appt-meta{color:var(--muted);font-size:14px;line-height:1.5}
 
+    
+    .client-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .client-form .full{grid-column:1/-1}
+    .client-form input,.client-form textarea{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .client-form textarea{min-height:80px;resize:vertical}
+    .client-list{display:grid;gap:12px}
+    .client-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .client-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .client-card h3{margin:0 0 6px}
+    .client-meta{color:var(--muted);font-size:14px;line-height:1.5}
+    .workflow-badge{display:inline-block;padding:5px 9px;border:1px solid var(--border);border-radius:999px;color:var(--accent);font-size:12px}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -201,7 +215,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -238,7 +252,7 @@
       <nav class="menu">
         <button class="active" data-page="dashboard">Accueil</button>
         <button data-page="repairs">Réparations</button>
-        <button>Clients</button>
+        <button data-page="clients">Clients</button>
         <button data-page="stock">Stock</button>
         <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
@@ -305,7 +319,7 @@
 
             <div class="field">
               <label>Client</label>
-              <input id="repairClient" type="text" required>
+              <input id="repairClient" type="text" list="clientNamesList" required>
             </div>
             <div class="field">
               <label>Téléphone</label>
@@ -604,7 +618,7 @@
 
             <div class="field">
               <label>Client</label>
-              <input id="documentClient" type="text" required>
+              <input id="documentClient" type="text" list="clientNamesList" required>
             </div>
             <div class="field">
               <label>Téléphone / Email</label>
@@ -729,7 +743,7 @@
 
             <div class="field">
               <label>Client</label>
-              <input id="appointmentClient" type="text" required>
+              <input id="appointmentClient" type="text" list="clientNamesList" required>
             </div>
             <div class="field">
               <label>Téléphone</label>
@@ -804,6 +818,66 @@
         </section>
       </section>
 
+
+      <section id="clientsPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Clients</h1>
+            <p>Fiches clients réutilisées dans les rendez-vous, réparations et documents</p>
+          </div>
+        </header>
+
+        <div id="clientsDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <div class="page-actions">
+            <button id="newClientBtn" class="action-btn write-action">Nouveau client</button>
+            <button id="cancelClientBtn" class="action-btn secondary hidden">Fermer le formulaire</button>
+          </div>
+
+          <form id="clientForm" class="client-form hidden">
+            <input id="clientEditId" type="hidden">
+
+            <div class="field">
+              <label>Nom complet</label>
+              <input id="clientName" type="text" required>
+            </div>
+            <div class="field">
+              <label>Téléphone</label>
+              <input id="clientPhone" type="tel">
+            </div>
+
+            <div class="field">
+              <label>E-mail</label>
+              <input id="clientEmail" type="email">
+            </div>
+            <div class="field">
+              <label>Adresse</label>
+              <input id="clientAddress" type="text">
+            </div>
+
+            <div class="field full">
+              <label>Notes</label>
+              <textarea id="clientNotes"></textarea>
+            </div>
+
+            <div class="full">
+              <button id="saveClientBtn" class="save-btn" type="submit">Enregistrer le client</button>
+            </div>
+          </form>
+
+          <div class="appt-toolbar">
+            <input id="clientSearch" type="search" placeholder="Rechercher un client, téléphone ou e-mail...">
+            <div></div>
+          </div>
+
+          <div id="clientsList" class="client-list"></div>
+          <div id="clientsEmpty" class="empty-state">Aucun client enregistré.</div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -864,7 +938,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V10 tableau de bord lié</footer>
+      <footer>TECH42SERVICE Gestion — V11 dossier client unique</footer>
     </main>
   </div>
 
@@ -886,10 +960,12 @@
     const stockPage = document.getElementById("stockPage");
     const documentsPage = document.getElementById("documentsPage");
     const appointmentsPage = document.getElementById("appointmentsPage");
+    const clientsPage = document.getElementById("clientsPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
     const documentsDemoNote = document.getElementById("documentsDemoNote");
     const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
+    const clientsDemoNote = document.getElementById("clientsDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -920,6 +996,7 @@
       stockDemoNote.classList.toggle("hidden", role !== "visuel");
       documentsDemoNote.classList.toggle("hidden", role !== "visuel");
       appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
+      clientsDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -979,10 +1056,12 @@
       }
       dashboardPage.classList.toggle("hidden", page !== "dashboard");
       if(page === "dashboard") updateDashboardStats();
+      renderClients();
       repairsPage.classList.toggle("hidden", page !== "repairs");
       stockPage.classList.toggle("hidden", page !== "stock");
       documentsPage.classList.toggle("hidden", page !== "documents");
       appointmentsPage.classList.toggle("hidden", page !== "appointments");
+      clientsPage.classList.toggle("hidden", page !== "clients");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
@@ -1235,8 +1314,10 @@
 
       const list = getAdminRepairs();
       const editId = document.getElementById("repairEditId").value;
+      const linkedClientId = upsertClientFromFields(document.getElementById("repairClient").value.trim(),document.getElementById("repairPhone").value.trim(),"");
       const item = {
         id: editId || nextRepairId(list),
+        clientId: linkedClientId,
         client: document.getElementById("repairClient").value.trim(),
         phone: document.getElementById("repairPhone").value.trim(),
         deviceType: document.getElementById("repairDevice").value,
@@ -1393,7 +1474,8 @@
             <div class="signature">Signature TECH42SERVICE</div>
           </div>
           <script>window.onload=()=>window.print();<\/script>
-        </body>
+        <datalist id="clientNamesList"></datalist>
+</body>
         </html>
       `);
       printWindow.document.close();
@@ -1803,8 +1885,10 @@
       const list = getAdminDocuments();
       const editId = document.getElementById("documentEditId").value;
       const type = document.getElementById("documentType").value;
+      const linkedClientId = upsertClientFromFields(document.getElementById("documentClient").value.trim(),document.getElementById("documentContact").value.trim(),"");
       const item = {
         id:editId || `DOC-${Date.now()}`,
+        clientId: linkedClientId,
         type,
         number:document.getElementById("documentNumber").value,
         date:document.getElementById("documentDate").value,
@@ -1933,7 +2017,8 @@
           <div class="signatures"><div class="signature">Signature du client</div><div class="signature">Signature TECH42SERVICE</div></div>
           <footer>${escapeHtml(t.footer)}</footer>
           <script>window.onload=()=>window.print();<\/script>
-        </body></html>
+        <datalist id="clientNamesList"></datalist>
+</body></html>
       `);
       w.document.close();
     }
@@ -1965,6 +2050,7 @@
 
       const documentItem = {
         id:`DOC-${Date.now()}`,
+        clientId:repair.clientId || null,
         type,
         number:nextDocumentNumber(type,documents),
         date:new Date().toISOString().slice(0,10),
@@ -2045,6 +2131,7 @@
             </div>
             <div class="table-actions">
               <button class="mini-btn" data-appt-google="${escapeHtml(item.id)}">Google Agenda</button>
+              ${activeRole==="admin" ? `<button class="mini-btn" data-appt-repair="${escapeHtml(item.id)}">Créer réparation</button>` : ""}
               ${actions}
             </div>
           </div>
@@ -2056,6 +2143,7 @@
       list.querySelectorAll("[data-appt-edit]").forEach(btn=>btn.addEventListener("click",()=>editAppointment(btn.dataset.apptEdit)));
       list.querySelectorAll("[data-appt-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteAppointment(btn.dataset.apptDelete)));
       list.querySelectorAll("[data-appt-google]").forEach(btn=>btn.addEventListener("click",()=>openGoogleCalendar(btn.dataset.apptGoogle)));
+      list.querySelectorAll("[data-appt-repair]").forEach(btn=>btn.addEventListener("click",()=>convertAppointmentToRepair(btn.dataset.apptRepair)));
     }
 
     function nextAppointmentId(list){
@@ -2099,8 +2187,10 @@
 
       const list = getAdminAppointments();
       const editId = document.getElementById("appointmentEditId").value;
+      const linkedClientId = upsertClientFromFields(document.getElementById("appointmentClient").value.trim(),document.getElementById("appointmentPhone").value.trim(),document.getElementById("appointmentEmail").value.trim());
       const item = {
         id:editId || nextAppointmentId(list),
+        clientId: linkedClientId,
         client:document.getElementById("appointmentClient").value.trim(),
         phone:document.getElementById("appointmentPhone").value.trim(),
         email:document.getElementById("appointmentEmail").value.trim(),
@@ -2234,6 +2324,211 @@
       showAppointmentForm();
     });
 
+
+    const demoClients = [
+      {id:"CLI-0001",name:"Jean Martin",phone:"06 12 34 56 78",email:"jean@example.fr",address:"12 rue des Lilas",notes:"Client régulier"},
+      {id:"CLI-0002",name:"Sophie Bernard",phone:"06 44 22 18 90",email:"sophie@example.fr",address:"8 avenue de la Gare",notes:""},
+      {id:"CLI-0003",name:"Lucas Petit",phone:"07 61 82 40 11",email:"lucas@example.fr",address:"5 impasse des Écoles",notes:""}
+    ];
+
+    function getAdminClients(){
+      try{return JSON.parse(localStorage.getItem("tech42-clients") || "[]")}catch{return []}
+    }
+
+    function saveAdminClients(list){
+      localStorage.setItem("tech42-clients", JSON.stringify(list));
+    }
+
+    function currentClients(){
+      return activeRole === "visuel" ? demoClients : getAdminClients();
+    }
+
+    function nextClientId(list){
+      const max = list.reduce((highest,item)=>{
+        const match = String(item.id).match(/(\d+)$/);
+        return Math.max(highest, match ? Number(match[1]) : 0);
+      },0);
+      return `CLI-${String(max+1).padStart(4,"0")}`;
+    }
+
+    function upsertClientFromFields(name,phone,email){
+      if(activeRole !== "admin" || !name) return null;
+      const list = getAdminClients();
+      const existing = list.find(c =>
+        (phone && c.phone === phone) ||
+        (email && c.email === email) ||
+        c.name.toLowerCase() === name.toLowerCase()
+      );
+
+      if(existing){
+        existing.name = name || existing.name;
+        existing.phone = phone || existing.phone;
+        existing.email = email || existing.email;
+        saveAdminClients(list);
+        refreshClientDatalist();
+        return existing.id;
+      }
+
+      const client = {id:nextClientId(list),name,phone:phone||"",email:email||"",address:"",notes:""};
+      list.unshift(client);
+      saveAdminClients(list);
+      refreshClientDatalist();
+      return client.id;
+    }
+
+    function refreshClientDatalist(){
+      const dl = document.getElementById("clientNamesList");
+      if(!dl) return;
+      dl.innerHTML = currentClients().map(c=>`<option value="${escapeHtml(c.name)}">${escapeHtml(c.phone||"")} ${escapeHtml(c.email||"")}</option>`).join("");
+    }
+
+    function renderClients(){
+      const box = document.getElementById("clientsList");
+      const empty = document.getElementById("clientsEmpty");
+      const q = document.getElementById("clientSearch").value.trim().toLowerCase();
+
+      const list = currentClients().filter(c =>
+        !q || [c.name,c.phone,c.email,c.address,c.notes].join(" ").toLowerCase().includes(q)
+      );
+
+      box.innerHTML = "";
+      list.forEach(client=>{
+        const repairs = currentRepairList().filter(r=>r.clientId===client.id || r.client===client.name).length;
+        const appointments = currentAppointments().filter(a=>a.clientId===client.id || a.client===client.name).length;
+        const documents = currentDocuments().filter(d=>d.clientId===client.id || d.client===client.name).length;
+        const actions = activeRole==="admin"
+          ? `<button class="mini-btn" data-client-edit="${escapeHtml(client.id)}">Modifier</button>
+             <button class="mini-btn danger" data-client-delete="${escapeHtml(client.id)}">Supprimer</button>`
+          : "";
+
+        const card = document.createElement("article");
+        card.className = "client-card";
+        card.innerHTML = `
+          <div class="client-card-head">
+            <div>
+              <h3>${escapeHtml(client.name)}</h3>
+              <div class="client-meta">
+                ${escapeHtml(client.phone||"—")} · ${escapeHtml(client.email||"—")}<br>
+                ${escapeHtml(client.address||"Adresse non renseignée")}
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                <span class="workflow-badge">${repairs} réparation(s)</span>
+                <span class="workflow-badge">${appointments} RDV</span>
+                <span class="workflow-badge">${documents} document(s)</span>
+              </div>
+            </div>
+            <div class="table-actions">${actions}</div>
+          </div>
+        `;
+        box.appendChild(card);
+      });
+
+      empty.classList.toggle("hidden",list.length>0);
+      box.querySelectorAll("[data-client-edit]").forEach(btn=>btn.addEventListener("click",()=>editClient(btn.dataset.clientEdit)));
+      box.querySelectorAll("[data-client-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteClient(btn.dataset.clientDelete)));
+      refreshClientDatalist();
+    }
+
+    function resetClientForm(){
+      document.getElementById("clientForm").reset();
+      document.getElementById("clientEditId").value="";
+      document.getElementById("saveClientBtn").textContent="Enregistrer le client";
+    }
+
+    function showClientForm(){
+      if(activeRole!=="admin"){alert("Action impossible en mode présentation.");return;}
+      document.getElementById("clientForm").classList.remove("hidden");
+      document.getElementById("cancelClientBtn").classList.remove("hidden");
+    }
+
+    function hideClientForm(){
+      document.getElementById("clientForm").classList.add("hidden");
+      document.getElementById("cancelClientBtn").classList.add("hidden");
+      resetClientForm();
+    }
+
+    document.getElementById("newClientBtn").addEventListener("click",()=>{resetClientForm();showClientForm();});
+    document.getElementById("cancelClientBtn").addEventListener("click",hideClientForm);
+    document.getElementById("clientSearch").addEventListener("input",renderClients);
+
+    document.getElementById("clientForm").addEventListener("submit",(event)=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+
+      const list=getAdminClients();
+      const editId=document.getElementById("clientEditId").value;
+      const item={
+        id:editId||nextClientId(list),
+        name:document.getElementById("clientName").value.trim(),
+        phone:document.getElementById("clientPhone").value.trim(),
+        email:document.getElementById("clientEmail").value.trim(),
+        address:document.getElementById("clientAddress").value.trim(),
+        notes:document.getElementById("clientNotes").value.trim()
+      };
+
+      if(editId){
+        const index=list.findIndex(i=>i.id===editId);
+        if(index!==-1) list[index]=item;
+      }else list.unshift(item);
+
+      saveAdminClients(list);
+      hideClientForm();
+      renderClients();
+    });
+
+    function editClient(id){
+      const item=getAdminClients().find(i=>i.id===id);
+      if(!item) return;
+      document.getElementById("clientEditId").value=item.id;
+      document.getElementById("clientName").value=item.name||"";
+      document.getElementById("clientPhone").value=item.phone||"";
+      document.getElementById("clientEmail").value=item.email||"";
+      document.getElementById("clientAddress").value=item.address||"";
+      document.getElementById("clientNotes").value=item.notes||"";
+      document.getElementById("saveClientBtn").textContent="Enregistrer les modifications";
+      showClientForm();
+    }
+
+    function deleteClient(id){
+      if(!confirm("Supprimer définitivement ce client ?")) return;
+      saveAdminClients(getAdminClients().filter(i=>i.id!==id));
+      renderClients();
+    }
+
+    function convertAppointmentToRepair(id){
+      if(activeRole!=="admin") return;
+      const appt=getAdminAppointments().find(a=>a.id===id);
+      if(!appt) return;
+
+      const repairs=getAdminRepairs();
+      const clientId=appt.clientId || upsertClientFromFields(appt.client,appt.phone,appt.email);
+      repairs.unshift({
+        id:nextRepairId(repairs),
+        clientId,
+        sourceAppointmentId:appt.id,
+        client:appt.client,
+        phone:appt.phone||"",
+        deviceType:"Autre",
+        brand:"",
+        model:appt.device||"",
+        serial:"",
+        issue:appt.reason||"",
+        diagnosis:"",
+        status:"En attente",
+        price:"",
+        deposit:"0",
+        depositDate:new Date().toISOString().slice(0,10),
+        dueDate:"",
+        parts:"",
+        lines:[]
+      });
+      saveAdminRepairs(repairs);
+      alert("Le rendez-vous a été transformé en réparation.");
+      showPage("repairs");
+      renderRepairs();
+      updateDashboardStats();
+    }
+
     const themes = {
       gold:{accent:"#f4b51f",border:"#3d3217"},
       blue:{accent:"#3ea6ff",border:"#17374d"},
@@ -2264,5 +2559,6 @@
     updateClock();
     setInterval(updateClock,1000);
   </script>
+<datalist id="clientNamesList"></datalist>
 </body>
 </html>
