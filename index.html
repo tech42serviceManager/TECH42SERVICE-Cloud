@@ -392,8 +392,24 @@
       </div>
 
       <button id="loginButton" class="primary" type="submit">Se connecter</button>
+      <button id="forgotPasswordBtn" type="button" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--accent);cursor:pointer">Mot de passe oublié</button>
+      <div id="forgotPasswordMessage" class="error"></div>
       <div id="loginError" class="error"></div>
       <div id="cloudStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">Connexion cloud</div>
+
+      <div id="passwordRecoveryBox" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <h2 style="font-size:18px;text-align:center;margin:0 0 12px">Nouveau mot de passe</h2>
+        <div class="field">
+          <label for="recoveryPassword">Nouveau mot de passe</label>
+          <input id="recoveryPassword" type="password" minlength="8" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="recoveryPasswordConfirm">Confirmer</label>
+          <input id="recoveryPasswordConfirm" type="password" minlength="8" autocomplete="new-password">
+        </div>
+        <button id="saveRecoveryPasswordBtn" class="primary" type="button">Enregistrer le nouveau mot de passe</button>
+        <div id="passwordRecoveryMessage" class="error"></div>
+      </div>
     </form>
   </section>
 
@@ -2169,6 +2185,12 @@
     const accountType = document.getElementById("accountType");
     const password = document.getElementById("password");
     const loginError = document.getElementById("loginError");
+    const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+    const forgotPasswordMessage = document.getElementById("forgotPasswordMessage");
+    const passwordRecoveryBox = document.getElementById("passwordRecoveryBox");
+    const recoveryPassword = document.getElementById("recoveryPassword");
+    const recoveryPasswordConfirm = document.getElementById("recoveryPasswordConfirm");
+    const passwordRecoveryMessage = document.getElementById("passwordRecoveryMessage");
     const currentUser = document.getElementById("currentUser");
     const readonlyNote = document.getElementById("readonlyNote");
     const dashboardPage = document.getElementById("dashboardPage");
@@ -2219,6 +2241,72 @@
       if(activeRole) currentUser.textContent = activeRole === "admin" ? adminName : visualName;
     }
     refreshUserNames();
+
+    function passwordRecoveryRedirectUrl(){
+      const url = new URL(window.location.href);
+      url.hash = "";
+      url.search = "";
+      return url.toString();
+    }
+
+    forgotPasswordBtn.addEventListener("click", async () => {
+      forgotPasswordMessage.className = "error";
+      forgotPasswordMessage.textContent = "";
+      forgotPasswordBtn.disabled = true;
+      forgotPasswordBtn.textContent = "Envoi en cours…";
+      try{
+        const {error} = await supabaseClient.auth.resetPasswordForEmail(CLOUD_EMAIL, {
+          redirectTo: passwordRecoveryRedirectUrl()
+        });
+        if(error) throw error;
+        forgotPasswordMessage.className = "notice";
+        forgotPasswordMessage.textContent = `E-mail de réinitialisation envoyé à ${CLOUD_EMAIL}.`;
+      }catch(error){
+        console.error("Réinitialisation mot de passe", error);
+        forgotPasswordMessage.className = "error";
+        forgotPasswordMessage.textContent = "Impossible d’envoyer l’e-mail de réinitialisation.";
+      }finally{
+        forgotPasswordBtn.disabled = false;
+        forgotPasswordBtn.textContent = "Mot de passe oublié";
+      }
+    });
+
+    document.getElementById("saveRecoveryPasswordBtn").addEventListener("click", async () => {
+      const a = recoveryPassword.value;
+      const b = recoveryPasswordConfirm.value;
+      passwordRecoveryMessage.className = "error";
+      passwordRecoveryMessage.textContent = "";
+      if(a.length < 8){
+        passwordRecoveryMessage.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+        return;
+      }
+      if(a !== b){
+        passwordRecoveryMessage.textContent = "Les mots de passe ne correspondent pas.";
+        return;
+      }
+      try{
+        const {error} = await supabaseClient.auth.updateUser({password:a});
+        if(error) throw error;
+        passwordRecoveryMessage.className = "notice";
+        passwordRecoveryMessage.textContent = "Mot de passe modifié. Tu peux maintenant te connecter.";
+        recoveryPassword.value = "";
+        recoveryPasswordConfirm.value = "";
+        setTimeout(() => passwordRecoveryBox.classList.add("hidden"), 1600);
+      }catch(error){
+        console.error("Nouveau mot de passe", error);
+        passwordRecoveryMessage.textContent = "Le lien est invalide ou expiré. Demande un nouvel e-mail.";
+      }
+    });
+
+    supabaseClient.auth.onAuthStateChange((event) => {
+      if(event === "PASSWORD_RECOVERY"){
+        accountType.value = "admin";
+        passwordRecoveryBox.classList.remove("hidden");
+        forgotPasswordMessage.className = "notice";
+        forgotPasswordMessage.textContent = "Lien validé. Choisis ton nouveau mot de passe.";
+        setTimeout(() => recoveryPassword.focus(), 50);
+      }
+    });
 
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
