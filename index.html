@@ -2243,13 +2243,7 @@
     refreshUserNames();
 
     function passwordRecoveryOptions(){
-      if(window.location.protocol !== "http:" && window.location.protocol !== "https:"){
-        return {};
-      }
-      const url = new URL(window.location.href);
-      url.hash = "";
-      url.search = "";
-      return {redirectTo:url.toString()};
+      return {redirectTo:"https://tech42service.fr/"};
     }
 
     forgotPasswordBtn.addEventListener("click", async () => {
