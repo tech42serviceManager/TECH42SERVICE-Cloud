@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1559,6 +1558,20 @@
             </div>
           </div>
 
+            <form id="userNamesForm" class="settings-card">
+              <h3>Utilisateurs</h3>
+              <div class="field">
+                <label>Nom de l’administrateur</label>
+                <input id="adminUserName" type="text" maxlength="40" required>
+              </div>
+              <div class="field">
+                <label>Nom du compte visuel</label>
+                <input id="visualUserName" type="text" maxlength="40" required>
+              </div>
+              <button class="save-btn" type="submit">Enregistrer les utilisateurs</button>
+              <div id="userNamesMessage"></div>
+            </form>
+
             <form id="adminPasswordForm" class="settings-card">
               <h3>Mot de passe cloud unique</h3>
               <div class="field">
@@ -1573,7 +1586,7 @@
               <div id="adminPasswordMessage"></div>
             </form>
 
-            <form id="visualPasswordForm" class="settings-card hidden">
+            <form id="visualPasswordForm" class="settings-card">
               <h3>Compte visuel</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
@@ -1594,7 +1607,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V18.4 synchronisation complète</footer>
+      <footer>TECH42SERVICE Gestion — V19.3.4</footer>
     </main>
   </div>
 
@@ -1638,7 +1651,9 @@
       "tech42-sites-links",
       "tech42-devices",
       "tech42-theme",
-      "tech42-visual-password"
+      "tech42-visual-password",
+      "tech42-admin-username",
+      "tech42-visual-username"
     ];
 
     let cloudUser = null;
@@ -1869,6 +1884,26 @@
     function getVisualPassword(){
       return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
     }
+    function getAdminUserName(){
+      return localStorage.getItem("tech42-admin-username") || "Administrateur";
+    }
+    function getVisualUserName(){
+      return localStorage.getItem("tech42-visual-username") || "Compte visuel";
+    }
+    function refreshUserNames(){
+      const adminName = getAdminUserName();
+      const visualName = getVisualUserName();
+      const adminOption = accountType.querySelector('option[value="admin"]');
+      const visualOption = accountType.querySelector('option[value="visuel"]');
+      if(adminOption) adminOption.textContent = adminName;
+      if(visualOption) visualOption.textContent = visualName;
+      const adminInput = document.getElementById("adminUserName");
+      const visualInput = document.getElementById("visualUserName");
+      if(adminInput) adminInput.value = adminName;
+      if(visualInput) visualInput.value = visualName;
+      if(activeRole) currentUser.textContent = activeRole === "admin" ? adminName : visualName;
+    }
+    refreshUserNames();
 
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1884,7 +1919,7 @@
       try{
         await cloudLogin(enteredPassword);
       activeRole = role;
-      currentUser.textContent = role === "admin" ? "Administrateur" : "Compte visuel";
+      currentUser.textContent = role === "admin" ? getAdminUserName() : getVisualUserName();
       readonlyNote.classList.toggle("hidden", role !== "visuel");
       repairDemoNote.classList.toggle("hidden", role !== "visuel");
       stockDemoNote.classList.toggle("hidden", role !== "visuel");
@@ -1996,6 +2031,7 @@
       updateDashboardStats(); resetAppointmentForm(); }
 
       if(page === "settings"){
+        refreshUserNames();
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
         visualSettingsBlocked.classList.toggle("hidden", activeRole === "admin");
       }
@@ -2027,6 +2063,24 @@
     }
     activateDashboardPanel(document.getElementById("dashboardPlanningPanel"), "appointments");
     activateDashboardPanel(document.getElementById("dashboardPrioritiesPanel"), "repairs");
+
+    document.getElementById("userNamesForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const adminName = document.getElementById("adminUserName").value.trim();
+      const visualName = document.getElementById("visualUserName").value.trim();
+      const msg = document.getElementById("userNamesMessage");
+      if(!adminName || !visualName){
+        msg.className = "error";
+        msg.textContent = "Les deux noms d’utilisateur sont obligatoires.";
+        return;
+      }
+      localStorage.setItem("tech42-admin-username", adminName);
+      localStorage.setItem("tech42-visual-username", visualName);
+      refreshUserNames();
+      scheduleCloudSave();
+      msg.className = "notice";
+      msg.textContent = "Utilisateurs modifiés et synchronisés.";
+    });
 
     document.getElementById("adminPasswordForm").addEventListener("submit", async (event) => {
       event.preventDefault();
