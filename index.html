@@ -1646,6 +1646,22 @@
               <div id="adminPasswordMessage"></div>
             </form>
 
+            <div class="settings-card">
+              <h3>Sauvegardes locales de secours</h3>
+              <p style="color:var(--muted);font-size:14px;line-height:1.5">Une copie datée est conservée automatiquement sur cet appareil après chaque modification synchronisée.</p>
+              <div class="field">
+                <label for="localBackupSelect">Copies disponibles</label>
+                <select id="localBackupSelect">
+                  <option value="">Aucune sauvegarde locale</option>
+                </select>
+              </div>
+              <div class="page-actions" style="margin-bottom:0">
+                <button id="createLocalBackupBtn" class="save-btn" type="button">Créer une copie maintenant</button>
+                <button id="restoreLocalBackupBtn" class="action-btn secondary" type="button">Restaurer la copie choisie</button>
+              </div>
+              <div id="localBackupMessage"></div>
+            </div>
+
             <form id="visualPasswordForm" class="settings-card">
               <h3>Compte visuel</h3>
               <div class="field">
@@ -1756,6 +1772,108 @@
         if(value !== null) data[key] = value;
       });
       return data;
+    }
+
+    const LOCAL_BACKUP_DB = "TECH42SERVICE_LOCAL_BACKUPS";
+    const LOCAL_BACKUP_STORE = "snapshots";
+    const LOCAL_BACKUP_LIMIT = 20;
+    let lastLocalBackupJson = "";
+
+    function openLocalBackupDb(){
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(LOCAL_BACKUP_DB, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if(!db.objectStoreNames.contains(LOCAL_BACKUP_STORE)){
+            const store = db.createObjectStore(LOCAL_BACKUP_STORE, {keyPath:"id", autoIncrement:true});
+            store.createIndex("createdAt", "createdAt");
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Base de sauvegarde locale indisponible"));
+      });
+    }
+
+    async function listLocalBackups(){
+      const db = await openLocalBackupDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(LOCAL_BACKUP_STORE, "readonly");
+        const request = tx.objectStore(LOCAL_BACKUP_STORE).getAll();
+        request.onsuccess = () => resolve((request.result || []).sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt))));
+        request.onerror = () => reject(request.error);
+        tx.oncomplete = () => db.close();
+      });
+    }
+
+    async function pruneLocalBackups(){
+      const backups = await listLocalBackups();
+      if(backups.length <= LOCAL_BACKUP_LIMIT) return;
+      const db = await openLocalBackupDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(LOCAL_BACKUP_STORE, "readwrite");
+        const store = tx.objectStore(LOCAL_BACKUP_STORE);
+        backups.slice(LOCAL_BACKUP_LIMIT).forEach(item => store.delete(item.id));
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    }
+
+    async function createLocalBackup(reason="Automatique", force=false){
+      const data = collectCloudData();
+      const json = JSON.stringify(data);
+      if(!force && json === lastLocalBackupJson) return false;
+      const db = await openLocalBackupDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(LOCAL_BACKUP_STORE, "readwrite");
+        tx.objectStore(LOCAL_BACKUP_STORE).add({
+          createdAt:new Date().toISOString(),
+          reason,
+          data
+        });
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+      lastLocalBackupJson = json;
+      await pruneLocalBackups();
+      await refreshLocalBackupSelect();
+      return true;
+    }
+
+    async function refreshLocalBackupSelect(){
+      const select = document.getElementById("localBackupSelect");
+      if(!select) return;
+      try{
+        const backups = await listLocalBackups();
+        select.innerHTML = backups.length ? backups.map(item => {
+          const date = new Date(item.createdAt).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"});
+          return `<option value="${item.id}">${date} — ${escapeHtml(item.reason || "Sauvegarde")}</option>`;
+        }).join("") : '<option value="">Aucune sauvegarde locale</option>';
+      }catch(error){
+        console.error("Lecture sauvegardes locales", error);
+        select.innerHTML = '<option value="">Sauvegardes indisponibles</option>';
+      }
+    }
+
+    async function restoreLocalBackup(id){
+      const backupId = Number(id);
+      if(!backupId) throw new Error("Aucune sauvegarde sélectionnée");
+      const db = await openLocalBackupDb();
+      const backup = await new Promise((resolve, reject) => {
+        const tx = db.transaction(LOCAL_BACKUP_STORE, "readonly");
+        const request = tx.objectStore(LOCAL_BACKUP_STORE).get(backupId);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+        tx.oncomplete = () => db.close();
+      });
+      if(!backup || !backup.data) throw new Error("Sauvegarde introuvable");
+      await createLocalBackup("Avant restauration", true);
+      applyCloudData(backup.data);
+      cloudDirty = true;
+      refreshAllCloudModules();
+      await cloudSaveNow(true);
+      return backup;
     }
 
     function applyCloudData(data){
@@ -1875,6 +1993,7 @@
         cloudDirty = false;
         const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
         setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
+        try{ await createLocalBackup("Après synchronisation"); }catch(backupError){ console.error("Sauvegarde locale", backupError); }
         return true;
       }catch(error){
         console.error("Erreur sauvegarde cloud", error);
@@ -2245,6 +2364,7 @@
 
       if(page === "settings"){
         refreshUserNames();
+        refreshLocalBackupSelect();
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
         visualSettingsBlocked.classList.toggle("hidden", activeRole === "admin");
       }
@@ -2349,6 +2469,40 @@
       msg.className = "notice";
       msg.textContent = "Mot de passe du compte visuel chiffré et modifié.";
       event.target.reset();
+    });
+
+    document.getElementById("createLocalBackupBtn").addEventListener("click", async () => {
+      const msg = document.getElementById("localBackupMessage");
+      try{
+        await createLocalBackup("Copie manuelle", true);
+        msg.className = "notice";
+        msg.textContent = "Sauvegarde locale datée créée sur cet appareil.";
+      }catch(error){
+        console.error(error);
+        msg.className = "error";
+        msg.textContent = "Impossible de créer la sauvegarde locale.";
+      }
+    });
+
+    document.getElementById("restoreLocalBackupBtn").addEventListener("click", async () => {
+      const select = document.getElementById("localBackupSelect");
+      const msg = document.getElementById("localBackupMessage");
+      if(!select.value){
+        msg.className = "error";
+        msg.textContent = "Choisis une sauvegarde à restaurer.";
+        return;
+      }
+      const label = select.options[select.selectedIndex]?.textContent || "la copie choisie";
+      if(!confirm(`Restaurer ${label} ? Une copie de l’état actuel sera créée avant la restauration.`)) return;
+      try{
+        await restoreLocalBackup(select.value);
+        msg.className = "notice";
+        msg.textContent = "Sauvegarde restaurée et synchronisée.";
+      }catch(error){
+        console.error(error);
+        msg.className = "error";
+        msg.textContent = "La restauration a échoué.";
+      }
     });
 
     const demoRepairs = [
@@ -4934,7 +5088,24 @@
       renderClients();
       updateDashboardStats();
     }
-    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
+    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}
+
+    /* V19.4 — Tableaux lisibles sur mobile, sans changement sur ordinateur */
+    @media(max-width:700px){
+      .table-wrap{overflow:visible}
+      .table-wrap table{width:100%;min-width:0!important;border-collapse:separate;border-spacing:0}
+      .table-wrap thead{display:none}
+      .table-wrap tbody,.table-wrap tr,.table-wrap td{display:block;width:100%}
+      .table-wrap tbody{display:grid;gap:12px}
+      .table-wrap tr{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:8px 12px;box-shadow:0 5px 16px #0004}
+      .table-wrap td{display:grid;grid-template-columns:minmax(105px,38%) 1fr;gap:10px;align-items:start;padding:9px 0!important;border-bottom:1px solid #2a2a2a!important;white-space:normal!important;overflow-wrap:anywhere}
+      .table-wrap td:last-child{border-bottom:0!important}
+      .table-wrap td::before{content:attr(data-label);color:var(--accent);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+      .table-wrap td[colspan]{display:block;text-align:center}
+      .table-wrap td[colspan]::before{display:none}
+      .table-wrap .table-actions{justify-content:flex-start}
+    }
+</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
 
     function clientMatches(item,client){return item.clientId===client.id||String(item.client||"").toLowerCase()===client.name.toLowerCase()}
     function openClientPro(id){
@@ -5004,5 +5175,27 @@
   <datalist id="deviceBrandsList"></datalist>
   <datalist id="deviceModelsList"></datalist>
   <datalist id="stockPartsList"></datalist>
+
+<script>
+  (function enableMobileTableCards(){
+    function labelTableCells(root=document){
+      root.querySelectorAll(".table-wrap table").forEach(table => {
+        const labels = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
+        table.querySelectorAll("tbody tr").forEach(row => {
+          Array.from(row.children).forEach((cell, index) => {
+            if(cell.tagName === "TD" && !cell.hasAttribute("colspan")){
+              cell.dataset.label = labels[index] || "Information";
+            }
+          });
+        });
+      });
+    }
+    labelTableCells();
+    const observer = new MutationObserver(mutations => {
+      if(mutations.some(m => m.type === "childList")) labelTableCells();
+    });
+    observer.observe(document.body, {subtree:true, childList:true});
+  })();
+</script>
 </body>
 </html>
