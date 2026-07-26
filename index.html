@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -297,6 +298,9 @@
     }
 
     
+    .module-home-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);font-weight:700;cursor:pointer;white-space:nowrap}
+    .module-home-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .module-home-btn::before{content:"←";font-size:18px;line-height:1}
     .cloud-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
     .cloud-sync-badge{display:inline-block;padding:8px 11px;border-radius:999px;border:1px solid var(--border);background:#171717;color:var(--muted);font-size:13px;font-weight:700}
     .cloud-sync-badge.syncing{color:#ffd66b;border-color:#755a13;background:#2c2108}
@@ -1997,6 +2001,22 @@
       }
     }
 
+    function installModuleHomeButtons(){
+      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, paymentsPage, buySellPage, devicesPage, repairHelpPage, sitesPage, settingsPage];
+      pages.forEach(page => {
+        if(!page) return;
+        const topbar = page.querySelector(":scope > .topbar");
+        if(!topbar || topbar.querySelector(".module-home-btn")) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "module-home-btn";
+        button.textContent = "Retour à l’accueil";
+        button.addEventListener("click", () => showPage("dashboard"));
+        topbar.appendChild(button);
+      });
+    }
+    installModuleHomeButtons();
+
     function activateDashboardPanel(element, page){
       if(!element) return;
       const open=()=>showPage(page);
@@ -3461,9 +3481,11 @@
       const totalStock = stock.reduce((sum,item)=>sum+Number(item.quantity||0),0);
       const lowStock = stock.filter(item=>["low","out"].includes(stockState(item).key)).length;
 
-      const revenue = documents
-        .filter(item => item.type === "facture" && item.status === "Payé")
-        .reduce((sum,item)=>sum+calculateDocumentTotals(item.lines||[],item.deposit||0).total,0);
+      // Le chiffre d'affaires correspond aux encaissements réellement validés.
+      // Il se met donc à jour immédiatement après ajout, modification ou suppression d'un paiement.
+      const revenue = getAdminPayments()
+        .filter(item => item.status === "Validé")
+        .reduce((sum,item)=>sum+Number(item.amount||0),0);
 
       const monthlyPurchases = buySell
         .filter(item=>item.type==="Rachat" && String(item.date||"").startsWith(month))
