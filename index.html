@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1608,7 +1607,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V19.3.5 Factures et encaissements liés</footer>
+      <footer>TECH42SERVICE Gestion — V19.3.6 Synchronisation PC et mobile</footer>
     </main>
   </div>
 
@@ -1660,8 +1659,13 @@
     let cloudUser = null;
     let cloudChannel = null;
     let cloudSaveTimer = null;
+    let cloudPollTimer = null;
     let cloudApplying = false;
+    let cloudSaving = false;
+    let cloudLoading = false;
+    let cloudAutoSaveStarted = false;
     let lastCloudJson = "";
+    let lastCloudUpdatedAt = "";
 
     function setCloudStatus(message, ok=false){
       const el = document.getElementById("cloudStatus");
@@ -1700,6 +1704,8 @@
         CLOUD_STORAGE_KEYS.forEach(key => {
           if(Object.prototype.hasOwnProperty.call(data, key)){
             localStorage.setItem(key, String(data[key]));
+          }else{
+            localStorage.removeItem(key);
           }
         });
       }finally{
@@ -1708,10 +1714,45 @@
       lastCloudJson = JSON.stringify(collectCloudData());
     }
 
+    async function cloudFetchLatest(refresh=true){
+      if(!cloudUser || cloudLoading || !navigator.onLine) return false;
+      cloudLoading = true;
+      try{
+        const {data, error} = await supabaseClient
+          .from("app_state")
+          .select("data,updated_at")
+          .eq("user_id", cloudUser.id)
+          .maybeSingle();
+
+        if(error) throw error;
+        if(!data || !data.data) return false;
+
+        const incomingJson = JSON.stringify(data.data);
+        const incomingDate = data.updated_at || "";
+        const isNewer = !lastCloudUpdatedAt || (incomingDate && incomingDate > lastCloudUpdatedAt);
+
+        if(incomingJson !== lastCloudJson && isNewer){
+          applyCloudData(data.data);
+          lastCloudUpdatedAt = incomingDate;
+          if(refresh) refreshAllCloudModules();
+          setCloudStatus("Données synchronisées", true);
+          return true;
+        }
+        if(incomingDate) lastCloudUpdatedAt = incomingDate;
+        return false;
+      }catch(error){
+        console.error("Erreur lecture cloud", error);
+        setCloudStatus("Synchronisation indisponible", false);
+        return false;
+      }finally{
+        cloudLoading = false;
+      }
+    }
+
     async function cloudLoadOrCreate(){
       const {data, error} = await supabaseClient
         .from("app_state")
-        .select("data")
+        .select("data,updated_at")
         .eq("user_id", cloudUser.id)
         .maybeSingle();
 
@@ -1719,70 +1760,108 @@
 
       if(data && data.data && Object.keys(data.data).length){
         applyCloudData(data.data);
+        lastCloudUpdatedAt = data.updated_at || "";
       }else{
         await cloudSaveNow(true);
       }
     }
 
     async function cloudSaveNow(force=false){
-      if(!cloudUser || cloudApplying) return;
+      if(!cloudUser || cloudApplying || cloudSaving) return;
       if(!navigator.onLine){
         setCloudStatus("Hors connexion — sauvegarde en attente", false);
         return;
       }
-      setCloudSyncing("Sauvegarde cloud…");
+
       const state = collectCloudData();
       const json = JSON.stringify(state);
       if(!force && json === lastCloudJson) return;
 
-      const {error} = await supabaseClient
-        .from("app_state")
-        .upsert({
-          user_id: cloudUser.id,
-          data: state,
-          updated_at: new Date().toISOString()
-        }, {onConflict: "user_id"});
+      cloudSaving = true;
+      setCloudSyncing("Sauvegarde…");
+      try{
+        const updatedAt = new Date().toISOString();
+        const {data, error} = await supabaseClient
+          .from("app_state")
+          .upsert({
+            user_id: cloudUser.id,
+            data: state,
+            updated_at: updatedAt
+          }, {onConflict: "user_id"})
+          .select("updated_at")
+          .single();
 
-      if(error){
+        if(error) throw error;
+
+        lastCloudJson = json;
+        lastCloudUpdatedAt = data?.updated_at || updatedAt;
+        setCloudStatus("Sauvegardé sur tous les appareils", true);
+      }catch(error){
         console.error("Erreur sauvegarde cloud", error);
-        setCloudStatus("Erreur de sauvegarde cloud", false);
-        return;
+        setCloudStatus("Erreur de sauvegarde", false);
+      }finally{
+        cloudSaving = false;
       }
-
-      lastCloudJson = json;
-      setCloudStatus("Cloud synchronisé", true);
     }
 
     function scheduleCloudSave(){
       if(!cloudUser || cloudApplying) return;
       clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 250);
+      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 300);
     }
 
+    // Toute modification d'une donnée de l'application déclenche une sauvegarde.
+    const originalLocalStorageSetItem = localStorage.setItem.bind(localStorage);
+    const originalLocalStorageRemoveItem = localStorage.removeItem.bind(localStorage);
+    localStorage.setItem = function(key, value){
+      originalLocalStorageSetItem(key, value);
+      if(CLOUD_STORAGE_KEYS.includes(String(key)) && !cloudApplying){
+        scheduleCloudSave();
+      }
+    };
+    localStorage.removeItem = function(key){
+      originalLocalStorageRemoveItem(key);
+      if(CLOUD_STORAGE_KEYS.includes(String(key)) && !cloudApplying){
+        scheduleCloudSave();
+      }
+    };
+
     function startCloudAutoSave(){
-      setInterval(() => cloudSaveNow(false), 4000);
-      window.addEventListener("visibilitychange", () => {
-        if(document.visibilityState === "hidden") cloudSaveNow(false);
+      if(cloudAutoSaveStarted) return;
+      cloudAutoSaveStarted = true;
+
+      setInterval(() => cloudSaveNow(false), 5000);
+      cloudPollTimer = setInterval(() => cloudFetchLatest(true), 8000);
+
+      window.addEventListener("focus", () => cloudFetchLatest(true));
+      document.addEventListener("visibilitychange", async () => {
+        if(document.visibilityState === "hidden"){
+          await cloudSaveNow(false);
+        }else{
+          await cloudFetchLatest(true);
+        }
       });
+      window.addEventListener("pagehide", () => cloudSaveNow(false));
       window.addEventListener("beforeunload", () => cloudSaveNow(false));
-      window.addEventListener("offline", () => setCloudStatus("Hors connexion — données conservées localement", false));
+      window.addEventListener("offline", () => setCloudStatus("Hors connexion — données conservées", false));
       window.addEventListener("online", async () => {
         setCloudSyncing("Connexion retrouvée…");
         await cloudSaveNow(true);
+        await cloudFetchLatest(true);
       });
     }
 
     async function manualCloudSync(){
       if(!cloudUser){
-        setCloudStatus("Connecte-toi au cloud", false);
+        setCloudStatus("Connecte-toi pour synchroniser", false);
         return;
       }
       try{
         setCloudSyncing("Synchronisation manuelle…");
         await cloudSaveNow(true);
-        await cloudLoadOrCreate();
+        await cloudFetchLatest(true);
         refreshAllCloudModules();
-        setCloudStatus("Synchronisation terminée", true);
+        setCloudStatus("PC et mobile synchronisés", true);
       }catch(error){
         console.error(error);
         setCloudStatus("Synchronisation impossible", false);
@@ -1794,7 +1873,7 @@
       cloudChannel = supabaseClient
         .channel("tech42-app-state-" + cloudUser.id)
         .on("postgres_changes", {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "app_state",
           filter: `user_id=eq.${cloudUser.id}`
@@ -1802,10 +1881,13 @@
           const incoming = payload.new && payload.new.data;
           if(!incoming) return;
           const incomingJson = JSON.stringify(incoming);
+          const incomingDate = payload.new.updated_at || "";
           if(incomingJson === lastCloudJson) return;
+          if(lastCloudUpdatedAt && incomingDate && incomingDate <= lastCloudUpdatedAt) return;
           applyCloudData(incoming);
+          lastCloudUpdatedAt = incomingDate;
           refreshAllCloudModules();
-          setCloudStatus("Données mises à jour", true);
+          setCloudStatus("Mise à jour reçue d’un autre appareil", true);
         })
         .subscribe();
     }
@@ -1836,8 +1918,10 @@
       if(error) throw error;
       cloudUser = data.user;
       await cloudLoadOrCreate();
+      refreshAllCloudModules();
       subscribeCloud();
       startCloudAutoSave();
+      setCloudStatus("PC et mobile synchronisés", true);
       return data.user;
     }
 
