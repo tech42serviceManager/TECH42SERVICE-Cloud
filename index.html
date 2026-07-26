@@ -307,6 +307,18 @@
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
       .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form,.codes-grid{grid-template-columns:1fr}
     }
+
+    /* V19.2 — Historique client PRO + Encaissements */
+    .client-pro-stats,.payment-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+    .client-pro-card,.payment-stat{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .client-pro-card small,.payment-stat small{display:block;color:var(--muted);margin-bottom:7px}.client-pro-card strong,.payment-stat strong{font-size:22px;color:var(--accent)}
+    .client-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.client-tab{padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);cursor:pointer}.client-tab.active{background:var(--accent);color:#080808;font-weight:800}
+    .client-history-list{display:grid;gap:10px}.client-history-row{display:grid;grid-template-columns:120px 1fr auto;gap:12px;align-items:center;background:#101010;border:1px solid #2b2b2b;border-radius:10px;padding:12px}.client-history-row small{color:var(--muted)}
+    .payment-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.payment-form .full{grid-column:1/-1}.payment-form input,.payment-form select,.payment-form textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}.payment-form textarea{min-height:80px;resize:vertical}
+    .payment-table{width:100%;border-collapse:collapse}.payment-table th,.payment-table td{padding:12px;border-bottom:1px solid #2a2a2a;text-align:left;white-space:nowrap}.payment-table th{color:var(--accent)}
+    .payment-paid{color:#74ef8b}.payment-partial{color:#ffd66b}.payment-cancelled{color:#ff8585}
+    @media(max-width:700px){.client-pro-stats,.payment-summary,.payment-form{grid-template-columns:1fr 1fr}.client-history-row{grid-template-columns:1fr}.payment-table{min-width:760px}}
+    @media(max-width:520px){.client-pro-stats,.payment-summary,.payment-form{grid-template-columns:1fr}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -353,6 +365,7 @@
         <button data-page="stock">Stock</button>
         <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
+        <button data-page="payments">Encaissements</button>
         <button data-page="buySell">Rachat / Vente</button>
         <button data-page="devices">Appareils</button>
         <button data-page="repairHelp">Aide réparations</button>
@@ -1087,6 +1100,46 @@
       </section>
 
 
+
+      <section id="paymentsPage" class="hidden">
+        <header class="topbar"><div><h1>Encaissements</h1><p>Paiements, acomptes et reçus clients</p></div></header>
+        <div id="paymentsDemoNote" class="demo-banner hidden">MODE PRÉSENTATION — Données fictives — Aucune modification autorisée</div>
+        <div class="payment-summary">
+          <div class="payment-stat"><small>Encaissé aujourd'hui</small><strong id="paymentToday">0,00 €</strong></div>
+          <div class="payment-stat"><small>Encaissé ce mois</small><strong id="paymentMonth">0,00 €</strong></div>
+          <div class="payment-stat"><small>Total enregistré</small><strong id="paymentTotal">0,00 €</strong></div>
+          <div class="payment-stat"><small>Nombre de paiements</small><strong id="paymentCount">0</strong></div>
+        </div>
+        <section class="panel">
+          <div class="page-actions"><button id="newPaymentBtn" class="action-btn write-action">Nouvel encaissement</button><button id="cancelPaymentBtn" class="action-btn secondary hidden">Fermer le formulaire</button></div>
+          <form id="paymentForm" class="payment-form hidden">
+            <input id="paymentEditId" type="hidden">
+            <div class="field"><label>Client</label><input id="paymentClient" list="clientNamesList" required></div>
+            <div class="field"><label>Facture liée</label><select id="paymentDocument"><option value="">Sans facture liée</option></select></div>
+            <div class="field"><label>Date</label><input id="paymentDate" type="date" required></div>
+            <div class="field"><label>Montant encaissé (€)</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required></div>
+            <div class="field"><label>Mode de paiement</label><select id="paymentMethod"><option>Carte bancaire</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Autre</option></select></div>
+            <div class="field"><label>Référence</label><input id="paymentReference" placeholder="N° transaction, chèque..."></div>
+            <div class="field"><label>Statut</label><select id="paymentStatus"><option>Validé</option><option>Annulé</option><option>Remboursé</option></select></div>
+            <div class="field full"><label>Notes</label><textarea id="paymentNotes"></textarea></div>
+            <div class="full"><button class="save-btn" type="submit">Enregistrer l'encaissement</button></div>
+          </form>
+          <div class="appt-toolbar"><input id="paymentSearch" type="search" placeholder="Rechercher client, facture, référence..."><select id="paymentMethodFilter"><option value="">Tous les modes</option><option>Carte bancaire</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Autre</option></select></div>
+          <div class="table-wrap"><table class="payment-table"><thead><tr><th>Date</th><th>Client</th><th>Facture</th><th>Mode</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="paymentsTableBody"></tbody></table></div>
+          <div id="paymentsEmpty" class="empty-state">Aucun encaissement enregistré.</div>
+        </section>
+      </section>
+
+
+      <div id="clientProModal" class="modal-backdrop hidden">
+        <div class="modal-card" style="width:min(1050px,100%)">
+          <div class="modal-head"><h2 id="clientProTitle">Dossier client</h2><button id="closeClientProModal" class="close-btn">Fermer</button></div>
+          <div id="clientProStats" class="client-pro-stats"></div>
+          <div id="clientProTabs" class="client-tabs"></div>
+          <div id="clientProContent"></div>
+        </div>
+      </div>
+
       <section id="buySellPage" class="hidden">
         <header class="topbar">
           <div>
@@ -1505,6 +1558,7 @@
       "tech42-document-templates",
       "tech42-appointments",
       "tech42-clients",
+      "tech42-payments",
       "tech42-buy-sell",
       "tech42-repair-help-links",
       "tech42-sites-links",
@@ -1714,6 +1768,7 @@
     const documentsPage = document.getElementById("documentsPage");
     const appointmentsPage = document.getElementById("appointmentsPage");
     const clientsPage = document.getElementById("clientsPage");
+    const paymentsPage = document.getElementById("paymentsPage");
     const buySellPage = document.getElementById("buySellPage");
     const devicesPage = document.getElementById("devicesPage");
     const repairHelpPage = document.getElementById("repairHelpPage");
@@ -1723,6 +1778,7 @@
     const documentsDemoNote = document.getElementById("documentsDemoNote");
     const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
     const clientsDemoNote = document.getElementById("clientsDemoNote");
+    const paymentsDemoNote = document.getElementById("paymentsDemoNote");
     const buySellDemoNote = document.getElementById("buySellDemoNote");
     const devicesDemoNote = document.getElementById("devicesDemoNote");
     const repairHelpDemoNote = document.getElementById("repairHelpDemoNote");
@@ -1761,6 +1817,7 @@
       documentsDemoNote.classList.toggle("hidden", role !== "visuel");
       appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
+      paymentsDemoNote.classList.toggle("hidden", role !== "visuel");
       buySellDemoNote.classList.toggle("hidden", role !== "visuel");
       devicesDemoNote.classList.toggle("hidden", role !== "visuel");
       repairHelpDemoNote.classList.toggle("hidden", role !== "visuel");
@@ -1850,6 +1907,7 @@
       documentsPage.classList.toggle("hidden", page !== "documents");
       appointmentsPage.classList.toggle("hidden", page !== "appointments");
       clientsPage.classList.toggle("hidden", page !== "clients");
+      paymentsPage.classList.toggle("hidden", page !== "payments");
       buySellPage.classList.toggle("hidden", page !== "buySell");
       devicesPage.classList.toggle("hidden", page !== "devices");
       repairHelpPage.classList.toggle("hidden", page !== "repairHelp");
@@ -1859,6 +1917,7 @@
       if(page === "repairs") renderRepairs();
       if(page === "stock") renderStock();
       if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
+      if(page === "payments") renderPayments();
       if(page === "appointments"){ renderAppointments();
       updateDashboardStats(); resetAppointmentForm(); }
 
@@ -2891,6 +2950,7 @@
           <td>${escapeHtml(item.status)}</td>
           <td><div class="table-actions">
             <button class="mini-btn" data-doc-print="${escapeHtml(item.id)}">Voir / Imprimer</button>
+            ${item.type==="facture"&&activeRole==="admin"?`<button class="mini-btn" data-doc-pay="${escapeHtml(item.id)}">Encaisser</button>`:""}
             ${actions}
           </div></td>
         `;
@@ -2899,6 +2959,7 @@
 
       empty.classList.toggle("hidden",list.length>0);
       tbody.querySelectorAll("[data-doc-print]").forEach(btn=>btn.addEventListener("click",()=>printDocumentById(btn.dataset.docPrint)));
+      tbody.querySelectorAll("[data-doc-pay]").forEach(btn=>btn.addEventListener("click",()=>{const d=currentDocuments().find(x=>x.id===btn.dataset.docPay);if(!d)return;showPage("payments");resetPaymentForm();document.getElementById("paymentClient").value=d.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=d.id;const t=calculateDocumentTotals(d.lines||[],d.deposit||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2);showPaymentForm();}));
       tbody.querySelectorAll("[data-doc-edit]").forEach(btn=>btn.addEventListener("click",()=>editDocument(btn.dataset.docEdit)));
       tbody.querySelectorAll("[data-doc-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteDocument(btn.dataset.docDelete)));
     }
@@ -3444,10 +3505,10 @@
         const repairs = currentRepairList().filter(r=>r.clientId===client.id || r.client===client.name).length;
         const appointments = currentAppointments().filter(a=>a.clientId===client.id || a.client===client.name).length;
         const documents = currentDocuments().filter(d=>d.clientId===client.id || d.client===client.name).length;
-        const actions = activeRole==="admin"
+        const actions = `<button class="mini-btn" data-client-view="${escapeHtml(client.id)}">Dossier complet</button>` + (activeRole==="admin"
           ? `<button class="mini-btn" data-client-edit="${escapeHtml(client.id)}">Modifier</button>
              <button class="mini-btn danger" data-client-delete="${escapeHtml(client.id)}">Supprimer</button>`
-          : "";
+          : "");
 
         const card = document.createElement("article");
         card.className = "client-card";
@@ -3472,6 +3533,7 @@
       });
 
       empty.classList.toggle("hidden",list.length>0);
+      box.querySelectorAll("[data-client-view]").forEach(btn=>btn.addEventListener("click",()=>openClientPro(btn.dataset.clientView)));
       box.querySelectorAll("[data-client-edit]").forEach(btn=>btn.addEventListener("click",()=>editClient(btn.dataset.clientEdit)));
       box.querySelectorAll("[data-client-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteClient(btn.dataset.clientDelete)));
       refreshClientDatalist();
@@ -4180,6 +4242,62 @@
     }
     updateClock();
     setInterval(updateClock,1000);
+
+
+    // ===== V19.2 : Encaissements et historique client PRO =====
+    function getAdminPayments(){try{return JSON.parse(localStorage.getItem("tech42-payments")||"[]")}catch{return []}}
+    function saveAdminPayments(list){localStorage.setItem("tech42-payments",JSON.stringify(list));scheduleCloudSave();}
+    function currentPayments(){return activeRole==="visuel"?[]:getAdminPayments()}
+    function nextPaymentId(){return `PAY-${Date.now()}`}
+    function validPayments(){return currentPayments().filter(p=>p.status==="Validé")}
+    function paymentSumForDocument(id){return validPayments().filter(p=>p.documentId===id).reduce((s,p)=>s+Number(p.amount||0),0)}
+    function paymentClientIdByName(name){const c=currentClients().find(x=>x.name.toLowerCase()===String(name||"").toLowerCase());return c?.id||""}
+
+    function refreshPaymentDocuments(){
+      const select=document.getElementById("paymentDocument"); if(!select)return;
+      const client=document.getElementById("paymentClient").value.trim().toLowerCase();
+      const current=select.value;
+      const invoices=currentDocuments().filter(d=>d.type==="facture" && (!client || String(d.client).toLowerCase()===client));
+      select.innerHTML='<option value="">Sans facture liée</option>'+invoices.map(d=>{const t=calculateDocumentTotals(d.lines||[],d.deposit||0);const paid=paymentSumForDocument(d.id);return `<option value="${escapeHtml(d.id)}">${escapeHtml(d.number)} — ${escapeHtml(d.client)} — reste ${formatMoney(Math.max(0,t.total-paid))}</option>`}).join('');
+      if([...select.options].some(o=>o.value===current))select.value=current;
+    }
+
+    function resetPaymentForm(){
+      document.getElementById("paymentForm").reset();document.getElementById("paymentEditId").value="";document.getElementById("paymentDate").value=new Date().toISOString().slice(0,10);refreshPaymentDocuments();
+    }
+    function showPaymentForm(){if(activeRole!=="admin"){alert("Action impossible en mode présentation.");return}document.getElementById("paymentForm").classList.remove("hidden");document.getElementById("cancelPaymentBtn").classList.remove("hidden");refreshPaymentDocuments()}
+    function hidePaymentForm(){document.getElementById("paymentForm").classList.add("hidden");document.getElementById("cancelPaymentBtn").classList.add("hidden");resetPaymentForm()}
+
+    function renderPayments(){
+      const q=document.getElementById("paymentSearch").value.trim().toLowerCase();const method=document.getElementById("paymentMethodFilter").value;
+      const list=currentPayments().filter(p=>(!q||[p.client,p.documentNumber,p.reference,p.notes].join(" ").toLowerCase().includes(q))&&(!method||p.method===method));
+      const body=document.getElementById("paymentsTableBody");body.innerHTML=list.map(p=>`<tr><td>${formatDate(p.date)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.documentNumber||"—")}</td><td>${escapeHtml(p.method)}</td><td>${formatMoney(p.amount)}</td><td class="${p.status==='Validé'?'payment-paid':'payment-cancelled'}">${escapeHtml(p.status)}</td><td><div class="table-actions"><button class="mini-btn" data-pay-print="${p.id}">Reçu</button>${activeRole==='admin'?`<button class="mini-btn" data-pay-edit="${p.id}">Modifier</button><button class="mini-btn danger" data-pay-delete="${p.id}">Supprimer</button>`:''}</div></td></tr>`).join('');
+      document.getElementById("paymentsEmpty").classList.toggle("hidden",list.length>0);
+      const now=new Date(),today=now.toISOString().slice(0,10),month=today.slice(0,7),valid=validPayments();
+      document.getElementById("paymentToday").textContent=formatMoney(valid.filter(p=>p.date===today).reduce((s,p)=>s+Number(p.amount||0),0));
+      document.getElementById("paymentMonth").textContent=formatMoney(valid.filter(p=>String(p.date).startsWith(month)).reduce((s,p)=>s+Number(p.amount||0),0));
+      document.getElementById("paymentTotal").textContent=formatMoney(valid.reduce((s,p)=>s+Number(p.amount||0),0));document.getElementById("paymentCount").textContent=valid.length;
+      body.querySelectorAll('[data-pay-print]').forEach(b=>b.onclick=()=>printPaymentReceipt(b.dataset.payPrint));body.querySelectorAll('[data-pay-edit]').forEach(b=>b.onclick=()=>editPayment(b.dataset.payEdit));body.querySelectorAll('[data-pay-delete]').forEach(b=>b.onclick=()=>deletePayment(b.dataset.payDelete));
+    }
+
+    document.getElementById("newPaymentBtn").addEventListener("click",()=>{resetPaymentForm();showPaymentForm()});document.getElementById("cancelPaymentBtn").addEventListener("click",hidePaymentForm);document.getElementById("paymentSearch").addEventListener("input",renderPayments);document.getElementById("paymentMethodFilter").addEventListener("change",renderPayments);document.getElementById("paymentClient").addEventListener("input",refreshPaymentDocuments);
+    document.getElementById("paymentDocument").addEventListener("change",()=>{const d=currentDocuments().find(x=>x.id===document.getElementById("paymentDocument").value);if(d){document.getElementById("paymentClient").value=d.client;const t=calculateDocumentTotals(d.lines||[],d.deposit||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2)}});
+    document.getElementById("paymentForm").addEventListener("submit",e=>{e.preventDefault();if(activeRole!=="admin")return;const list=getAdminPayments(),id=document.getElementById("paymentEditId").value,doc=currentDocuments().find(d=>d.id===document.getElementById("paymentDocument").value);const client=document.getElementById("paymentClient").value.trim();const item={id:id||nextPaymentId(),clientId:paymentClientIdByName(client)||upsertClientFromFields(client,"",""),client,documentId:doc?.id||"",documentNumber:doc?.number||"",date:document.getElementById("paymentDate").value,amount:Number(document.getElementById("paymentAmount").value||0),method:document.getElementById("paymentMethod").value,reference:document.getElementById("paymentReference").value.trim(),status:document.getElementById("paymentStatus").value,notes:document.getElementById("paymentNotes").value.trim()};const i=list.findIndex(x=>x.id===id);if(i>=0)list[i]=item;else list.unshift(item);saveAdminPayments(list);hidePaymentForm();renderPayments();renderClients();updateDashboardStats()});
+    function editPayment(id){const p=getAdminPayments().find(x=>x.id===id);if(!p)return;showPaymentForm();document.getElementById("paymentEditId").value=p.id;document.getElementById("paymentClient").value=p.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=p.documentId||"";document.getElementById("paymentDate").value=p.date;document.getElementById("paymentAmount").value=p.amount;document.getElementById("paymentMethod").value=p.method;document.getElementById("paymentReference").value=p.reference||"";document.getElementById("paymentStatus").value=p.status;document.getElementById("paymentNotes").value=p.notes||""}
+    function deletePayment(id){if(!confirm("Supprimer définitivement cet encaissement ?"))return;saveAdminPayments(getAdminPayments().filter(p=>p.id!==id));renderPayments();renderClients();updateDashboardStats()}
+    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
+
+    function clientMatches(item,client){return item.clientId===client.id||String(item.client||"").toLowerCase()===client.name.toLowerCase()}
+    function openClientPro(id){
+      const c=currentClients().find(x=>x.id===id);if(!c)return;const repairs=currentRepairList().filter(x=>clientMatches(x,c));const docs=currentDocuments().filter(x=>clientMatches(x,c));const appts=currentAppointments().filter(x=>clientMatches(x,c));const pays=currentPayments().filter(x=>x.clientId===c.id||String(x.client||"").toLowerCase()===c.name.toLowerCase());const valid=pays.filter(x=>x.status==="Validé");const spent=valid.reduce((s,p)=>s+Number(p.amount||0),0);const dates=[...repairs.map(x=>x.depositDate),...docs.map(x=>x.date),...appts.map(x=>x.date),...pays.map(x=>x.date)].filter(Boolean).sort().reverse();
+      document.getElementById("clientProTitle").textContent=`Dossier client — ${c.name}`;document.getElementById("clientProStats").innerHTML=`<div class="client-pro-card"><small>Total encaissé</small><strong>${formatMoney(spent)}</strong></div><div class="client-pro-card"><small>Réparations</small><strong>${repairs.length}</strong></div><div class="client-pro-card"><small>Documents</small><strong>${docs.length}</strong></div><div class="client-pro-card"><small>Dernière activité</small><strong style="font-size:16px">${dates[0]?formatDate(dates[0]):'—'}</strong></div>`;
+      const tabs=[['infos','Informations'],['repairs','Réparations'],['docs','Devis / Factures'],['payments','Encaissements'],['appointments','Rendez-vous']];document.getElementById("clientProTabs").innerHTML=tabs.map((t,i)=>`<button class="client-tab ${i===0?'active':''}" data-client-tab="${t[0]}">${t[1]}</button>`).join('');
+      const renderTab=tab=>{let h='';if(tab==='infos')h=`<div class="repair-details"><div class="detail-box"><small>Téléphone</small>${escapeHtml(c.phone||'—')}</div><div class="detail-box"><small>E-mail</small>${escapeHtml(c.email||'—')}</div><div class="detail-box full"><small>Adresse</small>${escapeHtml(c.address||'—')}</div><div class="detail-box full"><small>Notes</small>${escapeHtml(c.notes||'—')}</div></div>`;if(tab==='repairs')h=historyRows(repairs.map(r=>({date:r.depositDate,title:`${r.id} — ${r.brand||''} ${r.model||''}`,detail:`${r.issue||''} · ${r.status||''}`,amount:r.price})));if(tab==='docs')h=historyRows(docs.map(d=>{const t=calculateDocumentTotals(d.lines||[],d.deposit||0);return{date:d.date,title:`${d.number} — ${d.type}`,detail:`${d.subject||''} · ${d.status||''}`,amount:d.type==='non-reparabilite'?null:t.total}}));if(tab==='payments')h=historyRows(pays.map(p=>({date:p.date,title:`${p.method} — ${p.status}`,detail:p.documentNumber||p.reference||'Paiement libre',amount:p.amount})));if(tab==='appointments')h=historyRows(appts.map(a=>({date:a.date,title:`${a.time||''} — ${a.device||'Rendez-vous'}`,detail:`${a.reason||''} · ${a.status||''}`})));document.getElementById("clientProContent").innerHTML=h};
+      document.querySelectorAll('[data-client-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-client-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTab(b.dataset.clientTab)});renderTab('infos');document.getElementById("clientProModal").classList.remove("hidden")
+    }
+    function historyRows(rows){if(!rows.length)return '<div class="empty-state">Aucun élément dans cet historique.</div>';return `<div class="client-history-list">${rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(x=>`<div class="client-history-row"><small>${x.date?formatDate(x.date):'—'}</small><div><strong>${escapeHtml(x.title)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(x.detail||'')}</div></div><strong>${x.amount===null||x.amount===undefined?'':formatMoney(x.amount)}</strong></div>`).join('')}</div>`}
+    document.getElementById("closeClientProModal").addEventListener("click",()=>document.getElementById("clientProModal").classList.add("hidden"));document.getElementById("clientProModal").addEventListener("click",e=>{if(e.target.id==='clientProModal')e.currentTarget.classList.add('hidden')});
+
   </script>
 <datalist id="clientNamesList"></datalist>
   <datalist id="deviceBrandsList"></datalist>
