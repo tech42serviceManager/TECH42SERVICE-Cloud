@@ -1,4 +1,4 @@
-ok<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -122,7 +122,12 @@ ok<!DOCTYPE html>
     .repair-table{width:100%;border-collapse:collapse;margin-top:14px}
     .repair-table th,.repair-table td{padding:12px;border-bottom:1px solid #2a2a2a;text-align:left}
     .repair-table th{color:var(--accent)}
-    .status{display:inline-block;padding:5px 9px;border-radius:999px;background:#26200b;color:#ffd45c;border:1px solid #6d5714;font-size:12px}
+    .status{display:inline-block;padding:5px 9px;border-radius:999px;background:#26200b;color:#ffd45c;border:1px solid #6d5714;font-size:12px;font-weight:700}
+    .status-red{background:#2b1111;color:#ff8585;border-color:#7a2a2a}
+    .status-orange{background:#2c2108;color:#ffd66b;border-color:#755a13}
+    .status-blue{background:#102033;color:#82bfff;border-color:#355b82}
+    .status-green{background:#102518;color:#74ef8b;border-color:#245f35}
+    .status-grey{background:#202020;color:#c7c7c7;border-color:#555}
     .empty-state{color:var(--muted);text-align:center;padding:25px}
     
     .stock-toolbar{display:grid;grid-template-columns:1fr 220px 220px;gap:12px;margin-bottom:14px}
@@ -1346,13 +1351,25 @@ ok<!DOCTYPE html>
             </div>
 
             <div class="field">
-              <label>Prix de rachat TTC (€)</label>
-              <input id="buySellBuyPrice" type="number" min="0" step="0.01">
+              <label>Prix de rachat (€)</label>
+              <div style="display:grid;grid-template-columns:1fr 105px;gap:8px">
+                <input id="buySellBuyPrice" type="number" min="0" step="0.01">
+                <select id="buySellBuyMode" aria-label="Prix de rachat saisi en HT ou TTC">
+                  <option value="TTC">TTC</option>
+                  <option value="HT">HT</option>
+                </select>
+              </div>
             </div>
 
             <div class="field">
               <label>Prix de vente (€)</label>
-              <input id="buySellSellPrice" type="number" min="0" step="0.01">
+              <div style="display:grid;grid-template-columns:1fr 105px;gap:8px">
+                <input id="buySellSellPrice" type="number" min="0" step="0.01">
+                <select id="buySellSellMode" aria-label="Prix de vente saisi en HT ou TTC">
+                  <option value="TTC">TTC</option>
+                  <option value="HT">HT</option>
+                </select>
+              </div>
             </div>
 
             <div class="field full">
@@ -1619,11 +1636,11 @@ ok<!DOCTYPE html>
               <h3>Mot de passe cloud unique</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
-                <input id="newAdminPassword" type="password" minlength="4" required>
+                <input id="newAdminPassword" type="password" minlength="8" required>
               </div>
               <div class="field">
                 <label>Confirmer</label>
-                <input id="confirmAdminPassword" type="password" minlength="4" required>
+                <input id="confirmAdminPassword" type="password" minlength="8" required>
               </div>
               <button class="save-btn" type="submit">Changer le mot de passe</button>
               <div id="adminPasswordMessage"></div>
@@ -1633,11 +1650,11 @@ ok<!DOCTYPE html>
               <h3>Compte visuel</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
-                <input id="newVisualPassword" type="password" minlength="4" required>
+                <input id="newVisualPassword" type="password" minlength="8" required>
               </div>
               <div class="field">
                 <label>Confirmer</label>
-                <input id="confirmVisualPassword" type="password" minlength="4" required>
+                <input id="confirmVisualPassword" type="password" minlength="8" required>
               </div>
               <button class="save-btn" type="submit">Changer le mot de passe</button>
               <div id="visualPasswordMessage"></div>
@@ -1694,7 +1711,7 @@ ok<!DOCTYPE html>
       "tech42-sites-links",
       "tech42-devices",
       "tech42-theme",
-      "tech42-visual-password",
+      "tech42-visual-password-hash",
       "tech42-admin-username",
       "tech42-visual-username"
     ];
@@ -1838,7 +1855,8 @@ ok<!DOCTYPE html>
 
         lastCloudJson = json;
         lastCloudUpdatedAt = data?.updated_at || updatedAt;
-        setCloudStatus("Sauvegardé sur tous les appareils", true);
+        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+        setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
       }catch(error){
         console.error("Erreur sauvegarde cloud", error);
         setCloudStatus("Erreur de sauvegarde", false);
@@ -1968,8 +1986,42 @@ ok<!DOCTYPE html>
       return data.user;
     }
 
-    const DEFAULT_ADMIN_PASSWORD = "Tech42";
-    const DEFAULT_VISUAL_PASSWORD = "Visuel42";
+    const VISUAL_PASSWORD_SALT = "TECH42SERVICE-VISUEL-V1";
+    const DEFAULT_VISUAL_PASSWORD_HASH = "5b66c72343acbc1de4cd27965d753267d4d5e91b4a243a8d414d2eed6e8f8d03";
+    const VISUAL_PASSWORD_ITERATIONS = 120000;
+
+    function bytesToHex(bytes){
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function hashVisualPassword(value){
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw", encoder.encode(value), "PBKDF2", false, ["deriveBits"]
+      );
+      const bits = await crypto.subtle.deriveBits({
+        name: "PBKDF2",
+        salt: encoder.encode(VISUAL_PASSWORD_SALT),
+        iterations: VISUAL_PASSWORD_ITERATIONS,
+        hash: "SHA-256"
+      }, keyMaterial, 256);
+      return bytesToHex(new Uint8Array(bits));
+    }
+
+    async function verifyVisualPassword(value){
+      const calculatedHash = await hashVisualPassword(value);
+      const savedHash = localStorage.getItem("tech42-visual-password-hash") || DEFAULT_VISUAL_PASSWORD_HASH;
+      if(calculatedHash === savedHash) return true;
+
+      const legacyPassword = localStorage.getItem("tech42-visual-password");
+      if(legacyPassword && value === legacyPassword){
+        localStorage.setItem("tech42-visual-password-hash", calculatedHash);
+        localStorage.removeItem("tech42-visual-password");
+        scheduleCloudSave();
+        return true;
+      }
+      return false;
+    }
 
     const loginScreen = document.getElementById("loginScreen");
     const app = document.getElementById("app");
@@ -2007,12 +2059,6 @@ ok<!DOCTYPE html>
 
     let activeRole = null;
 
-    function getAdminPassword(){
-      return localStorage.getItem("tech42-admin-password") || DEFAULT_ADMIN_PASSWORD;
-    }
-    function getVisualPassword(){
-      return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
-    }
     function getAdminUserName(){
       return localStorage.getItem("tech42-admin-username") || "Administrateur";
     }
@@ -2046,7 +2092,7 @@ ok<!DOCTYPE html>
 
       try{
         if(role === "visuel"){
-          if(enteredPassword !== getVisualPassword()){
+          if(!(await verifyVisualPassword(enteredPassword))){
             throw new Error("VISUAL_PASSWORD_INVALID");
           }
           setCloudStatus("Mode présentation", true);
@@ -2239,9 +2285,9 @@ ok<!DOCTYPE html>
         msg.textContent = "Les mots de passe ne correspondent pas.";
         return;
       }
-      if(a.length < 6){
+      if(a.length < 8){
         msg.className = "error";
-        msg.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
+        msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
         return;
       }
 
@@ -2257,7 +2303,7 @@ ok<!DOCTYPE html>
       event.target.reset();
     });
 
-    document.getElementById("visualPasswordForm").addEventListener("submit", (event) => {
+    document.getElementById("visualPasswordForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const a = document.getElementById("newVisualPassword").value;
       const b = document.getElementById("confirmVisualPassword").value;
@@ -2269,10 +2315,18 @@ ok<!DOCTYPE html>
         return;
       }
 
-      localStorage.setItem("tech42-visual-password", a);
+      if(a.length < 8){
+        msg.className = "error";
+        msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+        return;
+      }
+
+      const passwordHash = await hashVisualPassword(a);
+      localStorage.setItem("tech42-visual-password-hash", passwordHash);
+      localStorage.removeItem("tech42-visual-password");
       scheduleCloudSave();
       msg.className = "notice";
-      msg.textContent = "Mot de passe du compte visuel modifié.";
+      msg.textContent = "Mot de passe du compte visuel chiffré et modifié.";
       event.target.reset();
     });
 
@@ -2344,6 +2398,16 @@ ok<!DOCTYPE html>
       });
     }
 
+    function statusBadgeClass(status){
+      const value = String(status || "").toLowerCase();
+      if(value.includes("urgent") || value.includes("annulé") || value.includes("annule")) return "status-red";
+      if(value.includes("en attente") || value.includes("pièce commandée") || value.includes("piece commandee") || value.includes("prévu") || value.includes("prevu")) return "status-orange";
+      if(value.includes("diagnostic") || value.includes("en réparation") || value.includes("en reparation")) return "status-blue";
+      if(value.includes("terminé") || value.includes("termine") || value.includes("payé") || value.includes("paye") || value.includes("validé") || value.includes("valide") || value.includes("confirmé") || value.includes("confirme")) return "status-green";
+      if(value.includes("restitué") || value.includes("restitue") || value.includes("clôturé") || value.includes("cloture")) return "status-grey";
+      return "status-orange";
+    }
+
     function renderRepairs(){
       const tbody = document.getElementById("repairTableBody");
       const empty = document.getElementById("repairEmpty");
@@ -2363,7 +2427,7 @@ ok<!DOCTYPE html>
           <td>${escapeHtml(item.client)}<br><small>${escapeHtml(item.phone || "")}</small></td>
           <td>${escapeHtml(item.brand)} ${escapeHtml(item.model)}</td>
           <td>${escapeHtml(item.issue)}</td>
-          <td><span class="status">${escapeHtml(item.status)}</span></td>
+          <td><span class="status ${statusBadgeClass(item.status)}">${escapeHtml(item.status)}</span></td>
           <td>
             <div class="table-actions">
               <button class="mini-btn" data-view="${escapeHtml(item.id)}">Voir</button>
@@ -4901,7 +4965,7 @@ ok<!DOCTYPE html>
       function googleUrl(a){const start=new Date(`${a.date}T${a.time||'09:00'}:00`),end=new Date(start.getTime()+Number(a.duration||30)*60000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');const p=new URLSearchParams({action:'TEMPLATE',text:`TECH42SERVICE — ${a.client} — ${a.device||'Rendez-vous'}`,dates:`${fmt(start)}/${fmt(end)}`,details:`${a.reason||''}\nTéléphone : ${a.phone||''}\n${a.notes||''}`,location:'TECH42SERVICE'});return `https://calendar.google.com/calendar/render?${p}`}
       function syncVisibleToGoogle(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');if(!items.length)return alert('Aucun rendez-vous à synchroniser.');const selected=items.filter(a=>plannerView==='month'?String(a.date).startsWith(`${plannerDate.getFullYear()}-${pad(plannerDate.getMonth()+1)}`):plannerView==='day'?a.date===iso(plannerDate):(()=>{const st=monday(plannerDate),en=clone(st);en.setDate(en.getDate()+7);return new Date(a.date+'T12:00:00')>=st&&new Date(a.date+'T12:00:00')<en})());if(!selected.length)return alert('Aucun rendez-vous visible à synchroniser.');selected.slice(0,5).forEach((a,i)=>setTimeout(()=>window.open(googleUrl(a),'_blank'),i*350));document.getElementById('plannerGoogleStatus').innerHTML=`<span class="google-sync-ok">${Math.min(selected.length,5)} rendez-vous ouverts dans Google Agenda.</span>${selected.length>5?' Synchronise les suivants depuis leur bouton individuel.':''}`}
       function downloadIcs(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');const esc=x=>String(x||'').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');let body='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TECH42SERVICE//Planning Atelier//FR\r\n';items.forEach(a=>{const st=new Date(`${a.date}T${a.time||'09:00'}:00`),en=new Date(st.getTime()+Number(a.duration||30)*60000);body+=`BEGIN:VEVENT\r\nUID:${esc(a.id)}@tech42service\r\nDTSTAMP:${dt(new Date())}\r\nDTSTART:${dt(st)}\r\nDTEND:${dt(en)}\r\nSUMMARY:${esc(`TECH42SERVICE - ${a.client} - ${a.device||'RDV'}`)}\r\nDESCRIPTION:${esc(`${a.reason||''} ${a.notes||''}`)}\r\nEND:VEVENT\r\n`});body+='END:VCALENDAR\r\n';const blob=new Blob([body],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='TECH42SERVICE_Planning.ics';a.click();URL.revokeObjectURL(u)}
-      function renderDashboardPro(){const today=iso(new Date()),appts=currentAppointments().filter(a=>a.date===today&&a.status!=='Annulé').sort((a,b)=>String(a.time).localeCompare(String(b.time))),repairs=currentRepairList().filter(r=>!['Terminé','Restitué'].includes(r.status));const p=document.getElementById('dashboardTodayPlanning'),q=document.getElementById('dashboardPriorities');if(p)p.innerHTML=appts.length?appts.map(a=>`<div class="dash-row"><strong>${escapeHtml(a.time||'')}</strong><div>${escapeHtml(a.client)}<small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div><span class="status">${escapeHtml(a.status)}</span></div>`).join(''):'<div class="empty-state">Aucun rendez-vous aujourd’hui.</div>';if(q){const due=repairs.filter(r=>r.dueDate&&r.dueDate<=today).slice(0,5);q.innerHTML=due.length?due.map(r=>`<div class="dash-alert"><strong>${escapeHtml(r.id)} — ${escapeHtml(r.client)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.brand||'')} ${escapeHtml(r.model||'')} · ${escapeHtml(r.status||'')} · prévu ${formatDate(r.dueDate)}</div></div>`).join(''):'<div class="empty-state">Aucune priorité urgente.</div>'}}
+      function renderDashboardPro(){const today=iso(new Date()),appts=currentAppointments().filter(a=>a.date===today&&a.status!=='Annulé').sort((a,b)=>String(a.time).localeCompare(String(b.time))),repairs=currentRepairList().filter(r=>!['Terminé','Restitué'].includes(r.status));const p=document.getElementById('dashboardTodayPlanning'),q=document.getElementById('dashboardPriorities');if(p)p.innerHTML=appts.length?appts.map(a=>`<div class="dash-row"><strong>${escapeHtml(a.time||'')}</strong><div>${escapeHtml(a.client)}<small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div><span class="status ${statusBadgeClass(a.status)}">${escapeHtml(a.status)}</span></div>`).join(''):'<div class="empty-state">Aucun rendez-vous aujourd’hui.</div>';if(q){const due=repairs.filter(r=>r.dueDate&&r.dueDate<=today).slice(0,5);q.innerHTML=due.length?due.map(r=>`<div class="dash-alert"><strong>${escapeHtml(r.id)} — ${escapeHtml(r.client)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.brand||'')} ${escapeHtml(r.model||'')} · ${escapeHtml(r.status||'')} · prévu ${formatDate(r.dueDate)}</div></div>`).join(''):'<div class="empty-state">Aucune priorité urgente.</div>'}}
       const oldRenderAppointments=renderAppointments;renderAppointments=function(){oldRenderAppointments();renderPlanner()};
       const oldUpdateDashboardStats=updateDashboardStats;updateDashboardStats=function(){oldUpdateDashboardStats();renderDashboardPro()};
       document.querySelectorAll('.planner-view-btn').forEach(b=>b.addEventListener('click',()=>{plannerView=b.dataset.plannerView;localStorage.setItem('tech42-planner-view',plannerView);renderPlanner()}));
