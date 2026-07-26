@@ -1607,7 +1607,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V19.3.4</footer>
+      <footer>TECH42SERVICE Gestion — V19.3.4 Compte visuel corrigé</footer>
     </main>
   </div>
 
@@ -1914,10 +1914,17 @@
       loginError.textContent = "";
       button.disabled = true;
       button.textContent = "Connexion…";
-      setCloudStatus("Connexion à Supabase…", false);
 
       try{
-        await cloudLogin(enteredPassword);
+        if(role === "visuel"){
+          if(enteredPassword !== getVisualPassword()){
+            throw new Error("VISUAL_PASSWORD_INVALID");
+          }
+          setCloudStatus("Mode présentation", true);
+        }else{
+          setCloudStatus("Connexion à Supabase…", false);
+          await cloudLogin(enteredPassword);
+        }
       activeRole = role;
       currentUser.textContent = role === "admin" ? getAdminUserName() : getVisualUserName();
       readonlyNote.classList.toggle("hidden", role !== "visuel");
@@ -1974,11 +1981,19 @@
       refreshDeviceLists();
       refreshStockPartsList();
 
-        refreshAllCloudModules();
-        setCloudStatus("Connecté et synchronisé", true);
+        if(role === "admin"){
+          refreshAllCloudModules();
+          setCloudStatus("Connecté et synchronisé", true);
+        }else{
+          setCloudStatus("Mode présentation", true);
+        }
       }catch(error){
-        console.error("Connexion cloud impossible", error);
-        loginError.textContent = "Mot de passe incorrect ou connexion cloud indisponible.";
+        console.error("Connexion impossible", error);
+        if(error && error.message === "VISUAL_PASSWORD_INVALID"){
+          loginError.textContent = "Mot de passe du compte visuel incorrect.";
+        }else{
+          loginError.textContent = "Mot de passe incorrect ou connexion indisponible.";
+        }
         setCloudStatus("Connexion refusée", false);
       }finally{
         button.disabled = false;
@@ -1987,8 +2002,10 @@
     });
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await cloudSaveNow(true);
-      await supabaseClient.auth.signOut();
+      if(activeRole === "admin"){
+        await cloudSaveNow(true);
+        await supabaseClient.auth.signOut();
+      }
       cloudUser = null;
       if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
       cloudChannel = null;
