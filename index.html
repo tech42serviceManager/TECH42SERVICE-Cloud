@@ -69,6 +69,10 @@
     .date{margin-top:6px;font-size:20px;color:var(--muted);text-align:center}
     .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}.dashboard-card{cursor:pointer;transition:.18s transform,.18s border-color}.dashboard-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+    .dashboard-open-panel{cursor:pointer;transition:.18s transform,.18s border-color,.18s background}
+    .dashboard-open-panel:hover,.dashboard-open-panel:focus{transform:translateY(-2px);border-color:var(--accent);background:#17140b;outline:none}
+    .dashboard-open-panel h2{display:flex;justify-content:space-between;align-items:center}
+    .dashboard-open-panel h2 span{color:var(--accent);font-size:28px;line-height:1}
     .card .label{color:var(--muted);font-size:14px}
     .card .value{margin-top:10px;font-size:34px;font-weight:800;color:var(--accent)}
     .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px}
@@ -169,7 +173,10 @@
 
     
     .repair-lines{display:grid;gap:10px}
-    .repair-line{display:grid;grid-template-columns:2fr 90px 120px 90px 42px;gap:8px;align-items:center}
+    .repair-line-head,.repair-line{display:grid;grid-template-columns:2fr 90px 140px 105px 42px;gap:8px;align-items:center}
+    .repair-line-head{margin:8px 0 5px;color:var(--muted);font-size:12px;font-weight:700}
+    .repair-line-head span{padding:0 4px}
+    .repair-line-mode{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)}
     .repair-line input{
       width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)
     }
@@ -433,12 +440,12 @@
 
 
         <section class="dashboard-pro-grid">
-          <div class="panel">
-            <h2>Planning du jour</h2>
+          <div id="dashboardPlanningPanel" class="panel dashboard-open-panel" role="button" tabindex="0" title="Ouvrir le planning atelier">
+            <h2>Planning du jour <span aria-hidden="true">›</span></h2>
             <div id="dashboardTodayPlanning" class="dash-list"></div>
           </div>
-          <div class="panel">
-            <h2>Priorités atelier</h2>
+          <div id="dashboardPrioritiesPanel" class="panel dashboard-open-panel" role="button" tabindex="0" title="Ouvrir les réparations prioritaires">
+            <h2>Priorités atelier <span aria-hidden="true">›</span></h2>
             <div id="dashboardPriorities"></div>
           </div>
         </section>
@@ -618,6 +625,9 @@
 
             <div class="field full">
               <label>Lignes de réparation</label>
+              <div class="repair-line-head" aria-hidden="true">
+                <span>Désignation de la pièce</span><span>Quantité</span><span>Prix unitaire</span><span>Prix saisi en</span><span></span>
+              </div>
               <div id="repairLines" class="repair-lines"></div>
               <button id="addRepairLineBtn" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne au document</button>
               <div class="repair-total">
@@ -1988,6 +1998,17 @@
       }
     }
 
+    function activateDashboardPanel(element, page){
+      if(!element) return;
+      const open=()=>showPage(page);
+      element.addEventListener("click", open);
+      element.addEventListener("keydown", event=>{
+        if(event.key === "Enter" || event.key === " "){ event.preventDefault(); open(); }
+      });
+    }
+    activateDashboardPanel(document.getElementById("dashboardPlanningPanel"), "appointments");
+    activateDashboardPanel(document.getElementById("dashboardPrioritiesPanel"), "repairs");
+
     document.getElementById("adminPasswordForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const a = document.getElementById("newAdminPassword").value;
@@ -2154,10 +2175,10 @@
       const row = document.createElement("div");
       row.className = "repair-line";
       row.innerHTML = `
-        <input class="repair-line-label" type="text" list="stockPartsList" placeholder="Désignation" value="${escapeHtml(data.label || "")}">
+        <input class="repair-line-label" type="text" list="stockPartsList" placeholder="Désignation de la pièce" value="${escapeHtml(data.label || "")}">
         <input class="repair-line-qty" type="number" min="0" step="1" value="${Number(data.qty || 1)}">
-        <input class="repair-line-unit" type="number" min="0" step="0.01" value="${Number(data.unit || 0)}">
-        <select class="repair-line-mode">
+        <input class="repair-line-unit" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Prix pièce" aria-label="Prix unitaire de la pièce" value="${Number(data.unit || 0)}">
+        <select class="repair-line-mode" aria-label="Prix de la pièce saisi en HT ou TTC">
           <option value="TTC" ${data.mode !== "HT" ? "selected" : ""}>TTC</option>
           <option value="HT" ${data.mode === "HT" ? "selected" : ""}>HT</option>
         </select>
