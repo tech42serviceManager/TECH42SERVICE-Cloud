@@ -2242,11 +2242,14 @@
     }
     refreshUserNames();
 
-    function passwordRecoveryRedirectUrl(){
+    function passwordRecoveryOptions(){
+      if(window.location.protocol !== "http:" && window.location.protocol !== "https:"){
+        return {};
+      }
       const url = new URL(window.location.href);
       url.hash = "";
       url.search = "";
-      return url.toString();
+      return {redirectTo:url.toString()};
     }
 
     forgotPasswordBtn.addEventListener("click", async () => {
@@ -2255,16 +2258,17 @@
       forgotPasswordBtn.disabled = true;
       forgotPasswordBtn.textContent = "Envoi en cours…";
       try{
-        const {error} = await supabaseClient.auth.resetPasswordForEmail(CLOUD_EMAIL, {
-          redirectTo: passwordRecoveryRedirectUrl()
-        });
+        const {error} = await supabaseClient.auth.resetPasswordForEmail(
+          CLOUD_EMAIL,
+          passwordRecoveryOptions()
+        );
         if(error) throw error;
         forgotPasswordMessage.className = "notice";
-        forgotPasswordMessage.textContent = `E-mail de réinitialisation envoyé à ${CLOUD_EMAIL}.`;
+        forgotPasswordMessage.textContent = `E-mail demandé pour ${CLOUD_EMAIL}. Vérifie aussi les spams.`;
       }catch(error){
         console.error("Réinitialisation mot de passe", error);
         forgotPasswordMessage.className = "error";
-        forgotPasswordMessage.textContent = "Impossible d’envoyer l’e-mail de réinitialisation.";
+        forgotPasswordMessage.textContent = `Envoi refusé : ${error?.message || "erreur Supabase"}`;
       }finally{
         forgotPasswordBtn.disabled = false;
         forgotPasswordBtn.textContent = "Mot de passe oublié";
