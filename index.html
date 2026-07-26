@@ -319,6 +319,30 @@
     .payment-paid{color:#74ef8b}.payment-partial{color:#ffd66b}.payment-cancelled{color:#ff8585}
     @media(max-width:700px){.client-pro-stats,.payment-summary,.payment-form{grid-template-columns:1fr 1fr}.client-history-row{grid-template-columns:1fr}.payment-table{min-width:760px}}
     @media(max-width:520px){.client-pro-stats,.payment-summary,.payment-form{grid-template-columns:1fr}}
+  
+
+    /* V19.3 — Tableau de bord & Planning atelier */
+    .dashboard-pro-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:20px}
+    .dash-list{display:grid;gap:9px}.dash-row{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid #2c2c2c;border-radius:10px;background:#101010}
+    .dash-row small{color:var(--muted)}.dash-row strong{color:var(--accent)}
+    .dash-alert{padding:11px;border-left:3px solid var(--accent);border-radius:8px;background:#101010;margin-bottom:8px}
+    .planner-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    .planner-nav,.planner-views{display:flex;gap:8px;flex-wrap:wrap}.planner-title{font-size:18px;font-weight:800;color:var(--accent)}
+    .planner-view-btn.active{background:var(--accent);color:#080808;font-weight:800}
+    .planner-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px;background:#0d0d0d;margin-bottom:18px}
+    .planner-grid{display:grid;min-width:760px}.planner-grid.week{grid-template-columns:72px repeat(7,minmax(125px,1fr))}.planner-grid.day{grid-template-columns:72px minmax(520px,1fr)}
+    .planner-head{position:sticky;top:0;z-index:4;background:#171717;border-bottom:1px solid var(--border);padding:11px;text-align:center;font-weight:800}
+    .planner-time{padding:10px 8px;color:var(--muted);border-right:1px solid #2a2a2a;border-bottom:1px solid #222;font-size:13px;text-align:center}
+    .planner-cell{position:relative;min-height:62px;border-right:1px solid #222;border-bottom:1px solid #222;padding:4px;transition:.15s background}
+    .planner-cell.drag-over{background:#2a2108}.planner-event{padding:7px 8px;border-radius:8px;background:linear-gradient(135deg,#3b2e08,#17140b);border:1px solid #806514;color:#fff;font-size:12px;cursor:grab;margin-bottom:4px;box-shadow:0 5px 15px #0007}
+    .planner-event.confirmed{border-color:#286d38;background:#102518}.planner-event.cancelled{opacity:.55;border-color:#7a2a2a;background:#2b1111}.planner-event.done{border-color:#355b82;background:#102033}
+    .planner-event strong{display:block;color:#ffd86f;margin-bottom:2px}.planner-event small{display:block;color:#ddd}
+    .month-grid{display:grid;grid-template-columns:repeat(7,minmax(115px,1fr));min-width:820px}.month-head{padding:10px;text-align:center;font-weight:800;background:#171717;border-bottom:1px solid var(--border)}
+    .month-day{min-height:125px;border-right:1px solid #222;border-bottom:1px solid #222;padding:7px}.month-day.outside{opacity:.38}.month-number{font-weight:800;color:var(--accent);margin-bottom:6px}
+    .google-sync-note{font-size:13px;color:var(--muted);margin-top:8px}.google-sync-ok{color:#74ef8b}
+    @media(max-width:900px){.dashboard-pro-grid{grid-template-columns:1fr}}
+    @media(max-width:520px){.planner-toolbar{align-items:stretch}.planner-nav,.planner-views{width:100%}.planner-nav button,.planner-views button{flex:1}.dashboard-pro-grid{grid-template-columns:1fr}.dash-row{grid-template-columns:70px 1fr}}
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -404,6 +428,19 @@
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Rachats du mois</div><div id="statMonthlyPurchases" class="value">0 €</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Ventes du mois</div><div id="statMonthlySales" class="value">0 €</div></article>
           <article class="card dashboard-card" data-open-page="devices"><div class="label">Modèles enregistrés</div><div id="statDevices" class="value">0</div></article>
+        </section>
+
+
+
+        <section class="dashboard-pro-grid">
+          <div class="panel">
+            <h2>Planning du jour</h2>
+            <div id="dashboardTodayPlanning" class="dash-list"></div>
+          </div>
+          <div class="panel">
+            <h2>Priorités atelier</h2>
+            <div id="dashboardPriorities"></div>
+          </div>
         </section>
 
         <section class="panel quick">
@@ -1022,6 +1059,30 @@
               <button id="saveAppointmentBtn" class="save-btn" type="submit">Enregistrer le rendez-vous</button>
             </div>
           </form>
+
+
+
+          <section id="workshopPlannerPanel">
+            <div class="planner-toolbar">
+              <div class="planner-nav">
+                <button id="plannerPrev" class="mini-btn" type="button">←</button>
+                <button id="plannerToday" class="mini-btn" type="button">Aujourd’hui</button>
+                <button id="plannerNext" class="mini-btn" type="button">→</button>
+              </div>
+              <div id="plannerTitle" class="planner-title">Planning atelier</div>
+              <div class="planner-views">
+                <button class="mini-btn planner-view-btn" data-planner-view="day" type="button">Jour</button>
+                <button class="mini-btn planner-view-btn active" data-planner-view="week" type="button">Semaine</button>
+                <button class="mini-btn planner-view-btn" data-planner-view="month" type="button">Mois</button>
+              </div>
+            </div>
+            <div class="page-actions">
+              <button id="syncVisibleGoogleBtn" class="action-btn secondary" type="button">Synchroniser vers Google Agenda</button>
+              <button id="downloadPlannerIcsBtn" class="action-btn secondary" type="button">Exporter le planning (.ics)</button>
+            </div>
+            <div id="plannerGoogleStatus" class="google-sync-note">La synchronisation ouvre Google Agenda avec les rendez-vous à ajouter.</div>
+            <div id="workshopPlanner" class="planner-wrap"></div>
+          </section>
 
           <div class="appt-toolbar">
             <input id="appointmentSearch" type="search" placeholder="Rechercher client, téléphone, appareil...">
@@ -4297,6 +4358,58 @@
     }
     function historyRows(rows){if(!rows.length)return '<div class="empty-state">Aucun élément dans cet historique.</div>';return `<div class="client-history-list">${rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(x=>`<div class="client-history-row"><small>${x.date?formatDate(x.date):'—'}</small><div><strong>${escapeHtml(x.title)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(x.detail||'')}</div></div><strong>${x.amount===null||x.amount===undefined?'':formatMoney(x.amount)}</strong></div>`).join('')}</div>`}
     document.getElementById("closeClientProModal").addEventListener("click",()=>document.getElementById("clientProModal").classList.add("hidden"));document.getElementById("clientProModal").addEventListener("click",e=>{if(e.target.id==='clientProModal')e.currentTarget.classList.add('hidden')});
+
+
+    /* V19.3 — Planning atelier, Drag & Drop, Google Agenda, Dashboard */
+    (()=>{
+      let plannerView=localStorage.getItem('tech42-planner-view')||'week';
+      let plannerDate=new Date(); plannerDate.setHours(12,0,0,0);
+      const pad=n=>String(n).padStart(2,'0');
+      const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      const clone=d=>new Date(d.getTime());
+      const monday=d=>{const x=clone(d),day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);return x};
+      const frDay=d=>d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'});
+      const statusClass=s=>s==='Confirmé'?'confirmed':s==='Annulé'?'cancelled':s==='Terminé'?'done':'';
+      function eventHtml(a){return `<div class="planner-event ${statusClass(a.status)}" draggable="${activeRole==='admin'}" data-planner-id="${escapeHtml(a.id)}"><strong>${escapeHtml(a.time||'')} · ${escapeHtml(a.client||'')}</strong><small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div>`}
+      function filteredForPlanner(){const q=(document.getElementById('appointmentSearch')?.value||'').toLowerCase(),st=document.getElementById('appointmentFilter')?.value||'';return currentAppointments().filter(a=>(!q||[a.client,a.phone,a.email,a.device,a.reason,a.notes].join(' ').toLowerCase().includes(q))&&(!st||a.status===st))}
+      function renderPlanner(){
+        const host=document.getElementById('workshopPlanner'); if(!host)return;
+        document.querySelectorAll('.planner-view-btn').forEach(b=>b.classList.toggle('active',b.dataset.plannerView===plannerView));
+        const appts=filteredForPlanner();
+        if(plannerView==='month'){renderMonth(host,appts);return}
+        const dates=plannerView==='day'?[clone(plannerDate)]:Array.from({length:7},(_,i)=>{const d=monday(plannerDate);d.setDate(d.getDate()+i);return d});
+        document.getElementById('plannerTitle').textContent=plannerView==='day'?plannerDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):`${dates[0].toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} — ${dates[dates.length-1].toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
+        let h=`<div class="planner-grid ${plannerView}"><div class="planner-head">Heure</div>${dates.map(d=>`<div class="planner-head">${frDay(d)}</div>`).join('')}`;
+        for(let hour=8;hour<20;hour++){
+          h+=`<div class="planner-time">${pad(hour)}:00</div>`;
+          dates.forEach(d=>{const day=iso(d),items=appts.filter(a=>a.date===day&&Number(String(a.time||'08:00').slice(0,2))===hour);h+=`<div class="planner-cell" data-drop-date="${day}" data-drop-hour="${hour}">${items.map(eventHtml).join('')}</div>`})
+        }
+        h+='</div>';host.innerHTML=h;bindPlannerDnD();
+      }
+      function renderMonth(host,appts){
+        const y=plannerDate.getFullYear(),m=plannerDate.getMonth(),first=new Date(y,m,1),start=monday(first);document.getElementById('plannerTitle').textContent=plannerDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+        let h='<div class="month-grid">'+['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(x=>`<div class="month-head">${x}</div>`).join('');
+        for(let i=0;i<42;i++){const d=clone(start);d.setDate(start.getDate()+i);const day=iso(d),items=appts.filter(a=>a.date===day);h+=`<div class="month-day ${d.getMonth()!==m?'outside':''}" data-drop-date="${day}" data-drop-hour="9"><div class="month-number">${d.getDate()}</div>${items.map(eventHtml).join('')}</div>`}host.innerHTML=h+'</div>';bindPlannerDnD();
+      }
+      function bindPlannerDnD(){
+        document.querySelectorAll('[data-planner-id]').forEach(el=>{el.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',el.dataset.plannerId));el.addEventListener('dblclick',()=>editAppointment(el.dataset.plannerId))});
+        document.querySelectorAll('[data-drop-date]').forEach(cell=>{cell.addEventListener('dragover',e=>{if(activeRole!=='admin')return;e.preventDefault();cell.classList.add('drag-over')});cell.addEventListener('dragleave',()=>cell.classList.remove('drag-over'));cell.addEventListener('drop',e=>{e.preventDefault();cell.classList.remove('drag-over');if(activeRole!=='admin')return;const id=e.dataTransfer.getData('text/plain'),list=getAdminAppointments(),a=list.find(x=>x.id===id);if(!a)return;a.date=cell.dataset.dropDate;a.time=`${pad(Number(cell.dataset.dropHour||9))}:00`;saveAdminAppointments(list);renderAppointments();updateDashboardStats()});cell.addEventListener('dblclick',()=>{if(activeRole!=='admin')return;resetAppointmentForm();document.getElementById('appointmentDate').value=cell.dataset.dropDate;document.getElementById('appointmentTime').value=`${pad(Number(cell.dataset.dropHour||9))}:00`;showAppointmentForm()})});
+      }
+      function googleUrl(a){const start=new Date(`${a.date}T${a.time||'09:00'}:00`),end=new Date(start.getTime()+Number(a.duration||30)*60000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');const p=new URLSearchParams({action:'TEMPLATE',text:`TECH42SERVICE — ${a.client} — ${a.device||'Rendez-vous'}`,dates:`${fmt(start)}/${fmt(end)}`,details:`${a.reason||''}\nTéléphone : ${a.phone||''}\n${a.notes||''}`,location:'TECH42SERVICE'});return `https://calendar.google.com/calendar/render?${p}`}
+      function syncVisibleToGoogle(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');if(!items.length)return alert('Aucun rendez-vous à synchroniser.');const selected=items.filter(a=>plannerView==='month'?String(a.date).startsWith(`${plannerDate.getFullYear()}-${pad(plannerDate.getMonth()+1)}`):plannerView==='day'?a.date===iso(plannerDate):(()=>{const st=monday(plannerDate),en=clone(st);en.setDate(en.getDate()+7);return new Date(a.date+'T12:00:00')>=st&&new Date(a.date+'T12:00:00')<en})());if(!selected.length)return alert('Aucun rendez-vous visible à synchroniser.');selected.slice(0,5).forEach((a,i)=>setTimeout(()=>window.open(googleUrl(a),'_blank'),i*350));document.getElementById('plannerGoogleStatus').innerHTML=`<span class="google-sync-ok">${Math.min(selected.length,5)} rendez-vous ouverts dans Google Agenda.</span>${selected.length>5?' Synchronise les suivants depuis leur bouton individuel.':''}`}
+      function downloadIcs(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');const esc=x=>String(x||'').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');let body='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TECH42SERVICE//Planning Atelier//FR\r\n';items.forEach(a=>{const st=new Date(`${a.date}T${a.time||'09:00'}:00`),en=new Date(st.getTime()+Number(a.duration||30)*60000);body+=`BEGIN:VEVENT\r\nUID:${esc(a.id)}@tech42service\r\nDTSTAMP:${dt(new Date())}\r\nDTSTART:${dt(st)}\r\nDTEND:${dt(en)}\r\nSUMMARY:${esc(`TECH42SERVICE - ${a.client} - ${a.device||'RDV'}`)}\r\nDESCRIPTION:${esc(`${a.reason||''} ${a.notes||''}`)}\r\nEND:VEVENT\r\n`});body+='END:VCALENDAR\r\n';const blob=new Blob([body],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='TECH42SERVICE_Planning.ics';a.click();URL.revokeObjectURL(u)}
+      function renderDashboardPro(){const today=iso(new Date()),appts=currentAppointments().filter(a=>a.date===today&&a.status!=='Annulé').sort((a,b)=>String(a.time).localeCompare(String(b.time))),repairs=currentRepairList().filter(r=>!['Terminé','Restitué'].includes(r.status));const p=document.getElementById('dashboardTodayPlanning'),q=document.getElementById('dashboardPriorities');if(p)p.innerHTML=appts.length?appts.map(a=>`<div class="dash-row"><strong>${escapeHtml(a.time||'')}</strong><div>${escapeHtml(a.client)}<small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div><span class="status">${escapeHtml(a.status)}</span></div>`).join(''):'<div class="empty-state">Aucun rendez-vous aujourd’hui.</div>';if(q){const due=repairs.filter(r=>r.dueDate&&r.dueDate<=today).slice(0,5);q.innerHTML=due.length?due.map(r=>`<div class="dash-alert"><strong>${escapeHtml(r.id)} — ${escapeHtml(r.client)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.brand||'')} ${escapeHtml(r.model||'')} · ${escapeHtml(r.status||'')} · prévu ${formatDate(r.dueDate)}</div></div>`).join(''):'<div class="empty-state">Aucune priorité urgente.</div>'}}
+      const oldRenderAppointments=renderAppointments;renderAppointments=function(){oldRenderAppointments();renderPlanner()};
+      const oldUpdateDashboardStats=updateDashboardStats;updateDashboardStats=function(){oldUpdateDashboardStats();renderDashboardPro()};
+      document.querySelectorAll('.planner-view-btn').forEach(b=>b.addEventListener('click',()=>{plannerView=b.dataset.plannerView;localStorage.setItem('tech42-planner-view',plannerView);renderPlanner()}));
+      document.getElementById('plannerPrev')?.addEventListener('click',()=>{plannerDate.setDate(plannerDate.getDate()-(plannerView==='day'?1:plannerView==='week'?7:0));if(plannerView==='month')plannerDate.setMonth(plannerDate.getMonth()-1);renderPlanner()});
+      document.getElementById('plannerNext')?.addEventListener('click',()=>{plannerDate.setDate(plannerDate.getDate()+(plannerView==='day'?1:plannerView==='week'?7:0));if(plannerView==='month')plannerDate.setMonth(plannerDate.getMonth()+1);renderPlanner()});
+      document.getElementById('plannerToday')?.addEventListener('click',()=>{plannerDate=new Date();plannerDate.setHours(12,0,0,0);renderPlanner()});
+      document.getElementById('syncVisibleGoogleBtn')?.addEventListener('click',syncVisibleToGoogle);document.getElementById('downloadPlannerIcsBtn')?.addEventListener('click',downloadIcs);
+      document.getElementById('appointmentSearch')?.addEventListener('input',renderPlanner);document.getElementById('appointmentFilter')?.addEventListener('change',renderPlanner);
+      const originalGoogle=openGoogleCalendar;openGoogleCalendar=function(id){const a=currentAppointments().find(x=>x.id===id);if(a)window.open(googleUrl(a),'_blank');else if(originalGoogle)originalGoogle(id)};
+      renderPlanner();renderDashboardPro();
+    })();
 
   </script>
 <datalist id="clientNamesList"></datalist>
