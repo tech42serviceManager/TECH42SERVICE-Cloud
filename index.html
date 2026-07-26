@@ -4934,24 +4934,7 @@
       renderClients();
       updateDashboardStats();
     }
-    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}
-
-    /* V19.4 — Tableaux lisibles sur mobile, sans changement sur ordinateur */
-    @media(max-width:700px){
-      .table-wrap{overflow:visible}
-      .table-wrap table{width:100%;min-width:0!important;border-collapse:separate;border-spacing:0}
-      .table-wrap thead{display:none}
-      .table-wrap tbody,.table-wrap tr,.table-wrap td{display:block;width:100%}
-      .table-wrap tbody{display:grid;gap:12px}
-      .table-wrap tr{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:8px 12px;box-shadow:0 5px 16px #0004}
-      .table-wrap td{display:grid;grid-template-columns:minmax(105px,38%) 1fr;gap:10px;align-items:start;padding:9px 0!important;border-bottom:1px solid #2a2a2a!important;white-space:normal!important;overflow-wrap:anywhere}
-      .table-wrap td:last-child{border-bottom:0!important}
-      .table-wrap td::before{content:attr(data-label);color:var(--accent);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
-      .table-wrap td[colspan]{display:block;text-align:center}
-      .table-wrap td[colspan]::before{display:none}
-      .table-wrap .table-actions{justify-content:flex-start}
-    }
-</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
+    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
 
     function clientMatches(item,client){return item.clientId===client.id||String(item.client||"").toLowerCase()===client.name.toLowerCase()}
     function openClientPro(id){
@@ -5021,27 +5004,5 @@
   <datalist id="deviceBrandsList"></datalist>
   <datalist id="deviceModelsList"></datalist>
   <datalist id="stockPartsList"></datalist>
-
-<script>
-  (function enableMobileTableCards(){
-    function labelTableCells(root=document){
-      root.querySelectorAll(".table-wrap table").forEach(table => {
-        const labels = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
-        table.querySelectorAll("tbody tr").forEach(row => {
-          Array.from(row.children).forEach((cell, index) => {
-            if(cell.tagName === "TD" && !cell.hasAttribute("colspan")){
-              cell.dataset.label = labels[index] || "Information";
-            }
-          });
-        });
-      });
-    }
-    labelTableCells();
-    const observer = new MutationObserver(mutations => {
-      if(mutations.some(m => m.type === "childList")) labelTableCells();
-    });
-    observer.observe(document.body, {subtree:true, childList:true});
-  })();
-</script>
 </body>
 </html>
