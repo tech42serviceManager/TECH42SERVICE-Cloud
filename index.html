@@ -427,7 +427,7 @@
             <p>Bienvenue dans TECH42SERVICE Gestion</p>
           </div>
           <div class="cloud-toolbar">
-            <span id="cloudSyncBadge" class="cloud-sync-badge">Cloud en attente</span>
+            <span id="cloudSyncBadge" class="cloud-sync-badge">Sauvegarde : en attente</span>
             <button id="manualCloudSyncBtn" class="mini-btn" type="button">Synchroniser</button>
           </div>
         </header>
@@ -1636,11 +1636,11 @@
               <h3>Mot de passe cloud unique</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
-                <input id="newAdminPassword" type="password" minlength="4" required>
+                <input id="newAdminPassword" type="password" minlength="8" required>
               </div>
               <div class="field">
                 <label>Confirmer</label>
-                <input id="confirmAdminPassword" type="password" minlength="4" required>
+                <input id="confirmAdminPassword" type="password" minlength="8" required>
               </div>
               <button class="save-btn" type="submit">Changer le mot de passe</button>
               <div id="adminPasswordMessage"></div>
@@ -1650,11 +1650,11 @@
               <h3>Compte visuel</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
-                <input id="newVisualPassword" type="password" minlength="4" required>
+                <input id="newVisualPassword" type="password" minlength="8" required>
               </div>
               <div class="field">
                 <label>Confirmer</label>
-                <input id="confirmVisualPassword" type="password" minlength="4" required>
+                <input id="confirmVisualPassword" type="password" minlength="8" required>
               </div>
               <button class="save-btn" type="submit">Changer le mot de passe</button>
               <div id="visualPasswordMessage"></div>
@@ -1711,7 +1711,7 @@
       "tech42-sites-links",
       "tech42-devices",
       "tech42-theme",
-      "tech42-visual-password",
+      "tech42-visual-password-hash",
       "tech42-admin-username",
       "tech42-visual-username"
     ];
@@ -1855,7 +1855,8 @@
 
         lastCloudJson = json;
         lastCloudUpdatedAt = data?.updated_at || updatedAt;
-        setCloudStatus("Sauvegardé sur tous les appareils", true);
+        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+        setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
       }catch(error){
         console.error("Erreur sauvegarde cloud", error);
         setCloudStatus("Erreur de sauvegarde", false);
@@ -1985,8 +1986,42 @@
       return data.user;
     }
 
-    const DEFAULT_ADMIN_PASSWORD = "Tech42";
-    const DEFAULT_VISUAL_PASSWORD = "Visuel42";
+    const VISUAL_PASSWORD_SALT = "TECH42SERVICE-VISUEL-V1";
+    const DEFAULT_VISUAL_PASSWORD_HASH = "5b66c72343acbc1de4cd27965d753267d4d5e91b4a243a8d414d2eed6e8f8d03";
+    const VISUAL_PASSWORD_ITERATIONS = 120000;
+
+    function bytesToHex(bytes){
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function hashVisualPassword(value){
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw", encoder.encode(value), "PBKDF2", false, ["deriveBits"]
+      );
+      const bits = await crypto.subtle.deriveBits({
+        name: "PBKDF2",
+        salt: encoder.encode(VISUAL_PASSWORD_SALT),
+        iterations: VISUAL_PASSWORD_ITERATIONS,
+        hash: "SHA-256"
+      }, keyMaterial, 256);
+      return bytesToHex(new Uint8Array(bits));
+    }
+
+    async function verifyVisualPassword(value){
+      const calculatedHash = await hashVisualPassword(value);
+      const savedHash = localStorage.getItem("tech42-visual-password-hash") || DEFAULT_VISUAL_PASSWORD_HASH;
+      if(calculatedHash === savedHash) return true;
+
+      const legacyPassword = localStorage.getItem("tech42-visual-password");
+      if(legacyPassword && value === legacyPassword){
+        localStorage.setItem("tech42-visual-password-hash", calculatedHash);
+        localStorage.removeItem("tech42-visual-password");
+        scheduleCloudSave();
+        return true;
+      }
+      return false;
+    }
 
     const loginScreen = document.getElementById("loginScreen");
     const app = document.getElementById("app");
@@ -2024,12 +2059,6 @@
 
     let activeRole = null;
 
-    function getAdminPassword(){
-      return localStorage.getItem("tech42-admin-password") || DEFAULT_ADMIN_PASSWORD;
-    }
-    function getVisualPassword(){
-      return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
-    }
     function getAdminUserName(){
       return localStorage.getItem("tech42-admin-username") || "Administrateur";
     }
@@ -2063,7 +2092,7 @@
 
       try{
         if(role === "visuel"){
-          if(enteredPassword !== getVisualPassword()){
+          if(!(await verifyVisualPassword(enteredPassword))){
             throw new Error("VISUAL_PASSWORD_INVALID");
           }
           setCloudStatus("Mode présentation", true);
@@ -2256,9 +2285,9 @@
         msg.textContent = "Les mots de passe ne correspondent pas.";
         return;
       }
-      if(a.length < 6){
+      if(a.length < 8){
         msg.className = "error";
-        msg.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
+        msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
         return;
       }
 
@@ -2274,7 +2303,7 @@
       event.target.reset();
     });
 
-    document.getElementById("visualPasswordForm").addEventListener("submit", (event) => {
+    document.getElementById("visualPasswordForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const a = document.getElementById("newVisualPassword").value;
       const b = document.getElementById("confirmVisualPassword").value;
@@ -2286,10 +2315,18 @@
         return;
       }
 
-      localStorage.setItem("tech42-visual-password", a);
+      if(a.length < 8){
+        msg.className = "error";
+        msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+        return;
+      }
+
+      const passwordHash = await hashVisualPassword(a);
+      localStorage.setItem("tech42-visual-password-hash", passwordHash);
+      localStorage.removeItem("tech42-visual-password");
       scheduleCloudSave();
       msg.className = "notice";
-      msg.textContent = "Mot de passe du compte visuel modifié.";
+      msg.textContent = "Mot de passe du compte visuel chiffré et modifié.";
       event.target.reset();
     });
 
