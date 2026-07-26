@@ -427,7 +427,7 @@
             <p>Bienvenue dans TECH42SERVICE Gestion</p>
           </div>
           <div class="cloud-toolbar">
-            <span id="cloudSyncBadge" class="cloud-sync-badge">Sauvegarde : en attente</span>
+            <span id="cloudSyncBadge" class="cloud-sync-badge">Cloud en attente</span>
             <button id="manualCloudSyncBtn" class="mini-btn" type="button">Synchroniser</button>
           </div>
         </header>
@@ -1855,8 +1855,7 @@
 
         lastCloudJson = json;
         lastCloudUpdatedAt = data?.updated_at || updatedAt;
-        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
-        setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
+        setCloudStatus("Sauvegardé sur tous les appareils", true);
       }catch(error){
         console.error("Erreur sauvegarde cloud", error);
         setCloudStatus("Erreur de sauvegarde", false);
