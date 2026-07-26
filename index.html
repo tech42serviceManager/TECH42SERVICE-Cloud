@@ -538,8 +538,14 @@
               </select>
             </div>
             <div class="field">
-              <label>Prix estimé calculé TTC (€)</label>
-              <input id="repairPrice" type="number" min="0" step="0.01">
+              <label>Prix de la réparation</label>
+              <div style="display:grid;grid-template-columns:1fr 105px;gap:8px">
+                <input id="repairPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Montant">
+                <select id="repairPriceMode" aria-label="Prix de la réparation saisi en HT ou TTC">
+                  <option value="TTC">TTC</option>
+                  <option value="HT">HT</option>
+                </select>
+              </div>
             </div>
 
             <div class="field">
@@ -562,19 +568,12 @@
                   <label>Technicien</label>
                   <input id="repairTechnician" type="text" placeholder="Ex. Christophe">
                 </div>
-                <div class="field">
-                  <label>Temps passé (minutes)</label>
-                  <input id="repairMinutes" type="number" min="0" step="5" value="0">
-                </div>
-                <div class="field">
-                  <label>Coût horaire interne (€)</label>
-                  <input id="repairHourlyCost" type="number" min="0" step="0.01" value="25">
-                </div>
               </div>
+              <input id="repairMinutes" type="hidden" value="0">
+              <input id="repairHourlyCost" type="hidden" value="0">
 
-              <div class="repair-finance-grid">
+              <div class="repair-finance-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
                 <div class="finance-card"><small>Coût des pièces TTC</small><strong id="repairPartsCost">0,00 €</strong></div>
-                <div class="finance-card"><small>Coût main-d'œuvre</small><strong id="repairLaborCost">0,00 €</strong></div>
                 <div class="finance-card"><small>Coût réel</small><strong id="repairRealCost">0,00 €</strong></div>
                 <div class="finance-card"><small>Marge estimée</small><strong id="repairMargin">0,00 €</strong></div>
               </div>
@@ -2213,11 +2212,14 @@
       const total = repairLinesTotal();
       document.getElementById("repairLinesTotal").textContent =
         total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
-      document.getElementById("repairPrice").value = total ? total.toFixed(2) : "";
+      const mode = document.getElementById("repairPriceMode")?.value || "TTC";
+      const displayedTotal = mode === "HT" ? total / 1.20 : total;
+      document.getElementById("repairPrice").value = total ? displayedTotal.toFixed(2) : "";
       if(document.getElementById("repairPartsCost")) updateRepairProTotals();
     }
 
     document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
+    document.getElementById("repairPriceMode").addEventListener("change", updateRepairLinesTotal);
 
 
     let currentRepairPhotos = [];
@@ -2277,7 +2279,8 @@
       renderRepairPhotosPreview();
       document.getElementById("repairTechnician").value="";
       document.getElementById("repairMinutes").value="0";
-      document.getElementById("repairHourlyCost").value="25";
+      document.getElementById("repairHourlyCost").value="0";
+      document.getElementById("repairPriceMode").value="TTC";
       clientSignatureData="";
       technicianSignatureData="";
       clientSignaturePad.clear();
@@ -2343,6 +2346,8 @@
         diagnosis: document.getElementById("repairDiagnosis").value.trim(),
         status: document.getElementById("repairStatus").value,
         price: document.getElementById("repairPrice").value,
+        priceMode: document.getElementById("repairPriceMode").value,
+        priceTTC: amountToTTC(document.getElementById("repairPrice").value, document.getElementById("repairPriceMode").value),
         deposit: document.getElementById("repairDeposit").value,
         depositDate: document.getElementById("repairDepositDate").value,
         dueDate: document.getElementById("repairDueDate").value,
@@ -2399,6 +2404,7 @@
       document.getElementById("repairDiagnosis").value = item.diagnosis || "";
       document.getElementById("repairStatus").value = item.status || "En attente";
       document.getElementById("repairPrice").value = item.price || "";
+      document.getElementById("repairPriceMode").value = item.priceMode || "TTC";
       document.getElementById("repairDeposit").value = item.deposit || "";
       document.getElementById("repairDepositDate").value = item.depositDate || "";
       currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
@@ -2406,7 +2412,7 @@
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairTechnician").value=item.technician||"";
       document.getElementById("repairMinutes").value=Number(item.minutes||0);
-      document.getElementById("repairHourlyCost").value=Number(item.hourlyCost||25);
+      document.getElementById("repairHourlyCost").value=0;
       clientSignatureData=item.clientSignature||"";
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
@@ -2453,14 +2459,12 @@
             ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
             : escapeHtml(item.parts || "—"))
         }</div>
-        <div class="detail-box"><small>Prix estimé</small>${escapeHtml(item.price || "0")} €</div>
+        <div class="detail-box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
         <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
         <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-        <div class="detail-box"><small>Temps passé</small>${Number(item.minutes||0)} min</div>
         <div class="detail-box"><small>Coût pièces</small>${formatMoney(item.partsCost||0)}</div>
-        <div class="detail-box"><small>Coût main-d'œuvre</small>${formatMoney(item.laborCost||0)}</div>
         <div class="detail-box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
         <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
@@ -2596,12 +2600,11 @@
                 ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
                 : escapeHtml(item.parts || "—"))
             }</div>
-            <div class="box"><small>Prix estimé</small>${escapeHtml(item.price || "0")} €</div>
+            <div class="box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
             <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
             <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
             <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
             <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-            <div class="box"><small>Temps passé</small>${Number(item.minutes||0)} min</div>
             <div class="box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
             <div class="box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
             <div class="box full"><small>QR Code / Code-barres</small>
@@ -4226,10 +4229,8 @@
         );
         return sum+(match ? getStockPurchaseCostTTC(match)*Number(line.qty||0) : 0);
       },0);
-      const minutes=Number(document.getElementById("repairMinutes").value||0);
-      const hourly=Number(document.getElementById("repairHourlyCost").value||0);
-      const laborCost=(minutes/60)*hourly;
-      const realCost=partsCost+laborCost;
+      const laborCost=0;
+      const realCost=partsCost;
       const sale=repairLinesTotal(lines);
       const margin=sale-realCost;
       return {partsCost,laborCost,realCost,margin};
@@ -4238,13 +4239,10 @@
     function updateRepairProTotals(){
       const p=calculateRepairPro();
       document.getElementById("repairPartsCost").textContent=formatMoney(p.partsCost);
-      document.getElementById("repairLaborCost").textContent=formatMoney(p.laborCost);
       document.getElementById("repairRealCost").textContent=formatMoney(p.realCost);
       document.getElementById("repairMargin").textContent=formatMoney(p.margin);
     }
 
-    document.getElementById("repairMinutes").addEventListener("input",updateRepairProTotals);
-    document.getElementById("repairHourlyCost").addEventListener("input",updateRepairProTotals);
 
     function repairQrUrl(item){
       const payload=`TECH42SERVICE|${item.id}|${item.client}|${item.brand} ${item.model}|${item.status}`;
