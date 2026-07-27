@@ -3111,68 +3111,99 @@
       const item = currentRepairList().find(r => r.id === openedRepairId);
       if(!item) return;
 
+      const historyRows = getRepairHistory(item).slice(0, 5);
+      const dossierPhotos = Array.isArray(item.photos) ? item.photos.slice(0, 3) : [];
       const printWindow = window.open("", "_blank", "width=900,height=700");
       printWindow.document.write(`
         <!DOCTYPE html>
         <html lang="fr">
         <head>
           <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
           <title>${escapeHtml(item.id)}</title>
           <style>
-            body{font-family:Arial,sans-serif;padding:35px;color:#111}
-            h1{margin-bottom:4px}
-            .sub{color:#555;margin-bottom:25px}
-            .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-            .box{border:1px solid #bbb;border-radius:8px;padding:10px}
+            @page{size:A4 portrait;margin:7mm}
+            *{box-sizing:border-box}
+            html,body{margin:0;padding:0;background:#fff;color:#111}
+            body{font-family:Arial,sans-serif;font-size:9.5px;line-height:1.22}
+            .a4-page{width:196mm;max-width:196mm;margin:0 auto;overflow:hidden}
+            .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:4mm;margin-bottom:3mm}
+            h1{font-size:20px;margin:0 0 1mm}
+            .sub{color:#555;font-size:10px}
+            .doc-number{text-align:right;font-weight:700;font-size:11px}
+            .grid{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
+            .box{border:1px solid #aaa;border-radius:4px;padding:2mm;min-height:11mm;overflow-wrap:anywhere}
             .full{grid-column:1/-1}
-            small{display:block;color:#666;margin-bottom:4px}
-            .signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:60px}
-            .signature{border-top:1px solid #333;padding-top:8px}
+            small{display:block;color:#555;font-size:8px;font-weight:700;text-transform:uppercase;margin-bottom:1mm}
+            .codes{display:grid;grid-template-columns:28mm 1fr;gap:5mm;align-items:center}
+            .codes img:first-child{width:25mm;height:25mm}
+            .codes img:last-child{max-width:100%;max-height:18mm}
+            .history{font-size:8.5px;line-height:1.25}
+            .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;margin-top:2mm}
+            .photos img{width:100%;height:24mm;object-fit:cover;border:1px solid #aaa;border-radius:4px}
+            .signatures{display:grid;grid-template-columns:1fr 1fr;gap:12mm;margin-top:5mm}
+            .signature{border-top:1px solid #333;padding-top:2mm;min-height:24mm;font-size:9px}
+            .signature img{display:block;max-width:100%;height:18mm;object-fit:contain;margin-top:1mm}
+            .footer{margin-top:3mm;padding-top:2mm;border-top:1px solid #aaa;color:#555;font-size:7.5px;text-align:center}
+            @media print{.a4-page{page-break-after:avoid;page-break-inside:avoid}}
           </style>
         </head>
         <body>
-          <h1>TECH42SERVICE</h1>
-          <div class="sub">Fiche de prise en charge — ${escapeHtml(item.id)}</div>
-          <div class="grid">
-            <div class="box"><small>Client</small>${escapeHtml(item.client)}</div>
-            <div class="box"><small>Téléphone</small>${escapeHtml(item.phone || "—")}</div>
-            <div class="box"><small>Appareil</small>${escapeHtml(item.deviceType)} — ${escapeHtml(item.brand)} ${escapeHtml(item.model)}</div>
-            <div class="box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
-            <div class="box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
-            <div class="box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
-            <div class="box full"><small>Lignes de réparation</small>${
-              (Array.isArray(item.lines) && item.lines.length
-                ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
-                : escapeHtml(item.parts || "—"))
-            }</div>
-            <div class="box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
-            <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
-            <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
-            <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
-            <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-            <div class="box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
-            <div class="box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
-            <div class="box full"><small>QR Code / Code-barres</small>
-              <div style="display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:center">
-                <img src="${repairQrUrl(item)}" style="width:150px">
-                <img src="${repairBarcodeUrl(item)}" style="max-width:100%">
+          <main id="printPage" class="a4-page">
+            <header class="header">
+              <div>
+                <h1>TECH42SERVICE</h1>
+                <div class="sub">Fiche de prise en charge</div>
               </div>
+              <div class="doc-number">Dossier : ${escapeHtml(item.id)}<br>Date : ${formatDate(item.depositDate)}</div>
+            </header>
+
+            <div class="grid">
+              <div class="box"><small>Client</small>${escapeHtml(item.client)}</div>
+              <div class="box"><small>Téléphone</small>${escapeHtml(item.phone || "—")}</div>
+              <div class="box"><small>Appareil</small>${escapeHtml(item.deviceType)} — ${escapeHtml(item.brand)} ${escapeHtml(item.model)}</div>
+              <div class="box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
+              <div class="box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
+              <div class="box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
+              <div class="box full"><small>Lignes de réparation</small>${
+                (Array.isArray(item.lines) && item.lines.length
+                  ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
+                  : escapeHtml(item.parts || "—"))
+              }</div>
+              <div class="box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
+              <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
+              <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+              <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
+              <div class="box full"><small>Identification du dossier</small>
+                <div class="codes">
+                  <img src="${repairQrUrl(item)}" alt="QR code">
+                  <img src="${repairBarcodeUrl(item)}" alt="Code-barres">
+                </div>
+              </div>
+              ${historyRows.length ? `<div class="box full history"><small>Historique récent</small>${historyRows.map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)}${h.note?` — ${escapeHtml(h.note)}`:""}`).join("<br>")}</div>` : ""}
             </div>
-            <div class="box full"><small>Historique</small>${getRepairHistory(item).map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)} — ${escapeHtml(h.note||"")} (${Number(h.minutes||0)} min)`).join("<br>")||"Aucun historique"}</div>
-          </div>
-          ${(Array.isArray(item.photos) && item.photos.length)
-            ? `<h3>Photos du dossier</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${item.photos.map(photo=>`<img src="${typeof photo==="string"?photo:photo.src}" style="width:100%;height:150px;object-fit:cover;border:1px solid #bbb;border-radius:8px">`).join("")}</div>`
-            : ""}
-          <div class="signatures">
-            <div class="signature">Signature du client<br>${item.clientSignature?`<img src="${item.clientSignature}" style="max-width:100%;height:110px;object-fit:contain">`:""}</div>
-            <div class="signature">Signature TECH42SERVICE<br>${item.technicianSignature?`<img src="${item.technicianSignature}" style="max-width:100%;height:110px;object-fit:contain">`:""}</div>
-          </div>
-          <script>window.onload=()=>window.print();<\/script>
-        <datalist id="clientNamesList"></datalist>
-  <datalist id="deviceBrandsList"></datalist>
-  <datalist id="deviceModelsList"></datalist>
-  <datalist id="stockPartsList"></datalist>
-</body>
+
+            ${dossierPhotos.length ? `<div class="photos">${dossierPhotos.map(photo=>`<img src="${typeof photo==="string"?photo:photo.src}" alt="Photo du dossier">`).join("")}</div>` : ""}
+
+            <div class="signatures">
+              <div class="signature">Signature du client${item.clientSignature?`<img src="${item.clientSignature}" alt="Signature client">`:""}</div>
+              <div class="signature">Signature TECH42SERVICE${item.technicianSignature?`<img src="${item.technicianSignature}" alt="Signature technicien">`:""}</div>
+            </div>
+            <div class="footer">Document de prise en charge client — Les informations internes de coût et de marge ne figurent pas sur ce document.</div>
+          </main>
+          <script>
+            window.onload=()=>{
+              const page=document.getElementById("printPage");
+              const maxHeight=(297-14)*3.7795275591;
+              const currentHeight=page.scrollHeight;
+              if(currentHeight>maxHeight){
+                const scale=Math.max(.72,maxHeight/currentHeight);
+                document.body.style.zoom=String(scale);
+              }
+              setTimeout(()=>window.print(),150);
+            };
+          <\/script>
+        </body>
         </html>
       `);
       printWindow.document.close();
