@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion</title>
+  <title>TECH42SERVICE Gestion — V19.5</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -598,8 +599,6 @@
                   <input id="repairTechnician" type="text" placeholder="Ex. Christophe">
                 </div>
               </div>
-              <input id="repairMinutes" type="hidden" value="0">
-              <input id="repairHourlyCost" type="hidden" value="0">
 
               <div class="repair-finance-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
                 <div class="finance-card"><small>Coût des pièces TTC</small><strong id="repairPartsCost">0,00 €</strong></div>
@@ -2828,8 +2827,6 @@
       currentRepairPhotos = [];
       renderRepairPhotosPreview();
       document.getElementById("repairTechnician").value="";
-      document.getElementById("repairMinutes").value="0";
-      document.getElementById("repairHourlyCost").value="0";
       document.getElementById("repairPriceMode").value="TTC";
       clientSignatureData="";
       technicianSignatureData="";
@@ -2905,8 +2902,6 @@
         lines: getRepairLines(),
         photos: [...currentRepairPhotos],
         technician: document.getElementById("repairTechnician").value.trim(),
-        minutes: Number(document.getElementById("repairMinutes").value||0),
-        hourlyCost: Number(document.getElementById("repairHourlyCost").value||0),
         clientSignature: clientSignatureData,
         technicianSignature: technicianSignatureData,
         history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
@@ -2961,8 +2956,6 @@
       renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairTechnician").value=item.technician||"";
-      document.getElementById("repairMinutes").value=Number(item.minutes||0);
-      document.getElementById("repairHourlyCost").value=0;
       clientSignatureData=item.clientSignature||"";
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
