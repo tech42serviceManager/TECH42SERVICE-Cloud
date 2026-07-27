@@ -389,17 +389,6 @@
     @media(max-width:900px){.dashboard-pro-grid{grid-template-columns:1fr}}
     @media(max-width:520px){.planner-toolbar{align-items:stretch}.planner-nav,.planner-views{width:100%}.planner-nav button,.planner-views button{flex:1}.dashboard-pro-grid{grid-template-columns:1fr}.dash-row{grid-template-columns:70px 1fr}}
 
-    /* V20.1 — Sauvegarde mobile renforcée */
-    .mobile-save-toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10050;padding:12px 16px;border-radius:999px;background:#102518;border:1px solid #245f35;color:#74ef8b;font-weight:800;box-shadow:0 8px 30px #000a;opacity:0;pointer-events:none;transition:.2s opacity,.2s transform}
-    .mobile-save-toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
-    .save-btn.is-saving{opacity:.7;pointer-events:none}
-    @media(max-width:520px){
-      .save-btn{width:100%;min-height:54px;font-size:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-      form .full:has(> .save-btn){position:sticky;bottom:8px;z-index:12;padding:8px;background:linear-gradient(180deg,transparent,#080808 28%);border-radius:12px}
-      .page-actions .save-btn{flex:1 1 100%}
-      input,select,textarea{font-size:16px!important}
-    }
-
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -1766,8 +1755,6 @@
     let cloudLoading = false;
     let cloudAutoSaveStarted = false;
     let cloudDirty = false;
-    let cloudSavePromise = null;
-    let cloudSaveAgain = false;
     let lastCloudJson = "";
     let lastCloudUpdatedAt = "";
 
@@ -1973,74 +1960,70 @@
     }
 
     async function cloudSaveNow(force=false){
-      if(!cloudUser || cloudApplying) return false;
+      if(!cloudUser || cloudApplying || cloudSaving) return false;
       if(!navigator.onLine){
         cloudDirty = true;
-        setCloudStatus("Hors connexion — sauvegarde locale en attente", false);
-        try{ await createLocalBackup("Hors connexion"); }catch(error){ console.error("Sauvegarde locale", error); }
+        setCloudStatus("Hors connexion — sauvegarde en attente", false);
         return false;
       }
 
-      if(cloudSaving){
-        cloudDirty = true;
-        cloudSaveAgain = true;
-        return cloudSavePromise || false;
-      }
+      const state = collectCloudData();
+      const json = JSON.stringify(state);
+      if(!force && !cloudDirty && json === lastCloudJson) return true;
 
-      const runSave = async () => {
-        cloudSaving = true;
-        setCloudSyncing("Sauvegarde en cours…");
-        try{
-          do{
-            cloudSaveAgain = false;
-            const state = collectCloudData();
-            const json = JSON.stringify(state);
-            if(!force && !cloudDirty && json === lastCloudJson) return true;
+      cloudSaving = true;
+      setCloudSyncing("Vérification de la version cloud…");
+      try{
+        const {data:remote, error:readError} = await supabaseClient
+          .from("app_state")
+          .select("updated_at")
+          .eq("user_id", cloudUser.id)
+          .maybeSingle();
+        if(readError) throw readError;
 
-            const updatedAt = new Date().toISOString();
-            const {data, error} = await supabaseClient
-              .from("app_state")
-              .upsert({
-                user_id: cloudUser.id,
-                data: state,
-                updated_at: updatedAt
-              }, {onConflict: "user_id"})
-              .select("updated_at")
-              .single();
-
-            if(error) throw error;
-
-            lastCloudJson = json;
-            lastCloudUpdatedAt = data?.updated_at || updatedAt;
-            cloudDirty = false;
-            force = false;
-          }while(cloudSaveAgain || JSON.stringify(collectCloudData()) !== lastCloudJson);
-
-          const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
-          setCloudStatus(`Sauvegardé à ${savedTime} — PC et mobile synchronisés`, true);
-          try{ await createLocalBackup("Après synchronisation"); }catch(error){ console.error("Sauvegarde locale", error); }
-          return true;
-        }catch(error){
-          console.error("Erreur sauvegarde cloud", error);
+        const remoteUpdatedAt = remote?.updated_at || "";
+        if(lastCloudUpdatedAt && remoteUpdatedAt && remoteUpdatedAt > lastCloudUpdatedAt){
           cloudDirty = true;
-          setCloudStatus("Erreur cloud — données conservées sur cet appareil", false);
-          try{ await createLocalBackup("Erreur cloud"); }catch(backupError){ console.error("Sauvegarde locale", backupError); }
+          setCloudStatus("Version cloud plus récente — synchronisation requise", false);
           return false;
-        }finally{
-          cloudSaving = false;
-          cloudSavePromise = null;
         }
-      };
 
-      cloudSavePromise = runSave();
-      return cloudSavePromise;
+        setCloudSyncing("Sauvegarde…");
+        const updatedAt = new Date().toISOString();
+        const {data, error} = await supabaseClient
+          .from("app_state")
+          .upsert({
+            user_id: cloudUser.id,
+            data: state,
+            updated_at: updatedAt
+          }, {onConflict: "user_id"})
+          .select("updated_at")
+          .single();
+
+        if(error) throw error;
+
+        lastCloudJson = json;
+        lastCloudUpdatedAt = data?.updated_at || updatedAt;
+        cloudDirty = false;
+        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+        setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
+        try{ await createLocalBackup("Après synchronisation"); }catch(backupError){ console.error("Sauvegarde locale", backupError); }
+        return true;
+      }catch(error){
+        console.error("Erreur sauvegarde cloud", error);
+        cloudDirty = true;
+        setCloudStatus("Erreur de sauvegarde", false);
+        return false;
+      }finally{
+        cloudSaving = false;
+      }
     }
 
     function scheduleCloudSave(){
       if(!cloudUser || cloudApplying) return;
       cloudDirty = true;
       clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 450);
+      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 900);
     }
 
     // Toute modification d'une donnée de l'application déclenche une sauvegarde.
@@ -2063,24 +2046,14 @@
       if(cloudAutoSaveStarted) return;
       cloudAutoSaveStarted = true;
 
-      // Contrôle périodique utile sur mobile, où les événements réseau et Realtime
-      // peuvent être suspendus lorsque l'écran se verrouille ou change d'application.
-      cloudPollTimer = setInterval(async () => {
-        if(document.visibilityState !== "visible" || !navigator.onLine || !cloudUser) return;
-        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
-          await cloudSaveNow(false);
-        }
-      }, 12000);
-      window.addEventListener("focus", async () => {
-        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
-        else await cloudFetchLatest(true);
-      });
+      // Pas de sauvegarde ni de lecture cloud périodique : les changements locaux
+      // déclenchent la sauvegarde et Supabase Realtime reçoit les changements distants.
+      window.addEventListener("focus", () => cloudFetchLatest(true));
       document.addEventListener("visibilitychange", async () => {
         if(document.visibilityState === "hidden"){
           await cloudSaveNow(false);
         }else{
-          if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
-          else await cloudFetchLatest(true);
+          await cloudFetchLatest(true);
         }
       });
       window.addEventListener("pagehide", () => cloudSaveNow(false));
@@ -5561,72 +5534,5 @@
     observer.observe(document.body, {subtree:true, childList:true});
   })();
 </script>
-  <div id="mobileSaveToast" class="mobile-save-toast" role="status" aria-live="polite">Enregistré ✓</div>
-  <script>
-  (()=>{
-    const toast=document.getElementById('mobileSaveToast');
-    let toastTimer;
-    const originalLabels=new WeakMap();
-
-    function showMobileSaveToast(message='Enregistré ✓', success=true){
-      if(!toast) return;
-      toast.textContent=message;
-      toast.style.background=success?'#102518':'#2c2108';
-      toast.style.borderColor=success?'#245f35':'#755a13';
-      toast.style.color=success?'#74ef8b':'#ffd66b';
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);
-    }
-    window.showMobileSaveToast=showMobileSaveToast;
-
-    async function confirmRealSave(button){
-      if(button){
-        if(!originalLabels.has(button)) originalLabels.set(button,button.textContent);
-        button.classList.add('is-saving');
-        button.textContent='Sauvegarde…';
-      }
-      try{
-        // Laisse d'abord le gestionnaire du formulaire écrire dans localStorage.
-        await new Promise(resolve=>setTimeout(resolve,180));
-        const synced=typeof cloudSaveNow==='function' ? await cloudSaveNow(false) : false;
-        if(synced){
-          showMobileSaveToast('Enregistré et synchronisé ✓',true);
-        }else if(!navigator.onLine){
-          showMobileSaveToast('Enregistré sur le mobile — synchro en attente',false);
-        }else{
-          showMobileSaveToast('Enregistré localement — synchro à vérifier',false);
-        }
-      }catch(error){
-        console.error('Sauvegarde mobile',error);
-        showMobileSaveToast('Enregistré localement — erreur de synchro',false);
-      }finally{
-        if(button){
-          button.classList.remove('is-saving');
-          button.textContent=originalLabels.get(button)||'Enregistrer';
-          originalLabels.delete(button);
-        }
-      }
-    }
-
-    // Phase bulle : elle intervient après les gestionnaires submit déjà installés.
-    document.addEventListener('submit', event=>{
-      const form=event.target;
-      if(!(form instanceof HTMLFormElement)) return;
-      const button=event.submitter || form.querySelector('.save-btn[type="submit"]');
-      if(!button || !button.classList.contains('save-btn')) return;
-      confirmRealSave(button);
-    },false);
-
-    document.querySelectorAll('.save-btn[type="button"]').forEach(button=>{
-      button.addEventListener('click',()=>confirmRealSave(button));
-    });
-
-    window.addEventListener('online',()=>{
-      if(typeof cloudSaveNow==='function') cloudSaveNow(false);
-    });
-  })();
-  </script>
-
 </body>
 </html>
