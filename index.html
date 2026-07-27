@@ -2833,16 +2833,19 @@
     }
 
     function updateRepairLinesTotal(){
-      const grossTotal = repairLinesTotal();
+      const linesGrossTotal = repairLinesTotal();
+      const repairPriceInput = document.getElementById("repairPrice");
+      const mode = document.getElementById("repairPriceMode")?.value || "TTC";
+      const enteredPriceTTC = amountToTTC(repairPriceInput?.value || 0, mode);
+      // La remise s'applique aux lignes lorsqu'elles existent, sinon au prix global de la réparation.
+      const grossTotal = linesGrossTotal > 0 ? linesGrossTotal : enteredPriceTTC;
       const discount = discountAmountTTC(grossTotal,repairDiscountType,repairDiscountValue);
       const total = Math.max(0,grossTotal-discount);
       document.getElementById("repairLinesTotal").textContent =
         total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       const summary=document.getElementById("repairDiscountSummary");
       if(summary) summary.textContent=discount>0 ? `Remise : ${formatMoney(discount)}` : "Aucune remise";
-      const mode = document.getElementById("repairPriceMode")?.value || "TTC";
       const displayedTotal = mode === "HT" ? total / 1.20 : total;
-      const repairPriceInput = document.getElementById("repairPrice");
       // Ne pas écraser un prix saisi ou déjà enregistré.
       // Le total des lignes sert uniquement de proposition lorsque le champ est vide.
       if(repairPriceInput && !repairPriceInput.value && total){
@@ -2852,6 +2855,7 @@
     }
 
     document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
+    document.getElementById("repairPrice").addEventListener("input", updateRepairLinesTotal);
     document.getElementById("repairPriceMode").addEventListener("change", updateRepairLinesTotal);
     document.getElementById("repairDiscount10Euro").addEventListener("click",()=>setRepairDiscount("fixed",10));
     document.getElementById("repairDiscount10Percent").addEventListener("click",()=>setRepairDiscount("percent",10));
