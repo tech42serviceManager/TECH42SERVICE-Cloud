@@ -2759,7 +2759,12 @@
         total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       const mode = document.getElementById("repairPriceMode")?.value || "TTC";
       const displayedTotal = mode === "HT" ? total / 1.20 : total;
-      document.getElementById("repairPrice").value = total ? displayedTotal.toFixed(2) : "";
+      const repairPriceInput = document.getElementById("repairPrice");
+      // Ne pas écraser un prix saisi ou déjà enregistré.
+      // Le total des lignes sert uniquement de proposition lorsque le champ est vide.
+      if(repairPriceInput && !repairPriceInput.value && total){
+        repairPriceInput.value = displayedTotal.toFixed(2);
+      }
       if(document.getElementById("repairPartsCost")) updateRepairProTotals();
     }
 
