@@ -755,6 +755,7 @@
           </div>
           <div id="repairModalContent" class="repair-details"></div>
           <div class="page-actions" style="margin-top:16px">
+            <button id="previewRepairBtn" class="action-btn secondary">Aperçu de la prise en charge</button>
             <button id="printRepairBtn" class="action-btn">Imprimer la prise en charge</button>
             <button id="repairToIntakeBtn" class="action-btn secondary">Enregistrer la prise en charge</button>
             <button id="repairToQuoteBtn" class="action-btn secondary">Basculer en devis</button>
@@ -933,7 +934,7 @@
         <header class="topbar">
           <div>
             <h1>Documents</h1>
-            <p>Factures, devis et certificats de non-réparabilité</p>
+            <p>Prises en charge, devis, factures et certificats de non-réparabilité</p>
           </div>
         </header>
 
@@ -959,7 +960,7 @@
             </div>
             <div class="doc-pro-card">
               <h3>Document</h3>
-              <div>Facture / Devis / Non-réparabilité</div>
+              <div>Prise en charge / Devis / Facture / Non-réparabilité</div>
               <div>Numérotation automatique</div>
               <div>Prix HT ou TTC par ligne</div>
             </div>
@@ -1253,6 +1254,27 @@
           <div id="appointmentsEmpty" class="empty-state">Aucun rendez-vous enregistré.</div>
         </section>
       </section>
+
+      <div id="appointmentCompleteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="appointmentCompleteTitle">
+        <div class="modal-card appointment-complete-card">
+          <div class="modal-head">
+            <h2 id="appointmentCompleteTitle">Terminer le rendez-vous</h2>
+            <button id="closeAppointmentCompleteModal" class="close-btn" type="button">Fermer</button>
+          </div>
+          <div id="appointmentCompleteSummary" class="appointment-complete-summary"></div>
+          <form id="appointmentCompleteForm" class="appointment-complete-form">
+            <input id="appointmentCompleteId" type="hidden">
+            <div class="field">
+              <label for="appointmentCompleteNote">Note de fin de rendez-vous</label>
+              <textarea id="appointmentCompleteNote" placeholder="Travail réalisé, résultat, suite à prévoir…"></textarea>
+            </div>
+            <div class="appointment-complete-actions">
+              <button id="cancelAppointmentComplete" class="action-btn secondary" type="button">Annuler</button>
+              <button class="save-btn" type="submit">Valider et marquer terminé</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
 
       <section id="clientsPage" class="hidden">
@@ -3372,7 +3394,7 @@
       updateDashboardStats();
     });
 
-    document.getElementById("printRepairBtn").addEventListener("click", () => {
+    function openRepairIntakeDocument(autoPrint=false){
       const item = currentRepairList().find(r => r.id === openedRepairId);
       if(!item) return;
 
@@ -3465,14 +3487,16 @@
                 const scale=Math.max(.72,maxHeight/currentHeight);
                 document.body.style.zoom=String(scale);
               }
-              setTimeout(()=>window.print(),150);
+              if(${autoPrint}) setTimeout(()=>window.print(),150);
             };
           <\/script>
         </body>
         </html>
       `);
       printWindow.document.close();
-    });
+    }
+    document.getElementById("previewRepairBtn").addEventListener("click",()=>openRepairIntakeDocument(false));
+    document.getElementById("printRepairBtn").addEventListener("click",()=>openRepairIntakeDocument(true));
 
 
     const demoStock = [
@@ -3909,7 +3933,8 @@
           <td>${item.type==="non-reparabilite"?"—":totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}</td>
           <td>${escapeHtml(item.status)}</td>
           <td><div class="table-actions">
-            <button class="mini-btn" data-doc-print="${escapeHtml(item.id)}">Voir / Imprimer</button>
+            <button class="mini-btn" data-doc-preview="${escapeHtml(item.id)}">Aperçu</button>
+            <button class="mini-btn" data-doc-print="${escapeHtml(item.id)}">Imprimer</button>
             <button class="mini-btn" data-doc-email="${escapeHtml(item.id)}">E-mail</button>
             ${item.type==="facture"&&activeRole==="admin"?`<button class="mini-btn" data-doc-pay="${escapeHtml(item.id)}">Encaisser</button>`:""}
             ${actions}
@@ -3919,6 +3944,7 @@
       });
 
       empty.classList.toggle("hidden",list.length>0);
+      tbody.querySelectorAll("[data-doc-preview]").forEach(btn=>btn.addEventListener("click",()=>previewDocumentById(btn.dataset.docPreview)));
       tbody.querySelectorAll("[data-doc-print]").forEach(btn=>btn.addEventListener("click",()=>printDocumentById(btn.dataset.docPrint)));
       tbody.querySelectorAll("[data-doc-email]").forEach(btn=>btn.addEventListener("click",()=>emailDocumentById(btn.dataset.docEmail)));
       tbody.querySelectorAll("[data-doc-pay]").forEach(btn=>btn.addEventListener("click",()=>{const d=currentDocuments().find(x=>x.id===btn.dataset.docPay);if(!d)return;showPage("payments");resetPaymentForm();document.getElementById("paymentClient").value=d.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=d.id;const t=calculateDocumentTotals(d.lines||[],d.deposit||0,d.discountType||"none",d.discountValue||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2);showPaymentForm();}));
@@ -4048,6 +4074,11 @@
     document.getElementById("previewCurrentDocumentBtn").addEventListener("click",()=>previewDocument(currentFormDocument()));
     document.getElementById("printCurrentDocumentBtn").addEventListener("click",()=>printDocument(currentFormDocument()));
     document.getElementById("emailCurrentDocumentBtn").addEventListener("click",()=>emailDocument(currentFormDocument()));
+
+    function previewDocumentById(id){
+      const item = currentDocuments().find(d=>d.id===id);
+      if(item) previewDocument(item);
+    }
 
     function printDocumentById(id){
       const item = currentDocuments().find(d=>d.id===id);
@@ -4381,7 +4412,7 @@
             <div class="table-actions">
               <button class="mini-btn" data-appt-google="${escapeHtml(item.id)}">Google Agenda</button>
               ${activeRole==="admin" && item.status!=="Terminé" ? `<button class="mini-btn" data-appt-done="${escapeHtml(item.id)}">Marquer terminé</button>` : ""}
-              ${activeRole==="admin" ? `<button class="mini-btn" data-appt-repair="${escapeHtml(item.id)}">Créer réparation</button>` : ""}
+              ${activeRole==="admin" && !["Terminé","Annulé"].includes(item.status) ? `<button class="mini-btn" data-appt-repair="${escapeHtml(item.id)}">Créer une réparation</button>` : ""}
               ${actions}
             </div>
           </div>
@@ -4451,8 +4482,11 @@
         duration:Number(document.getElementById("appointmentDuration").value||30),
         status:document.getElementById("appointmentStatus").value,
         reason:document.getElementById("appointmentReason").value.trim(),
-        notes:document.getElementById("appointmentNotes").value.trim()
+        notes:document.getElementById("appointmentNotes").value.trim(),
+        completedAt: editId ? (list.find(i=>i.id===editId)?.completedAt || "") : ""
       };
+      if(item.status === "Terminé" && !item.completedAt) item.completedAt = new Date().toISOString();
+      if(item.status !== "Terminé") item.completedAt = "";
 
       if(editId){
         const index = list.findIndex(i=>i.id===editId);
@@ -4487,20 +4521,44 @@
       showAppointmentForm();
     }
 
-    function completeAppointment(id){
+    function openAppointmentCompleteModal(id){
       if(activeRole !== "admin") return;
+      const item=getAdminAppointments().find(i=>i.id===id);
+      if(!item) return;
+      document.getElementById("appointmentCompleteId").value=item.id;
+      document.getElementById("appointmentCompleteNote").value=item.notes||"";
+      document.getElementById("appointmentCompleteSummary").innerHTML=`<strong>${escapeHtml(item.client)}</strong><br>${formatDate(item.date)} à ${escapeHtml(item.time)} · ${escapeHtml(item.device||"Appareil non précisé")}<br>${escapeHtml(item.reason||"")}`;
+      document.getElementById("appointmentCompleteModal").classList.remove("hidden");
+      setTimeout(()=>document.getElementById("appointmentCompleteNote").focus(),80);
+    }
+
+    function closeAppointmentCompleteModal(){
+      document.getElementById("appointmentCompleteModal").classList.add("hidden");
+      document.getElementById("appointmentCompleteForm").reset();
+      document.getElementById("appointmentCompleteId").value="";
+    }
+
+    function completeAppointment(id){ openAppointmentCompleteModal(id); }
+
+    document.getElementById("closeAppointmentCompleteModal").addEventListener("click",closeAppointmentCompleteModal);
+    document.getElementById("cancelAppointmentComplete").addEventListener("click",closeAppointmentCompleteModal);
+    document.getElementById("appointmentCompleteModal").addEventListener("click",event=>{if(event.target.id==="appointmentCompleteModal")closeAppointmentCompleteModal();});
+    document.getElementById("appointmentCompleteForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const id=document.getElementById("appointmentCompleteId").value;
       const list=getAdminAppointments();
       const item=list.find(i=>i.id===id);
       if(!item) return;
-      const note=prompt("Ajoute une note pour ce rendez-vous terminé :", item.notes || "");
-      if(note===null) return;
       item.status="Terminé";
-      item.notes=note.trim();
+      item.notes=document.getElementById("appointmentCompleteNote").value.trim();
       item.completedAt=new Date().toISOString();
       saveAdminAppointments(list);
+      closeAppointmentCompleteModal();
       renderAppointments();
+      try{renderWorkshopPlanner();renderDashboardPro();}catch(error){console.warn(error);}
       updateDashboardStats();
-    }
+    });
 
     function deleteAppointment(id){
       if(activeRole !== "admin") return;
