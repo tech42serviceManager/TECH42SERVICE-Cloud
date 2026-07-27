@@ -315,6 +315,31 @@
     .cloud-sync-badge.online{color:#74ef8b;border-color:#245f35;background:#102518}
     .cloud-sync-badge.offline{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
+    /* V19.8 — Signature client plein écran */
+    .client-sign-module{grid-column:1/-1;background:#101010;border:1px solid var(--border);border-radius:12px;padding:16px}
+    .client-sign-module h3{margin:0 0 8px;color:var(--accent)}
+    .client-sign-module p{margin:0 0 14px;color:var(--muted)}
+    .client-sign-status{display:inline-block;margin-left:10px;padding:7px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:700}
+    .client-sign-status.signed{background:#102518;border-color:#245f35;color:#74ef8b}
+    .client-sign-screen{position:fixed;inset:0;z-index:9999;background:#f5f5f5;color:#111;display:flex;flex-direction:column;padding:clamp(16px,3vw,34px);overflow:auto}
+    .client-sign-header{text-align:center;border-bottom:2px solid #d8b04a;padding-bottom:16px;margin-bottom:18px}
+    .client-sign-header h1{margin:0 0 6px;font-size:clamp(25px,4vw,40px)}
+    .client-sign-header p{margin:0;color:#555}
+    .client-only-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:min(950px,100%);margin:0 auto 18px}
+    .client-only-card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:14px;box-shadow:0 4px 15px #0000000d}
+    .client-only-card small{display:block;color:#666;margin-bottom:5px}
+    .client-only-card strong{font-size:17px}
+    .client-sign-pad{width:min(950px,100%);margin:auto auto 0;background:#fff;border:2px solid #d0d0d0;border-radius:14px;padding:14px}
+    .client-sign-pad label{display:block;font-size:18px;font-weight:800;margin-bottom:10px}
+    .client-sign-pad canvas{display:block;width:100%;height:min(34vh,260px);background:#fff;border:2px dashed #aaa;border-radius:10px;touch-action:none}
+    .client-sign-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+    .client-sign-actions button{min-width:190px;padding:14px 18px;border-radius:10px;font-weight:800;font-size:16px;cursor:pointer}
+    .client-sign-cancel{border:1px solid #999;background:#fff;color:#222}
+    .client-sign-clear{border:1px solid #b44;background:#fff;color:#b22}
+    .client-sign-confirm{border:0;background:#d8a91f;color:#111}
+    .hidden-signature-compat{display:none!important}
+    @media(max-width:620px){.client-only-info{grid-template-columns:1fr}.client-sign-screen{padding:12px}.client-sign-actions button{width:100%}}
+
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -614,24 +639,16 @@
               </div>
             </div>
 
-            <div class="pro-repair-section">
-              <h3>Signatures</h3>
-              <div class="signature-grid">
-                <div class="signature-box">
-                  <label>Signature du client</label>
-                  <canvas id="clientSignatureCanvas" width="520" height="180"></canvas>
-                  <div class="signature-actions">
-                    <button id="clearClientSignature" class="mini-btn danger" type="button">Effacer</button>
-                  </div>
-                </div>
-                <div class="signature-box">
-                  <label>Signature du technicien</label>
-                  <canvas id="technicianSignatureCanvas" width="520" height="180"></canvas>
-                  <div class="signature-actions">
-                    <button id="clearTechnicianSignature" class="mini-btn danger" type="button">Effacer</button>
-                  </div>
-                </div>
-              </div>
+            <div class="client-sign-module">
+              <h3>Signature du client</h3>
+              <p>Le client accède uniquement à ses informations et à la zone de signature.</p>
+              <button id="openClientSignatureBtn" class="action-btn" type="button">Faire signer le client</button>
+              <span id="clientSignatureStatus" class="client-sign-status">Non signé</span>
+            </div>
+
+            <div class="hidden-signature-compat" aria-hidden="true">
+              <canvas id="technicianSignatureCanvas" width="520" height="180"></canvas>
+              <button id="clearTechnicianSignature" type="button">Effacer</button>
             </div>
 
             <div class="field full">
@@ -725,6 +742,23 @@
         </div>
       </div>
 
+
+      <section id="clientSignatureScreen" class="client-sign-screen hidden" aria-modal="true" role="dialog">
+        <header class="client-sign-header">
+          <h1>Signature du client</h1>
+          <p>TECH42SERVICE — Vérifiez vos informations avant de signer.</p>
+        </header>
+        <div id="clientSignatureInfo" class="client-only-info"></div>
+        <div class="client-sign-pad">
+          <label>Signature</label>
+          <canvas id="clientSignatureCanvas" width="1200" height="320"></canvas>
+          <div class="client-sign-actions">
+            <button id="cancelClientSignature" class="client-sign-cancel" type="button">Retour au dossier</button>
+            <button id="clearClientSignature" class="client-sign-clear" type="button">Effacer</button>
+            <button id="confirmClientSignature" class="client-sign-confirm" type="button">Valider la signature</button>
+          </div>
+        </div>
+      </section>
 
       <section id="stockPage" class="hidden">
         <header class="topbar">
@@ -2865,6 +2899,7 @@
       technicianSignatureData="";
       clientSignaturePad.clear();
       technicianSignaturePad.clear();
+      updateClientSignatureStatus();
       document.getElementById("repairLines").innerHTML = "";
       addRepairLine();
       updateRepairLinesTotal();
@@ -2996,6 +3031,7 @@
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
       technicianSignaturePad.load(technicianSignatureData);
+      updateClientSignatureStatus();
       document.getElementById("repairLines").innerHTML = "";
       const existingLines = Array.isArray(item.lines) && item.lines.length
         ? item.lines
@@ -4972,6 +5008,59 @@
       "technicianSignatureCanvas","clearTechnicianSignature",
       value=>technicianSignatureData=value
     );
+
+    function updateClientSignatureStatus(){
+      const status=document.getElementById("clientSignatureStatus");
+      if(!status) return;
+      const signed=Boolean(clientSignatureData);
+      status.textContent=signed ? "Signature enregistrée" : "Non signé";
+      status.classList.toggle("signed",signed);
+    }
+
+    function clientInfoValue(id, fallback="—"){
+      return escapeHtml(document.getElementById(id)?.value?.trim() || fallback);
+    }
+
+    function openClientSignatureScreen(){
+      const screen=document.getElementById("clientSignatureScreen");
+      document.getElementById("clientSignatureInfo").innerHTML=`
+        <div class="client-only-card"><small>Client</small><strong>${clientInfoValue("repairClient")}</strong></div>
+        <div class="client-only-card"><small>Téléphone</small><strong>${clientInfoValue("repairPhone")}</strong></div>
+        <div class="client-only-card"><small>Appareil</small><strong>${clientInfoValue("repairDevice")} — ${clientInfoValue("repairBrand")} ${clientInfoValue("repairModel","")}</strong></div>
+        <div class="client-only-card"><small>IMEI / N° de série</small><strong>${clientInfoValue("repairSerial")}</strong></div>
+        <div class="client-only-card"><small>Panne déclarée</small><strong>${clientInfoValue("repairIssue")}</strong></div>
+        <div class="client-only-card"><small>Prix de la réparation</small><strong>${clientInfoValue("repairPrice","0")} € ${clientInfoValue("repairPriceMode","TTC")}</strong></div>`;
+      screen.classList.remove("hidden");
+      document.body.style.overflow="hidden";
+      clientSignaturePad.load(clientSignatureData);
+    }
+
+    function closeClientSignatureScreen(){
+      document.getElementById("clientSignatureScreen").classList.add("hidden");
+      document.body.style.overflow="";
+      document.getElementById("openClientSignatureBtn")?.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+
+    document.getElementById("openClientSignatureBtn").addEventListener("click",openClientSignatureScreen);
+    document.getElementById("cancelClientSignature").addEventListener("click",closeClientSignatureScreen);
+    document.getElementById("confirmClientSignature").addEventListener("click",()=>{
+      if(!clientSignatureData){
+        alert("Le client doit signer avant de valider.");
+        return;
+      }
+      const editId=document.getElementById("repairEditId").value;
+      if(editId){
+        const repairs=getAdminRepairs();
+        const index=repairs.findIndex(item=>item.id===editId);
+        if(index!==-1){
+          repairs[index].clientSignature=clientSignatureData;
+          saveAdminRepairs(repairs);
+        }
+      }
+      updateClientSignatureStatus();
+      closeClientSignatureScreen();
+    });
+    updateClientSignatureStatus();
 
     function getStockPurchaseCostTTC(stockItem){
       if(!stockItem) return 0;
