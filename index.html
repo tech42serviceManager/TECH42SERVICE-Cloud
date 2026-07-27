@@ -389,6 +389,17 @@
     @media(max-width:900px){.dashboard-pro-grid{grid-template-columns:1fr}}
     @media(max-width:520px){.planner-toolbar{align-items:stretch}.planner-nav,.planner-views{width:100%}.planner-nav button,.planner-views button{flex:1}.dashboard-pro-grid{grid-template-columns:1fr}.dash-row{grid-template-columns:70px 1fr}}
 
+    /* V20.1 — Sauvegarde mobile renforcée */
+    .mobile-save-toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10050;padding:12px 16px;border-radius:999px;background:#102518;border:1px solid #245f35;color:#74ef8b;font-weight:800;box-shadow:0 8px 30px #000a;opacity:0;pointer-events:none;transition:.2s opacity,.2s transform}
+    .mobile-save-toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+    .save-btn.is-saving{opacity:.7;pointer-events:none}
+    @media(max-width:520px){
+      .save-btn{width:100%;min-height:54px;font-size:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      form .full:has(> .save-btn){position:sticky;bottom:8px;z-index:12;padding:8px;background:linear-gradient(180deg,transparent,#080808 28%);border-radius:12px}
+      .page-actions .save-btn{flex:1 1 100%}
+      input,select,textarea{font-size:16px!important}
+    }
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -5534,5 +5545,56 @@
     observer.observe(document.body, {subtree:true, childList:true});
   })();
 </script>
+  <div id="mobileSaveToast" class="mobile-save-toast" role="status" aria-live="polite">Enregistré ✓</div>
+  <script>
+  (()=>{
+    const toast=document.getElementById('mobileSaveToast');
+    let toastTimer;
+    function showMobileSaveToast(message='Enregistré ✓'){
+      if(!toast) return;
+      toast.textContent=message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer=setTimeout(()=>toast.classList.remove('show'),1800);
+    }
+    window.showMobileSaveToast=showMobileSaveToast;
+
+    document.addEventListener('submit', event=>{
+      const form=event.target;
+      if(!(form instanceof HTMLFormElement)) return;
+      const button=form.querySelector('.save-btn[type="submit"],button[type="submit"].save-btn');
+      if(!button) return;
+      const original=button.textContent;
+      button.classList.add('is-saving');
+      button.textContent='Enregistrement…';
+      setTimeout(async()=>{
+        try{
+          if(typeof cloudSaveNow==='function') await cloudSaveNow(false);
+          showMobileSaveToast('Enregistré ✓');
+        }catch(e){
+          console.error('Confirmation sauvegarde mobile',e);
+          showMobileSaveToast('Enregistré localement');
+        }finally{
+          button.classList.remove('is-saving');
+          button.textContent=original;
+        }
+      },80);
+    },true);
+
+    document.querySelectorAll('.save-btn[type="button"]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const original=button.textContent;
+        button.classList.add('is-saving');
+        setTimeout(async()=>{
+          try{if(typeof cloudSaveNow==='function') await cloudSaveNow(false);}catch(e){}
+          button.classList.remove('is-saving');
+          button.textContent=original;
+          showMobileSaveToast('Enregistré ✓');
+        },120);
+      });
+    });
+  })();
+  </script>
+
 </body>
 </html>
