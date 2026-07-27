@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V19.6</title>
+  <title>TECH42SERVICE Gestion — V19.7</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -599,9 +599,11 @@
                 </div>
               </div>
 
-              <div class="repair-finance-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-                <div class="finance-card"><small>Coût des pièces TTC</small><strong id="repairPartsCost">0,00 €</strong></div>
-                <div class="finance-card"><small>Coût réel</small><strong id="repairRealCost">0,00 €</strong></div>
+              <div class="repair-finance-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+                <div class="finance-card">
+                  <small>Coût des pièces TTC</small>
+                  <input id="repairPartsCostInput" type="number" min="0" step="0.01" inputmode="decimal" value="0" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text);font-weight:800">
+                </div>
                 <div class="finance-card"><small>Marge estimée</small><strong id="repairMargin">0,00 €</strong></div>
               </div>
             </div>
@@ -1697,7 +1699,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V19.4 Documents A4</footer>
+      <footer>TECH42SERVICE Gestion — V19.7 Suivi professionnel</footer>
     </main>
   </div>
 
@@ -2850,6 +2852,7 @@
       currentRepairPhotos = [];
       renderRepairPhotosPreview();
       document.getElementById("repairTechnician").value="";
+      document.getElementById("repairPartsCostInput").value="0";
       document.getElementById("repairPriceMode").value="TTC";
       clientSignatureData="";
       technicianSignatureData="";
@@ -2926,6 +2929,7 @@
         lines: getRepairLines(),
         photos: [...currentRepairPhotos],
         technician: document.getElementById("repairTechnician").value.trim(),
+        partsCost: Number(document.getElementById("repairPartsCostInput").value||0),
         clientSignature: clientSignatureData,
         technicianSignature: technicianSignatureData,
         history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
@@ -2940,8 +2944,6 @@
       };
       const pro=calculateRepairPro(item.lines);
       item.partsCost=pro.partsCost;
-      item.laborCost=pro.laborCost;
-      item.realCost=pro.realCost;
       item.margin=pro.margin;
 
       if(editId){
@@ -2980,6 +2982,7 @@
       renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairTechnician").value=item.technician||"";
+      document.getElementById("repairPartsCostInput").value=Number(item.partsCost||0);
       clientSignatureData=item.clientSignature||"";
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
@@ -3033,7 +3036,6 @@
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
         <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
         <div class="detail-box"><small>Coût pièces</small>${formatMoney(item.partsCost||0)}</div>
-        <div class="detail-box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
         <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
         <div class="detail-box full">
@@ -4969,28 +4971,29 @@
     }
 
     function calculateRepairPro(lines=getRepairLines()){
-      const stock=getAdminStock();
-      const partsCost=lines.reduce((sum,line)=>{
-        const match=stock.find(item =>
-          item.id===line.stockId ||
-          String(item.name||"").toLowerCase()===String(line.label||"").toLowerCase()
-        );
-        return sum+(match ? getStockPurchaseCostTTC(match)*Number(line.qty||0) : 0);
-      },0);
-      const laborCost=0;
-      const realCost=partsCost;
-      const sale=repairLinesTotal(lines);
-      const margin=sale-realCost;
-      return {partsCost,laborCost,realCost,margin};
+      const partsCostInput=document.getElementById("repairPartsCostInput");
+      const partsCost=Number(partsCostInput?.value||0);
+      const repairPrice=amountToTTC(
+        document.getElementById("repairPrice")?.value||0,
+        document.getElementById("repairPriceMode")?.value||"TTC"
+      );
+      const linesSale=repairLinesTotal(lines);
+      const sale=repairPrice>0 ? repairPrice : linesSale;
+      const margin=sale-partsCost;
+      return {partsCost,margin};
     }
 
     function updateRepairProTotals(){
       const p=calculateRepairPro();
-      document.getElementById("repairPartsCost").textContent=formatMoney(p.partsCost);
-      document.getElementById("repairRealCost").textContent=formatMoney(p.realCost);
-      document.getElementById("repairMargin").textContent=formatMoney(p.margin);
+      const marginEl=document.getElementById("repairMargin");
+      if(marginEl) marginEl.textContent=formatMoney(p.margin);
     }
 
+
+    ["repairPartsCostInput","repairPrice","repairPriceMode"].forEach(id=>{
+      document.getElementById(id)?.addEventListener("input",updateRepairProTotals);
+      document.getElementById(id)?.addEventListener("change",updateRepairProTotals);
+    });
 
     function repairQrUrl(item){
       const payload=`TECH42SERVICE|${item.id}|${item.client}|${item.brand} ${item.model}|${item.status}`;
