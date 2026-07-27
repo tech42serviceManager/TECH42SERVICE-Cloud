@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V19.8</title>
+  <title>TECH42SERVICE Gestion</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -122,12 +122,7 @@
     .repair-table{width:100%;border-collapse:collapse;margin-top:14px}
     .repair-table th,.repair-table td{padding:12px;border-bottom:1px solid #2a2a2a;text-align:left}
     .repair-table th{color:var(--accent)}
-    .status{display:inline-block;padding:5px 9px;border-radius:999px;background:#26200b;color:#ffd45c;border:1px solid #6d5714;font-size:12px;font-weight:700}
-    .status-red{background:#2b1111;color:#ff8585;border-color:#7a2a2a}
-    .status-orange{background:#2c2108;color:#ffd66b;border-color:#755a13}
-    .status-blue{background:#102033;color:#82bfff;border-color:#355b82}
-    .status-green{background:#102518;color:#74ef8b;border-color:#245f35}
-    .status-grey{background:#202020;color:#c7c7c7;border-color:#555}
+    .status{display:inline-block;padding:5px 9px;border-radius:999px;background:#26200b;color:#ffd45c;border:1px solid #6d5714;font-size:12px}
     .empty-state{color:var(--muted);text-align:center;padding:25px}
     
     .stock-toolbar{display:grid;grid-template-columns:1fr 220px 220px;gap:12px;margin-bottom:14px}
@@ -190,6 +185,8 @@
       width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)
     }
     .repair-total{display:flex;justify-content:flex-end;gap:14px;align-items:center;margin-top:12px;font-size:18px}
+    .discount-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+    .discount-note{color:var(--muted);font-size:13px}
 
     
     .appt-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -315,31 +312,6 @@
     .cloud-sync-badge.online{color:#74ef8b;border-color:#245f35;background:#102518}
     .cloud-sync-badge.offline{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
-    /* V19.8 — Signature client plein écran */
-    .client-sign-module{grid-column:1/-1;background:#101010;border:1px solid var(--border);border-radius:12px;padding:16px}
-    .client-sign-module h3{margin:0 0 8px;color:var(--accent)}
-    .client-sign-module p{margin:0 0 14px;color:var(--muted)}
-    .client-sign-status{display:inline-block;margin-left:10px;padding:7px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:700}
-    .client-sign-status.signed{background:#102518;border-color:#245f35;color:#74ef8b}
-    .client-sign-screen{position:fixed;inset:0;z-index:9999;background:#f5f5f5;color:#111;display:flex;flex-direction:column;padding:clamp(16px,3vw,34px);overflow:auto}
-    .client-sign-header{text-align:center;border-bottom:2px solid #d8b04a;padding-bottom:16px;margin-bottom:18px}
-    .client-sign-header h1{margin:0 0 6px;font-size:clamp(25px,4vw,40px)}
-    .client-sign-header p{margin:0;color:#555}
-    .client-only-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:min(950px,100%);margin:0 auto 18px}
-    .client-only-card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:14px;box-shadow:0 4px 15px #0000000d}
-    .client-only-card small{display:block;color:#666;margin-bottom:5px}
-    .client-only-card strong{font-size:17px}
-    .client-sign-pad{width:min(950px,100%);margin:auto auto 0;background:#fff;border:2px solid #d0d0d0;border-radius:14px;padding:14px}
-    .client-sign-pad label{display:block;font-size:18px;font-weight:800;margin-bottom:10px}
-    .client-sign-pad canvas{display:block;width:100%;height:min(34vh,260px);background:#fff;border:2px dashed #aaa;border-radius:10px;touch-action:none}
-    .client-sign-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-    .client-sign-actions button{min-width:190px;padding:14px 18px;border-radius:10px;font-weight:800;font-size:16px;cursor:pointer}
-    .client-sign-cancel{border:1px solid #999;background:#fff;color:#222}
-    .client-sign-clear{border:1px solid #b44;background:#fff;color:#b22}
-    .client-sign-confirm{border:0;background:#d8a91f;color:#111}
-    .hidden-signature-compat{display:none!important}
-    @media(max-width:620px){.client-only-info{grid-template-columns:1fr}.client-sign-screen{padding:12px}.client-sign-actions button{width:100%}}
-
     footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
 
     @media(max-width:900px){
@@ -417,24 +389,8 @@
       </div>
 
       <button id="loginButton" class="primary" type="submit">Se connecter</button>
-      <button id="forgotPasswordBtn" type="button" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--accent);cursor:pointer">Mot de passe oublié</button>
-      <div id="forgotPasswordMessage" class="error"></div>
       <div id="loginError" class="error"></div>
       <div id="cloudStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">Connexion cloud</div>
-
-      <div id="passwordRecoveryBox" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-        <h2 style="font-size:18px;text-align:center;margin:0 0 12px">Nouveau mot de passe</h2>
-        <div class="field">
-          <label for="recoveryPassword">Nouveau mot de passe</label>
-          <input id="recoveryPassword" type="password" minlength="8" autocomplete="new-password">
-        </div>
-        <div class="field">
-          <label for="recoveryPasswordConfirm">Confirmer</label>
-          <input id="recoveryPasswordConfirm" type="password" minlength="8" autocomplete="new-password">
-        </div>
-        <button id="saveRecoveryPasswordBtn" class="primary" type="button">Enregistrer le nouveau mot de passe</button>
-        <div id="passwordRecoveryMessage" class="error"></div>
-      </div>
     </form>
   </section>
 
@@ -468,7 +424,7 @@
             <p>Bienvenue dans TECH42SERVICE Gestion</p>
           </div>
           <div class="cloud-toolbar">
-            <span id="cloudSyncBadge" class="cloud-sync-badge">Sauvegarde : en attente</span>
+            <span id="cloudSyncBadge" class="cloud-sync-badge">Cloud en attente</span>
             <button id="manualCloudSyncBtn" class="mini-btn" type="button">Synchroniser</button>
           </div>
         </header>
@@ -623,32 +579,34 @@
                   <input id="repairTechnician" type="text" placeholder="Ex. Christophe">
                 </div>
               </div>
+              <input id="repairMinutes" type="hidden" value="0">
+              <input id="repairHourlyCost" type="hidden" value="0">
 
-              <div class="repair-finance-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-                <div class="finance-card">
-                  <small>Coût des pièces</small>
-                  <div style="display:grid;grid-template-columns:1fr 95px;gap:8px">
-                    <input id="repairPartsCostInput" type="number" min="0" step="0.01" inputmode="decimal" value="0" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text);font-weight:800">
-                    <select id="repairPartsCostMode" aria-label="Coût des pièces saisi en HT ou TTC" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)">
-                      <option value="TTC">TTC</option>
-                      <option value="HT">HT</option>
-                    </select>
-                  </div>
-                </div>
+              <div class="repair-finance-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+                <div class="finance-card"><small>Coût des pièces TTC</small><strong id="repairPartsCost">0,00 €</strong></div>
+                <div class="finance-card"><small>Coût réel</small><strong id="repairRealCost">0,00 €</strong></div>
                 <div class="finance-card"><small>Marge estimée</small><strong id="repairMargin">0,00 €</strong></div>
               </div>
             </div>
 
-            <div class="client-sign-module">
-              <h3>Signature du client</h3>
-              <p>Le client accède uniquement à ses informations et à la zone de signature.</p>
-              <button id="openClientSignatureBtn" class="action-btn" type="button">Faire signer le client</button>
-              <span id="clientSignatureStatus" class="client-sign-status">Non signé</span>
-            </div>
-
-            <div class="hidden-signature-compat" aria-hidden="true">
-              <canvas id="technicianSignatureCanvas" width="520" height="180"></canvas>
-              <button id="clearTechnicianSignature" type="button">Effacer</button>
+            <div class="pro-repair-section">
+              <h3>Signatures</h3>
+              <div class="signature-grid">
+                <div class="signature-box">
+                  <label>Signature du client</label>
+                  <canvas id="clientSignatureCanvas" width="520" height="180"></canvas>
+                  <div class="signature-actions">
+                    <button id="clearClientSignature" class="mini-btn danger" type="button">Effacer</button>
+                  </div>
+                </div>
+                <div class="signature-box">
+                  <label>Signature du technicien</label>
+                  <canvas id="technicianSignatureCanvas" width="520" height="180"></canvas>
+                  <div class="signature-actions">
+                    <button id="clearTechnicianSignature" class="mini-btn danger" type="button">Effacer</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="field full">
@@ -681,6 +639,14 @@
               </div>
               <div id="repairLines" class="repair-lines"></div>
               <button id="addRepairLineBtn" class="action-btn secondary" type="button" style="margin-top:10px">Ajouter une ligne au document</button>
+              <input id="repairDiscountType" type="hidden" value="">
+              <input id="repairDiscountValue" type="hidden" value="0">
+              <div class="discount-actions">
+                <button id="repairDiscount10Euro" class="mini-btn" type="button">Remise 10 €</button>
+                <button id="repairDiscount10Percent" class="mini-btn" type="button">Remise 10 %</button>
+                <button id="repairDiscountClear" class="mini-btn danger" type="button">Annuler la remise</button>
+                <span id="repairDiscountLabel" class="discount-note">Aucune remise</span>
+              </div>
               <div class="repair-total">
                 <span>Total estimé TTC :</span>
                 <strong id="repairLinesTotal">0,00 €</strong>
@@ -742,23 +708,6 @@
         </div>
       </div>
 
-
-      <section id="clientSignatureScreen" class="client-sign-screen hidden" aria-modal="true" role="dialog">
-        <header class="client-sign-header">
-          <h1>Signature du client</h1>
-          <p>TECH42SERVICE — Vérifiez vos informations avant de signer.</p>
-        </header>
-        <div id="clientSignatureInfo" class="client-only-info"></div>
-        <div class="client-sign-pad">
-          <label>Signature</label>
-          <canvas id="clientSignatureCanvas" width="1200" height="320"></canvas>
-          <div class="client-sign-actions">
-            <button id="cancelClientSignature" class="client-sign-cancel" type="button">Retour au dossier</button>
-            <button id="clearClientSignature" class="client-sign-clear" type="button">Effacer</button>
-            <button id="confirmClientSignature" class="client-sign-confirm" type="button">Valider la signature</button>
-          </div>
-        </div>
-      </section>
 
       <section id="stockPage" class="hidden">
         <header class="topbar">
@@ -1022,11 +971,15 @@
               </select>
             </div>
 
-            <div id="documentClientSignModule" class="client-sign-module full">
-              <h3>Signature du client</h3>
-              <p>Disponible pour la prise en charge, le devis et la facture.</p>
-              <button id="openDocumentClientSignatureBtn" class="action-btn" type="button">Faire signer le client</button>
-              <span id="documentClientSignatureStatus" class="client-sign-status">Non signé</span>
+            <div class="full">
+              <input id="documentDiscountType" type="hidden" value="">
+              <input id="documentDiscountValue" type="hidden" value="0">
+              <div class="discount-actions">
+                <button id="documentDiscount10Euro" class="mini-btn" type="button">Remise 10 €</button>
+                <button id="documentDiscount10Percent" class="mini-btn" type="button">Remise 10 %</button>
+                <button id="documentDiscountClear" class="mini-btn danger" type="button">Annuler la remise</button>
+                <span id="documentDiscountLabel" class="discount-note">Aucune remise</span>
+              </div>
             </div>
 
             <div class="full document-total">
@@ -1699,41 +1652,25 @@
               <h3>Mot de passe cloud unique</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
-                <input id="newAdminPassword" type="password" minlength="8" required>
+                <input id="newAdminPassword" type="password" minlength="4" required>
               </div>
               <div class="field">
                 <label>Confirmer</label>
-                <input id="confirmAdminPassword" type="password" minlength="8" required>
+                <input id="confirmAdminPassword" type="password" minlength="4" required>
               </div>
               <button class="save-btn" type="submit">Changer le mot de passe</button>
               <div id="adminPasswordMessage"></div>
             </form>
 
-            <div class="settings-card">
-              <h3>Sauvegardes locales de secours</h3>
-              <p style="color:var(--muted);font-size:14px;line-height:1.5">Une copie datée est conservée automatiquement sur cet appareil après chaque modification synchronisée.</p>
-              <div class="field">
-                <label for="localBackupSelect">Copies disponibles</label>
-                <select id="localBackupSelect">
-                  <option value="">Aucune sauvegarde locale</option>
-                </select>
-              </div>
-              <div class="page-actions" style="margin-bottom:0">
-                <button id="createLocalBackupBtn" class="save-btn" type="button">Créer une copie maintenant</button>
-                <button id="restoreLocalBackupBtn" class="action-btn secondary" type="button">Restaurer la copie choisie</button>
-              </div>
-              <div id="localBackupMessage"></div>
-            </div>
-
             <form id="visualPasswordForm" class="settings-card">
               <h3>Compte visuel</h3>
               <div class="field">
                 <label>Nouveau mot de passe</label>
-                <input id="newVisualPassword" type="password" minlength="8" required>
+                <input id="newVisualPassword" type="password" minlength="4" required>
               </div>
               <div class="field">
                 <label>Confirmer</label>
-                <input id="confirmVisualPassword" type="password" minlength="8" required>
+                <input id="confirmVisualPassword" type="password" minlength="4" required>
               </div>
               <button class="save-btn" type="submit">Changer le mot de passe</button>
               <div id="visualPasswordMessage"></div>
@@ -1746,7 +1683,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V19.7 Suivi professionnel</footer>
+      <footer>TECH42SERVICE Gestion — V19.4 Documents A4</footer>
     </main>
   </div>
 
@@ -1790,7 +1727,7 @@
       "tech42-sites-links",
       "tech42-devices",
       "tech42-theme",
-      "tech42-visual-password-hash",
+      "tech42-visual-password",
       "tech42-admin-username",
       "tech42-visual-username"
     ];
@@ -1803,7 +1740,6 @@
     let cloudSaving = false;
     let cloudLoading = false;
     let cloudAutoSaveStarted = false;
-    let cloudDirty = false;
     let lastCloudJson = "";
     let lastCloudUpdatedAt = "";
 
@@ -1835,108 +1771,6 @@
         if(value !== null) data[key] = value;
       });
       return data;
-    }
-
-    const LOCAL_BACKUP_DB = "TECH42SERVICE_LOCAL_BACKUPS";
-    const LOCAL_BACKUP_STORE = "snapshots";
-    const LOCAL_BACKUP_LIMIT = 20;
-    let lastLocalBackupJson = "";
-
-    function openLocalBackupDb(){
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(LOCAL_BACKUP_DB, 1);
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if(!db.objectStoreNames.contains(LOCAL_BACKUP_STORE)){
-            const store = db.createObjectStore(LOCAL_BACKUP_STORE, {keyPath:"id", autoIncrement:true});
-            store.createIndex("createdAt", "createdAt");
-          }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error("Base de sauvegarde locale indisponible"));
-      });
-    }
-
-    async function listLocalBackups(){
-      const db = await openLocalBackupDb();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(LOCAL_BACKUP_STORE, "readonly");
-        const request = tx.objectStore(LOCAL_BACKUP_STORE).getAll();
-        request.onsuccess = () => resolve((request.result || []).sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt))));
-        request.onerror = () => reject(request.error);
-        tx.oncomplete = () => db.close();
-      });
-    }
-
-    async function pruneLocalBackups(){
-      const backups = await listLocalBackups();
-      if(backups.length <= LOCAL_BACKUP_LIMIT) return;
-      const db = await openLocalBackupDb();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction(LOCAL_BACKUP_STORE, "readwrite");
-        const store = tx.objectStore(LOCAL_BACKUP_STORE);
-        backups.slice(LOCAL_BACKUP_LIMIT).forEach(item => store.delete(item.id));
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-      });
-      db.close();
-    }
-
-    async function createLocalBackup(reason="Automatique", force=false){
-      const data = collectCloudData();
-      const json = JSON.stringify(data);
-      if(!force && json === lastLocalBackupJson) return false;
-      const db = await openLocalBackupDb();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction(LOCAL_BACKUP_STORE, "readwrite");
-        tx.objectStore(LOCAL_BACKUP_STORE).add({
-          createdAt:new Date().toISOString(),
-          reason,
-          data
-        });
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-      });
-      db.close();
-      lastLocalBackupJson = json;
-      await pruneLocalBackups();
-      await refreshLocalBackupSelect();
-      return true;
-    }
-
-    async function refreshLocalBackupSelect(){
-      const select = document.getElementById("localBackupSelect");
-      if(!select) return;
-      try{
-        const backups = await listLocalBackups();
-        select.innerHTML = backups.length ? backups.map(item => {
-          const date = new Date(item.createdAt).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"});
-          return `<option value="${item.id}">${date} — ${escapeHtml(item.reason || "Sauvegarde")}</option>`;
-        }).join("") : '<option value="">Aucune sauvegarde locale</option>';
-      }catch(error){
-        console.error("Lecture sauvegardes locales", error);
-        select.innerHTML = '<option value="">Sauvegardes indisponibles</option>';
-      }
-    }
-
-    async function restoreLocalBackup(id){
-      const backupId = Number(id);
-      if(!backupId) throw new Error("Aucune sauvegarde sélectionnée");
-      const db = await openLocalBackupDb();
-      const backup = await new Promise((resolve, reject) => {
-        const tx = db.transaction(LOCAL_BACKUP_STORE, "readonly");
-        const request = tx.objectStore(LOCAL_BACKUP_STORE).get(backupId);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-        tx.oncomplete = () => db.close();
-      });
-      if(!backup || !backup.data) throw new Error("Sauvegarde introuvable");
-      await createLocalBackup("Avant restauration", true);
-      applyCloudData(backup.data);
-      cloudDirty = true;
-      refreshAllCloudModules();
-      await cloudSaveNow(true);
-      return backup;
     }
 
     function applyCloudData(data){
@@ -2009,35 +1843,19 @@
     }
 
     async function cloudSaveNow(force=false){
-      if(!cloudUser || cloudApplying || cloudSaving) return false;
+      if(!cloudUser || cloudApplying || cloudSaving) return;
       if(!navigator.onLine){
-        cloudDirty = true;
         setCloudStatus("Hors connexion — sauvegarde en attente", false);
-        return false;
+        return;
       }
 
       const state = collectCloudData();
       const json = JSON.stringify(state);
-      if(!force && !cloudDirty && json === lastCloudJson) return true;
+      if(!force && json === lastCloudJson) return;
 
       cloudSaving = true;
-      setCloudSyncing("Vérification de la version cloud…");
+      setCloudSyncing("Sauvegarde…");
       try{
-        const {data:remote, error:readError} = await supabaseClient
-          .from("app_state")
-          .select("updated_at")
-          .eq("user_id", cloudUser.id)
-          .maybeSingle();
-        if(readError) throw readError;
-
-        const remoteUpdatedAt = remote?.updated_at || "";
-        if(lastCloudUpdatedAt && remoteUpdatedAt && remoteUpdatedAt > lastCloudUpdatedAt){
-          cloudDirty = true;
-          setCloudStatus("Version cloud plus récente — synchronisation requise", false);
-          return false;
-        }
-
-        setCloudSyncing("Sauvegarde…");
         const updatedAt = new Date().toISOString();
         const {data, error} = await supabaseClient
           .from("app_state")
@@ -2053,16 +1871,10 @@
 
         lastCloudJson = json;
         lastCloudUpdatedAt = data?.updated_at || updatedAt;
-        cloudDirty = false;
-        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
-        setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
-        try{ await createLocalBackup("Après synchronisation"); }catch(backupError){ console.error("Sauvegarde locale", backupError); }
-        return true;
+        setCloudStatus("Sauvegardé sur tous les appareils", true);
       }catch(error){
         console.error("Erreur sauvegarde cloud", error);
-        cloudDirty = true;
         setCloudStatus("Erreur de sauvegarde", false);
-        return false;
       }finally{
         cloudSaving = false;
       }
@@ -2070,9 +1882,8 @@
 
     function scheduleCloudSave(){
       if(!cloudUser || cloudApplying) return;
-      cloudDirty = true;
       clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 900);
+      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 300);
     }
 
     // Toute modification d'une donnée de l'application déclenche une sauvegarde.
@@ -2095,8 +1906,9 @@
       if(cloudAutoSaveStarted) return;
       cloudAutoSaveStarted = true;
 
-      // Pas de sauvegarde ni de lecture cloud périodique : les changements locaux
-      // déclenchent la sauvegarde et Supabase Realtime reçoit les changements distants.
+      setInterval(() => cloudSaveNow(false), 5000);
+      cloudPollTimer = setInterval(() => cloudFetchLatest(true), 8000);
+
       window.addEventListener("focus", () => cloudFetchLatest(true));
       document.addEventListener("visibilitychange", async () => {
         if(document.visibilityState === "hidden"){
@@ -2110,8 +1922,8 @@
       window.addEventListener("offline", () => setCloudStatus("Hors connexion — données conservées", false));
       window.addEventListener("online", async () => {
         setCloudSyncing("Connexion retrouvée…");
-        const remoteChanged = await cloudFetchLatest(true);
-        if(!remoteChanged && cloudDirty) await cloudSaveNow(false);
+        await cloudSaveNow(true);
+        await cloudFetchLatest(true);
       });
     }
 
@@ -2189,42 +2001,8 @@
       return data.user;
     }
 
-    const VISUAL_PASSWORD_SALT = "TECH42SERVICE-VISUEL-V1";
-    const DEFAULT_VISUAL_PASSWORD_HASH = "5b66c72343acbc1de4cd27965d753267d4d5e91b4a243a8d414d2eed6e8f8d03";
-    const VISUAL_PASSWORD_ITERATIONS = 120000;
-
-    function bytesToHex(bytes){
-      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
-    }
-
-    async function hashVisualPassword(value){
-      const encoder = new TextEncoder();
-      const keyMaterial = await crypto.subtle.importKey(
-        "raw", encoder.encode(value), "PBKDF2", false, ["deriveBits"]
-      );
-      const bits = await crypto.subtle.deriveBits({
-        name: "PBKDF2",
-        salt: encoder.encode(VISUAL_PASSWORD_SALT),
-        iterations: VISUAL_PASSWORD_ITERATIONS,
-        hash: "SHA-256"
-      }, keyMaterial, 256);
-      return bytesToHex(new Uint8Array(bits));
-    }
-
-    async function verifyVisualPassword(value){
-      const calculatedHash = await hashVisualPassword(value);
-      const savedHash = localStorage.getItem("tech42-visual-password-hash") || DEFAULT_VISUAL_PASSWORD_HASH;
-      if(calculatedHash === savedHash) return true;
-
-      const legacyPassword = localStorage.getItem("tech42-visual-password");
-      if(legacyPassword && value === legacyPassword){
-        localStorage.setItem("tech42-visual-password-hash", calculatedHash);
-        localStorage.removeItem("tech42-visual-password");
-        scheduleCloudSave();
-        return true;
-      }
-      return false;
-    }
+    const DEFAULT_ADMIN_PASSWORD = "Tech42";
+    const DEFAULT_VISUAL_PASSWORD = "Visuel42";
 
     const loginScreen = document.getElementById("loginScreen");
     const app = document.getElementById("app");
@@ -2232,12 +2010,6 @@
     const accountType = document.getElementById("accountType");
     const password = document.getElementById("password");
     const loginError = document.getElementById("loginError");
-    const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
-    const forgotPasswordMessage = document.getElementById("forgotPasswordMessage");
-    const passwordRecoveryBox = document.getElementById("passwordRecoveryBox");
-    const recoveryPassword = document.getElementById("recoveryPassword");
-    const recoveryPasswordConfirm = document.getElementById("recoveryPasswordConfirm");
-    const passwordRecoveryMessage = document.getElementById("passwordRecoveryMessage");
     const currentUser = document.getElementById("currentUser");
     const readonlyNote = document.getElementById("readonlyNote");
     const dashboardPage = document.getElementById("dashboardPage");
@@ -2268,6 +2040,12 @@
 
     let activeRole = null;
 
+    function getAdminPassword(){
+      return localStorage.getItem("tech42-admin-password") || DEFAULT_ADMIN_PASSWORD;
+    }
+    function getVisualPassword(){
+      return localStorage.getItem("tech42-visual-password") || DEFAULT_VISUAL_PASSWORD;
+    }
     function getAdminUserName(){
       return localStorage.getItem("tech42-admin-username") || "Administrateur";
     }
@@ -2289,70 +2067,6 @@
     }
     refreshUserNames();
 
-    function passwordRecoveryOptions(){
-      return {redirectTo:"https://tech42service.fr/"};
-    }
-
-    forgotPasswordBtn.addEventListener("click", async () => {
-      forgotPasswordMessage.className = "error";
-      forgotPasswordMessage.textContent = "";
-      forgotPasswordBtn.disabled = true;
-      forgotPasswordBtn.textContent = "Envoi en cours…";
-      try{
-        const {error} = await supabaseClient.auth.resetPasswordForEmail(
-          CLOUD_EMAIL,
-          passwordRecoveryOptions()
-        );
-        if(error) throw error;
-        forgotPasswordMessage.className = "notice";
-        forgotPasswordMessage.textContent = `E-mail demandé pour ${CLOUD_EMAIL}. Vérifie aussi les spams.`;
-      }catch(error){
-        console.error("Réinitialisation mot de passe", error);
-        forgotPasswordMessage.className = "error";
-        forgotPasswordMessage.textContent = `Envoi refusé : ${error?.message || "erreur Supabase"}`;
-      }finally{
-        forgotPasswordBtn.disabled = false;
-        forgotPasswordBtn.textContent = "Mot de passe oublié";
-      }
-    });
-
-    document.getElementById("saveRecoveryPasswordBtn").addEventListener("click", async () => {
-      const a = recoveryPassword.value;
-      const b = recoveryPasswordConfirm.value;
-      passwordRecoveryMessage.className = "error";
-      passwordRecoveryMessage.textContent = "";
-      if(a.length < 8){
-        passwordRecoveryMessage.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
-        return;
-      }
-      if(a !== b){
-        passwordRecoveryMessage.textContent = "Les mots de passe ne correspondent pas.";
-        return;
-      }
-      try{
-        const {error} = await supabaseClient.auth.updateUser({password:a});
-        if(error) throw error;
-        passwordRecoveryMessage.className = "notice";
-        passwordRecoveryMessage.textContent = "Mot de passe modifié. Tu peux maintenant te connecter.";
-        recoveryPassword.value = "";
-        recoveryPasswordConfirm.value = "";
-        setTimeout(() => passwordRecoveryBox.classList.add("hidden"), 1600);
-      }catch(error){
-        console.error("Nouveau mot de passe", error);
-        passwordRecoveryMessage.textContent = "Le lien est invalide ou expiré. Demande un nouvel e-mail.";
-      }
-    });
-
-    supabaseClient.auth.onAuthStateChange((event) => {
-      if(event === "PASSWORD_RECOVERY"){
-        accountType.value = "admin";
-        passwordRecoveryBox.classList.remove("hidden");
-        forgotPasswordMessage.className = "notice";
-        forgotPasswordMessage.textContent = "Lien validé. Choisis ton nouveau mot de passe.";
-        setTimeout(() => recoveryPassword.focus(), 50);
-      }
-    });
-
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const role = accountType.value;
@@ -2365,7 +2079,7 @@
 
       try{
         if(role === "visuel"){
-          if(!(await verifyVisualPassword(enteredPassword))){
+          if(enteredPassword !== getVisualPassword()){
             throw new Error("VISUAL_PASSWORD_INVALID");
           }
           setCloudStatus("Mode présentation", true);
@@ -2421,7 +2135,6 @@
       loginError.textContent = "";
       showPage("dashboard");
       renderRepairs();
-      if(role === "admin") unlockRepairFormFields();
       renderStock();
       refreshStockPartsList();
       renderDocuments();
@@ -2498,7 +2211,6 @@
 
       if(page === "settings"){
         refreshUserNames();
-        refreshLocalBackupSelect();
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
         visualSettingsBlocked.classList.toggle("hidden", activeRole === "admin");
       }
@@ -2560,9 +2272,9 @@
         msg.textContent = "Les mots de passe ne correspondent pas.";
         return;
       }
-      if(a.length < 8){
+      if(a.length < 6){
         msg.className = "error";
-        msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+        msg.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
         return;
       }
 
@@ -2578,7 +2290,7 @@
       event.target.reset();
     });
 
-    document.getElementById("visualPasswordForm").addEventListener("submit", async (event) => {
+    document.getElementById("visualPasswordForm").addEventListener("submit", (event) => {
       event.preventDefault();
       const a = document.getElementById("newVisualPassword").value;
       const b = document.getElementById("confirmVisualPassword").value;
@@ -2590,53 +2302,11 @@
         return;
       }
 
-      if(a.length < 8){
-        msg.className = "error";
-        msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
-        return;
-      }
-
-      const passwordHash = await hashVisualPassword(a);
-      localStorage.setItem("tech42-visual-password-hash", passwordHash);
-      localStorage.removeItem("tech42-visual-password");
+      localStorage.setItem("tech42-visual-password", a);
       scheduleCloudSave();
       msg.className = "notice";
-      msg.textContent = "Mot de passe du compte visuel chiffré et modifié.";
+      msg.textContent = "Mot de passe du compte visuel modifié.";
       event.target.reset();
-    });
-
-    document.getElementById("createLocalBackupBtn").addEventListener("click", async () => {
-      const msg = document.getElementById("localBackupMessage");
-      try{
-        await createLocalBackup("Copie manuelle", true);
-        msg.className = "notice";
-        msg.textContent = "Sauvegarde locale datée créée sur cet appareil.";
-      }catch(error){
-        console.error(error);
-        msg.className = "error";
-        msg.textContent = "Impossible de créer la sauvegarde locale.";
-      }
-    });
-
-    document.getElementById("restoreLocalBackupBtn").addEventListener("click", async () => {
-      const select = document.getElementById("localBackupSelect");
-      const msg = document.getElementById("localBackupMessage");
-      if(!select.value){
-        msg.className = "error";
-        msg.textContent = "Choisis une sauvegarde à restaurer.";
-        return;
-      }
-      const label = select.options[select.selectedIndex]?.textContent || "la copie choisie";
-      if(!confirm(`Restaurer ${label} ? Une copie de l’état actuel sera créée avant la restauration.`)) return;
-      try{
-        await restoreLocalBackup(select.value);
-        msg.className = "notice";
-        msg.textContent = "Sauvegarde restaurée et synchronisée.";
-      }catch(error){
-        console.error(error);
-        msg.className = "error";
-        msg.textContent = "La restauration a échoué.";
-      }
     });
 
     const demoRepairs = [
@@ -2707,16 +2377,6 @@
       });
     }
 
-    function statusBadgeClass(status){
-      const value = String(status || "").toLowerCase();
-      if(value.includes("urgent") || value.includes("annulé") || value.includes("annule")) return "status-red";
-      if(value.includes("en attente") || value.includes("pièce commandée") || value.includes("piece commandee") || value.includes("prévu") || value.includes("prevu")) return "status-orange";
-      if(value.includes("diagnostic") || value.includes("en réparation") || value.includes("en reparation")) return "status-blue";
-      if(value.includes("terminé") || value.includes("termine") || value.includes("payé") || value.includes("paye") || value.includes("validé") || value.includes("valide") || value.includes("confirmé") || value.includes("confirme")) return "status-green";
-      if(value.includes("restitué") || value.includes("restitue") || value.includes("clôturé") || value.includes("cloture")) return "status-grey";
-      return "status-orange";
-    }
-
     function renderRepairs(){
       const tbody = document.getElementById("repairTableBody");
       const empty = document.getElementById("repairEmpty");
@@ -2736,7 +2396,7 @@
           <td>${escapeHtml(item.client)}<br><small>${escapeHtml(item.phone || "")}</small></td>
           <td>${escapeHtml(item.brand)} ${escapeHtml(item.model)}</td>
           <td>${escapeHtml(item.issue)}</td>
-          <td><span class="status ${statusBadgeClass(item.status)}">${escapeHtml(item.status)}</span></td>
+          <td><span class="status">${escapeHtml(item.status)}</span></td>
           <td>
             <div class="table-actions">
               <button class="mini-btn" data-view="${escapeHtml(item.id)}">Voir</button>
@@ -2797,27 +2457,44 @@
       })).filter(line=>line.label);
     }
 
-    function repairLinesTotal(lines=getRepairLines()){
-      return lines.reduce((sum,line)=>sum+(Number(line.qty||0)*amountToTTC(line.unit,line.mode||"TTC")),0);
+    function discountAmount(total,type,value){
+      const safeTotal=Math.max(0,Number(total||0));
+      const safeValue=Math.max(0,Number(value||0));
+      if(type==="percent") return Math.min(safeTotal,safeTotal*safeValue/100);
+      if(type==="fixed") return Math.min(safeTotal,safeValue);
+      return 0;
+    }
+
+    function repairLinesTotal(lines=getRepairLines(),discountType=document.getElementById("repairDiscountType")?.value||"",discountValue=Number(document.getElementById("repairDiscountValue")?.value||0)){
+      const gross=lines.reduce((sum,line)=>sum+(Number(line.qty||0)*amountToTTC(line.unit,line.mode||"TTC")),0);
+      return Math.max(0,gross-discountAmount(gross,discountType,discountValue));
+    }
+
+    function setRepairDiscount(type,value){
+      document.getElementById("repairDiscountType").value=type||"";
+      document.getElementById("repairDiscountValue").value=Number(value||0);
+      updateRepairLinesTotal();
     }
 
     function updateRepairLinesTotal(){
-      const total = repairLinesTotal();
-      document.getElementById("repairLinesTotal").textContent =
-        total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      const gross=getRepairLines().reduce((sum,line)=>sum+(Number(line.qty||0)*amountToTTC(line.unit,line.mode||"TTC")),0);
+      const type=document.getElementById("repairDiscountType")?.value||"";
+      const value=Number(document.getElementById("repairDiscountValue")?.value||0);
+      const reduction=discountAmount(gross,type,value);
+      const total=Math.max(0,gross-reduction);
+      document.getElementById("repairLinesTotal").textContent = total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("repairDiscountLabel").textContent = reduction ? `Remise appliquée : -${reduction.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}` : "Aucune remise";
       const mode = document.getElementById("repairPriceMode")?.value || "TTC";
       const displayedTotal = mode === "HT" ? total / 1.20 : total;
-      const repairPriceInput = document.getElementById("repairPrice");
-      // Ne pas écraser un prix saisi ou déjà enregistré.
-      // Le total des lignes sert uniquement de proposition lorsque le champ est vide.
-      if(repairPriceInput && !repairPriceInput.value && total){
-        repairPriceInput.value = displayedTotal.toFixed(2);
-      }
+      document.getElementById("repairPrice").value = total ? displayedTotal.toFixed(2) : "";
       if(document.getElementById("repairPartsCost")) updateRepairProTotals();
     }
 
     document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
     document.getElementById("repairPriceMode").addEventListener("change", updateRepairLinesTotal);
+    document.getElementById("repairDiscount10Euro").addEventListener("click",()=>setRepairDiscount("fixed",10));
+    document.getElementById("repairDiscount10Percent").addEventListener("click",()=>setRepairDiscount("percent",10));
+    document.getElementById("repairDiscountClear").addEventListener("click",()=>setRepairDiscount("",0));
 
 
     let currentRepairPhotos = [];
@@ -2869,29 +2546,6 @@
       });
     });
 
-
-    function unlockRepairFormFields(){
-      if(activeRole !== "admin") return;
-      document.querySelectorAll("#repairForm input,#repairForm select,#repairForm textarea,#repairForm button").forEach(el=>{
-        el.disabled = false;
-        el.readOnly = false;
-        el.removeAttribute("disabled");
-        el.removeAttribute("readonly");
-        el.style.pointerEvents = "auto";
-        el.style.opacity = "1";
-      });
-      const price = document.getElementById("repairPrice");
-      const technician = document.getElementById("repairTechnician");
-      if(price){
-        price.disabled = false;
-        price.readOnly = false;
-      }
-      if(technician){
-        technician.disabled = false;
-        technician.readOnly = false;
-      }
-    }
-
     function resetRepairForm(){
       document.getElementById("repairForm").reset();
       document.getElementById("repairEditId").value = "";
@@ -2899,14 +2553,15 @@
       currentRepairPhotos = [];
       renderRepairPhotosPreview();
       document.getElementById("repairTechnician").value="";
-      document.getElementById("repairPartsCostInput").value="0";
-      document.getElementById("repairPartsCostMode").value="TTC";
+      document.getElementById("repairMinutes").value="0";
+      document.getElementById("repairHourlyCost").value="0";
       document.getElementById("repairPriceMode").value="TTC";
+      document.getElementById("repairDiscountType").value="";
+      document.getElementById("repairDiscountValue").value="0";
       clientSignatureData="";
       technicianSignatureData="";
       clientSignaturePad.clear();
       technicianSignaturePad.clear();
-      updateClientSignatureStatus();
       document.getElementById("repairLines").innerHTML = "";
       addRepairLine();
       updateRepairLinesTotal();
@@ -2921,7 +2576,6 @@
       }
       document.getElementById("repairForm").classList.remove("hidden");
       document.getElementById("cancelRepairBtn").classList.remove("hidden");
-      unlockRepairFormFields();
     }
 
     function hideRepairForm(){
@@ -2971,6 +2625,8 @@
         price: document.getElementById("repairPrice").value,
         priceMode: document.getElementById("repairPriceMode").value,
         priceTTC: amountToTTC(document.getElementById("repairPrice").value, document.getElementById("repairPriceMode").value),
+        discountType: document.getElementById("repairDiscountType").value,
+        discountValue: Number(document.getElementById("repairDiscountValue").value||0),
         deposit: document.getElementById("repairDeposit").value,
         depositDate: document.getElementById("repairDepositDate").value,
         dueDate: document.getElementById("repairDueDate").value,
@@ -2978,8 +2634,8 @@
         lines: getRepairLines(),
         photos: [...currentRepairPhotos],
         technician: document.getElementById("repairTechnician").value.trim(),
-        partsCost: Number(document.getElementById("repairPartsCostInput").value||0),
-        partsCostMode: document.getElementById("repairPartsCostMode").value||"TTC",
+        minutes: Number(document.getElementById("repairMinutes").value||0),
+        hourlyCost: Number(document.getElementById("repairHourlyCost").value||0),
         clientSignature: clientSignatureData,
         technicianSignature: technicianSignatureData,
         history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
@@ -2994,6 +2650,8 @@
       };
       const pro=calculateRepairPro(item.lines);
       item.partsCost=pro.partsCost;
+      item.laborCost=pro.laborCost;
+      item.realCost=pro.realCost;
       item.margin=pro.margin;
 
       if(editId){
@@ -3004,6 +2662,7 @@
       }
 
       saveAdminRepairs(list);
+      syncRepairInvoice(item);
       hideRepairForm();
       renderRepairs();
       updateDashboardStats();
@@ -3026,19 +2685,20 @@
       document.getElementById("repairStatus").value = item.status || "En attente";
       document.getElementById("repairPrice").value = item.price || "";
       document.getElementById("repairPriceMode").value = item.priceMode || "TTC";
+      document.getElementById("repairDiscountType").value=item.discountType||"";
+      document.getElementById("repairDiscountValue").value=Number(item.discountValue||0);
       document.getElementById("repairDeposit").value = item.deposit || "";
       document.getElementById("repairDepositDate").value = item.depositDate || "";
       currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
       renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairTechnician").value=item.technician||"";
-      document.getElementById("repairPartsCostInput").value=Number(item.partsCost||0);
-      document.getElementById("repairPartsCostMode").value=item.partsCostMode||"TTC";
+      document.getElementById("repairMinutes").value=Number(item.minutes||0);
+      document.getElementById("repairHourlyCost").value=0;
       clientSignatureData=item.clientSignature||"";
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
       technicianSignaturePad.load(technicianSignatureData);
-      updateClientSignatureStatus();
       document.getElementById("repairLines").innerHTML = "";
       const existingLines = Array.isArray(item.lines) && item.lines.length
         ? item.lines
@@ -3049,7 +2709,6 @@
       updateRepairProTotals();
       document.getElementById("saveRepairBtn").textContent = "Enregistrer les modifications";
       showRepairForm();
-      unlockRepairFormFields();
       document.getElementById("repairForm").scrollIntoView({behavior:"smooth"});
     }
 
@@ -3088,6 +2747,7 @@
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
         <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
         <div class="detail-box"><small>Coût pièces</small>${formatMoney(item.partsCost||0)}</div>
+        <div class="detail-box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
         <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
         <div class="detail-box full">
@@ -3188,99 +2848,68 @@
       const item = currentRepairList().find(r => r.id === openedRepairId);
       if(!item) return;
 
-      const historyRows = getRepairHistory(item).slice(0, 5);
-      const dossierPhotos = Array.isArray(item.photos) ? item.photos.slice(0, 3) : [];
       const printWindow = window.open("", "_blank", "width=900,height=700");
       printWindow.document.write(`
         <!DOCTYPE html>
         <html lang="fr">
         <head>
           <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width,initial-scale=1">
           <title>${escapeHtml(item.id)}</title>
           <style>
-            @page{size:A4 portrait;margin:7mm}
-            *{box-sizing:border-box}
-            html,body{margin:0;padding:0;background:#fff;color:#111}
-            body{font-family:Arial,sans-serif;font-size:9.5px;line-height:1.22}
-            .a4-page{width:196mm;max-width:196mm;margin:0 auto;overflow:hidden}
-            .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:4mm;margin-bottom:3mm}
-            h1{font-size:20px;margin:0 0 1mm}
-            .sub{color:#555;font-size:10px}
-            .doc-number{text-align:right;font-weight:700;font-size:11px}
-            .grid{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
-            .box{border:1px solid #aaa;border-radius:4px;padding:2mm;min-height:11mm;overflow-wrap:anywhere}
+            body{font-family:Arial,sans-serif;padding:35px;color:#111}
+            h1{margin-bottom:4px}
+            .sub{color:#555;margin-bottom:25px}
+            .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+            .box{border:1px solid #bbb;border-radius:8px;padding:10px}
             .full{grid-column:1/-1}
-            small{display:block;color:#555;font-size:8px;font-weight:700;text-transform:uppercase;margin-bottom:1mm}
-            .codes{display:grid;grid-template-columns:28mm 1fr;gap:5mm;align-items:center}
-            .codes img:first-child{width:25mm;height:25mm}
-            .codes img:last-child{max-width:100%;max-height:18mm}
-            .history{font-size:8.5px;line-height:1.25}
-            .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;margin-top:2mm}
-            .photos img{width:100%;height:24mm;object-fit:cover;border:1px solid #aaa;border-radius:4px}
-            .signatures{display:grid;grid-template-columns:1fr 1fr;gap:12mm;margin-top:5mm}
-            .signature{border-top:1px solid #333;padding-top:2mm;min-height:24mm;font-size:9px}
-            .signature img{display:block;max-width:100%;height:18mm;object-fit:contain;margin-top:1mm}
-            .footer{margin-top:3mm;padding-top:2mm;border-top:1px solid #aaa;color:#555;font-size:7.5px;text-align:center}
-            @media print{.a4-page{page-break-after:avoid;page-break-inside:avoid}}
+            small{display:block;color:#666;margin-bottom:4px}
+            .signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:60px}
+            .signature{border-top:1px solid #333;padding-top:8px}
           </style>
         </head>
         <body>
-          <main id="printPage" class="a4-page">
-            <header class="header">
-              <div>
-                <h1>TECH42SERVICE</h1>
-                <div class="sub">Fiche de prise en charge</div>
+          <h1>TECH42SERVICE</h1>
+          <div class="sub">Fiche de prise en charge — ${escapeHtml(item.id)}</div>
+          <div class="grid">
+            <div class="box"><small>Client</small>${escapeHtml(item.client)}</div>
+            <div class="box"><small>Téléphone</small>${escapeHtml(item.phone || "—")}</div>
+            <div class="box"><small>Appareil</small>${escapeHtml(item.deviceType)} — ${escapeHtml(item.brand)} ${escapeHtml(item.model)}</div>
+            <div class="box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
+            <div class="box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
+            <div class="box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
+            <div class="box full"><small>Lignes de réparation</small>${
+              (Array.isArray(item.lines) && item.lines.length
+                ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
+                : escapeHtml(item.parts || "—"))
+            }</div>
+            <div class="box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
+            <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
+            <div class="box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
+            <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
+            <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
+            <div class="box"><small>Coût réel</small>${formatMoney(item.realCost||0)}</div>
+            <div class="box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
+            <div class="box full"><small>QR Code / Code-barres</small>
+              <div style="display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:center">
+                <img src="${repairQrUrl(item)}" style="width:150px">
+                <img src="${repairBarcodeUrl(item)}" style="max-width:100%">
               </div>
-              <div class="doc-number">Dossier : ${escapeHtml(item.id)}<br>Date : ${formatDate(item.depositDate)}</div>
-            </header>
-
-            <div class="grid">
-              <div class="box"><small>Client</small>${escapeHtml(item.client)}</div>
-              <div class="box"><small>Téléphone</small>${escapeHtml(item.phone || "—")}</div>
-              <div class="box"><small>Appareil</small>${escapeHtml(item.deviceType)} — ${escapeHtml(item.brand)} ${escapeHtml(item.model)}</div>
-              <div class="box"><small>IMEI / N° de série</small>${escapeHtml(item.serial || "—")}</div>
-              <div class="box full"><small>Panne déclarée</small>${escapeHtml(item.issue)}</div>
-              <div class="box full"><small>Diagnostic</small>${escapeHtml(item.diagnosis || "—")}</div>
-              <div class="box full"><small>Lignes de réparation</small>${
-                (Array.isArray(item.lines) && item.lines.length
-                  ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
-                  : escapeHtml(item.parts || "—"))
-              }</div>
-              <div class="box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
-              <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
-              <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
-              <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-              <div class="box full"><small>Identification du dossier</small>
-                <div class="codes">
-                  <img src="${repairQrUrl(item)}" alt="QR code">
-                  <img src="${repairBarcodeUrl(item)}" alt="Code-barres">
-                </div>
-              </div>
-              ${historyRows.length ? `<div class="box full history"><small>Historique récent</small>${historyRows.map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)}${h.note?` — ${escapeHtml(h.note)}`:""}`).join("<br>")}</div>` : ""}
             </div>
-
-            ${dossierPhotos.length ? `<div class="photos">${dossierPhotos.map(photo=>`<img src="${typeof photo==="string"?photo:photo.src}" alt="Photo du dossier">`).join("")}</div>` : ""}
-
-            <div class="signatures">
-              <div class="signature">Signature du client${item.clientSignature?`<img src="${item.clientSignature}" alt="Signature client">`:""}</div>
-              <div class="signature">Signature TECH42SERVICE${item.technicianSignature?`<img src="${item.technicianSignature}" alt="Signature technicien">`:""}</div>
-            </div>
-            <div class="footer">Document de prise en charge client — Les informations internes de coût et de marge ne figurent pas sur ce document.</div>
-          </main>
-          <script>
-            window.onload=()=>{
-              const page=document.getElementById("printPage");
-              const maxHeight=(297-14)*3.7795275591;
-              const currentHeight=page.scrollHeight;
-              if(currentHeight>maxHeight){
-                const scale=Math.max(.72,maxHeight/currentHeight);
-                document.body.style.zoom=String(scale);
-              }
-              setTimeout(()=>window.print(),150);
-            };
-          <\/script>
-        </body>
+            <div class="box full"><small>Historique</small>${getRepairHistory(item).map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)} — ${escapeHtml(h.note||"")} (${Number(h.minutes||0)} min)`).join("<br>")||"Aucun historique"}</div>
+          </div>
+          ${(Array.isArray(item.photos) && item.photos.length)
+            ? `<h3>Photos du dossier</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${item.photos.map(photo=>`<img src="${typeof photo==="string"?photo:photo.src}" style="width:100%;height:150px;object-fit:cover;border:1px solid #bbb;border-radius:8px">`).join("")}</div>`
+            : ""}
+          <div class="signatures">
+            <div class="signature">Signature du client<br>${item.clientSignature?`<img src="${item.clientSignature}" style="max-width:100%;height:110px;object-fit:contain">`:""}</div>
+            <div class="signature">Signature TECH42SERVICE<br>${item.technicianSignature?`<img src="${item.technicianSignature}" style="max-width:100%;height:110px;object-fit:contain">`:""}</div>
+          </div>
+          <script>window.onload=()=>window.print();<\/script>
+        <datalist id="clientNamesList"></datalist>
+  <datalist id="deviceBrandsList"></datalist>
+  <datalist id="deviceModelsList"></datalist>
+  <datalist id="stockPartsList"></datalist>
+</body>
         </html>
       `);
       printWindow.document.close();
@@ -3617,20 +3246,31 @@
       })).filter(line=>line.label);
     }
 
-    function calculateDocumentTotals(lines,deposit=0){
-      const totalHT = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*amountToHT(l.unit,l.mode||"TTC")),0);
-      const totalTTC = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*amountToTTC(l.unit,l.mode||"TTC")),0);
+    function calculateDocumentTotals(lines,deposit=0,discountType="",discountValue=0){
+      const grossHT = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*amountToHT(l.unit,l.mode||"TTC")),0);
+      const grossTTC = lines.reduce((sum,l)=>sum+(Number(l.qty||0)*amountToTTC(l.unit,l.mode||"TTC")),0);
+      const reduction=discountAmount(grossTTC,discountType,discountValue);
+      const ratio=grossTTC>0?(grossTTC-reduction)/grossTTC:1;
+      const totalHT=grossHT*ratio;
+      const totalTTC=Math.max(0,grossTTC-reduction);
       const tax = totalTTC - totalHT;
-      return {subtotal:totalHT,tax,total:totalTTC,balance:Math.max(0,totalTTC-Number(deposit||0))};
+      return {subtotal:totalHT,tax,total:totalTTC,balance:Math.max(0,totalTTC-Number(deposit||0)),discount:reduction};
+    }
+
+    function setDocumentDiscount(type,value){
+      document.getElementById("documentDiscountType").value=type||"";
+      document.getElementById("documentDiscountValue").value=Number(value||0);
+      updateDocumentTotals();
     }
 
     function updateDocumentTotals(){
-      const totals = calculateDocumentTotals(getDocumentLines(),document.getElementById("documentDeposit").value);
+      const totals = calculateDocumentTotals(getDocumentLines(),document.getElementById("documentDeposit").value,document.getElementById("documentDiscountType").value,document.getElementById("documentDiscountValue").value);
       document.getElementById("documentSubtotal").textContent = totals.subtotal.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       document.getElementById("documentTax").textContent = totals.tax.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       
       document.getElementById("documentGrandTotal").textContent = totals.total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       document.getElementById("documentBalance").textContent = totals.balance.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+      document.getElementById("documentDiscountLabel").textContent = totals.discount ? `Remise appliquée : -${totals.discount.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}` : "Aucune remise";
     }
 
     function nextDocumentNumber(type,list){
@@ -3652,7 +3292,6 @@
       document.getElementById("nonRepairBlock").classList.toggle("hidden",!nonRepair);
       document.getElementById("documentDeposit").closest(".field").classList.toggle("hidden",nonRepair);
       document.querySelector(".document-total").classList.toggle("hidden",nonRepair||intake);
-      document.getElementById("documentClientSignModule").classList.toggle("hidden",nonRepair);
       if(!document.getElementById("documentEditId").value){
         document.getElementById("documentNumber").value = nextDocumentNumber(type,getAdminDocuments());
       }
@@ -3662,15 +3301,17 @@
     document.querySelectorAll(".document-tab").forEach(btn=>btn.addEventListener("click",()=>setDocumentType(btn.dataset.docType)));
     document.getElementById("addDocumentLine").addEventListener("click",()=>addDocumentLine());
     document.getElementById("documentDeposit").addEventListener("input",updateDocumentTotals);
+    document.getElementById("documentDiscount10Euro").addEventListener("click",()=>setDocumentDiscount("fixed",10));
+    document.getElementById("documentDiscount10Percent").addEventListener("click",()=>setDocumentDiscount("percent",10));
+    document.getElementById("documentDiscountClear").addEventListener("click",()=>setDocumentDiscount("",0));
 
     function resetDocumentForm(){
       document.getElementById("documentForm").reset();
       document.getElementById("documentEditId").value = "";
       document.getElementById("documentDate").value = new Date().toISOString().slice(0,10);
       document.getElementById("documentLines").innerHTML = "";
-      documentClientSignatureData="";
-      clientSignaturePad.clear();
-      updateDocumentClientSignatureStatus();
+      document.getElementById("documentDiscountType").value="";
+      document.getElementById("documentDiscountValue").value="0";
       addDocumentLine();
       setDocumentType("facture");
       document.getElementById("saveDocumentBtn").textContent = "Enregistrer";
@@ -3683,6 +3324,24 @@
 
     document.getElementById("resetDocumentBtn").addEventListener("click",resetDocumentForm);
 
+    function syncRepairInvoice(repair){
+      if(activeRole!=="admin"||!repair) return;
+      const docs=getAdminDocuments();
+      const existingIndex=docs.findIndex(d=>d.type==="facture"&&d.repairId===repair.id);
+      const existing=existingIndex>=0?docs[existingIndex]:null;
+      if(existing && ["Payé","Accepté"].includes(existing.status)) return;
+      const lines=(repair.lines||[]).length ? repair.lines.map(l=>({label:l.label,qty:Number(l.qty||0),unit:Number(l.unit||0),mode:l.mode||"TTC",tax:0})) : [{label:`Réparation ${repair.brand||""} ${repair.model||""}`.trim(),qty:1,unit:Number(repair.price||0),mode:repair.priceMode||"TTC",tax:0}];
+      const invoice={
+        ...(existing||{}), id:existing?.id||`DOC-${Date.now()}`, repairId:repair.id, clientId:repair.clientId||"", type:"facture",
+        number:existing?.number||nextDocumentNumber("facture",docs), date:new Date().toISOString().slice(0,10), client:repair.client||"", contact:repair.phone||"",
+        subject:`Réparation ${repair.id} - ${repair.brand||""} ${repair.model||""}`.trim(), deviceType:repair.deviceType||"", brand:repair.brand||"", model:repair.model||"", serial:repair.serial||"",
+        diagnosis:repair.diagnosis||"", fault:repair.issue||"", lines, reason:"", deposit:Number(repair.deposit||0), discountType:repair.discountType||"", discountValue:Number(repair.discountValue||0), status:existing?.status||"Brouillon"
+      };
+      if(existingIndex>=0) docs[existingIndex]=invoice; else docs.unshift(invoice);
+      saveAdminDocuments(docs);
+      try{renderDocuments();}catch(error){console.warn(error);}
+    }
+
     function renderDocuments(){
       const tbody = document.getElementById("documentsTableBody");
       const empty = document.getElementById("documentsEmpty");
@@ -3690,7 +3349,7 @@
       tbody.innerHTML = "";
 
       list.forEach(item=>{
-        const totals = calculateDocumentTotals(item.lines||[],item.deposit||0);
+        const totals = calculateDocumentTotals(item.lines||[],item.deposit||0,item.discountType||"",item.discountValue||0);
         const typeLabel = item.type==="facture"?"Facture":item.type==="devis"?"Devis":item.type==="prise-en-charge"?"Prise en charge":"Non-réparabilité";
         const actions = activeRole === "admin"
           ? `<button class="mini-btn" data-doc-edit="${escapeHtml(item.id)}">Modifier</button>
@@ -3718,7 +3377,7 @@
       empty.classList.toggle("hidden",list.length>0);
       tbody.querySelectorAll("[data-doc-print]").forEach(btn=>btn.addEventListener("click",()=>printDocumentById(btn.dataset.docPrint)));
       tbody.querySelectorAll("[data-doc-email]").forEach(btn=>btn.addEventListener("click",()=>emailDocumentById(btn.dataset.docEmail)));
-      tbody.querySelectorAll("[data-doc-pay]").forEach(btn=>btn.addEventListener("click",()=>{const d=currentDocuments().find(x=>x.id===btn.dataset.docPay);if(!d)return;showPage("payments");resetPaymentForm();document.getElementById("paymentClient").value=d.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=d.id;const t=calculateDocumentTotals(d.lines||[],d.deposit||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2);showPaymentForm();}));
+      tbody.querySelectorAll("[data-doc-pay]").forEach(btn=>btn.addEventListener("click",()=>{const d=currentDocuments().find(x=>x.id===btn.dataset.docPay);if(!d)return;showPage("payments");resetPaymentForm();document.getElementById("paymentClient").value=d.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=d.id;const t=calculateDocumentTotals(d.lines||[],d.deposit||0,d.discountType||"",d.discountValue||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2);showPaymentForm();}));
       tbody.querySelectorAll("[data-doc-edit]").forEach(btn=>btn.addEventListener("click",()=>editDocument(btn.dataset.docEdit)));
       tbody.querySelectorAll("[data-doc-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteDocument(btn.dataset.docDelete)));
     }
@@ -3749,8 +3408,9 @@
         lines:(type==="non-reparabilite"||type==="prise-en-charge")?[]:getDocumentLines(),
         reason:document.getElementById("nonRepairReason").value.trim(),
         deposit:Number(document.getElementById("documentDeposit").value||0),
-        status:document.getElementById("documentStatus").value,
-        clientSignature:documentClientSignatureData
+        discountType:document.getElementById("documentDiscountType").value,
+        discountValue:Number(document.getElementById("documentDiscountValue").value||0),
+        status:document.getElementById("documentStatus").value
       };
 
       if(editId){
@@ -3788,9 +3448,9 @@
       document.getElementById("documentFault").value=item.fault||"";
       document.getElementById("nonRepairReason").value=item.reason||"";
       document.getElementById("documentDeposit").value=item.deposit||0;
+      document.getElementById("documentDiscountType").value=item.discountType||"";
+      document.getElementById("documentDiscountValue").value=Number(item.discountValue||0);
       document.getElementById("documentStatus").value=item.status||"Brouillon";
-      documentClientSignatureData=item.clientSignature||"";
-      updateDocumentClientSignatureStatus();
       document.getElementById("documentLines").innerHTML="";
       (item.lines||[]).forEach(addDocumentLine);
       if(!(item.lines||[]).length && !["non-reparabilite","prise-en-charge"].includes(item.type)) addDocumentLine();
@@ -3826,8 +3486,9 @@
         lines:["non-reparabilite","prise-en-charge"].includes(document.getElementById("documentType").value)?[]:getDocumentLines(),
         reason:document.getElementById("nonRepairReason").value.trim(),
         deposit:Number(document.getElementById("documentDeposit").value||0),
-        status:document.getElementById("documentStatus").value,
-        clientSignature:documentClientSignatureData
+        discountType:document.getElementById("documentDiscountType").value,
+        discountValue:Number(document.getElementById("documentDiscountValue").value||0),
+        status:document.getElementById("documentStatus").value
       };
     }
 
@@ -3859,7 +3520,7 @@
     function documentPrintableContent(item){
       const templates=getDocumentTemplates();
       const t=templates[item.type]||templates.facture;
-      const totals=calculateDocumentTotals(item.lines||[],item.deposit||0);
+      const totals=calculateDocumentTotals(item.lines||[],item.deposit||0,item.discountType||"",item.discountValue||0);
       const device=[item.deviceType,item.brand,item.model].filter(Boolean).join(" — ")||"Non précisé";
       const linesHtml=(item.lines||[]).map(line=>{
         const qty=Number(line.qty||0);
@@ -3918,7 +3579,7 @@
             <div class="doc-grid"><div><small>Nom</small><strong>${escapeHtml(item.client||"—")}</strong></div><div><small>Contact</small><strong>${escapeHtml(item.contact||"—")}</strong></div><div class="wide"><small>Objet</small>${escapeHtml(item.subject||"—")}</div></div>
           </section>
           ${main}
-          <div class="signatures"><div><span>Signature du client</span>${item.clientSignature?`<img class="signature-image" src="${item.clientSignature}" alt="Signature du client">`:""}</div><div><span>Signature et cachet TECH42SERVICE</span></div></div>
+          <div class="signatures"><div><span>Signature du client</span></div><div><span>Signature et cachet TECH42SERVICE</span></div></div>
           <footer>${escapeHtml(t.footer||"")}</footer>
         </div>`;
     }
@@ -4954,8 +4615,6 @@
 
 
     let clientSignatureData = "";
-    let documentClientSignatureData = "";
-    let clientSignatureContext = "repair";
     let technicianSignatureData = "";
 
     function setupSignatureCanvas(canvasId, clearButtonId, setter){
@@ -5019,104 +4678,12 @@
 
     const clientSignaturePad=setupSignatureCanvas(
       "clientSignatureCanvas","clearClientSignature",
-      value=>{
-        if(clientSignatureContext==="document") documentClientSignatureData=value;
-        else clientSignatureData=value;
-      }
+      value=>clientSignatureData=value
     );
     const technicianSignaturePad=setupSignatureCanvas(
       "technicianSignatureCanvas","clearTechnicianSignature",
       value=>technicianSignatureData=value
     );
-
-    function updateClientSignatureStatus(){
-      const status=document.getElementById("clientSignatureStatus");
-      if(!status) return;
-      const signed=Boolean(clientSignatureData);
-      status.textContent=signed ? "Signature enregistrée" : "Non signé";
-      status.classList.toggle("signed",signed);
-    }
-
-    function updateDocumentClientSignatureStatus(){
-      const status=document.getElementById("documentClientSignatureStatus");
-      if(!status) return;
-      const signed=Boolean(documentClientSignatureData);
-      status.textContent=signed ? "Signature enregistrée" : "Non signé";
-      status.classList.toggle("signed",signed);
-    }
-
-    function clientInfoValue(id, fallback="—"){
-      return escapeHtml(document.getElementById(id)?.value?.trim() || fallback);
-    }
-
-    function openClientSignatureScreen(context="repair"){
-      clientSignatureContext=context;
-      const screen=document.getElementById("clientSignatureScreen");
-      const isDocument=context==="document";
-      const type=document.getElementById("documentType")?.value||"facture";
-      const typeLabel=documentTypeLabel(type);
-      document.querySelector("#clientSignatureScreen .client-sign-header h1").textContent=isDocument?`Signature du client — ${typeLabel}`:"Signature du client";
-      document.getElementById("clientSignatureInfo").innerHTML=isDocument?`
-        <div class="client-only-card"><small>Document</small><strong>${escapeHtml(typeLabel)}</strong></div>
-        <div class="client-only-card"><small>Numéro</small><strong>${clientInfoValue("documentNumber")}</strong></div>
-        <div class="client-only-card"><small>Client</small><strong>${clientInfoValue("documentClient")}</strong></div>
-        <div class="client-only-card"><small>Contact</small><strong>${clientInfoValue("documentContact")}</strong></div>
-        <div class="client-only-card"><small>Objet</small><strong>${clientInfoValue("documentSubject")}</strong></div>
-        <div class="client-only-card"><small>Appareil</small><strong>${clientInfoValue("documentDeviceType")} — ${clientInfoValue("documentBrand","")} ${clientInfoValue("documentModel","")}</strong></div>`:`
-        <div class="client-only-card"><small>Client</small><strong>${clientInfoValue("repairClient")}</strong></div>
-        <div class="client-only-card"><small>Téléphone</small><strong>${clientInfoValue("repairPhone")}</strong></div>
-        <div class="client-only-card"><small>Appareil</small><strong>${clientInfoValue("repairDevice")} — ${clientInfoValue("repairBrand")} ${clientInfoValue("repairModel","")}</strong></div>
-        <div class="client-only-card"><small>IMEI / N° de série</small><strong>${clientInfoValue("repairSerial")}</strong></div>
-        <div class="client-only-card"><small>Panne déclarée</small><strong>${clientInfoValue("repairIssue")}</strong></div>
-        <div class="client-only-card"><small>Prix de la réparation</small><strong>${clientInfoValue("repairPrice","0")} € ${clientInfoValue("repairPriceMode","TTC")}</strong></div>`;
-      screen.classList.remove("hidden");
-      document.body.style.overflow="hidden";
-      clientSignaturePad.load(isDocument?documentClientSignatureData:clientSignatureData);
-    }
-
-    function closeClientSignatureScreen(){
-      document.getElementById("clientSignatureScreen").classList.add("hidden");
-      document.body.style.overflow="";
-      const returnButton=clientSignatureContext==="document"?document.getElementById("openDocumentClientSignatureBtn"):document.getElementById("openClientSignatureBtn");
-      returnButton?.scrollIntoView({behavior:"smooth",block:"center"});
-    }
-
-    document.getElementById("openClientSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("repair"));
-    document.getElementById("openDocumentClientSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("document"));
-    document.getElementById("cancelClientSignature").addEventListener("click",closeClientSignatureScreen);
-    document.getElementById("confirmClientSignature").addEventListener("click",()=>{
-      const currentData=clientSignatureContext==="document"?documentClientSignatureData:clientSignatureData;
-      if(!currentData){
-        alert("Le client doit signer avant de valider.");
-        return;
-      }
-      if(clientSignatureContext==="document"){
-        const editId=document.getElementById("documentEditId").value;
-        if(editId){
-          const documents=getAdminDocuments();
-          const index=documents.findIndex(item=>item.id===editId);
-          if(index!==-1){
-            documents[index].clientSignature=documentClientSignatureData;
-            saveAdminDocuments(documents);
-          }
-        }
-        updateDocumentClientSignatureStatus();
-      }else{
-        const editId=document.getElementById("repairEditId").value;
-        if(editId){
-          const repairs=getAdminRepairs();
-          const index=repairs.findIndex(item=>item.id===editId);
-          if(index!==-1){
-            repairs[index].clientSignature=clientSignatureData;
-            saveAdminRepairs(repairs);
-          }
-        }
-        updateClientSignatureStatus();
-      }
-      closeClientSignatureScreen();
-    });
-    updateClientSignatureStatus();
-    updateDocumentClientSignatureStatus();
 
     function getStockPurchaseCostTTC(stockItem){
       if(!stockItem) return 0;
@@ -5125,30 +4692,28 @@
     }
 
     function calculateRepairPro(lines=getRepairLines()){
-      const partsCostInput=document.getElementById("repairPartsCostInput");
-      const partsCostMode=document.getElementById("repairPartsCostMode")?.value||"TTC";
-      const partsCost=amountToTTC(Number(partsCostInput?.value||0),partsCostMode);
-      const repairPrice=amountToTTC(
-        document.getElementById("repairPrice")?.value||0,
-        document.getElementById("repairPriceMode")?.value||"TTC"
-      );
-      const linesSale=repairLinesTotal(lines);
-      const sale=repairPrice>0 ? repairPrice : linesSale;
-      const margin=sale-partsCost;
-      return {partsCost,margin};
+      const stock=getAdminStock();
+      const partsCost=lines.reduce((sum,line)=>{
+        const match=stock.find(item =>
+          item.id===line.stockId ||
+          String(item.name||"").toLowerCase()===String(line.label||"").toLowerCase()
+        );
+        return sum+(match ? getStockPurchaseCostTTC(match)*Number(line.qty||0) : 0);
+      },0);
+      const laborCost=0;
+      const realCost=partsCost;
+      const sale=repairLinesTotal(lines);
+      const margin=sale-realCost;
+      return {partsCost,laborCost,realCost,margin};
     }
 
     function updateRepairProTotals(){
       const p=calculateRepairPro();
-      const marginEl=document.getElementById("repairMargin");
-      if(marginEl) marginEl.textContent=formatMoney(p.margin);
+      document.getElementById("repairPartsCost").textContent=formatMoney(p.partsCost);
+      document.getElementById("repairRealCost").textContent=formatMoney(p.realCost);
+      document.getElementById("repairMargin").textContent=formatMoney(p.margin);
     }
 
-
-    ["repairPartsCostInput","repairPartsCostMode","repairPrice","repairPriceMode"].forEach(id=>{
-      document.getElementById(id)?.addEventListener("input",updateRepairProTotals);
-      document.getElementById(id)?.addEventListener("change",updateRepairProTotals);
-    });
 
     function repairQrUrl(item){
       const payload=`TECH42SERVICE|${item.id}|${item.client}|${item.brand} ${item.model}|${item.status}`;
@@ -5249,7 +4814,7 @@
     }
 
     function invoiceTotal(documentItem){
-      return calculateDocumentTotals(documentItem?.lines||[],documentItem?.deposit||0).total;
+      return calculateDocumentTotals(documentItem?.lines||[],documentItem?.deposit||0,documentItem?.discountType||"",documentItem?.discountValue||0).total;
     }
 
     function updateInvoiceFromPayments(documentId){
@@ -5321,7 +4886,7 @@
       const client=document.getElementById("paymentClient").value.trim().toLowerCase();
       const current=select.value;
       const invoices=currentDocuments().filter(d=>d.type==="facture" && (!client || String(d.client).toLowerCase()===client));
-      select.innerHTML='<option value="">Sans facture liée</option>'+invoices.map(d=>{const t=calculateDocumentTotals(d.lines||[],d.deposit||0);const paid=paymentSumForDocument(d.id);return `<option value="${escapeHtml(d.id)}">${escapeHtml(d.number)} — ${escapeHtml(d.client)} — reste ${formatMoney(Math.max(0,t.total-paid))}</option>`}).join('');
+      select.innerHTML='<option value="">Sans facture liée</option>'+invoices.map(d=>{const t=calculateDocumentTotals(d.lines||[],d.deposit||0,d.discountType||"",d.discountValue||0);const paid=paymentSumForDocument(d.id);return `<option value="${escapeHtml(d.id)}">${escapeHtml(d.number)} — ${escapeHtml(d.client)} — reste ${formatMoney(Math.max(0,t.total-paid))}</option>`}).join('');
       if([...select.options].some(o=>o.value===current))select.value=current;
     }
 
@@ -5344,7 +4909,7 @@
     }
 
     document.getElementById("newPaymentBtn").addEventListener("click",()=>{resetPaymentForm();showPaymentForm()});document.getElementById("cancelPaymentBtn").addEventListener("click",hidePaymentForm);document.getElementById("paymentSearch").addEventListener("input",renderPayments);document.getElementById("paymentMethodFilter").addEventListener("change",renderPayments);document.getElementById("paymentClient").addEventListener("input",refreshPaymentDocuments);
-    document.getElementById("paymentDocument").addEventListener("change",()=>{const d=currentDocuments().find(x=>x.id===document.getElementById("paymentDocument").value);if(d){document.getElementById("paymentClient").value=d.client;const t=calculateDocumentTotals(d.lines||[],d.deposit||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2)}});
+    document.getElementById("paymentDocument").addEventListener("change",()=>{const d=currentDocuments().find(x=>x.id===document.getElementById("paymentDocument").value);if(d){document.getElementById("paymentClient").value=d.client;const t=calculateDocumentTotals(d.lines||[],d.deposit||0,d.discountType||"",d.discountValue||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2)}});
     document.getElementById("paymentForm").addEventListener("submit",e=>{
       e.preventDefault();
       if(activeRole!=="admin")return;
@@ -5386,31 +4951,14 @@
       renderClients();
       updateDashboardStats();
     }
-    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}
-
-    /* V19.4 — Tableaux lisibles sur mobile, sans changement sur ordinateur */
-    @media(max-width:700px){
-      .table-wrap{overflow:visible}
-      .table-wrap table{width:100%;min-width:0!important;border-collapse:separate;border-spacing:0}
-      .table-wrap thead{display:none}
-      .table-wrap tbody,.table-wrap tr,.table-wrap td{display:block;width:100%}
-      .table-wrap tbody{display:grid;gap:12px}
-      .table-wrap tr{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:8px 12px;box-shadow:0 5px 16px #0004}
-      .table-wrap td{display:grid;grid-template-columns:minmax(105px,38%) 1fr;gap:10px;align-items:start;padding:9px 0!important;border-bottom:1px solid #2a2a2a!important;white-space:normal!important;overflow-wrap:anywhere}
-      .table-wrap td:last-child{border-bottom:0!important}
-      .table-wrap td::before{content:attr(data-label);color:var(--accent);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
-      .table-wrap td[colspan]{display:block;text-align:center}
-      .table-wrap td[colspan]::before{display:none}
-      .table-wrap .table-actions{justify-content:flex-start}
-    }
-</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
+    function printPaymentReceipt(id){const p=currentPayments().find(x=>x.id===id);if(!p)return;const w=window.open("","_blank");w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu ${escapeHtml(p.id)}</title><style>body{font-family:Arial;padding:35px;color:#111}.head{border-bottom:3px solid #d99b00;padding-bottom:15px;margin-bottom:25px}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.amount{font-size:28px;font-weight:bold;text-align:right;margin-top:25px}</style></head><body><div class="head"><h1>TECH42SERVICE</h1><p>Reçu d'encaissement</p></div><table><tr><td>Référence</td><td>${escapeHtml(p.id)}</td></tr><tr><td>Date</td><td>${formatDate(p.date)}</td></tr><tr><td>Client</td><td>${escapeHtml(p.client)}</td></tr><tr><td>Facture</td><td>${escapeHtml(p.documentNumber||"Sans facture liée")}</td></tr><tr><td>Mode</td><td>${escapeHtml(p.method)}</td></tr><tr><td>Référence paiement</td><td>${escapeHtml(p.reference||"—")}</td></tr></table><div class="amount">Montant : ${formatMoney(p.amount)}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
 
     function clientMatches(item,client){return item.clientId===client.id||String(item.client||"").toLowerCase()===client.name.toLowerCase()}
     function openClientPro(id){
       const c=currentClients().find(x=>x.id===id);if(!c)return;const repairs=currentRepairList().filter(x=>clientMatches(x,c));const docs=currentDocuments().filter(x=>clientMatches(x,c));const appts=currentAppointments().filter(x=>clientMatches(x,c));const pays=currentPayments().filter(x=>x.clientId===c.id||String(x.client||"").toLowerCase()===c.name.toLowerCase());const valid=pays.filter(x=>x.status==="Validé");const spent=valid.reduce((s,p)=>s+Number(p.amount||0),0);const dates=[...repairs.map(x=>x.depositDate),...docs.map(x=>x.date),...appts.map(x=>x.date),...pays.map(x=>x.date)].filter(Boolean).sort().reverse();
       document.getElementById("clientProTitle").textContent=`Dossier client — ${c.name}`;document.getElementById("clientProStats").innerHTML=`<div class="client-pro-card"><small>Total encaissé</small><strong>${formatMoney(spent)}</strong></div><div class="client-pro-card"><small>Réparations</small><strong>${repairs.length}</strong></div><div class="client-pro-card"><small>Documents</small><strong>${docs.length}</strong></div><div class="client-pro-card"><small>Dernière activité</small><strong style="font-size:16px">${dates[0]?formatDate(dates[0]):'—'}</strong></div>`;
       const tabs=[['infos','Informations'],['repairs','Réparations'],['docs','Devis / Factures'],['payments','Encaissements'],['appointments','Rendez-vous']];document.getElementById("clientProTabs").innerHTML=tabs.map((t,i)=>`<button class="client-tab ${i===0?'active':''}" data-client-tab="${t[0]}">${t[1]}</button>`).join('');
-      const renderTab=tab=>{let h='';if(tab==='infos')h=`<div class="repair-details"><div class="detail-box"><small>Téléphone</small>${escapeHtml(c.phone||'—')}</div><div class="detail-box"><small>E-mail</small>${escapeHtml(c.email||'—')}</div><div class="detail-box full"><small>Adresse</small>${escapeHtml(c.address||'—')}</div><div class="detail-box full"><small>Notes</small>${escapeHtml(c.notes||'—')}</div></div>`;if(tab==='repairs')h=historyRows(repairs.map(r=>({date:r.depositDate,title:`${r.id} — ${r.brand||''} ${r.model||''}`,detail:`${r.issue||''} · ${r.status||''}`,amount:r.price})));if(tab==='docs')h=historyRows(docs.map(d=>{const t=calculateDocumentTotals(d.lines||[],d.deposit||0);return{date:d.date,title:`${d.number} — ${d.type}`,detail:`${d.subject||''} · ${d.status||''}`,amount:d.type==='non-reparabilite'?null:t.total}}));if(tab==='payments')h=historyRows(pays.map(p=>({date:p.date,title:`${p.method} — ${p.status}`,detail:p.documentNumber||p.reference||'Paiement libre',amount:p.amount})));if(tab==='appointments')h=historyRows(appts.map(a=>({date:a.date,title:`${a.time||''} — ${a.device||'Rendez-vous'}`,detail:`${a.reason||''} · ${a.status||''}`})));document.getElementById("clientProContent").innerHTML=h};
+      const renderTab=tab=>{let h='';if(tab==='infos')h=`<div class="repair-details"><div class="detail-box"><small>Téléphone</small>${escapeHtml(c.phone||'—')}</div><div class="detail-box"><small>E-mail</small>${escapeHtml(c.email||'—')}</div><div class="detail-box full"><small>Adresse</small>${escapeHtml(c.address||'—')}</div><div class="detail-box full"><small>Notes</small>${escapeHtml(c.notes||'—')}</div></div>`;if(tab==='repairs')h=historyRows(repairs.map(r=>({date:r.depositDate,title:`${r.id} — ${r.brand||''} ${r.model||''}`,detail:`${r.issue||''} · ${r.status||''}`,amount:r.price})));if(tab==='docs')h=historyRows(docs.map(d=>{const t=calculateDocumentTotals(d.lines||[],d.deposit||0,d.discountType||"",d.discountValue||0);return{date:d.date,title:`${d.number} — ${d.type}`,detail:`${d.subject||''} · ${d.status||''}`,amount:d.type==='non-reparabilite'?null:t.total}}));if(tab==='payments')h=historyRows(pays.map(p=>({date:p.date,title:`${p.method} — ${p.status}`,detail:p.documentNumber||p.reference||'Paiement libre',amount:p.amount})));if(tab==='appointments')h=historyRows(appts.map(a=>({date:a.date,title:`${a.time||''} — ${a.device||'Rendez-vous'}`,detail:`${a.reason||''} · ${a.status||''}`})));document.getElementById("clientProContent").innerHTML=h};
       document.querySelectorAll('[data-client-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-client-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTab(b.dataset.clientTab)});renderTab('infos');document.getElementById("clientProModal").classList.remove("hidden")
     }
     function historyRows(rows){if(!rows.length)return '<div class="empty-state">Aucun élément dans cet historique.</div>';return `<div class="client-history-list">${rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(x=>`<div class="client-history-row"><small>${x.date?formatDate(x.date):'—'}</small><div><strong>${escapeHtml(x.title)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(x.detail||'')}</div></div><strong>${x.amount===null||x.amount===undefined?'':formatMoney(x.amount)}</strong></div>`).join('')}</div>`}
@@ -5455,7 +5003,7 @@
       function googleUrl(a){const start=new Date(`${a.date}T${a.time||'09:00'}:00`),end=new Date(start.getTime()+Number(a.duration||30)*60000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');const p=new URLSearchParams({action:'TEMPLATE',text:`TECH42SERVICE — ${a.client} — ${a.device||'Rendez-vous'}`,dates:`${fmt(start)}/${fmt(end)}`,details:`${a.reason||''}\nTéléphone : ${a.phone||''}\n${a.notes||''}`,location:'TECH42SERVICE'});return `https://calendar.google.com/calendar/render?${p}`}
       function syncVisibleToGoogle(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');if(!items.length)return alert('Aucun rendez-vous à synchroniser.');const selected=items.filter(a=>plannerView==='month'?String(a.date).startsWith(`${plannerDate.getFullYear()}-${pad(plannerDate.getMonth()+1)}`):plannerView==='day'?a.date===iso(plannerDate):(()=>{const st=monday(plannerDate),en=clone(st);en.setDate(en.getDate()+7);return new Date(a.date+'T12:00:00')>=st&&new Date(a.date+'T12:00:00')<en})());if(!selected.length)return alert('Aucun rendez-vous visible à synchroniser.');selected.slice(0,5).forEach((a,i)=>setTimeout(()=>window.open(googleUrl(a),'_blank'),i*350));document.getElementById('plannerGoogleStatus').innerHTML=`<span class="google-sync-ok">${Math.min(selected.length,5)} rendez-vous ouverts dans Google Agenda.</span>${selected.length>5?' Synchronise les suivants depuis leur bouton individuel.':''}`}
       function downloadIcs(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');const esc=x=>String(x||'').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');let body='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TECH42SERVICE//Planning Atelier//FR\r\n';items.forEach(a=>{const st=new Date(`${a.date}T${a.time||'09:00'}:00`),en=new Date(st.getTime()+Number(a.duration||30)*60000);body+=`BEGIN:VEVENT\r\nUID:${esc(a.id)}@tech42service\r\nDTSTAMP:${dt(new Date())}\r\nDTSTART:${dt(st)}\r\nDTEND:${dt(en)}\r\nSUMMARY:${esc(`TECH42SERVICE - ${a.client} - ${a.device||'RDV'}`)}\r\nDESCRIPTION:${esc(`${a.reason||''} ${a.notes||''}`)}\r\nEND:VEVENT\r\n`});body+='END:VCALENDAR\r\n';const blob=new Blob([body],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='TECH42SERVICE_Planning.ics';a.click();URL.revokeObjectURL(u)}
-      function renderDashboardPro(){const today=iso(new Date()),appts=currentAppointments().filter(a=>a.date===today&&a.status!=='Annulé').sort((a,b)=>String(a.time).localeCompare(String(b.time))),repairs=currentRepairList().filter(r=>!['Terminé','Restitué'].includes(r.status));const p=document.getElementById('dashboardTodayPlanning'),q=document.getElementById('dashboardPriorities');if(p)p.innerHTML=appts.length?appts.map(a=>`<div class="dash-row"><strong>${escapeHtml(a.time||'')}</strong><div>${escapeHtml(a.client)}<small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div><span class="status ${statusBadgeClass(a.status)}">${escapeHtml(a.status)}</span></div>`).join(''):'<div class="empty-state">Aucun rendez-vous aujourd’hui.</div>';if(q){const due=repairs.filter(r=>r.dueDate&&r.dueDate<=today).slice(0,5);q.innerHTML=due.length?due.map(r=>`<div class="dash-alert"><strong>${escapeHtml(r.id)} — ${escapeHtml(r.client)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.brand||'')} ${escapeHtml(r.model||'')} · ${escapeHtml(r.status||'')} · prévu ${formatDate(r.dueDate)}</div></div>`).join(''):'<div class="empty-state">Aucune priorité urgente.</div>'}}
+      function renderDashboardPro(){const today=iso(new Date()),appts=currentAppointments().filter(a=>a.date===today&&a.status!=='Annulé').sort((a,b)=>String(a.time).localeCompare(String(b.time))),repairs=currentRepairList().filter(r=>!['Terminé','Restitué'].includes(r.status));const p=document.getElementById('dashboardTodayPlanning'),q=document.getElementById('dashboardPriorities');if(p)p.innerHTML=appts.length?appts.map(a=>`<div class="dash-row"><strong>${escapeHtml(a.time||'')}</strong><div>${escapeHtml(a.client)}<small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div><span class="status">${escapeHtml(a.status)}</span></div>`).join(''):'<div class="empty-state">Aucun rendez-vous aujourd’hui.</div>';if(q){const due=repairs.filter(r=>r.dueDate&&r.dueDate<=today).slice(0,5);q.innerHTML=due.length?due.map(r=>`<div class="dash-alert"><strong>${escapeHtml(r.id)} — ${escapeHtml(r.client)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.brand||'')} ${escapeHtml(r.model||'')} · ${escapeHtml(r.status||'')} · prévu ${formatDate(r.dueDate)}</div></div>`).join(''):'<div class="empty-state">Aucune priorité urgente.</div>'}}
       const oldRenderAppointments=renderAppointments;renderAppointments=function(){oldRenderAppointments();renderPlanner()};
       const oldUpdateDashboardStats=updateDashboardStats;updateDashboardStats=function(){oldUpdateDashboardStats();renderDashboardPro()};
       document.querySelectorAll('.planner-view-btn').forEach(b=>b.addEventListener('click',()=>{plannerView=b.dataset.plannerView;localStorage.setItem('tech42-planner-view',plannerView);renderPlanner()}));
@@ -5473,27 +5021,5 @@
   <datalist id="deviceBrandsList"></datalist>
   <datalist id="deviceModelsList"></datalist>
   <datalist id="stockPartsList"></datalist>
-
-<script>
-  (function enableMobileTableCards(){
-    function labelTableCells(root=document){
-      root.querySelectorAll(".table-wrap table").forEach(table => {
-        const labels = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
-        table.querySelectorAll("tbody tr").forEach(row => {
-          Array.from(row.children).forEach((cell, index) => {
-            if(cell.tagName === "TD" && !cell.hasAttribute("colspan")){
-              cell.dataset.label = labels[index] || "Information";
-            }
-          });
-        });
-      });
-    }
-    labelTableCells();
-    const observer = new MutationObserver(mutations => {
-      if(mutations.some(m => m.type === "childList")) labelTableCells();
-    });
-    observer.observe(document.body, {subtree:true, childList:true});
-  })();
-</script>
 </body>
 </html>
