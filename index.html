@@ -1022,6 +1022,13 @@
               </select>
             </div>
 
+            <div id="documentClientSignModule" class="client-sign-module full">
+              <h3>Signature du client</h3>
+              <p>Disponible pour la prise en charge, le devis et la facture.</p>
+              <button id="openDocumentClientSignatureBtn" class="action-btn" type="button">Faire signer le client</button>
+              <span id="documentClientSignatureStatus" class="client-sign-status">Non signé</span>
+            </div>
+
             <div class="full document-total">
               <div class="document-total-row"><span>Total HT</span><strong id="documentSubtotal">0,00 €</strong></div>
               <div class="document-total-row"><span>TVA</span><strong id="documentTax">0,00 €</strong></div>
@@ -3645,6 +3652,7 @@
       document.getElementById("nonRepairBlock").classList.toggle("hidden",!nonRepair);
       document.getElementById("documentDeposit").closest(".field").classList.toggle("hidden",nonRepair);
       document.querySelector(".document-total").classList.toggle("hidden",nonRepair||intake);
+      document.getElementById("documentClientSignModule").classList.toggle("hidden",nonRepair);
       if(!document.getElementById("documentEditId").value){
         document.getElementById("documentNumber").value = nextDocumentNumber(type,getAdminDocuments());
       }
@@ -3660,6 +3668,9 @@
       document.getElementById("documentEditId").value = "";
       document.getElementById("documentDate").value = new Date().toISOString().slice(0,10);
       document.getElementById("documentLines").innerHTML = "";
+      documentClientSignatureData="";
+      clientSignaturePad.clear();
+      updateDocumentClientSignatureStatus();
       addDocumentLine();
       setDocumentType("facture");
       document.getElementById("saveDocumentBtn").textContent = "Enregistrer";
@@ -3738,7 +3749,8 @@
         lines:(type==="non-reparabilite"||type==="prise-en-charge")?[]:getDocumentLines(),
         reason:document.getElementById("nonRepairReason").value.trim(),
         deposit:Number(document.getElementById("documentDeposit").value||0),
-        status:document.getElementById("documentStatus").value
+        status:document.getElementById("documentStatus").value,
+        clientSignature:documentClientSignatureData
       };
 
       if(editId){
@@ -3777,6 +3789,8 @@
       document.getElementById("nonRepairReason").value=item.reason||"";
       document.getElementById("documentDeposit").value=item.deposit||0;
       document.getElementById("documentStatus").value=item.status||"Brouillon";
+      documentClientSignatureData=item.clientSignature||"";
+      updateDocumentClientSignatureStatus();
       document.getElementById("documentLines").innerHTML="";
       (item.lines||[]).forEach(addDocumentLine);
       if(!(item.lines||[]).length && !["non-reparabilite","prise-en-charge"].includes(item.type)) addDocumentLine();
@@ -3812,7 +3826,8 @@
         lines:["non-reparabilite","prise-en-charge"].includes(document.getElementById("documentType").value)?[]:getDocumentLines(),
         reason:document.getElementById("nonRepairReason").value.trim(),
         deposit:Number(document.getElementById("documentDeposit").value||0),
-        status:document.getElementById("documentStatus").value
+        status:document.getElementById("documentStatus").value,
+        clientSignature:documentClientSignatureData
       };
     }
 
@@ -3903,7 +3918,7 @@
             <div class="doc-grid"><div><small>Nom</small><strong>${escapeHtml(item.client||"—")}</strong></div><div><small>Contact</small><strong>${escapeHtml(item.contact||"—")}</strong></div><div class="wide"><small>Objet</small>${escapeHtml(item.subject||"—")}</div></div>
           </section>
           ${main}
-          <div class="signatures"><div><span>Signature du client</span></div><div><span>Signature et cachet TECH42SERVICE</span></div></div>
+          <div class="signatures"><div><span>Signature du client</span>${item.clientSignature?`<img class="signature-image" src="${item.clientSignature}" alt="Signature du client">`:""}</div><div><span>Signature et cachet TECH42SERVICE</span></div></div>
           <footer>${escapeHtml(t.footer||"")}</footer>
         </div>`;
     }
@@ -4939,6 +4954,8 @@
 
 
     let clientSignatureData = "";
+    let documentClientSignatureData = "";
+    let clientSignatureContext = "repair";
     let technicianSignatureData = "";
 
     function setupSignatureCanvas(canvasId, clearButtonId, setter){
@@ -5002,7 +5019,10 @@
 
     const clientSignaturePad=setupSignatureCanvas(
       "clientSignatureCanvas","clearClientSignature",
-      value=>clientSignatureData=value
+      value=>{
+        if(clientSignatureContext==="document") documentClientSignatureData=value;
+        else clientSignatureData=value;
+      }
     );
     const technicianSignaturePad=setupSignatureCanvas(
       "technicianSignatureCanvas","clearTechnicianSignature",
@@ -5017,13 +5037,32 @@
       status.classList.toggle("signed",signed);
     }
 
+    function updateDocumentClientSignatureStatus(){
+      const status=document.getElementById("documentClientSignatureStatus");
+      if(!status) return;
+      const signed=Boolean(documentClientSignatureData);
+      status.textContent=signed ? "Signature enregistrée" : "Non signé";
+      status.classList.toggle("signed",signed);
+    }
+
     function clientInfoValue(id, fallback="—"){
       return escapeHtml(document.getElementById(id)?.value?.trim() || fallback);
     }
 
-    function openClientSignatureScreen(){
+    function openClientSignatureScreen(context="repair"){
+      clientSignatureContext=context;
       const screen=document.getElementById("clientSignatureScreen");
-      document.getElementById("clientSignatureInfo").innerHTML=`
+      const isDocument=context==="document";
+      const type=document.getElementById("documentType")?.value||"facture";
+      const typeLabel=documentTypeLabel(type);
+      document.querySelector("#clientSignatureScreen .client-sign-header h1").textContent=isDocument?`Signature du client — ${typeLabel}`:"Signature du client";
+      document.getElementById("clientSignatureInfo").innerHTML=isDocument?`
+        <div class="client-only-card"><small>Document</small><strong>${escapeHtml(typeLabel)}</strong></div>
+        <div class="client-only-card"><small>Numéro</small><strong>${clientInfoValue("documentNumber")}</strong></div>
+        <div class="client-only-card"><small>Client</small><strong>${clientInfoValue("documentClient")}</strong></div>
+        <div class="client-only-card"><small>Contact</small><strong>${clientInfoValue("documentContact")}</strong></div>
+        <div class="client-only-card"><small>Objet</small><strong>${clientInfoValue("documentSubject")}</strong></div>
+        <div class="client-only-card"><small>Appareil</small><strong>${clientInfoValue("documentDeviceType")} — ${clientInfoValue("documentBrand","")} ${clientInfoValue("documentModel","")}</strong></div>`:`
         <div class="client-only-card"><small>Client</small><strong>${clientInfoValue("repairClient")}</strong></div>
         <div class="client-only-card"><small>Téléphone</small><strong>${clientInfoValue("repairPhone")}</strong></div>
         <div class="client-only-card"><small>Appareil</small><strong>${clientInfoValue("repairDevice")} — ${clientInfoValue("repairBrand")} ${clientInfoValue("repairModel","")}</strong></div>
@@ -5032,35 +5071,52 @@
         <div class="client-only-card"><small>Prix de la réparation</small><strong>${clientInfoValue("repairPrice","0")} € ${clientInfoValue("repairPriceMode","TTC")}</strong></div>`;
       screen.classList.remove("hidden");
       document.body.style.overflow="hidden";
-      clientSignaturePad.load(clientSignatureData);
+      clientSignaturePad.load(isDocument?documentClientSignatureData:clientSignatureData);
     }
 
     function closeClientSignatureScreen(){
       document.getElementById("clientSignatureScreen").classList.add("hidden");
       document.body.style.overflow="";
-      document.getElementById("openClientSignatureBtn")?.scrollIntoView({behavior:"smooth",block:"center"});
+      const returnButton=clientSignatureContext==="document"?document.getElementById("openDocumentClientSignatureBtn"):document.getElementById("openClientSignatureBtn");
+      returnButton?.scrollIntoView({behavior:"smooth",block:"center"});
     }
 
-    document.getElementById("openClientSignatureBtn").addEventListener("click",openClientSignatureScreen);
+    document.getElementById("openClientSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("repair"));
+    document.getElementById("openDocumentClientSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("document"));
     document.getElementById("cancelClientSignature").addEventListener("click",closeClientSignatureScreen);
     document.getElementById("confirmClientSignature").addEventListener("click",()=>{
-      if(!clientSignatureData){
+      const currentData=clientSignatureContext==="document"?documentClientSignatureData:clientSignatureData;
+      if(!currentData){
         alert("Le client doit signer avant de valider.");
         return;
       }
-      const editId=document.getElementById("repairEditId").value;
-      if(editId){
-        const repairs=getAdminRepairs();
-        const index=repairs.findIndex(item=>item.id===editId);
-        if(index!==-1){
-          repairs[index].clientSignature=clientSignatureData;
-          saveAdminRepairs(repairs);
+      if(clientSignatureContext==="document"){
+        const editId=document.getElementById("documentEditId").value;
+        if(editId){
+          const documents=getAdminDocuments();
+          const index=documents.findIndex(item=>item.id===editId);
+          if(index!==-1){
+            documents[index].clientSignature=documentClientSignatureData;
+            saveAdminDocuments(documents);
+          }
         }
+        updateDocumentClientSignatureStatus();
+      }else{
+        const editId=document.getElementById("repairEditId").value;
+        if(editId){
+          const repairs=getAdminRepairs();
+          const index=repairs.findIndex(item=>item.id===editId);
+          if(index!==-1){
+            repairs[index].clientSignature=clientSignatureData;
+            saveAdminRepairs(repairs);
+          }
+        }
+        updateClientSignatureStatus();
       }
-      updateClientSignatureStatus();
       closeClientSignatureScreen();
     });
     updateClientSignatureStatus();
+    updateDocumentClientSignatureStatus();
 
     function getStockPurchaseCostTTC(stockItem){
       if(!stockItem) return 0;
