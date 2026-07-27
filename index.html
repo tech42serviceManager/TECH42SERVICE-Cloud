@@ -3026,6 +3026,10 @@
         technician: document.getElementById("repairTechnician").value.trim(),
         partsCost: Number(document.getElementById("repairPartsCostInput").value||0),
         partsCostMode: document.getElementById("repairPartsCostMode").value||"TTC",
+        partsCostTTC: amountToTTC(
+          document.getElementById("repairPartsCostInput").value||0,
+          document.getElementById("repairPartsCostMode").value||"TTC"
+        ),
         clientSignature: clientSignatureData,
         technicianSignature: technicianSignatureData,
         history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
@@ -3039,7 +3043,7 @@
         closedDate: editId ? (list.find(r=>r.id===editId)?.closedDate||"") : ""
       };
       const pro=calculateRepairPro(item.lines);
-      item.partsCost=pro.partsCost;
+      item.partsCostTTC=pro.partsCost;
       item.margin=pro.margin;
 
       if(editId){
@@ -3081,8 +3085,12 @@
       renderRepairPhotosPreview();
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairTechnician").value=item.technician||"";
-      document.getElementById("repairPartsCostInput").value=Number(item.partsCost||0);
-      document.getElementById("repairPartsCostMode").value=item.partsCostMode||"TTC";
+      const savedPartsMode=item.partsCostMode||"TTC";
+      const savedPartsRaw=item.partsCostTTC !== undefined
+        ? Number(item.partsCost||0)
+        : (savedPartsMode === "HT" ? Number(item.partsCost||0)/1.20 : Number(item.partsCost||0));
+      document.getElementById("repairPartsCostInput").value=Number(savedPartsRaw.toFixed(2));
+      document.getElementById("repairPartsCostMode").value=savedPartsMode;
       clientSignatureData=item.clientSignature||"";
       technicianSignatureData=item.technicianSignature||"";
       clientSignaturePad.load(clientSignatureData);
@@ -3136,7 +3144,7 @@
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
         <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-        <div class="detail-box"><small>Coût pièces</small>${formatMoney(item.partsCost||0)}</div>
+        <div class="detail-box"><small>Coût pièces TTC</small>${formatMoney(item.partsCostTTC !== undefined ? item.partsCostTTC : amountToTTC(item.partsCost||0,item.partsCostMode||"TTC"))}</div>
         <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
         <div class="detail-box full">
