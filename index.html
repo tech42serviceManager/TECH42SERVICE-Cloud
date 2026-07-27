@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V20.0 Agenda & Documents</title>
+  <title>TECH42SERVICE Gestion — V20.3 Synchronisation sécurisée</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -389,6 +389,22 @@
     @media(max-width:900px){.dashboard-pro-grid{grid-template-columns:1fr}}
     @media(max-width:520px){.planner-toolbar{align-items:stretch}.planner-nav,.planner-views{width:100%}.planner-nav button,.planner-views button{flex:1}.dashboard-pro-grid{grid-template-columns:1fr}.dash-row{grid-template-columns:70px 1fr}}
 
+    /* V20.1 — Sauvegarde mobile renforcée */
+    .mobile-save-toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10050;padding:12px 16px;border-radius:999px;background:#102518;border:1px solid #245f35;color:#74ef8b;font-weight:800;box-shadow:0 8px 30px #000a;opacity:0;pointer-events:none;transition:.2s opacity,.2s transform}
+    .mobile-save-toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+    .save-btn.is-saving{opacity:.7;pointer-events:none}
+    @media(max-width:520px){
+      .save-btn{width:100%;min-height:54px;font-size:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      form .full:has(> .save-btn){position:sticky;bottom:8px;z-index:12;padding:8px;background:linear-gradient(180deg,transparent,#080808 28%);border-radius:12px}
+      .page-actions .save-btn{flex:1 1 100%}
+      input,select,textarea{font-size:16px!important}
+    }
+
+    /* V20.3 — Synchronisation anti-écrasement */
+    .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
+
+      /* V20.4 — Factures, acomptes, encaissements et stock liés */
+    .workflow-badge{vertical-align:middle}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -1317,13 +1333,13 @@
             <div class="field"><label>Facture liée</label><select id="paymentDocument"><option value="">Sans facture liée</option></select></div>
             <div class="field"><label>Date</label><input id="paymentDate" type="date" required></div>
             <div class="field"><label>Montant encaissé (€)</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required></div>
-            <div class="field"><label>Mode de paiement</label><select id="paymentMethod"><option>Carte bancaire</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Autre</option></select></div>
+            <div class="field"><label>Mode de paiement</label><select id="paymentMethod"><option>Carte bancaire</option><option>Acompte</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Autre</option></select></div>
             <div class="field"><label>Référence</label><input id="paymentReference" placeholder="N° transaction, chèque..."></div>
             <div class="field"><label>Statut</label><select id="paymentStatus"><option>Validé</option><option>Annulé</option><option>Remboursé</option></select></div>
             <div class="field full"><label>Notes</label><textarea id="paymentNotes"></textarea></div>
             <div class="full"><button class="save-btn" type="submit">Enregistrer l'encaissement</button></div>
           </form>
-          <div class="appt-toolbar"><input id="paymentSearch" type="search" placeholder="Rechercher client, facture, référence..."><select id="paymentMethodFilter"><option value="">Tous les modes</option><option>Carte bancaire</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Autre</option></select></div>
+          <div class="appt-toolbar"><input id="paymentSearch" type="search" placeholder="Rechercher client, facture, référence..."><select id="paymentMethodFilter"><option value="">Tous les modes</option><option>Carte bancaire</option><option>Acompte</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Autre</option></select></div>
           <div class="table-wrap"><table class="payment-table"><thead><tr><th>Date</th><th>Client</th><th>Facture</th><th>Mode</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="paymentsTableBody"></tbody></table></div>
           <div id="paymentsEmpty" class="empty-state">Aucun encaissement enregistré.</div>
         </section>
@@ -1697,7 +1713,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V20.0 Agenda & Documentsmatique</footer>
+      <footer>TECH42SERVICE Gestion — V20.4 Factures, acomptes & stock liésmatique</footer>
     </main>
   </div>
 
@@ -1738,7 +1754,6 @@
       "tech42-payments",
       "tech42-buy-sell",
       "tech42-repair-help-links",
-      "tech42-sites-links",
       "tech42-devices",
       "tech42-theme",
       "tech42-visual-password-hash",
@@ -1755,8 +1770,12 @@
     let cloudLoading = false;
     let cloudAutoSaveStarted = false;
     let cloudDirty = false;
+    let cloudSavePromise = null;
+    let cloudSaveAgain = false;
     let lastCloudJson = "";
     let lastCloudUpdatedAt = "";
+    let cloudConflictDetected = false;
+    const REMOVED_LEGACY_KEYS = ["tech42-sites-links"];
 
     function setCloudStatus(message, ok=false){
       const el = document.getElementById("cloudStatus");
@@ -1901,23 +1920,34 @@
             localStorage.removeItem(key);
           }
         });
+        REMOVED_LEGACY_KEYS.forEach(key => localStorage.removeItem(key));
       }finally{
         cloudApplying = false;
       }
       lastCloudJson = JSON.stringify(collectCloudData());
     }
 
+    async function readCloudState(){
+      if(!cloudUser || !navigator.onLine) return {ok:false, reason:"offline"};
+      const {data, error} = await supabaseClient
+        .from("app_state")
+        .select("data,updated_at")
+        .eq("user_id", cloudUser.id)
+        .maybeSingle();
+      if(error) throw error;
+      return {ok:true, row:data || null};
+    }
+
     async function cloudFetchLatest(refresh=true){
       if(!cloudUser || cloudLoading || !navigator.onLine) return false;
+      if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+        setCloudStatus("Modifications locales en attente — réception cloud suspendue", false);
+        return false;
+      }
       cloudLoading = true;
       try{
-        const {data, error} = await supabaseClient
-          .from("app_state")
-          .select("data,updated_at")
-          .eq("user_id", cloudUser.id)
-          .maybeSingle();
-
-        if(error) throw error;
+        const result = await readCloudState();
+        const data = result.row;
         if(!data || !data.data) return false;
 
         const incomingJson = JSON.stringify(data.data);
@@ -1927,8 +1957,9 @@
         if(incomingJson !== lastCloudJson && isNewer){
           applyCloudData(data.data);
           lastCloudUpdatedAt = incomingDate;
+          cloudConflictDetected = false;
           if(refresh) refreshAllCloudModules();
-          setCloudStatus("Données synchronisées", true);
+          setCloudStatus("Données cloud reçues et vérifiées", true);
           return true;
         }
         if(incomingDate) lastCloudUpdatedAt = incomingDate;
@@ -1960,75 +1991,106 @@
     }
 
     async function cloudSaveNow(force=false){
-      if(!cloudUser || cloudApplying || cloudSaving) return false;
+      if(!cloudUser || cloudApplying) return false;
       if(!navigator.onLine){
         cloudDirty = true;
-        setCloudStatus("Hors connexion — sauvegarde en attente", false);
+        setCloudStatus("Hors connexion — sauvegarde locale en attente", false);
+        try{ await createLocalBackup("Hors connexion"); }catch(error){ console.error("Sauvegarde locale", error); }
         return false;
       }
 
-      const state = collectCloudData();
-      const json = JSON.stringify(state);
-      if(!force && !cloudDirty && json === lastCloudJson) return true;
-
-      cloudSaving = true;
-      setCloudSyncing("Vérification de la version cloud…");
-      try{
-        const {data:remote, error:readError} = await supabaseClient
-          .from("app_state")
-          .select("updated_at")
-          .eq("user_id", cloudUser.id)
-          .maybeSingle();
-        if(readError) throw readError;
-
-        const remoteUpdatedAt = remote?.updated_at || "";
-        if(lastCloudUpdatedAt && remoteUpdatedAt && remoteUpdatedAt > lastCloudUpdatedAt){
-          cloudDirty = true;
-          setCloudStatus("Version cloud plus récente — synchronisation requise", false);
-          return false;
-        }
-
-        setCloudSyncing("Sauvegarde…");
-        const updatedAt = new Date().toISOString();
-        const {data, error} = await supabaseClient
-          .from("app_state")
-          .upsert({
-            user_id: cloudUser.id,
-            data: state,
-            updated_at: updatedAt
-          }, {onConflict: "user_id"})
-          .select("updated_at")
-          .single();
-
-        if(error) throw error;
-
-        lastCloudJson = json;
-        lastCloudUpdatedAt = data?.updated_at || updatedAt;
-        cloudDirty = false;
-        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
-        setCloudStatus(`Sauvegardé à ${savedTime} — Cloud synchronisé`, true);
-        try{ await createLocalBackup("Après synchronisation"); }catch(backupError){ console.error("Sauvegarde locale", backupError); }
-        return true;
-      }catch(error){
-        console.error("Erreur sauvegarde cloud", error);
+      if(cloudSaving){
         cloudDirty = true;
-        setCloudStatus("Erreur de sauvegarde", false);
-        return false;
-      }finally{
-        cloudSaving = false;
+        cloudSaveAgain = true;
+        return cloudSavePromise || false;
       }
+
+      const runSave = async () => {
+        cloudSaving = true;
+        setCloudSyncing("Vérification avant sauvegarde…");
+        try{
+          do{
+            cloudSaveAgain = false;
+            const state = collectCloudData();
+            const json = JSON.stringify(state);
+            if(!force && !cloudDirty && json === lastCloudJson) return true;
+
+            const remoteResult = await readCloudState();
+            const remote = remoteResult.row;
+            const remoteJson = remote?.data ? JSON.stringify(remote.data) : "";
+            const remoteDate = remote?.updated_at || "";
+            const remoteChangedSinceLastSync = Boolean(
+              remoteJson &&
+              remoteJson !== lastCloudJson &&
+              lastCloudUpdatedAt &&
+              remoteDate &&
+              remoteDate > lastCloudUpdatedAt
+            );
+
+            if(remoteChangedSinceLastSync){
+              cloudConflictDetected = true;
+              cloudDirty = true;
+              try{ await createLocalBackup("Conflit cloud — version locale conservée", true); }catch(error){ console.error("Sauvegarde conflit", error); }
+              setCloudStatus("Conflit détecté — aucune donnée écrasée", false);
+              return false;
+            }
+
+            setCloudSyncing("Envoi sécurisé vers le cloud…");
+            const updatedAt = new Date().toISOString();
+            const {data, error} = await supabaseClient
+              .from("app_state")
+              .upsert({
+                user_id: cloudUser.id,
+                data: state,
+                updated_at: updatedAt
+              }, {onConflict: "user_id"})
+              .select("data,updated_at")
+              .single();
+
+            if(error) throw error;
+            const confirmedJson = JSON.stringify(data?.data || {});
+            if(confirmedJson !== json){
+              throw new Error("La confirmation cloud ne correspond pas aux données envoyées");
+            }
+
+            lastCloudJson = json;
+            lastCloudUpdatedAt = data?.updated_at || updatedAt;
+            cloudDirty = false;
+            cloudConflictDetected = false;
+            force = false;
+          }while(cloudSaveAgain || JSON.stringify(collectCloudData()) !== lastCloudJson);
+
+          const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+          setCloudStatus(`Synchronisation confirmée à ${savedTime}`, true);
+          try{ await createLocalBackup("Après synchronisation confirmée"); }catch(error){ console.error("Sauvegarde locale", error); }
+          return true;
+        }catch(error){
+          console.error("Erreur sauvegarde cloud", error);
+          cloudDirty = true;
+          setCloudStatus("Échec cloud — données conservées sur cet appareil", false);
+          try{ await createLocalBackup("Erreur cloud"); }catch(backupError){ console.error("Sauvegarde locale", backupError); }
+          return false;
+        }finally{
+          cloudSaving = false;
+          cloudSavePromise = null;
+        }
+      };
+
+      cloudSavePromise = runSave();
+      return cloudSavePromise;
     }
 
     function scheduleCloudSave(){
       if(!cloudUser || cloudApplying) return;
       cloudDirty = true;
       clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 900);
+      cloudSaveTimer = setTimeout(() => cloudSaveNow(false), 450);
     }
 
     // Toute modification d'une donnée de l'application déclenche une sauvegarde.
     const originalLocalStorageSetItem = localStorage.setItem.bind(localStorage);
     const originalLocalStorageRemoveItem = localStorage.removeItem.bind(localStorage);
+    REMOVED_LEGACY_KEYS.forEach(key => originalLocalStorageRemoveItem(key));
     localStorage.setItem = function(key, value){
       originalLocalStorageSetItem(key, value);
       if(CLOUD_STORAGE_KEYS.includes(String(key)) && !cloudApplying){
@@ -2046,14 +2108,24 @@
       if(cloudAutoSaveStarted) return;
       cloudAutoSaveStarted = true;
 
-      // Pas de sauvegarde ni de lecture cloud périodique : les changements locaux
-      // déclenchent la sauvegarde et Supabase Realtime reçoit les changements distants.
-      window.addEventListener("focus", () => cloudFetchLatest(true));
+      // Contrôle périodique utile sur mobile, où les événements réseau et Realtime
+      // peuvent être suspendus lorsque l'écran se verrouille ou change d'application.
+      cloudPollTimer = setInterval(async () => {
+        if(document.visibilityState !== "visible" || !navigator.onLine || !cloudUser) return;
+        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+          await cloudSaveNow(false);
+        }
+      }, 12000);
+      window.addEventListener("focus", async () => {
+        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
+        else await cloudFetchLatest(true);
+      });
       document.addEventListener("visibilitychange", async () => {
         if(document.visibilityState === "hidden"){
           await cloudSaveNow(false);
         }else{
-          await cloudFetchLatest(true);
+          if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
+          else await cloudFetchLatest(true);
         }
       });
       window.addEventListener("pagehide", () => cloudSaveNow(false));
@@ -2061,8 +2133,11 @@
       window.addEventListener("offline", () => setCloudStatus("Hors connexion — données conservées", false));
       window.addEventListener("online", async () => {
         setCloudSyncing("Connexion retrouvée…");
-        const remoteChanged = await cloudFetchLatest(true);
-        if(!remoteChanged && cloudDirty) await cloudSaveNow(false);
+        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+          await cloudSaveNow(false);
+        }else{
+          await cloudFetchLatest(true);
+        }
       });
     }
 
@@ -2071,12 +2146,29 @@
         setCloudStatus("Connecte-toi pour synchroniser", false);
         return;
       }
+      if(!navigator.onLine){
+        setCloudStatus("Hors connexion — synchronisation impossible", false);
+        return;
+      }
       try{
         setCloudSyncing("Synchronisation manuelle…");
-        await cloudSaveNow(true);
-        await cloudFetchLatest(true);
+        const saved = await cloudSaveNow(true);
+        if(!saved){
+          if(!cloudConflictDetected) setCloudStatus("Synchronisation non confirmée", false);
+          return;
+        }
+        const verification = await readCloudState();
+        const remoteJson = JSON.stringify(verification.row?.data || {});
+        const localJson = JSON.stringify(collectCloudData());
+        if(!verification.ok || remoteJson !== localJson){
+          cloudDirty = true;
+          setCloudStatus("Vérification échouée — aucune réussite affichée", false);
+          return;
+        }
+        lastCloudUpdatedAt = verification.row?.updated_at || lastCloudUpdatedAt;
         refreshAllCloudModules();
-        setCloudStatus("PC et mobile synchronisés", true);
+        const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+        setCloudStatus(`PC et mobile synchronisés à ${savedTime}`, true);
       }catch(error){
         console.error(error);
         setCloudStatus("Synchronisation impossible", false);
@@ -2099,8 +2191,15 @@
           const incomingDate = payload.new.updated_at || "";
           if(incomingJson === lastCloudJson) return;
           if(lastCloudUpdatedAt && incomingDate && incomingDate <= lastCloudUpdatedAt) return;
+          if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+            cloudConflictDetected = true;
+            createLocalBackup("Conflit temps réel — version locale conservée", true).catch(error => console.error(error));
+            setCloudStatus("Conflit entre appareils — version locale conservée", false);
+            return;
+          }
           applyCloudData(incoming);
           lastCloudUpdatedAt = incomingDate;
+          cloudConflictDetected = false;
           refreshAllCloudModules();
           setCloudStatus("Mise à jour reçue d’un autre appareil", true);
         })
@@ -2925,12 +3024,61 @@
     document.getElementById("repairSearch").addEventListener("input", renderRepairs);
     document.getElementById("repairFilter").addEventListener("change", renderRepairs);
 
+    function stockUsageMap(lines){
+      return (lines||[]).reduce((map,line)=>{
+        const stockId=String(line.stockId||"");
+        if(!stockId) return map;
+        map[stockId]=(map[stockId]||0)+Math.max(0,Number(line.qty||0));
+        return map;
+      },{});
+    }
+
+    function reconcileRepairStock(previousRepair,nextLines){
+      const stock=getAdminStock();
+      const previousUsage=previousRepair?.stockApplied ? stockUsageMap(previousRepair.lines||[]) : {};
+      const nextUsage=stockUsageMap(nextLines||[]);
+      const ids=new Set([...Object.keys(previousUsage),...Object.keys(nextUsage)]);
+
+      for(const stockId of ids){
+        const item=stock.find(entry=>entry.id===stockId);
+        if(!item) throw new Error(`Article de stock introuvable : ${stockId}`);
+        const delta=(nextUsage[stockId]||0)-(previousUsage[stockId]||0);
+        if(delta>0 && Number(item.quantity||0)<delta){
+          throw new Error(`Stock insuffisant pour « ${item.name} » : ${item.quantity||0} disponible(s), ${delta} supplémentaire(s) demandé(s).`);
+        }
+      }
+
+      ids.forEach(stockId=>{
+        const item=stock.find(entry=>entry.id===stockId);
+        const delta=(nextUsage[stockId]||0)-(previousUsage[stockId]||0);
+        item.quantity=Math.max(0,Number(item.quantity||0)-delta);
+      });
+      saveAdminStock(stock);
+      refreshStockPartsList();
+      try{renderStock();}catch(error){console.warn(error);}
+      return true;
+    }
+
+    function restoreRepairStock(repair){
+      if(!repair?.stockApplied) return;
+      const stock=getAdminStock();
+      const usage=stockUsageMap(repair.lines||[]);
+      Object.entries(usage).forEach(([stockId,qty])=>{
+        const item=stock.find(entry=>entry.id===stockId);
+        if(item) item.quantity=Number(item.quantity||0)+Number(qty||0);
+      });
+      saveAdminStock(stock);
+      refreshStockPartsList();
+      try{renderStock();}catch(error){console.warn(error);}
+    }
+
     document.getElementById("repairForm").addEventListener("submit", (event) => {
       event.preventDefault();
       if(activeRole !== "admin") return;
 
       const list = getAdminRepairs();
       const editId = document.getElementById("repairEditId").value;
+      const previousRepair = editId ? list.find(r=>r.id===editId) : null;
       const linkedClientId = upsertClientFromFields(document.getElementById("repairClient").value.trim(),document.getElementById("repairPhone").value.trim(),"");
       const item = {
         id: editId || nextRepairId(list),
@@ -2972,11 +3120,19 @@
           minutes:0
         }],
         closed: editId ? Boolean(list.find(r=>r.id===editId)?.closed) : false,
-        closedDate: editId ? (list.find(r=>r.id===editId)?.closedDate||"") : ""
+        closedDate: editId ? (list.find(r=>r.id===editId)?.closedDate||"") : "",
+        stockApplied: true
       };
       const pro=calculateRepairPro(item.lines);
       item.partsCostTTC=pro.partsCost;
       item.margin=pro.margin;
+
+      try{
+        reconcileRepairStock(previousRepair,item.lines);
+      }catch(error){
+        alert(error.message || "Impossible de mettre à jour le stock.");
+        return;
+      }
 
       if(editId){
         const index = list.findIndex(r => r.id === editId);
@@ -3044,7 +3200,9 @@
 
     function deleteRepair(id){
       if(activeRole !== "admin") return;
-      if(!confirm("Supprimer définitivement ce dossier ?")) return;
+      if(!confirm("Supprimer définitivement ce dossier ? Les pièces utilisées seront remises en stock.")) return;
+      const repair=getAdminRepairs().find(r=>r.id===id);
+      restoreRepairStock(repair);
       saveAdminRepairs(getAdminRepairs().filter(r => r.id !== id));
       renderRepairs();
       updateDashboardStats();
@@ -3768,7 +3926,9 @@
       }
 
       saveAdminDocuments(list);
+      syncDepositPaymentForInvoice(item);
       syncAutomaticPaymentForInvoice(item);
+      updateInvoiceFromPayments(item.id);
       renderDocuments();
       try{renderPayments();}catch(error){console.warn(error);}
       updateDashboardStats();
@@ -3813,7 +3973,9 @@
       if(activeRole!=="admin") return;
       if(!confirm("Supprimer définitivement ce document ?")) return;
       saveAdminDocuments(getAdminDocuments().filter(d=>d.id!==id));
+      saveAdminPayments(getAdminPayments().filter(p=>p.documentId!==id));
       renderDocuments();
+      try{renderPayments();}catch(error){console.warn(error);}
       updateDashboardStats();
     }
 
@@ -4787,12 +4949,6 @@
       {id:"HELP-003",name:"IMEI.info",url:"https://www.imei.info",category:"IMEI / Série",description:"Informations IMEI et appareil"}
     ];
 
-    const demoSitesLinks = [
-      {id:"SITE-001",name:"Netlify",url:"https://www.netlify.com",category:"Outil professionnel",description:"Hébergement du logiciel"},
-      {id:"SITE-002",name:"Supabase",url:"https://supabase.com",category:"Outil professionnel",description:"Base de données cloud"},
-      {id:"SITE-003",name:"GitHub",url:"https://github.com",category:"Outil professionnel",description:"Gestion des fichiers du projet"}
-    ];
-
     function getStoredLinks(key){
       try{return JSON.parse(localStorage.getItem(key) || "[]")}catch{return []}
     }
@@ -5267,6 +5423,7 @@
     }
     updateClock();
     setInterval(updateClock,1000);
+    setTimeout(()=>{try{reconcileAllInvoicesAndPayments();renderPayments();renderDocuments();}catch(error){console.warn("Réconciliation initiale impossible",error);}},600);
 
 
     // ===== V19.2 : Encaissements et historique client PRO =====
@@ -5288,7 +5445,12 @@
     }
 
     function invoiceTotal(documentItem){
-      return calculateDocumentTotals(documentItem?.lines||[],documentItem?.deposit||0).total;
+      return calculateDocumentTotals(
+        documentItem?.lines||[],
+        0,
+        documentItem?.discountType||"none",
+        documentItem?.discountValue||0
+      ).total;
     }
 
     function updateInvoiceFromPayments(documentId){
@@ -5309,6 +5471,40 @@
       documents[index]=invoice;
       saveAdminDocuments(documents);
       try{renderDocuments();}catch(error){console.warn(error);}
+    }
+
+    function syncDepositPaymentForInvoice(invoice){
+      if(!invoice||invoice.type!=="facture") return;
+      const payments=getAdminPayments();
+      const depositId=`DEP-${invoice.id}`;
+      const index=payments.findIndex(p=>p.id===depositId);
+      const amount=Math.max(0,Number(invoice.deposit||0));
+
+      if(amount<=0.005){
+        if(index>=0){
+          payments.splice(index,1);
+          saveAdminPayments(payments);
+        }
+        return;
+      }
+
+      const depositPayment={
+        id:depositId,
+        clientId:invoice.clientId||paymentClientIdByName(invoice.client),
+        client:invoice.client||"",
+        documentId:invoice.id,
+        documentNumber:invoice.number||"",
+        date:invoice.date||new Date().toISOString().slice(0,10),
+        amount,
+        method:"Acompte",
+        reference:"Acompte facture",
+        status:"Validé",
+        notes:"Acompte enregistré automatiquement depuis la facture.",
+        automaticType:"deposit"
+      };
+      if(index>=0) payments[index]=depositPayment;
+      else payments.unshift(depositPayment);
+      saveAdminPayments(payments);
     }
 
     function syncAutomaticPaymentForInvoice(invoice){
@@ -5346,7 +5542,8 @@
           method:"Autre",
           reference:"Encaissement automatique facture payée",
           status:"Validé",
-          notes:"Créé automatiquement depuis la facture."
+          notes:"Solde créé automatiquement car la facture a été marquée payée.",
+          automaticType:"balance"
         };
         if(automaticIndex>=0)payments[automaticIndex]=automaticPayment;
         else payments.unshift(automaticPayment);
@@ -5354,6 +5551,13 @@
       saveAdminPayments(payments);
     }
     function paymentClientIdByName(name){const c=currentClients().find(x=>x.name.toLowerCase()===String(name||"").toLowerCase());return c?.id||""}
+
+    function reconcileAllInvoicesAndPayments(){
+      getAdminDocuments().filter(d=>d.type==="facture").forEach(invoice=>{
+        syncDepositPaymentForInvoice(invoice);
+        updateInvoiceFromPayments(invoice.id);
+      });
+    }
 
     function refreshPaymentDocuments(){
       const select=document.getElementById("paymentDocument"); if(!select)return;
@@ -5373,7 +5577,7 @@
     function renderPayments(){
       const q=document.getElementById("paymentSearch").value.trim().toLowerCase();const method=document.getElementById("paymentMethodFilter").value;
       const list=currentPayments().filter(p=>(!q||[p.client,p.documentNumber,p.reference,p.notes].join(" ").toLowerCase().includes(q))&&(!method||p.method===method));
-      const body=document.getElementById("paymentsTableBody");body.innerHTML=list.map(p=>`<tr><td>${formatDate(p.date)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.documentNumber||"—")}</td><td>${escapeHtml(p.method)}</td><td>${formatMoney(p.amount)}</td><td class="${p.status==='Validé'?'payment-paid':'payment-cancelled'}">${escapeHtml(p.status)}</td><td><div class="table-actions"><button class="mini-btn" data-pay-print="${p.id}">Reçu</button>${activeRole==='admin'?`<button class="mini-btn" data-pay-edit="${p.id}">Modifier</button><button class="mini-btn danger" data-pay-delete="${p.id}">Supprimer</button>`:''}</div></td></tr>`).join('');
+      const body=document.getElementById("paymentsTableBody");body.innerHTML=list.map(p=>`<tr><td>${formatDate(p.date)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.documentNumber||"—")}</td><td>${escapeHtml(p.method)}</td><td>${formatMoney(p.amount)}</td><td class="${p.status==='Validé'?'payment-paid':'payment-cancelled'}">${escapeHtml(p.status)}</td><td><div class="table-actions"><button class="mini-btn" data-pay-print="${p.id}">Reçu</button>${activeRole==='admin'&&!p.automaticType?`<button class="mini-btn" data-pay-edit="${p.id}">Modifier</button><button class="mini-btn danger" data-pay-delete="${p.id}">Supprimer</button>`:p.automaticType?`<span class="workflow-badge">Automatique</span>`:''}</div></td></tr>`).join('');
       document.getElementById("paymentsEmpty").classList.toggle("hidden",list.length>0);
       const now=new Date(),today=now.toISOString().slice(0,10),month=today.slice(0,7),valid=validPayments();
       document.getElementById("paymentToday").textContent=formatMoney(valid.filter(p=>p.date===today).reduce((s,p)=>s+Number(p.amount||0),0));
@@ -5392,6 +5596,21 @@
       const previous=list.find(x=>x.id===id);
       const doc=currentDocuments().find(d=>d.id===document.getElementById("paymentDocument").value);
       const client=document.getElementById("paymentClient").value.trim();
+      if(previous?.automaticType){
+        alert("Cet encaissement est géré automatiquement depuis la facture. Modifie l’acompte ou le statut directement dans la facture.");
+        return;
+      }
+      const enteredAmount=Number(document.getElementById("paymentAmount").value||0);
+      if(doc && document.getElementById("paymentStatus").value==="Validé"){
+        const otherPaid=getAdminPayments()
+          .filter(p=>p.documentId===doc.id&&p.id!==id&&isValidatedPayment(p))
+          .reduce((sum,p)=>sum+Number(p.amount||0),0);
+        const remaining=Math.max(0,invoiceTotal(doc)-otherPaid);
+        if(enteredAmount>remaining+0.005){
+          alert(`Montant trop élevé. Reste maximum à encaisser : ${formatMoney(remaining)}.`);
+          return;
+        }
+      }
       const item={
         id:id||nextPaymentId(),
         clientId:paymentClientIdByName(client)||upsertClientFromFields(client,"",""),
@@ -5399,7 +5618,7 @@
         documentId:doc?.id||"",
         documentNumber:doc?.number||"",
         date:document.getElementById("paymentDate").value,
-        amount:Number(document.getElementById("paymentAmount").value||0),
+        amount:enteredAmount,
         method:document.getElementById("paymentMethod").value,
         reference:document.getElementById("paymentReference").value.trim(),
         status:document.getElementById("paymentStatus").value,
@@ -5417,8 +5636,9 @@
     });
     function editPayment(id){const p=getAdminPayments().find(x=>x.id===id);if(!p)return;showPaymentForm();document.getElementById("paymentEditId").value=p.id;document.getElementById("paymentClient").value=p.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=p.documentId||"";document.getElementById("paymentDate").value=p.date;document.getElementById("paymentAmount").value=p.amount;document.getElementById("paymentMethod").value=p.method;document.getElementById("paymentReference").value=p.reference||"";document.getElementById("paymentStatus").value=p.status;document.getElementById("paymentNotes").value=p.notes||""}
     function deletePayment(id){
-      if(!confirm("Supprimer définitivement cet encaissement ?"))return;
       const payment=getAdminPayments().find(p=>p.id===id);
+      if(payment?.automaticType){alert("Cet encaissement est géré depuis la facture.");return;}
+      if(!confirm("Supprimer définitivement cet encaissement ?"))return;
       saveAdminPayments(getAdminPayments().filter(p=>p.id!==id));
       if(payment?.documentId)updateInvoiceFromPayments(payment.documentId);
       renderPayments();
@@ -5534,5 +5754,72 @@
     observer.observe(document.body, {subtree:true, childList:true});
   })();
 </script>
+  <div id="mobileSaveToast" class="mobile-save-toast" role="status" aria-live="polite">Enregistré ✓</div>
+  <script>
+  (()=>{
+    const toast=document.getElementById('mobileSaveToast');
+    let toastTimer;
+    const originalLabels=new WeakMap();
+
+    function showMobileSaveToast(message='Enregistré ✓', success=true){
+      if(!toast) return;
+      toast.textContent=message;
+      toast.style.background=success?'#102518':'#2c2108';
+      toast.style.borderColor=success?'#245f35':'#755a13';
+      toast.style.color=success?'#74ef8b':'#ffd66b';
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);
+    }
+    window.showMobileSaveToast=showMobileSaveToast;
+
+    async function confirmRealSave(button){
+      if(button){
+        if(!originalLabels.has(button)) originalLabels.set(button,button.textContent);
+        button.classList.add('is-saving');
+        button.textContent='Sauvegarde…';
+      }
+      try{
+        // Laisse d'abord le gestionnaire du formulaire écrire dans localStorage.
+        await new Promise(resolve=>setTimeout(resolve,180));
+        const synced=typeof cloudSaveNow==='function' ? await cloudSaveNow(false) : false;
+        if(synced){
+          showMobileSaveToast('Enregistré et synchronisé ✓',true);
+        }else if(!navigator.onLine){
+          showMobileSaveToast('Enregistré sur le mobile — synchro en attente',false);
+        }else{
+          showMobileSaveToast('Enregistré localement — synchro à vérifier',false);
+        }
+      }catch(error){
+        console.error('Sauvegarde mobile',error);
+        showMobileSaveToast('Enregistré localement — erreur de synchro',false);
+      }finally{
+        if(button){
+          button.classList.remove('is-saving');
+          button.textContent=originalLabels.get(button)||'Enregistrer';
+          originalLabels.delete(button);
+        }
+      }
+    }
+
+    // Phase bulle : elle intervient après les gestionnaires submit déjà installés.
+    document.addEventListener('submit', event=>{
+      const form=event.target;
+      if(!(form instanceof HTMLFormElement)) return;
+      const button=event.submitter || form.querySelector('.save-btn[type="submit"]');
+      if(!button || !button.classList.contains('save-btn')) return;
+      confirmRealSave(button);
+    },false);
+
+    document.querySelectorAll('.save-btn[type="button"]').forEach(button=>{
+      button.addEventListener('click',()=>confirmRealSave(button));
+    });
+
+    window.addEventListener('online',()=>{
+      if(typeof cloudSaveNow==='function') cloudSaveNow(false);
+    });
+  })();
+  </script>
+
 </body>
 </html>
