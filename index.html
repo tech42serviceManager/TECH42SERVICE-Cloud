@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V20.3 Synchronisation sécurisée</title>
+  <title>TECH42SERVICE Gestion — V20.5 Synchronisation sans faux conflits</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -400,7 +400,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V20.3 — Synchronisation anti-écrasement */
+    /* V20.5 — Synchronisation anti-écrasement sans faux conflits */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1713,7 +1713,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V20.4 Factures, acomptes & stock liésmatique</footer>
+      <footer>TECH42SERVICE Gestion — V20.5 Synchronisation sans faux conflitsmatique</footer>
     </main>
   </div>
 
@@ -1807,6 +1807,19 @@
       return data;
     }
 
+    // Comparaison canonique : l'ordre des propriétés renvoyé par Supabase
+    // ne doit jamais créer un faux conflit entre deux contenus identiques.
+    function canonicalCloudJson(data){
+      const source = data && typeof data === "object" ? data : {};
+      const normalized = {};
+      CLOUD_STORAGE_KEYS.slice().sort().forEach(key => {
+        if(Object.prototype.hasOwnProperty.call(source, key) && source[key] !== null){
+          normalized[key] = String(source[key]);
+        }
+      });
+      return JSON.stringify(normalized);
+    }
+
     const LOCAL_BACKUP_DB = "TECH42SERVICE_LOCAL_BACKUPS";
     const LOCAL_BACKUP_STORE = "snapshots";
     const LOCAL_BACKUP_LIMIT = 20;
@@ -1854,7 +1867,7 @@
 
     async function createLocalBackup(reason="Automatique", force=false){
       const data = collectCloudData();
-      const json = JSON.stringify(data);
+      const json = canonicalCloudJson(data);
       if(!force && json === lastLocalBackupJson) return false;
       const db = await openLocalBackupDb();
       await new Promise((resolve, reject) => {
@@ -1924,7 +1937,7 @@
       }finally{
         cloudApplying = false;
       }
-      lastCloudJson = JSON.stringify(collectCloudData());
+      lastCloudJson = canonicalCloudJson(collectCloudData());
     }
 
     async function readCloudState(){
@@ -1940,7 +1953,7 @@
 
     async function cloudFetchLatest(refresh=true){
       if(!cloudUser || cloudLoading || !navigator.onLine) return false;
-      if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+      if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
         setCloudStatus("Modifications locales en attente — réception cloud suspendue", false);
         return false;
       }
@@ -1950,14 +1963,22 @@
         const data = result.row;
         if(!data || !data.data) return false;
 
-        const incomingJson = JSON.stringify(data.data);
+        const incomingJson = canonicalCloudJson(data.data);
         const incomingDate = data.updated_at || "";
         const isNewer = !lastCloudUpdatedAt || (incomingDate && incomingDate > lastCloudUpdatedAt);
 
+        if(incomingJson === canonicalCloudJson(collectCloudData())){
+          lastCloudJson = incomingJson;
+          if(incomingDate) lastCloudUpdatedAt = incomingDate;
+          cloudDirty = false;
+          cloudConflictDetected = false;
+          return false;
+        }
         if(incomingJson !== lastCloudJson && isNewer){
           applyCloudData(data.data);
           lastCloudUpdatedAt = incomingDate;
           cloudConflictDetected = false;
+          cloudDirty = false;
           if(refresh) refreshAllCloudModules();
           setCloudStatus("Données cloud reçues et vérifiées", true);
           return true;
@@ -2012,14 +2033,31 @@
           do{
             cloudSaveAgain = false;
             const state = collectCloudData();
-            const json = JSON.stringify(state);
+            const json = canonicalCloudJson(state);
             if(!force && !cloudDirty && json === lastCloudJson) return true;
 
             const remoteResult = await readCloudState();
             const remote = remoteResult.row;
-            const remoteJson = remote?.data ? JSON.stringify(remote.data) : "";
+            const remoteJson = remote?.data ? canonicalCloudJson(remote.data) : "";
             const remoteDate = remote?.updated_at || "";
+            // Si le cloud contient déjà exactement les mêmes données que cet appareil,
+            // il n'y a aucun conflit, même si la date ou l'ordre JSON diffèrent.
+            if(remoteJson && remoteJson === json){
+              lastCloudJson = json;
+              lastCloudUpdatedAt = remoteDate || lastCloudUpdatedAt;
+              cloudDirty = false;
+              cloudConflictDetected = false;
+              force = false;
+              continue;
+            }
+
+            // Un conflit réel exige trois conditions :
+            // 1) le cloud a changé depuis la dernière synchronisation confirmée ;
+            // 2) le contenu cloud diffère de la base confirmée ;
+            // 3) le contenu local diffère lui aussi de cette base.
+            const localChangedSinceLastSync = Boolean(lastCloudJson && json !== lastCloudJson);
             const remoteChangedSinceLastSync = Boolean(
+              lastCloudJson &&
               remoteJson &&
               remoteJson !== lastCloudJson &&
               lastCloudUpdatedAt &&
@@ -2027,13 +2065,16 @@
               remoteDate > lastCloudUpdatedAt
             );
 
-            if(remoteChangedSinceLastSync){
+            if(localChangedSinceLastSync && remoteChangedSinceLastSync){
               cloudConflictDetected = true;
               cloudDirty = true;
-              try{ await createLocalBackup("Conflit cloud — version locale conservée", true); }catch(error){ console.error("Sauvegarde conflit", error); }
-              setCloudStatus("Conflit détecté — aucune donnée écrasée", false);
+              try{ await createLocalBackup("Conflit cloud réel — version locale conservée", true); }catch(error){ console.error("Sauvegarde conflit", error); }
+              setCloudStatus("Conflit réel détecté — données locales conservées", false);
               return false;
             }
+
+            // Au premier passage sans base locale fiable, la version de l'appareil
+            // peut être envoyée sans déclencher un conflit fondé uniquement sur une date.
 
             setCloudSyncing("Envoi sécurisé vers le cloud…");
             const updatedAt = new Date().toISOString();
@@ -2048,7 +2089,7 @@
               .single();
 
             if(error) throw error;
-            const confirmedJson = JSON.stringify(data?.data || {});
+            const confirmedJson = canonicalCloudJson(data?.data || {});
             if(confirmedJson !== json){
               throw new Error("La confirmation cloud ne correspond pas aux données envoyées");
             }
@@ -2058,7 +2099,7 @@
             cloudDirty = false;
             cloudConflictDetected = false;
             force = false;
-          }while(cloudSaveAgain || JSON.stringify(collectCloudData()) !== lastCloudJson);
+          }while(cloudSaveAgain || canonicalCloudJson(collectCloudData()) !== lastCloudJson);
 
           const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
           setCloudStatus(`Synchronisation confirmée à ${savedTime}`, true);
@@ -2112,19 +2153,19 @@
       // peuvent être suspendus lorsque l'écran se verrouille ou change d'application.
       cloudPollTimer = setInterval(async () => {
         if(document.visibilityState !== "visible" || !navigator.onLine || !cloudUser) return;
-        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+        if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
           await cloudSaveNow(false);
         }
       }, 12000);
       window.addEventListener("focus", async () => {
-        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
+        if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
         else await cloudFetchLatest(true);
       });
       document.addEventListener("visibilitychange", async () => {
         if(document.visibilityState === "hidden"){
           await cloudSaveNow(false);
         }else{
-          if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
+          if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson) await cloudSaveNow(false);
           else await cloudFetchLatest(true);
         }
       });
@@ -2133,7 +2174,7 @@
       window.addEventListener("offline", () => setCloudStatus("Hors connexion — données conservées", false));
       window.addEventListener("online", async () => {
         setCloudSyncing("Connexion retrouvée…");
-        if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+        if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
           await cloudSaveNow(false);
         }else{
           await cloudFetchLatest(true);
@@ -2158,8 +2199,8 @@
           return;
         }
         const verification = await readCloudState();
-        const remoteJson = JSON.stringify(verification.row?.data || {});
-        const localJson = JSON.stringify(collectCloudData());
+        const remoteJson = canonicalCloudJson(verification.row?.data || {});
+        const localJson = canonicalCloudJson(collectCloudData());
         if(!verification.ok || remoteJson !== localJson){
           cloudDirty = true;
           setCloudStatus("Vérification échouée — aucune réussite affichée", false);
@@ -2191,7 +2232,7 @@
           const incomingDate = payload.new.updated_at || "";
           if(incomingJson === lastCloudJson) return;
           if(lastCloudUpdatedAt && incomingDate && incomingDate <= lastCloudUpdatedAt) return;
-          if(cloudDirty || JSON.stringify(collectCloudData()) !== lastCloudJson){
+          if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
             cloudConflictDetected = true;
             createLocalBackup("Conflit temps réel — version locale conservée", true).catch(error => console.error(error));
             setCloudStatus("Conflit entre appareils — version locale conservée", false);
