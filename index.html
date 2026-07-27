@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V19.5</title>
+  <title>TECH42SERVICE Gestion — V19.6</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -2373,6 +2372,7 @@
       loginError.textContent = "";
       showPage("dashboard");
       renderRepairs();
+      if(role === "admin") unlockRepairFormFields();
       renderStock();
       refreshStockPartsList();
       renderDocuments();
@@ -2820,6 +2820,29 @@
       });
     });
 
+
+    function unlockRepairFormFields(){
+      if(activeRole !== "admin") return;
+      document.querySelectorAll("#repairForm input,#repairForm select,#repairForm textarea,#repairForm button").forEach(el=>{
+        el.disabled = false;
+        el.readOnly = false;
+        el.removeAttribute("disabled");
+        el.removeAttribute("readonly");
+        el.style.pointerEvents = "auto";
+        el.style.opacity = "1";
+      });
+      const price = document.getElementById("repairPrice");
+      const technician = document.getElementById("repairTechnician");
+      if(price){
+        price.disabled = false;
+        price.readOnly = false;
+      }
+      if(technician){
+        technician.disabled = false;
+        technician.readOnly = false;
+      }
+    }
+
     function resetRepairForm(){
       document.getElementById("repairForm").reset();
       document.getElementById("repairEditId").value = "";
@@ -2846,6 +2869,7 @@
       }
       document.getElementById("repairForm").classList.remove("hidden");
       document.getElementById("cancelRepairBtn").classList.remove("hidden");
+      unlockRepairFormFields();
     }
 
     function hideRepairForm(){
@@ -2970,6 +2994,7 @@
       updateRepairProTotals();
       document.getElementById("saveRepairBtn").textContent = "Enregistrer les modifications";
       showRepairForm();
+      unlockRepairFormFields();
       document.getElementById("repairForm").scrollIntoView({behavior:"smooth"});
     }
 
