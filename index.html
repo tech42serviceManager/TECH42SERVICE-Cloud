@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V19.9 Remises & Facture auto</title>
+  <title>TECH42SERVICE Gestion — V20.0 Agenda & Documents</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -456,7 +456,6 @@
         <button data-page="buySell">Rachat / Vente</button>
         <button data-page="devices">Appareils</button>
         <button data-page="repairHelp">Aide réparations</button>
-        <button data-page="sites">Sites</button>
         <button data-page="settings">Paramètres</button>
         <button id="logoutBtn" class="logout">Déconnexion</button>
       </nav>
@@ -1053,7 +1052,8 @@
 
             <div class="full page-actions">
               <button id="saveDocumentBtn" class="save-btn write-action" type="submit">Enregistrer</button>
-              <button id="printCurrentDocumentBtn" class="action-btn secondary" type="button">Aperçu / Imprimer</button>
+              <button id="previewCurrentDocumentBtn" class="action-btn secondary" type="button">Aperçu</button>
+              <button id="printCurrentDocumentBtn" class="action-btn secondary" type="button">Imprimer</button>
               <button id="emailCurrentDocumentBtn" class="action-btn secondary" type="button">Envoyer par e-mail</button>
               <button id="resetDocumentBtn" class="action-btn secondary" type="button">Nouveau</button>
               <div class="document-mail-note">Sur mobile, le PDF peut être partagé directement. Sur PC, il est téléchargé puis le logiciel de messagerie s'ouvre.</div>
@@ -1607,70 +1607,6 @@
         </section>
       </section>
 
-
-      <section id="sitesPage" class="hidden">
-        <header class="topbar">
-          <div>
-            <h1>Sites</h1>
-            <p>Accès rapide à tous tes sites professionnels</p>
-          </div>
-        </header>
-
-        <div id="sitesDemoNote" class="demo-banner hidden">
-          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
-        </div>
-
-        <section class="panel">
-          <form id="sitesForm" class="links-form">
-            <div class="field">
-              <label>Nom du site</label>
-              <input id="siteName" type="text" required>
-            </div>
-            <div class="field">
-              <label>Lien</label>
-              <input id="siteUrl" type="url" placeholder="https://..." required>
-            </div>
-            <div class="field">
-              <label>Catégorie</label>
-              <select id="siteCategory">
-                <option>Fournisseur</option>
-                <option>Administration</option>
-                <option>Banque</option>
-                <option>Marketplace</option>
-                <option>Communication</option>
-                <option>Outil professionnel</option>
-                <option>Autre</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Description</label>
-              <input id="siteDescription" type="text">
-            </div>
-            <div>
-              <button class="save-btn write-action" type="submit">Ajouter le site</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="panel">
-          <div class="repair-toolbar">
-            <input id="sitesSearch" type="search" placeholder="Rechercher un site...">
-            <select id="sitesFilter">
-              <option value="">Toutes les catégories</option>
-              <option>Fournisseur</option>
-              <option>Administration</option>
-              <option>Banque</option>
-              <option>Marketplace</option>
-              <option>Communication</option>
-              <option>Outil professionnel</option>
-              <option>Autre</option>
-            </select>
-          </div>
-          <div id="sitesGrid" class="links-grid"></div>
-          <div id="sitesEmpty" class="empty-state">Aucun site enregistré.</div>
-        </section>
-      </section>
-
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -1761,7 +1697,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V19.9 Remises & Facture automatique</footer>
+      <footer>TECH42SERVICE Gestion — V20.0 Agenda & Documentsmatique</footer>
     </main>
   </div>
 
@@ -2180,7 +2116,7 @@
       try{ renderClients(); }catch(e){ console.warn(e); }
       try{ renderBuySell(); }catch(e){ console.warn(e); }
       try{ renderDevices(); refreshDeviceLists(); }catch(e){ console.warn(e); }
-      try{ renderRepairHelp(); renderSites(); }catch(e){ console.warn(e); }
+      try{ renderRepairHelp(); }catch(e){ console.warn(e); }
       try{ updateDashboardStats(); }catch(e){ console.warn(e); }
       try{
         const savedTheme = localStorage.getItem("tech42-theme") || "gold";
@@ -2266,7 +2202,6 @@
     const buySellPage = document.getElementById("buySellPage");
     const devicesPage = document.getElementById("devicesPage");
     const repairHelpPage = document.getElementById("repairHelpPage");
-    const sitesPage = document.getElementById("sitesPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
     const documentsDemoNote = document.getElementById("documentsDemoNote");
@@ -2276,7 +2211,6 @@
     const buySellDemoNote = document.getElementById("buySellDemoNote");
     const devicesDemoNote = document.getElementById("devicesDemoNote");
     const repairHelpDemoNote = document.getElementById("repairHelpDemoNote");
-    const sitesDemoNote = document.getElementById("sitesDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
     const theme = document.getElementById("theme");
@@ -2400,7 +2334,6 @@
       buySellDemoNote.classList.toggle("hidden", role !== "visuel");
       devicesDemoNote.classList.toggle("hidden", role !== "visuel");
       repairHelpDemoNote.classList.toggle("hidden", role !== "visuel");
-      sitesDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
 
@@ -2501,7 +2434,6 @@
       buySellPage.classList.toggle("hidden", page !== "buySell");
       devicesPage.classList.toggle("hidden", page !== "devices");
       repairHelpPage.classList.toggle("hidden", page !== "repairHelp");
-      sitesPage.classList.toggle("hidden", page !== "sites");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
@@ -2520,7 +2452,7 @@
     }
 
     function installModuleHomeButtons(){
-      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, paymentsPage, buySellPage, devicesPage, repairHelpPage, sitesPage, settingsPage];
+      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, paymentsPage, buySellPage, devicesPage, repairHelpPage, settingsPage];
       pages.forEach(page => {
         if(!page) return;
         const topbar = page.querySelector(":scope > .topbar");
@@ -3747,7 +3679,7 @@
       setDocumentType("facture");
       document.getElementById("saveDocumentBtn").textContent = "Enregistrer";
       document.querySelectorAll("#documentForm input,#documentForm select,#documentForm textarea,#documentForm button").forEach(el=>{
-        if(!["printCurrentDocumentBtn","emailCurrentDocumentBtn","resetDocumentBtn"].includes(el.id)){
+        if(!["previewCurrentDocumentBtn","printCurrentDocumentBtn","emailCurrentDocumentBtn","resetDocumentBtn"].includes(el.id)){
           el.disabled = activeRole !== "admin";
         }
       });
@@ -3910,6 +3842,7 @@
       };
     }
 
+    document.getElementById("previewCurrentDocumentBtn").addEventListener("click",()=>previewDocument(currentFormDocument()));
     document.getElementById("printCurrentDocumentBtn").addEventListener("click",()=>printDocument(currentFormDocument()));
     document.getElementById("emailCurrentDocumentBtn").addEventListener("click",()=>emailDocument(currentFormDocument()));
 
@@ -4022,6 +3955,13 @@
         footer{position:absolute;left:6mm;right:6mm;bottom:5mm;border-top:1px solid #aaa;padding-top:3mm;font-size:8pt;color:#555;line-height:1.35}
         @media print{.a4-document{margin:0;padding:5mm 6mm}}
       `;
+    }
+
+    function previewDocument(item){
+      const w=window.open("","_blank","width=980,height=820");
+      if(!w){alert("Autorise les fenêtres pop-up pour afficher l’aperçu.");return;}
+      w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Aperçu — ${escapeHtml(item.number||"Document")}</title><style>${documentPrintStyles()} .preview-toolbar{position:sticky;top:0;z-index:10;padding:10px;background:#111;text-align:center}.preview-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;font-weight:800;cursor:pointer}@media print{.preview-toolbar{display:none}}</style></head><body><div class="preview-toolbar"><button onclick="window.print()">Imprimer cet aperçu</button></div>${documentPrintableContent(item)}</body></html>`);
+      w.document.close();
     }
 
     function printDocument(item){
@@ -4232,10 +4172,12 @@
                 ${escapeHtml(item.phone || "—")} · ${escapeHtml(item.email || "—")}<br>
                 ${escapeHtml(item.device || "Appareil non précisé")} · ${escapeHtml(item.reason)}<br>
                 Durée : ${Number(item.duration || 30)} min · Statut : ${escapeHtml(item.status)}
+                ${item.notes ? `<br><strong>Note :</strong> ${escapeHtml(item.notes)}` : ""}
               </div>
             </div>
             <div class="table-actions">
               <button class="mini-btn" data-appt-google="${escapeHtml(item.id)}">Google Agenda</button>
+              ${activeRole==="admin" && item.status!=="Terminé" ? `<button class="mini-btn" data-appt-done="${escapeHtml(item.id)}">Marquer terminé</button>` : ""}
               ${activeRole==="admin" ? `<button class="mini-btn" data-appt-repair="${escapeHtml(item.id)}">Créer réparation</button>` : ""}
               ${actions}
             </div>
@@ -4249,6 +4191,7 @@
       list.querySelectorAll("[data-appt-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteAppointment(btn.dataset.apptDelete)));
       list.querySelectorAll("[data-appt-google]").forEach(btn=>btn.addEventListener("click",()=>openGoogleCalendar(btn.dataset.apptGoogle)));
       list.querySelectorAll("[data-appt-repair]").forEach(btn=>btn.addEventListener("click",()=>convertAppointmentToRepair(btn.dataset.apptRepair)));
+      list.querySelectorAll("[data-appt-done]").forEach(btn=>btn.addEventListener("click",()=>completeAppointment(btn.dataset.apptDone)));
     }
 
     function nextAppointmentId(list){
@@ -4339,6 +4282,21 @@
       document.getElementById("appointmentNotes").value = item.notes || "";
       document.getElementById("saveAppointmentBtn").textContent = "Enregistrer les modifications";
       showAppointmentForm();
+    }
+
+    function completeAppointment(id){
+      if(activeRole !== "admin") return;
+      const list=getAdminAppointments();
+      const item=list.find(i=>i.id===id);
+      if(!item) return;
+      const note=prompt("Ajoute une note pour ce rendez-vous terminé :", item.notes || "");
+      if(note===null) return;
+      item.status="Terminé";
+      item.notes=note.trim();
+      item.completedAt=new Date().toISOString();
+      saveAdminAppointments(list);
+      renderAppointments();
+      updateDashboardStats();
     }
 
     function deleteAppointment(id){
@@ -4930,45 +4888,6 @@
 
     document.getElementById("repairHelpSearch").addEventListener("input",renderRepairHelp);
     document.getElementById("repairHelpFilter").addEventListener("change",renderRepairHelp);
-
-    function currentSitesLinks(){
-      return activeRole==="visuel" ? demoSitesLinks : getStoredLinks("tech42-sites-links");
-    }
-
-    function renderSites(){
-      const grid=renderLinkCards({
-        gridId:"sitesGrid",emptyId:"sitesEmpty",
-        searchId:"sitesSearch",filterId:"sitesFilter",
-        list:currentSitesLinks(),key:"tech42-sites-links",
-        deleteAttr:"data-site-delete"
-      });
-      grid.querySelectorAll("[data-site-delete]").forEach(btn=>{
-        btn.addEventListener("click",()=>{
-          if(!confirm("Supprimer ce site ?")) return;
-          saveStoredLinks("tech42-sites-links",getStoredLinks("tech42-sites-links").filter(i=>i.id!==btn.dataset.siteDelete));
-          renderSites();
-        });
-      });
-    }
-
-    document.getElementById("sitesForm").addEventListener("submit",event=>{
-      event.preventDefault();
-      if(activeRole!=="admin") return;
-      const list=getStoredLinks("tech42-sites-links");
-      list.unshift({
-        id:nextLinkId("SITE",list),
-        name:document.getElementById("siteName").value.trim(),
-        url:document.getElementById("siteUrl").value.trim(),
-        category:document.getElementById("siteCategory").value,
-        description:document.getElementById("siteDescription").value.trim()
-      });
-      saveStoredLinks("tech42-sites-links",list);
-      event.target.reset();
-      renderSites();
-    });
-
-    document.getElementById("sitesSearch").addEventListener("input",renderSites);
-    document.getElementById("sitesFilter").addEventListener("change",renderSites);
 
 
     const demoDevices = [
