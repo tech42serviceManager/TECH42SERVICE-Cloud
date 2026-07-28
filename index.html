@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.6 tous documents A4 une page</title>
+  <title>TECH42SERVICE Gestion — V21.7 PDF corrigé et module Factures</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -421,7 +421,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.6 — Tous les documents et PDF sur une seule page A4 */
+    /* V21.7 — PDF A4 corrigé et module Factures séparé */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -429,6 +429,8 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <section id="loginScreen" class="login-screen">
@@ -492,6 +494,7 @@
         <button data-page="stock">Stock</button>
         <button data-page="appointments">Rendez-vous</button>
         <button data-page="documents">Documents</button>
+        <button data-page="invoices">Factures</button>
         <button data-page="payments">Encaissements</button>
         <button data-page="buySell">Rachat / Vente</button>
         <button data-page="devices">Appareils</button>
@@ -525,7 +528,7 @@
           <article class="card dashboard-card" data-open-page="repairs"><div class="label">Réparations en cours</div><div id="statRepairs" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="appointments"><div class="label">Rendez-vous aujourd'hui</div><div id="statAppointments" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="stock"><div class="label">Articles en stock</div><div id="statStock" class="value">0</div></article>
-          <article class="card dashboard-card" data-open-page="documents"><div class="label">CA payé</div><div id="statRevenue" class="value">0 €</div></article>
+          <article class="card dashboard-card" data-open-page="invoices"><div class="label">CA payé</div><div id="statRevenue" class="value">0 €</div></article>
           <article class="card dashboard-card" data-open-page="stock"><div class="label">Stock faible</div><div id="statLowStock" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Rachats du mois</div><div id="statMonthlyPurchases" class="value">0 €</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Ventes du mois</div><div id="statMonthlySales" class="value">0 €</div></article>
@@ -1117,27 +1120,6 @@
           </form>
         </section>
 
-        <section class="panel">
-          <h2>Documents enregistrés</h2>
-          <div class="table-wrap">
-            <table class="document-list">
-              <thead>
-                <tr>
-                  <th>Numéro</th>
-                  <th>Type</th>
-                  <th>Client</th>
-                  <th>Date</th>
-                  <th>Total</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="documentsTableBody"></tbody>
-            </table>
-          </div>
-          <div id="documentsEmpty" class="empty-state">Aucun document enregistré.</div>
-        </section>
-
         <section id="documentTemplatesPanel" class="panel">
           <h2>Personnalisation des documents</h2>
           <div class="template-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
@@ -1168,6 +1150,40 @@
           </div>
           <button id="saveDocumentTemplates" class="save-btn write-action" type="button">Enregistrer la personnalisation</button>
           <div id="documentTemplatesMessage"></div>
+        </section>
+      </section>
+
+      <section id="invoicesPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Factures</h1>
+            <p>Tous les documents enregistrés</p>
+          </div>
+        </header>
+
+        <div id="invoicesDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
+        </div>
+
+        <section class="panel">
+          <h2>Documents enregistrés</h2>
+          <div class="table-wrap">
+            <table class="document-list">
+              <thead>
+                <tr>
+                  <th>Numéro</th>
+                  <th>Type</th>
+                  <th>Client</th>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="documentsTableBody"></tbody>
+            </table>
+          </div>
+          <div id="documentsEmpty" class="empty-state">Aucun document enregistré.</div>
         </section>
       </section>
 
@@ -1774,7 +1790,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.6 tous documents A4 une page</footer>
+      <footer>TECH42SERVICE Gestion — V21.7 PDF corrigé et module Factures</footer>
     </main>
   </div>
 
@@ -2720,6 +2736,7 @@
     const repairsPage = document.getElementById("repairsPage");
     const stockPage = document.getElementById("stockPage");
     const documentsPage = document.getElementById("documentsPage");
+    const invoicesPage = document.getElementById("invoicesPage");
     const appointmentsPage = document.getElementById("appointmentsPage");
     const clientsPage = document.getElementById("clientsPage");
     const paymentsPage = document.getElementById("paymentsPage");
@@ -2729,6 +2746,7 @@
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
     const documentsDemoNote = document.getElementById("documentsDemoNote");
+    const invoicesDemoNote = document.getElementById("invoicesDemoNote");
     const appointmentsDemoNote = document.getElementById("appointmentsDemoNote");
     const clientsDemoNote = document.getElementById("clientsDemoNote");
     const paymentsDemoNote = document.getElementById("paymentsDemoNote");
@@ -2878,6 +2896,7 @@
       repairDemoNote.classList.toggle("hidden", role !== "visuel");
       stockDemoNote.classList.toggle("hidden", role !== "visuel");
       documentsDemoNote.classList.toggle("hidden", role !== "visuel");
+      invoicesDemoNote.classList.toggle("hidden", role !== "visuel");
       appointmentsDemoNote.classList.toggle("hidden", role !== "visuel");
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
       paymentsDemoNote.classList.toggle("hidden", role !== "visuel");
@@ -2986,6 +3005,7 @@
       repairsPage.classList.toggle("hidden", page !== "repairs");
       stockPage.classList.toggle("hidden", page !== "stock");
       documentsPage.classList.toggle("hidden", page !== "documents");
+      invoicesPage.classList.toggle("hidden", page !== "invoices");
       appointmentsPage.classList.toggle("hidden", page !== "appointments");
       clientsPage.classList.toggle("hidden", page !== "clients");
       paymentsPage.classList.toggle("hidden", page !== "payments");
@@ -2997,6 +3017,7 @@
       if(page === "repairs") renderRepairs();
       if(page === "stock") renderStock();
       if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
+      if(page === "invoices") renderDocuments();
       if(page === "payments") renderPayments();
       if(page === "appointments"){ renderAppointments();
       updateDashboardStats(); resetAppointmentForm(); }
@@ -3010,7 +3031,7 @@
     }
 
     function installModuleHomeButtons(){
-      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, paymentsPage, buySellPage, devicesPage, repairHelpPage, settingsPage];
+      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, invoicesPage, paymentsPage, buySellPage, devicesPage, repairHelpPage, settingsPage];
       pages.forEach(page => {
         if(!page) return;
         const topbar = page.querySelector(":scope > .topbar");
@@ -4477,6 +4498,7 @@
       if(activeRole!=="admin") return;
       const item = getAdminDocuments().find(d=>d.id===id);
       if(!item) return;
+      showPage("documents");
 
       document.getElementById("documentEditId").value=item.id;
       document.getElementById("documentType").value=item.type;
@@ -4728,7 +4750,8 @@
       wrapper.style.left="0";
       wrapper.style.top="0";
       wrapper.style.width="210mm";
-      wrapper.style.minHeight="297mm";
+      wrapper.style.height="297mm";
+      wrapper.style.overflow="hidden";
       wrapper.style.zIndex="-2147483647";
       wrapper.style.pointerEvents="none";
       wrapper.style.background="#fff";
@@ -4736,7 +4759,18 @@
       document.body.appendChild(wrapper);
       try{
         const page=wrapper.querySelector(".a4-document");
-        page.style.zoom="1";
+        Object.assign(page.style,{
+          width:"190mm",
+          minWidth:"190mm",
+          maxWidth:"190mm",
+          height:"277mm",
+          minHeight:"277mm",
+          maxHeight:"277mm",
+          overflow:"hidden",
+          zoom:"1",
+          transform:"none",
+          margin:"0"
+        });
         await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
         await Promise.all([...page.querySelectorAll("img")].map(image=>{
           if(image.complete) return Promise.resolve();
@@ -4746,13 +4780,22 @@
             setTimeout(resolve,1500);
           });
         }));
+        const bounds=page.getBoundingClientRect();
+        const captureWidth=Math.max(1,Math.ceil(bounds.width));
+        const captureHeight=Math.max(1,Math.ceil(bounds.height));
 
         if(typeof window.html2canvas==="function" && window.jspdf?.jsPDF){
           const canvas=await window.html2canvas(page,{
             scale:2,
             useCORS:true,
             backgroundColor:"#ffffff",
-            logging:false
+            logging:false,
+            width:captureWidth,
+            height:captureHeight,
+            windowWidth:1200,
+            windowHeight:1200,
+            scrollX:0,
+            scrollY:0
           });
           if(!canvas.width || !canvas.height) throw new Error("PDF_CANVAS_EMPTY");
           const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
@@ -4772,14 +4815,11 @@
           return pdf.output("blob");
         }
 
-        fitA4Element(page,277,190);
-        page.style.maxHeight="277mm";
-        page.style.overflow="hidden";
         return await html2pdf().set({
           margin:5,
           filename:`${item.number||"document"}.pdf`,
           image:{type:"jpeg",quality:.98},
-          html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:794,windowHeight:1123},
+          html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,width:captureWidth,height:captureHeight,windowWidth:1200,windowHeight:1200},
           jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
           pagebreak:{mode:[]}
         }).from(page).outputPdf("blob");
