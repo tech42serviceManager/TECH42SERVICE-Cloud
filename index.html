@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.7 PDF corrigé et module Factures</title>
+  <title>TECH42SERVICE Gestion — V21.8 sans module Appareils et rendez-vous modifiables</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -282,15 +282,6 @@
     .doc-pro-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
     .doc-pro-card h3{margin:0 0 10px;color:var(--accent)}
 
-    
-    .device-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-    .device-form input,.device-form select{
-      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
-    }
-    .device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-    .device-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:15px}
-    .device-card h3{margin:0 0 8px;color:var(--accent)}
-    .device-meta{color:var(--muted);font-size:14px;line-height:1.5}
     .photo-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .photo-type-card{border:1px solid var(--border);border-radius:10px;padding:12px;background:#101010}
 
@@ -367,7 +358,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
       .document-discount-controls{grid-template-columns:1fr}
       .document-discount-title{grid-column:1}
       .discount-editor{grid-template-columns:1fr}
@@ -404,6 +395,7 @@
     .planner-cell.drag-over{background:#2a2108}.planner-event{padding:7px 8px;border-radius:8px;background:linear-gradient(135deg,#3b2e08,#17140b);border:1px solid #806514;color:#fff;font-size:12px;cursor:grab;margin-bottom:4px;box-shadow:0 5px 15px #0007}
     .planner-event.confirmed{border-color:#286d38;background:#102518}.planner-event.cancelled{opacity:.55;border-color:#7a2a2a;background:#2b1111}.planner-event.done{border-color:#355b82;background:#102033}
     .planner-event strong{display:block;color:#ffd86f;margin-bottom:2px}.planner-event small{display:block;color:#ddd}
+    .planner-edit-btn{width:100%;margin-top:6px;padding:5px 7px;border:1px solid #d4a72c;border-radius:6px;background:#111;color:#f1d783;font-size:11px;font-weight:800;cursor:pointer}
     .month-grid{display:grid;grid-template-columns:repeat(7,minmax(115px,1fr));min-width:820px}.month-head{padding:10px;text-align:center;font-weight:800;background:#171717;border-bottom:1px solid var(--border)}
     .month-day{min-height:125px;border-right:1px solid #222;border-bottom:1px solid #222;padding:7px}.month-day.outside{opacity:.38}.month-number{font-weight:800;color:var(--accent);margin-bottom:6px}
     .google-sync-note{font-size:13px;color:var(--muted);margin-top:8px}.google-sync-ok{color:#74ef8b}
@@ -421,7 +413,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.7 — PDF A4 corrigé et module Factures séparé */
+    /* V21.8 — Module Appareils supprimé et rendez-vous terminés modifiables */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -497,7 +489,6 @@
         <button data-page="invoices">Factures</button>
         <button data-page="payments">Encaissements</button>
         <button data-page="buySell">Rachat / Vente</button>
-        <button data-page="devices">Appareils</button>
         <button data-page="repairHelp">Aide réparations</button>
         <button data-page="settings">Paramètres</button>
         <button id="logoutBtn" class="logout">Déconnexion</button>
@@ -532,7 +523,6 @@
           <article class="card dashboard-card" data-open-page="stock"><div class="label">Stock faible</div><div id="statLowStock" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Rachats du mois</div><div id="statMonthlyPurchases" class="value">0 €</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Ventes du mois</div><div id="statMonthlySales" class="value">0 €</div></article>
-          <article class="card dashboard-card" data-open-page="devices"><div class="label">Modèles enregistrés</div><div id="statDevices" class="value">0</div></article>
         </section>
 
 
@@ -602,12 +592,12 @@
             </div>
             <div class="field">
               <label>Marque</label>
-              <input id="repairBrand" type="text" list="deviceBrandsList" required>
+              <input id="repairBrand" type="text" required>
             </div>
 
             <div class="field">
               <label>Modèle</label>
-              <input id="repairModel" type="text" list="deviceModelsList" required>
+              <input id="repairModel" type="text" required>
             </div>
             <div class="field">
               <label>IMEI / N° de série</label>
@@ -1572,71 +1562,6 @@
         </section>
       </section>
 
-
-
-      <section id="devicesPage" class="hidden">
-        <header class="topbar">
-          <div>
-            <h1>Appareils</h1>
-            <p>Catalogue des marques, gammes et modèles</p>
-          </div>
-        </header>
-
-        <div id="devicesDemoNote" class="demo-banner hidden">
-          MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
-        </div>
-
-        <section class="panel">
-          <form id="deviceForm" class="device-form">
-            <div class="field">
-              <label>Type</label>
-              <select id="deviceTypeCatalog">
-                <option>Téléphone</option>
-                <option>Tablette</option>
-                <option>Ordinateur</option>
-                <option>Console</option>
-                <option>Autre</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Marque</label>
-              <input id="deviceBrandCatalog" type="text" required>
-            </div>
-            <div class="field">
-              <label>Gamme</label>
-              <input id="deviceRangeCatalog" type="text" placeholder="Ex. iPhone, Galaxy S">
-            </div>
-            <div class="field">
-              <label>Modèle</label>
-              <input id="deviceModelCatalog" type="text" required>
-            </div>
-            <div class="field">
-              <label>Capacité / Variante</label>
-              <input id="deviceVariantCatalog" type="text" placeholder="Ex. 128 Go, Slim">
-            </div>
-            <div>
-              <button class="save-btn write-action" type="submit">Ajouter le modèle</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="panel">
-          <div class="repair-toolbar">
-            <input id="deviceSearch" type="search" placeholder="Rechercher marque, gamme ou modèle...">
-            <select id="deviceTypeFilter">
-              <option value="">Tous les types</option>
-              <option>Téléphone</option>
-              <option>Tablette</option>
-              <option>Ordinateur</option>
-              <option>Console</option>
-              <option>Autre</option>
-            </select>
-          </div>
-          <div id="deviceGrid" class="device-grid"></div>
-          <div id="deviceEmpty" class="empty-state">Aucun modèle enregistré.</div>
-        </section>
-      </section>
-
       <section id="repairHelpPage" class="hidden">
         <header class="topbar">
           <div>
@@ -1790,7 +1715,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.7 PDF corrigé et module Factures</footer>
+      <footer>TECH42SERVICE Gestion — V21.8 sans module Appareils et rendez-vous modifiables</footer>
     </main>
   </div>
 
@@ -1899,7 +1824,6 @@
       "tech42-payments",
       "tech42-buy-sell",
       "tech42-repair-help-links",
-      "tech42-devices",
       CLOUD_TOMBSTONE_KEY,
       "tech42-theme",
       "tech42-visual-password-hash",
@@ -1915,7 +1839,6 @@
       "tech42-payments",
       "tech42-buy-sell",
       "tech42-repair-help-links",
-      "tech42-devices",
       CLOUD_TOMBSTONE_KEY
     ];
     const CLOUD_PENDING_KEY = "tech42-cloud-save-pending";
@@ -1939,7 +1862,7 @@
     let cloudConflictDetected = false;
     let cloudInitializedUserId = "";
     let cloudInitializationPromise = null;
-    const REMOVED_LEGACY_KEYS = ["tech42-sites-links"];
+    const REMOVED_LEGACY_KEYS = ["tech42-sites-links","tech42-devices"];
 
     function setCloudStatus(message, ok=false){
       const el = document.getElementById("cloudStatus");
@@ -2655,7 +2578,6 @@
       try{ renderAppointments(); }catch(e){ console.warn(e); }
       try{ renderClients(); }catch(e){ console.warn(e); }
       try{ renderBuySell(); }catch(e){ console.warn(e); }
-      try{ renderDevices(); refreshDeviceLists(); }catch(e){ console.warn(e); }
       try{ renderRepairHelp(); }catch(e){ console.warn(e); }
       try{ updateDashboardStats(); }catch(e){ console.warn(e); }
       try{
@@ -2741,7 +2663,6 @@
     const clientsPage = document.getElementById("clientsPage");
     const paymentsPage = document.getElementById("paymentsPage");
     const buySellPage = document.getElementById("buySellPage");
-    const devicesPage = document.getElementById("devicesPage");
     const repairHelpPage = document.getElementById("repairHelpPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
@@ -2751,7 +2672,6 @@
     const clientsDemoNote = document.getElementById("clientsDemoNote");
     const paymentsDemoNote = document.getElementById("paymentsDemoNote");
     const buySellDemoNote = document.getElementById("buySellDemoNote");
-    const devicesDemoNote = document.getElementById("devicesDemoNote");
     const repairHelpDemoNote = document.getElementById("repairHelpDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
@@ -2901,7 +2821,6 @@
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
       paymentsDemoNote.classList.toggle("hidden", role !== "visuel");
       buySellDemoNote.classList.toggle("hidden", role !== "visuel");
-      devicesDemoNote.classList.toggle("hidden", role !== "visuel");
       repairHelpDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
@@ -2943,8 +2862,6 @@
       refreshStockPartsList();
       renderDocuments();
       loadDocumentTemplates();
-      renderDevices();
-      refreshDeviceLists();
       refreshStockPartsList();
 
         if(role === "admin"){
@@ -3010,7 +2927,6 @@
       clientsPage.classList.toggle("hidden", page !== "clients");
       paymentsPage.classList.toggle("hidden", page !== "payments");
       buySellPage.classList.toggle("hidden", page !== "buySell");
-      devicesPage.classList.toggle("hidden", page !== "devices");
       repairHelpPage.classList.toggle("hidden", page !== "repairHelp");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
@@ -3031,7 +2947,7 @@
     }
 
     function installModuleHomeButtons(){
-      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, invoicesPage, paymentsPage, buySellPage, devicesPage, repairHelpPage, settingsPage];
+      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, invoicesPage, paymentsPage, buySellPage, repairHelpPage, settingsPage];
       pages.forEach(page => {
         if(!page) return;
         const topbar = page.querySelector(":scope > .topbar");
@@ -5099,6 +5015,7 @@
       if(activeRole !== "admin") return;
       const item = getAdminAppointments().find(i=>i.id===id);
       if(!item) return;
+      showPage("appointments");
 
       document.getElementById("appointmentEditId").value = item.id;
       document.getElementById("appointmentClient").value = item.client || "";
@@ -5113,6 +5030,7 @@
       document.getElementById("appointmentNotes").value = item.notes || "";
       document.getElementById("saveAppointmentBtn").textContent = "Enregistrer les modifications";
       showAppointmentForm();
+      requestAnimationFrame(()=>document.getElementById("appointmentForm").scrollIntoView({behavior:"smooth",block:"start"}));
     }
 
     function openAppointmentCompleteModal(id){
@@ -5185,7 +5103,6 @@
         document.getElementById("statLowStock").textContent = "6";
         document.getElementById("statMonthlyPurchases").textContent = "1 240 €";
         document.getElementById("statMonthlySales").textContent = "2 980 €";
-        document.getElementById("statDevices").textContent = currentDevices().length;
         return;
       }
 
@@ -5223,7 +5140,6 @@
       document.getElementById("statLowStock").textContent = lowStock;
       document.getElementById("statMonthlyPurchases").textContent = formatMoney(monthlyPurchases);
       document.getElementById("statMonthlySales").textContent = formatMoney(monthlySales);
-      document.getElementById("statDevices").textContent = getAdminDevices().length;
     }
 
     document.querySelectorAll("[data-open-page]").forEach(card=>{
@@ -5743,92 +5659,6 @@
 
     document.getElementById("repairHelpSearch").addEventListener("input",renderRepairHelp);
     document.getElementById("repairHelpFilter").addEventListener("change",renderRepairHelp);
-
-
-    const demoDevices = [
-      {id:"DEV-001",type:"Téléphone",brand:"Apple",range:"iPhone",model:"iPhone 13",variant:"128 Go"},
-      {id:"DEV-002",type:"Téléphone",brand:"Samsung",range:"Galaxy S",model:"Galaxy S22",variant:"128 Go"},
-      {id:"DEV-003",type:"Console",brand:"Sony",range:"PlayStation",model:"PlayStation 5",variant:"Standard"},
-      {id:"DEV-004",type:"Ordinateur",brand:"Asus",range:"VivoBook",model:"VivoBook 15",variant:""}
-    ];
-
-    function getAdminDevices(){
-      try{return JSON.parse(localStorage.getItem("tech42-devices") || "[]")}catch{return []}
-    }
-    function saveAdminDevices(list){
-      clearCloudDeletionsForSavedItems("tech42-devices",list);
-      localStorage.setItem("tech42-devices",JSON.stringify(list));
-      scheduleCloudSave();
-    }
-    function currentDevices(){
-      return activeRole==="visuel" ? demoDevices : getAdminDevices();
-    }
-    function nextDeviceId(list){
-      const max=list.reduce((highest,item)=>{
-        const match=String(item.id).match(/(\d+)$/);
-        return Math.max(highest,match?Number(match[1]):0);
-      },0);
-      return `DEV-${String(max+1).padStart(3,"0")}`;
-    }
-    function refreshDeviceLists(){
-      const devices=currentDevices();
-      document.getElementById("deviceBrandsList").innerHTML=
-        [...new Set(devices.map(i=>i.brand).filter(Boolean))].map(v=>`<option value="${escapeHtml(v)}"></option>`).join("");
-      document.getElementById("deviceModelsList").innerHTML=
-        devices.map(i=>`<option value="${escapeHtml(i.model)}">${escapeHtml(i.brand)} ${escapeHtml(i.range||"")}</option>`).join("");
-    }
-    function renderDevices(){
-      const q=document.getElementById("deviceSearch").value.trim().toLowerCase();
-      const type=document.getElementById("deviceTypeFilter").value;
-      const list=currentDevices().filter(i=>{
-        const text=[i.type,i.brand,i.range,i.model,i.variant].join(" ").toLowerCase();
-        return (!q||text.includes(q))&&(!type||i.type===type);
-      });
-      const grid=document.getElementById("deviceGrid");
-      grid.innerHTML="";
-      list.forEach(item=>{
-        const card=document.createElement("article");
-        card.className="device-card";
-        card.innerHTML=`
-          <h3>${escapeHtml(item.brand)} ${escapeHtml(item.model)}</h3>
-          <div class="device-meta">${escapeHtml(item.type)} · ${escapeHtml(item.range||"—")}<br>${escapeHtml(item.variant||"")}</div>
-          ${activeRole==="admin" ? `<div class="link-card-actions"><button class="mini-btn danger" data-device-delete="${escapeHtml(item.id)}">Supprimer</button></div>` : ""}
-        `;
-        grid.appendChild(card);
-      });
-      document.getElementById("deviceEmpty").classList.toggle("hidden",list.length>0);
-      grid.querySelectorAll("[data-device-delete]").forEach(btn=>{
-        btn.addEventListener("click",()=>{
-          if(!confirm("Supprimer ce modèle ?")) return;
-          recordCloudDeletion("tech42-devices",btn.dataset.deviceDelete);
-          saveAdminDevices(getAdminDevices().filter(i=>i.id!==btn.dataset.deviceDelete));
-          renderDevices();
-          refreshDeviceLists();
-          updateDashboardStats();
-        });
-      });
-      refreshDeviceLists();
-    }
-
-    document.getElementById("deviceForm").addEventListener("submit",event=>{
-      event.preventDefault();
-      if(activeRole!=="admin") return;
-      const list=getAdminDevices();
-      list.unshift({
-        id:nextDeviceId(list),
-        type:document.getElementById("deviceTypeCatalog").value,
-        brand:document.getElementById("deviceBrandCatalog").value.trim(),
-        range:document.getElementById("deviceRangeCatalog").value.trim(),
-        model:document.getElementById("deviceModelCatalog").value.trim(),
-        variant:document.getElementById("deviceVariantCatalog").value.trim()
-      });
-      saveAdminDevices(list);
-      event.target.reset();
-      renderDevices();
-      updateDashboardStats();
-    });
-    document.getElementById("deviceSearch").addEventListener("input",renderDevices);
-    document.getElementById("deviceTypeFilter").addEventListener("change",renderDevices);
 
     function refreshStockPartsList(){
       const stock=currentStockList();
@@ -6579,7 +6409,7 @@
       const monday=d=>{const x=clone(d),day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);return x};
       const frDay=d=>d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'});
       const statusClass=s=>s==='Confirmé'?'confirmed':s==='Annulé'?'cancelled':s==='Terminé'?'done':'';
-      function eventHtml(a){return `<div class="planner-event ${statusClass(a.status)}" draggable="${activeRole==='admin'}" data-planner-id="${escapeHtml(a.id)}"><strong>${escapeHtml(a.time||'')} · ${escapeHtml(a.client||'')}</strong><small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div>`}
+      function eventHtml(a){return `<div class="planner-event ${statusClass(a.status)}" draggable="${activeRole==='admin'}" data-planner-id="${escapeHtml(a.id)}"><strong>${escapeHtml(a.time||'')} · ${escapeHtml(a.client||'')}</strong><small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small>${activeRole==='admin'?`<button type="button" class="planner-edit-btn" data-planner-edit="${escapeHtml(a.id)}">Modifier</button>`:''}</div>`}
       function filteredForPlanner(){const q=(document.getElementById('appointmentSearch')?.value||'').toLowerCase(),st=document.getElementById('appointmentFilter')?.value||'';return currentAppointments().filter(a=>(!q||[a.client,a.phone,a.email,a.device,a.reason,a.notes].join(' ').toLowerCase().includes(q))&&(!st||a.status===st))}
       function renderPlanner(){
         const host=document.getElementById('workshopPlanner'); if(!host)return;
@@ -6602,6 +6432,7 @@
       }
       function bindPlannerDnD(){
         document.querySelectorAll('[data-planner-id]').forEach(el=>{el.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',el.dataset.plannerId));el.addEventListener('dblclick',()=>editAppointment(el.dataset.plannerId))});
+        document.querySelectorAll('[data-planner-edit]').forEach(button=>{button.addEventListener('pointerdown',event=>event.stopPropagation());button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();editAppointment(button.dataset.plannerEdit)})});
         document.querySelectorAll('[data-drop-date]').forEach(cell=>{cell.addEventListener('dragover',e=>{if(activeRole!=='admin')return;e.preventDefault();cell.classList.add('drag-over')});cell.addEventListener('dragleave',()=>cell.classList.remove('drag-over'));cell.addEventListener('drop',e=>{e.preventDefault();cell.classList.remove('drag-over');if(activeRole!=='admin')return;const id=e.dataTransfer.getData('text/plain'),list=getAdminAppointments(),a=list.find(x=>x.id===id);if(!a)return;a.date=cell.dataset.dropDate;a.time=`${pad(Number(cell.dataset.dropHour||9))}:00`;saveAdminAppointments(list);renderAppointments();updateDashboardStats()});cell.addEventListener('dblclick',()=>{if(activeRole!=='admin')return;resetAppointmentForm();document.getElementById('appointmentDate').value=cell.dataset.dropDate;document.getElementById('appointmentTime').value=`${pad(Number(cell.dataset.dropHour||9))}:00`;showAppointmentForm()})});
       }
       function googleUrl(a){const start=new Date(`${a.date}T${a.time||'09:00'}:00`),end=new Date(start.getTime()+Number(a.duration||30)*60000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');const p=new URLSearchParams({action:'TEMPLATE',text:`TECH42SERVICE — ${a.client} — ${a.device||'Rendez-vous'}`,dates:`${fmt(start)}/${fmt(end)}`,details:`${a.reason||''}\nTéléphone : ${a.phone||''}\n${a.notes||''}`,location:'TECH42SERVICE',ctz:'Europe/Paris'});return `https://calendar.google.com/calendar/render?${p}`}
@@ -6622,8 +6453,6 @@
 
   </script>
 <datalist id="clientNamesList"></datalist>
-  <datalist id="deviceBrandsList"></datalist>
-  <datalist id="deviceModelsList"></datalist>
   <datalist id="stockPartsList"></datalist>
 
 <script>
