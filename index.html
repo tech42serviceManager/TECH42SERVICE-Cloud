@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.1 récupération et synchronisation sécurisées</title>
+  <title>TECH42SERVICE Gestion — V21.2 synchronisation multi-appareils sécurisée</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -401,7 +401,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.1 — Récupération des réparations et synchronisation sans perte */
+    /* V21.2 — Synchronisation bidirectionnelle PC, tablette et mobile */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1739,7 +1739,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.1 récupération et synchronisation sécurisées</footer>
+      <footer>TECH42SERVICE Gestion — V21.2 synchronisation multi-appareils sécurisée</footer>
     </main>
   </div>
 
@@ -1830,6 +1830,8 @@
     let lastCloudFingerprint = localStorage.getItem(CLOUD_FINGERPRINT_KEY) || "";
     let lastCloudUpdatedAt = localStorage.getItem(CLOUD_CONFIRMED_AT_KEY) || "";
     let cloudConflictDetected = false;
+    let cloudInitializedUserId = "";
+    let cloudInitializationPromise = null;
     const REMOVED_LEGACY_KEYS = ["tech42-sites-links"];
 
     function setCloudStatus(message, ok=false){
@@ -2162,13 +2164,16 @@
 
         const incomingJson = canonicalCloudJson(data.data);
         const incomingDate = data.updated_at || "";
-        const isNewer = !lastCloudUpdatedAt || (incomingDate && incomingDate > lastCloudUpdatedAt);
+        const currentJson = canonicalCloudJson(collectCloudData());
 
-        if(incomingJson === canonicalCloudJson(collectCloudData())){
+        if(incomingJson === currentJson){
           markCloudConfirmed(incomingJson,incomingDate);
           return false;
         }
-        if(incomingJson !== lastCloudJson && isNewer){
+        // La ligne lue est l'état cloud actuel. On la reçoit dès que cet
+        // appareil n'a aucune modification locale en attente. La date de
+        // l'horloge du PC, de la tablette ou du mobile ne décide plus.
+        if(incomingJson !== currentJson){
           const appliedJson=applyCloudData(data.data);
           if(appliedJson===incomingJson){
             markCloudConfirmed(incomingJson,incomingDate);
@@ -2287,10 +2292,7 @@
             const remoteChangedSinceLastSync = Boolean(
               lastCloudJson &&
               remoteJson &&
-              remoteJson !== lastCloudJson &&
-              lastCloudUpdatedAt &&
-              remoteDate &&
-              remoteDate > lastCloudUpdatedAt
+              remoteJson !== lastCloudJson
             );
 
             if(localChangedSinceLastSync && remoteChangedSinceLastSync){
@@ -2385,6 +2387,10 @@
         if(document.visibilityState !== "visible" || !navigator.onLine || !cloudUser) return;
         if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
           await cloudSaveNow(false);
+        }else{
+          // Reçoit les changements des autres appareils même si Supabase
+          // Realtime est suspendu ou non activé pour la table.
+          await cloudFetchLatest(true);
         }
       }, 12000);
       window.addEventListener("focus", async () => {
@@ -2423,7 +2429,22 @@
       }
       try{
         setCloudSyncing("Synchronisation manuelle…");
-        const saved = await cloudSaveNow(true);
+        let saved = true;
+
+        // Une synchronisation manuelle ne doit jamais envoyer aveuglément
+        // l'ancienne copie d'un appareil. On envoie seulement si cet appareil
+        // a réellement des changements ; sinon on reçoit d'abord le cloud.
+        if(hasPendingCloudChanges()){
+          saved = await cloudSaveNow(false);
+        }else{
+          const received = await cloudFetchLatest(true);
+          if(!received){
+            const currentCloud = await readCloudState();
+            if(!currentCloud.row || !currentCloud.row.data){
+              saved = await cloudSaveNow(true);
+            }
+          }
+        }
         if(!saved){
           if(!cloudConflictDetected) setCloudStatus("Synchronisation non confirmée", false);
           return;
@@ -2439,7 +2460,7 @@
         markCloudConfirmed(localJson,verification.row?.updated_at || lastCloudUpdatedAt);
         refreshAllCloudModules();
         const savedTime = new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
-        setCloudStatus(`PC et mobile synchronisés à ${savedTime}`, true);
+        setCloudStatus(`PC, tablette et mobile synchronisés à ${savedTime}`, true);
       }catch(error){
         console.error(error);
         setCloudStatus("Synchronisation impossible", false);
@@ -2461,8 +2482,13 @@
           const incomingJson = canonicalCloudJson(incoming);
           const incomingDate = payload.new.updated_at || "";
           if(incomingJson === lastCloudJson) return;
-          if(lastCloudUpdatedAt && incomingDate && incomingDate <= lastCloudUpdatedAt) return;
-          if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
+          const currentJson = canonicalCloudJson(collectCloudData());
+          if(incomingJson === currentJson){
+            markCloudConfirmed(incomingJson,incomingDate);
+            setCloudStatus("Synchronisation confirmée sur tous les appareils", true);
+            return;
+          }
+          if(cloudDirty || currentJson !== lastCloudJson){
             cloudConflictDetected = true;
             markCloudPending();
             createLocalBackup("Conflit temps réel — version locale conservée", true).catch(error => console.error(error));
@@ -2485,6 +2511,32 @@
           setCloudStatus("Mise à jour reçue d’un autre appareil", true);
         })
         .subscribe();
+    }
+
+    async function initializeCloudForUser(user,{refresh=true}={}){
+      if(!user) return false;
+      cloudUser = user;
+
+      if(cloudInitializedUserId === user.id){
+        if(refresh) refreshAllCloudModules();
+        return true;
+      }
+      if(cloudInitializationPromise) return cloudInitializationPromise;
+
+      cloudInitializationPromise = (async () => {
+        await cloudLoadOrCreate();
+        if(refresh) refreshAllCloudModules();
+        subscribeCloud();
+        startCloudAutoSave();
+        cloudInitializedUserId = user.id;
+        return true;
+      })();
+
+      try{
+        return await cloudInitializationPromise;
+      }finally{
+        cloudInitializationPromise = null;
+      }
     }
 
     function refreshAllCloudModules(){
@@ -2512,15 +2564,11 @@
         password: passwordValue
       });
       if(error) throw error;
-      cloudUser = data.user;
-      await cloudLoadOrCreate();
-      refreshAllCloudModules();
-      subscribeCloud();
-      startCloudAutoSave();
+      await initializeCloudForUser(data.user,{refresh:true});
       if(hasPendingCloudChanges()){
         setCloudStatus("Connecté — sauvegarde cloud en attente", false);
       }else{
-        setCloudStatus("PC et mobile synchronisés", true);
+        setCloudStatus("PC, tablette et mobile synchronisés", true);
       }
       return data.user;
     }
@@ -2815,10 +2863,11 @@
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       if(activeRole === "admin"){
-        await cloudSaveNow(true);
+        await cloudSaveNow(false);
         await supabaseClient.auth.signOut();
       }
       cloudUser = null;
+      cloudInitializedUserId = "";
       if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
       cloudChannel = null;
       activeRole = null;
@@ -5762,10 +5811,15 @@
 
     document.getElementById("manualCloudSyncBtn")?.addEventListener("click", manualCloudSync);
 
-    supabaseClient.auth.getSession().then(({data}) => {
+    supabaseClient.auth.getSession().then(async ({data}) => {
       if(data && data.session && data.session.user){
-        cloudUser = data.session.user;
-        setCloudStatus("Session cloud disponible", true);
+        setCloudSyncing("Reconnexion au cloud…");
+        await initializeCloudForUser(data.session.user,{refresh:false});
+        if(hasPendingCloudChanges()){
+          setCloudStatus("Session retrouvée — sauvegarde en attente", false);
+        }else{
+          setCloudStatus("Session cloud synchronisée", true);
+        }
       }else{
         setCloudStatus("Compte cloud prêt", true);
       }
