@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH42SERVICE Gestion — V20.5 Synchronisation sans faux conflits</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TECH42SERVICE Gestion — V20.7 Cohérences corrigées</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -400,7 +400,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V20.5 — Synchronisation anti-écrasement sans faux conflits */
+    /* V20.7 — Synchronisation fiable et corrections de cohérence */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1661,11 +1661,11 @@
             <div class="field">
               <label for="theme">Couleur du thème</label>
               <select id="theme" class="theme-select">
-                <option value="gold">Noir & Or</option>
-                <option value="blue">Noir & Bleu</option>
-                <option value="red">Noir & Rouge</option>
-                <option value="green">Noir & Vert</option>
-                <option value="purple">Noir & Violet</option>
+                <option value="gold">Noir &amp; Or</option>
+                <option value="blue">Noir &amp; Bleu</option>
+                <option value="red">Noir &amp; Rouge</option>
+                <option value="green">Noir &amp; Vert</option>
+                <option value="purple">Noir &amp; Violet</option>
               </select>
             </div>
           </div>
@@ -1735,25 +1735,36 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V20.5 Synchronisation sans faux conflitsmatique</footer>
+      <footer>TECH42SERVICE Gestion — V20.7 Cohérences corrigées</footer>
     </main>
   </div>
 
   <script>
 
     const TVA_RATE = 20;
+    const TVA_FACTOR = 1 + TVA_RATE / 100;
+
     function amountToTTC(value, mode){
       const amount = Number(value || 0);
-      return mode === "HT" ? amount * 1.20 : amount;
+      return mode === "HT" ? amount * TVA_FACTOR : amount;
     }
+
     function amountToHT(value, mode){
       const amount = Number(value || 0);
-      return mode === "TTC" ? amount / 1.20 : amount;
+      return mode === "TTC" ? amount / TVA_FACTOR : amount;
     }
+
     function formatMoney(value){
       return Number(value || 0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
     }
 
+    function localIsoDate(value=new Date()){
+      const date = value instanceof Date ? value : new Date(value);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2,"0");
+      const day = String(date.getDate()).padStart(2,"0");
+      return `${year}-${month}-${day}`;
+    }
 
     const SUPABASE_URL = "https://uenpjlqskauvcsndajyq.supabase.co";
     const SUPABASE_KEY = "sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q";
@@ -2584,6 +2595,9 @@
         alert("Paramètres indisponibles en mode présentation.");
         page = "dashboard";
       }
+      document.querySelectorAll("[data-page]").forEach(button => {
+        button.classList.toggle("active", button.dataset.page === page);
+      });
       dashboardPage.classList.toggle("hidden", page !== "dashboard");
       if(page === "dashboard") updateDashboardStats();
       renderClients();
@@ -2939,13 +2953,13 @@
         total.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
       const summary=document.getElementById("repairDiscountSummary");
       if(summary) summary.textContent=discount>0 ? `Remise : ${formatMoney(discount)}` : "Aucune remise";
-      const displayedTotal = mode === "HT" ? total / 1.20 : total;
+      const displayedTotal = mode === "HT" ? amountToHT(total,"TTC") : total;
       // Ne pas écraser un prix saisi ou déjà enregistré.
       // Le total des lignes sert uniquement de proposition lorsque le champ est vide.
       if(repairPriceInput && !repairPriceInput.value && total){
         repairPriceInput.value = displayedTotal.toFixed(2);
       }
-      if(document.getElementById("repairPartsCost")) updateRepairProTotals();
+      if(document.getElementById("repairPartsCostInput")) updateRepairProTotals();
     }
 
     document.getElementById("addRepairLineBtn").addEventListener("click",()=>addRepairLine());
@@ -3031,7 +3045,7 @@
     function resetRepairForm(){
       document.getElementById("repairForm").reset();
       document.getElementById("repairEditId").value = "";
-      document.getElementById("repairDepositDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("repairDepositDate").value = localIsoDate();
       currentRepairPhotos = [];
       renderRepairPhotosPreview();
       document.getElementById("repairTechnician").value="";
@@ -3176,7 +3190,7 @@
         clientSignature: clientSignatureData,
         technicianSignature: technicianSignatureData,
         history: editId ? (list.find(r=>r.id===editId)?.history||[]) : [{
-          date:new Date().toISOString().slice(0,10),
+          date:localIsoDate(),
           action:"Création du dossier",
           note:"Dossier de réparation créé.",
           technician:document.getElementById("repairTechnician").value.trim(),
@@ -3239,7 +3253,7 @@
       const savedPartsMode=item.partsCostMode||"TTC";
       const savedPartsRaw=item.partsCostTTC !== undefined
         ? Number(item.partsCost||0)
-        : (savedPartsMode === "HT" ? Number(item.partsCost||0)/1.20 : Number(item.partsCost||0));
+        : (savedPartsMode === "HT" ? amountToHT(Number(item.partsCost||0),"TTC") : Number(item.partsCost||0));
       document.getElementById("repairPartsCostInput").value=Number(savedPartsRaw.toFixed(2));
       document.getElementById("repairPartsCostMode").value=savedPartsMode;
       clientSignatureData=item.clientSignature||"";
@@ -3347,7 +3361,7 @@
           const action=document.getElementById("historyAction").value;
           const minutes=Number(document.getElementById("historyMinutes").value||0);
           appendRepairHistory(item.id,{
-            date:new Date().toISOString().slice(0,10),
+            date:localIsoDate(),
             action,note,minutes,
             technician:item.technician||""
           });
@@ -3377,7 +3391,7 @@
       const index=list.findIndex(r=>r.id===openedRepairId);
       if(index===-1) return;
       list[index].closed=true;
-      list[index].closedDate=new Date().toISOString().slice(0,10);
+      list[index].closedDate=localIsoDate();
       list[index].status="Restitué";
       const history=getRepairHistory(list[index]);
       history.unshift({
@@ -3891,7 +3905,7 @@
     function resetDocumentForm(){
       document.getElementById("documentForm").reset();
       document.getElementById("documentEditId").value = "";
-      document.getElementById("documentDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("documentDate").value = localIsoDate();
       document.getElementById("documentLines").innerHTML = "";
       documentDiscountType="none";
       documentDiscountValue=0;
@@ -4260,7 +4274,7 @@
       return {
         ...(existing||{}),
         id:existing?.id||`DOC-${Date.now()}`, clientId:repair.clientId||null, type:"facture",
-        number:existing?.number||nextDocumentNumber("facture",documents), date:existing?.date||new Date().toISOString().slice(0,10),
+        number:existing?.number||nextDocumentNumber("facture",documents), date:existing?.date||localIsoDate(),
         client:repair.client||"", contact:repair.phone||"", subject:`Réparation ${repair.brand||""} ${repair.model||""}`.trim(),
         deviceType:repair.deviceType||repair.device||"", brand:repair.brand||"", model:repair.model||"", serial:repair.serial||"",
         diagnosis:repair.diagnosis||"", fault:repair.issue||"", lines:docLines, reason:"", deposit:Number(repair.deposit||0),
@@ -4321,7 +4335,7 @@
         clientId:repair.clientId || null,
         type,
         number:nextDocumentNumber(type,documents),
-        date:new Date().toISOString().slice(0,10),
+        date:localIsoDate(),
         client:repair.client || "",
         contact:repair.phone || "",
         subject:type==="prise-en-charge"?`Prise en charge ${repair.brand || ""} ${repair.model || ""}`.trim():type==="non-reparabilite"?`Certificat ${repair.brand || ""} ${repair.model || ""}`.trim():`Réparation ${repair.brand || ""} ${repair.model || ""}`.trim(),
@@ -4439,7 +4453,7 @@
     function resetAppointmentForm(){
       document.getElementById("appointmentForm").reset();
       document.getElementById("appointmentEditId").value = "";
-      document.getElementById("appointmentDate").value = new Date().toISOString().slice(0,10);
+      document.getElementById("appointmentDate").value = localIsoDate();
       document.getElementById("saveAppointmentBtn").textContent = "Enregistrer le rendez-vous";
     }
 
@@ -4556,7 +4570,6 @@
       saveAdminAppointments(list);
       closeAppointmentCompleteModal();
       renderAppointments();
-      try{renderWorkshopPlanner();renderDashboardPro();}catch(error){console.warn(error);}
       updateDashboardStats();
     });
 
@@ -4602,7 +4615,7 @@
       const buySell = getAdminBuySell();
 
       const activeRepairs = repairs.filter(item => !["Terminé","Restitué"].includes(item.status)).length;
-      const today = new Date().toISOString().slice(0,10);
+      const today = localIsoDate();
       const month = today.slice(0,7);
       const todayAppointments = appointments.filter(item => item.date === today && item.status !== "Annulé").length;
       const totalStock = stock.reduce((sum,item)=>sum+Number(item.quantity||0),0);
@@ -4861,7 +4874,7 @@
         status:"En attente",
         price:"",
         deposit:"0",
-        depositDate:new Date().toISOString().slice(0,10),
+        depositDate:localIsoDate(),
         dueDate:"",
         parts:"",
         lines:[]
@@ -4951,7 +4964,7 @@
     function resetBuySellForm(){
       document.getElementById("buySellForm").reset();
       document.getElementById("buySellEditId").value="";
-      document.getElementById("buySellDate").value=new Date().toISOString().slice(0,10);
+      document.getElementById("buySellDate").value=localIsoDate();
       document.getElementById("saveBuySellBtn").textContent="Enregistrer l'opération";
     }
 
@@ -5593,7 +5606,7 @@
         client:invoice.client||"",
         documentId:invoice.id,
         documentNumber:invoice.number||"",
-        date:invoice.date||new Date().toISOString().slice(0,10),
+        date:invoice.date||localIsoDate(),
         amount,
         method:"Acompte",
         reference:"Acompte facture",
@@ -5636,7 +5649,7 @@
           client:invoice.client||"",
           documentId:invoice.id,
           documentNumber:invoice.number||"",
-          date:invoice.date||new Date().toISOString().slice(0,10),
+          date:invoice.date||localIsoDate(),
           amount:remaining,
           method:"Autre",
           reference:"Encaissement automatique facture payée",
@@ -5668,7 +5681,7 @@
     }
 
     function resetPaymentForm(){
-      document.getElementById("paymentForm").reset();document.getElementById("paymentEditId").value="";document.getElementById("paymentDate").value=new Date().toISOString().slice(0,10);refreshPaymentDocuments();
+      document.getElementById("paymentForm").reset();document.getElementById("paymentEditId").value="";document.getElementById("paymentDate").value=localIsoDate();refreshPaymentDocuments();
     }
     function showPaymentForm(){if(activeRole!=="admin"){alert("Action impossible en mode présentation.");return}document.getElementById("paymentForm").classList.remove("hidden");document.getElementById("cancelPaymentBtn").classList.remove("hidden");refreshPaymentDocuments()}
     function hidePaymentForm(){document.getElementById("paymentForm").classList.add("hidden");document.getElementById("cancelPaymentBtn").classList.add("hidden");resetPaymentForm()}
@@ -5678,7 +5691,7 @@
       const list=currentPayments().filter(p=>(!q||[p.client,p.documentNumber,p.reference,p.notes].join(" ").toLowerCase().includes(q))&&(!method||p.method===method));
       const body=document.getElementById("paymentsTableBody");body.innerHTML=list.map(p=>`<tr><td>${formatDate(p.date)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.documentNumber||"—")}</td><td>${escapeHtml(p.method)}</td><td>${formatMoney(p.amount)}</td><td class="${p.status==='Validé'?'payment-paid':'payment-cancelled'}">${escapeHtml(p.status)}</td><td><div class="table-actions"><button class="mini-btn" data-pay-print="${p.id}">Reçu</button>${activeRole==='admin'&&!p.automaticType?`<button class="mini-btn" data-pay-edit="${p.id}">Modifier</button><button class="mini-btn danger" data-pay-delete="${p.id}">Supprimer</button>`:p.automaticType?`<span class="workflow-badge">Automatique</span>`:''}</div></td></tr>`).join('');
       document.getElementById("paymentsEmpty").classList.toggle("hidden",list.length>0);
-      const now=new Date(),today=now.toISOString().slice(0,10),month=today.slice(0,7),valid=validPayments();
+      const now=new Date(),today=localIsoDate(now),month=today.slice(0,7),valid=validPayments();
       document.getElementById("paymentToday").textContent=formatMoney(valid.filter(p=>p.date===today).reduce((s,p)=>s+Number(p.amount||0),0));
       document.getElementById("paymentMonth").textContent=formatMoney(valid.filter(p=>String(p.date).startsWith(month)).reduce((s,p)=>s+Number(p.amount||0),0));
       document.getElementById("paymentTotal").textContent=formatMoney(valid.reduce((s,p)=>s+Number(p.amount||0),0));document.getElementById("paymentCount").textContent=valid.length;
@@ -5810,7 +5823,7 @@
         document.querySelectorAll('[data-planner-id]').forEach(el=>{el.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',el.dataset.plannerId));el.addEventListener('dblclick',()=>editAppointment(el.dataset.plannerId))});
         document.querySelectorAll('[data-drop-date]').forEach(cell=>{cell.addEventListener('dragover',e=>{if(activeRole!=='admin')return;e.preventDefault();cell.classList.add('drag-over')});cell.addEventListener('dragleave',()=>cell.classList.remove('drag-over'));cell.addEventListener('drop',e=>{e.preventDefault();cell.classList.remove('drag-over');if(activeRole!=='admin')return;const id=e.dataTransfer.getData('text/plain'),list=getAdminAppointments(),a=list.find(x=>x.id===id);if(!a)return;a.date=cell.dataset.dropDate;a.time=`${pad(Number(cell.dataset.dropHour||9))}:00`;saveAdminAppointments(list);renderAppointments();updateDashboardStats()});cell.addEventListener('dblclick',()=>{if(activeRole!=='admin')return;resetAppointmentForm();document.getElementById('appointmentDate').value=cell.dataset.dropDate;document.getElementById('appointmentTime').value=`${pad(Number(cell.dataset.dropHour||9))}:00`;showAppointmentForm()})});
       }
-      function googleUrl(a){const start=new Date(`${a.date}T${a.time||'09:00'}:00`),end=new Date(start.getTime()+Number(a.duration||30)*60000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');const p=new URLSearchParams({action:'TEMPLATE',text:`TECH42SERVICE — ${a.client} — ${a.device||'Rendez-vous'}`,dates:`${fmt(start)}/${fmt(end)}`,details:`${a.reason||''}\nTéléphone : ${a.phone||''}\n${a.notes||''}`,location:'TECH42SERVICE'});return `https://calendar.google.com/calendar/render?${p}`}
+      function googleUrl(a){const start=new Date(`${a.date}T${a.time||'09:00'}:00`),end=new Date(start.getTime()+Number(a.duration||30)*60000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');const p=new URLSearchParams({action:'TEMPLATE',text:`TECH42SERVICE — ${a.client} — ${a.device||'Rendez-vous'}`,dates:`${fmt(start)}/${fmt(end)}`,details:`${a.reason||''}\nTéléphone : ${a.phone||''}\n${a.notes||''}`,location:'TECH42SERVICE',ctz:'Europe/Paris'});return `https://calendar.google.com/calendar/render?${p}`}
       function syncVisibleToGoogle(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');if(!items.length)return alert('Aucun rendez-vous à synchroniser.');const selected=items.filter(a=>plannerView==='month'?String(a.date).startsWith(`${plannerDate.getFullYear()}-${pad(plannerDate.getMonth()+1)}`):plannerView==='day'?a.date===iso(plannerDate):(()=>{const st=monday(plannerDate),en=clone(st);en.setDate(en.getDate()+7);return new Date(a.date+'T12:00:00')>=st&&new Date(a.date+'T12:00:00')<en})());if(!selected.length)return alert('Aucun rendez-vous visible à synchroniser.');selected.slice(0,5).forEach((a,i)=>setTimeout(()=>window.open(googleUrl(a),'_blank'),i*350));document.getElementById('plannerGoogleStatus').innerHTML=`<span class="google-sync-ok">${Math.min(selected.length,5)} rendez-vous ouverts dans Google Agenda.</span>${selected.length>5?' Synchronise les suivants depuis leur bouton individuel.':''}`}
       function downloadIcs(){const items=filteredForPlanner().filter(a=>a.status!=='Annulé');const esc=x=>String(x||'').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');let body='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TECH42SERVICE//Planning Atelier//FR\r\n';items.forEach(a=>{const st=new Date(`${a.date}T${a.time||'09:00'}:00`),en=new Date(st.getTime()+Number(a.duration||30)*60000);body+=`BEGIN:VEVENT\r\nUID:${esc(a.id)}@tech42service\r\nDTSTAMP:${dt(new Date())}\r\nDTSTART:${dt(st)}\r\nDTEND:${dt(en)}\r\nSUMMARY:${esc(`TECH42SERVICE - ${a.client} - ${a.device||'RDV'}`)}\r\nDESCRIPTION:${esc(`${a.reason||''} ${a.notes||''}`)}\r\nEND:VEVENT\r\n`});body+='END:VCALENDAR\r\n';const blob=new Blob([body],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='TECH42SERVICE_Planning.ics';a.click();URL.revokeObjectURL(u)}
       function renderDashboardPro(){const today=iso(new Date()),appts=currentAppointments().filter(a=>a.date===today&&a.status!=='Annulé').sort((a,b)=>String(a.time).localeCompare(String(b.time))),repairs=currentRepairList().filter(r=>!['Terminé','Restitué'].includes(r.status));const p=document.getElementById('dashboardTodayPlanning'),q=document.getElementById('dashboardPriorities');if(p)p.innerHTML=appts.length?appts.map(a=>`<div class="dash-row"><strong>${escapeHtml(a.time||'')}</strong><div>${escapeHtml(a.client)}<small>${escapeHtml(a.device||'')} — ${escapeHtml(a.reason||'')}</small></div><span class="status ${statusBadgeClass(a.status)}">${escapeHtml(a.status)}</span></div>`).join(''):'<div class="empty-state">Aucun rendez-vous aujourd’hui.</div>';if(q){const due=repairs.filter(r=>r.dueDate&&r.dueDate<=today).slice(0,5);q.innerHTML=due.length?due.map(r=>`<div class="dash-alert"><strong>${escapeHtml(r.id)} — ${escapeHtml(r.client)}</strong><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.brand||'')} ${escapeHtml(r.model||'')} · ${escapeHtml(r.status||'')} · prévu ${formatDate(r.dueDate)}</div></div>`).join(''):'<div class="empty-state">Aucune priorité urgente.</div>'}}
