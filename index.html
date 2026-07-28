@@ -974,6 +974,7 @@
               <div>TECH42SERVICE</div>
               <div>Réparation téléphone, tablette, ordinateur et console</div>
               <div>gestiontech42service@gmail.com</div>
+              <div>Tél. 0743262415</div>
             </div>
             <div class="doc-pro-card">
               <h3>Document</h3>
@@ -1805,6 +1806,7 @@
     const SUPABASE_KEY = "sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q";
     const CLOUD_EMAIL = "tech42service@gmail.com";
     const CONTACT_EMAIL = "gestiontech42service@gmail.com";
+    const CONTACT_PHONE = "0743262415";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: {
         persistSession: true,
@@ -3801,6 +3803,7 @@
               <div>
                 <h1>TECH42SERVICE</h1>
                 <div class="sub">Fiche de prise en charge</div>
+                <div class="sub">${escapeHtml(CONTACT_EMAIL)} · Tél. ${escapeHtml(CONTACT_PHONE)}</div>
               </div>
               <div class="doc-number">Dossier : ${escapeHtml(item.id)}<br>Date : ${formatDate(item.depositDate)}</div>
             </header>
@@ -3833,7 +3836,10 @@
               <div class="signature">Signature du client${item.clientSignature?`<img src="${item.clientSignature}" alt="Signature client">`:""}</div>
               <div class="signature">Signature TECH42SERVICE${item.technicianSignature?`<img src="${item.technicianSignature}" alt="Signature technicien">`:""}</div>
             </div>
-            <div class="footer">Document de prise en charge client — Les informations internes de coût et de marge ne figurent pas sur ce document.</div>
+            <div class="footer">
+              Document de prise en charge client — Les informations internes de coût et de marge ne figurent pas sur ce document.<br>
+              ${escapeHtml(CONTACT_EMAIL)} · Tél. ${escapeHtml(CONTACT_PHONE)}
+            </div>
           </main>
           </div>
           ${a4PopupScript("#printPage",283,autoPrint,196)}
@@ -4570,7 +4576,7 @@
         <div class="a4-document">
           <div class="top-accent"></div>
           <header>
-            <div class="brand"><div class="logo-frame"><img src="logo.png" alt="TECH42SERVICE"></div><div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p class="brand-contact">${escapeHtml(CONTACT_EMAIL)}</p></div></div>
+            <div class="brand"><div class="logo-frame"><img src="logo.png" alt="TECH42SERVICE"></div><div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p class="brand-contact">${escapeHtml(CONTACT_EMAIL)}<br>Tél. ${escapeHtml(CONTACT_PHONE)}</p></div></div>
             <div class="meta"><span class="document-kind">${escapeHtml(documentTypeLabel(item.type))}</span><h2>${escapeHtml(t.title)}</h2><strong>${escapeHtml(item.number||"APERÇU")}</strong></div>
           </header>
           <div class="reference-strip">
@@ -4584,7 +4590,7 @@
           </section>
           ${main}
           <div class="signatures"><div><span>Signature du client</span>${item.clientSignature?`<img class="signature-image" src="${item.clientSignature}" alt="Signature du client">`:""}</div><div><span>Signature et cachet TECH42SERVICE</span></div></div>
-          <footer><div>${escapeHtml(t.footer||"")}</div><strong>TECH42SERVICE</strong></footer>
+          <footer><div>${escapeHtml(t.footer||"")}<br>${escapeHtml(CONTACT_EMAIL)} · Tél. ${escapeHtml(CONTACT_PHONE)}</div><strong>TECH42SERVICE</strong></footer>
         </div>`;
     }
 
@@ -6363,6 +6369,7 @@
                 <h1>TECH42SERVICE</h1>
                 <p>Réparation téléphone, tablette, ordinateur et console</p>
                 <p>${escapeHtml(CONTACT_EMAIL)}</p>
+                <p>Tél. ${escapeHtml(CONTACT_PHONE)}</p>
               </div>
               <div class="receipt-title"><small>Document client</small><strong>REÇU D’ENCAISSEMENT</strong></div>
             </header>
@@ -6378,7 +6385,7 @@
             <div class="amount-card"><span>Montant encaissé</span><strong>${formatMoney(p.amount)}</strong></div>
             <div class="legal">Ce reçu atteste de l’encaissement du montant mentionné. Il doit être conservé avec la facture correspondante lorsqu’une facture est indiquée.</div>
             <div class="signatures"><div>Signature du client</div><div>Signature et cachet TECH42SERVICE</div></div>
-            <footer><div>${escapeHtml(CONTACT_EMAIL)}</div><strong>TECH42SERVICE</strong></footer>
+            <footer><div>${escapeHtml(CONTACT_EMAIL)} · Tél. ${escapeHtml(CONTACT_PHONE)}</div><strong>TECH42SERVICE</strong></footer>
           </main>
           </div>
           ${a4PopupScript(".receipt-page",277,false,190)}
