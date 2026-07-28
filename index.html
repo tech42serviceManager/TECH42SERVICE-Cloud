@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.4 documents A4, reçu mobile et Gmail</title>
+  <title>TECH42SERVICE Gestion — V21.5 PDF, documents sans codes et remise PEC</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -178,7 +178,7 @@
     .document-list th{color:var(--accent)}
     .document-device-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#101010}
     .document-device-grid .full{grid-column:1/-1}
-    .document-mail-note{font-size:13px;color:var(--muted);margin-top:7px}
+    .document-pdf-note{font-size:13px;color:var(--muted);margin-top:7px}
     @media(max-width:520px){.document-device-grid{grid-template-columns:1fr}}
 
     
@@ -311,8 +311,6 @@
     .history-item small{color:var(--muted)}
     .history-form{display:grid;grid-template-columns:160px 1fr 110px auto;gap:8px;align-items:end;margin-top:12px}
     .history-form input,.history-form select{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#171717;color:var(--text)}
-    .codes-grid{display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:center}
-    .codes-grid img{max-width:100%;background:#fff;padding:8px;border-radius:8px}
     .closed-badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#13331b;color:#7cf195;border:1px solid #286d38;font-weight:800}
 
     
@@ -369,7 +367,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form,.codes-grid{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.device-form,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
       .document-discount-controls{grid-template-columns:1fr}
       .document-discount-title{grid-column:1}
       .discount-editor{grid-template-columns:1fr}
@@ -423,7 +421,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.4 — Documents A4, reçu mobile refermable et Gmail de gestion */
+    /* V21.5 — PDF fiable, documents sans QR ni code-barres et remise prise en charge */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1082,7 +1080,7 @@
             <div id="documentDiscountControls" class="full discount-controls document-discount-controls">
               <div class="document-discount-title">
                 <strong>Remise commerciale</strong>
-                <small>La remise apparaîtra clairement sur le devis ou la facture imprimée.</small>
+                <small>La remise apparaîtra sur la prise en charge, le devis ou la facture.</small>
               </div>
               <div class="discount-editor">
                 <select id="documentDiscountCustomType" aria-label="Type de remise">
@@ -1112,9 +1110,9 @@
               <button id="saveDocumentBtn" class="save-btn write-action" type="submit">Enregistrer</button>
               <button id="previewCurrentDocumentBtn" class="action-btn secondary" type="button">Aperçu</button>
               <button id="printCurrentDocumentBtn" class="action-btn secondary" type="button">Imprimer</button>
-              <button id="emailCurrentDocumentBtn" class="action-btn secondary" type="button">Envoyer par e-mail</button>
+              <button id="downloadCurrentDocumentPdfBtn" class="action-btn secondary" type="button">Télécharger PDF</button>
               <button id="resetDocumentBtn" class="action-btn secondary" type="button">Nouveau</button>
-              <div class="document-mail-note">Le PDF est préparé puis Gmail s’ouvre avec le compte gestiontech42service@gmail.com.</div>
+              <div class="document-pdf-note">Le document est téléchargé directement en PDF A4 sur une seule page.</div>
             </div>
           </form>
         </section>
@@ -1776,7 +1774,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.4 documents A4, reçu mobile et Gmail</footer>
+      <footer>TECH42SERVICE Gestion — V21.5 PDF, documents sans codes et remise PEC</footer>
     </main>
   </div>
 
@@ -1850,7 +1848,7 @@
     const SUPABASE_URL = "https://uenpjlqskauvcsndajyq.supabase.co";
     const SUPABASE_KEY = "sb_publishable_fMA10Tcb1-aYrAD44fxXOA_mLXjas0q";
     const CLOUD_EMAIL = "tech42service@gmail.com";
-    const DOCUMENT_EMAIL = "gestiontech42service@gmail.com";
+    const CONTACT_EMAIL = "gestiontech42service@gmail.com";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: {
         persistSession: true,
@@ -3310,6 +3308,25 @@
       return lines.reduce((sum,line)=>sum+(Number(line.qty||0)*amountToTTC(line.unit,line.mode||"TTC")),0);
     }
 
+    function calculateRepairItemTotals(item){
+      const linesGross=repairLinesTotal(Array.isArray(item?.lines)?item.lines:[]);
+      const priceGross=item?.priceTTC!==undefined
+        ? Number(item.priceTTC||0)
+        : amountToTTC(item?.price||0,item?.priceMode||"TTC");
+      const gross=linesGross>0?linesGross:priceGross;
+      const discount=discountAmountTTC(gross,item?.discountType||"none",item?.discountValue||0);
+      const total=Math.max(0,gross-discount);
+      const deposit=Math.max(0,Number(item?.deposit||0));
+      return {gross,discount,total,deposit,balance:Math.max(0,total-deposit)};
+    }
+
+    function repairItemDiscountLabel(item){
+      const value=Number(item?.discountValue||0);
+      return item?.discountType==="percent" && value>0
+        ? `Remise (${value.toLocaleString("fr-FR",{maximumFractionDigits:2})} %)`
+        : "Remise commerciale";
+    }
+
     function updateRepairLinesTotal(){
       const linesGrossTotal = repairLinesTotal();
       const repairPriceInput = document.getElementById("repairPrice");
@@ -3663,6 +3680,7 @@
       if(!item) return;
 
       openedRepairId = id;
+      const repairTotals=calculateRepairItemTotals(item);
       document.getElementById("repairModalTitle").textContent = `Dossier ${item.id}`;
       document.getElementById("repairModalContent").innerHTML = `
         <div class="detail-box"><small>Client</small>${escapeHtml(item.client)}</div>
@@ -3677,21 +3695,17 @@
             ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
             : escapeHtml(item.parts || "—"))
         }</div>
-        <div class="detail-box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
-        <div class="detail-box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
+        <div class="detail-box"><small>Prix avant remise TTC</small>${formatMoney(repairTotals.gross)}</div>
+        ${repairTotals.discount>0?`<div class="detail-box"><small>${escapeHtml(repairItemDiscountLabel(item))}</small>− ${formatMoney(repairTotals.discount)}</div>`:""}
+        <div class="detail-box"><small>Net TTC</small>${formatMoney(repairTotals.total)}</div>
+        <div class="detail-box"><small>Acompte</small>${formatMoney(repairTotals.deposit)}</div>
+        <div class="detail-box"><small>Reste à payer</small>${formatMoney(repairTotals.balance)}</div>
         <div class="detail-box"><small>Date de dépôt</small>${formatDate(item.depositDate)}</div>
         <div class="detail-box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
         <div class="detail-box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
         <div class="detail-box"><small>Coût pièces TTC</small>${formatMoney(item.partsCostTTC !== undefined ? item.partsCostTTC : amountToTTC(item.partsCost||0,item.partsCostMode||"TTC"))}</div>
         <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
-        <div class="detail-box full">
-          <small>QR Code et code-barres</small>
-          <div class="codes-grid">
-            <img src="${repairQrUrl(item)}" alt="QR Code dossier">
-            <img src="${repairBarcodeUrl(item)}" alt="Code-barres dossier">
-          </div>
-        </div>
         <div class="detail-box full">
           <small>Historique des interventions</small>
           <div id="repairHistoryList" class="history-list">${renderRepairHistory(item)}</div>
@@ -3783,6 +3797,7 @@
       const item = currentRepairList().find(r => r.id === openedRepairId);
       if(!item) return;
 
+      const repairTotals=calculateRepairItemTotals(item);
       const historyRows = getRepairHistory(item).slice(0, 5);
       const dossierPhotos = Array.isArray(item.photos) ? item.photos.slice(0, 3) : [];
       const printWindow = window.open("", "_blank", "width=900,height=700");
@@ -3814,9 +3829,6 @@
             .box{border:1px solid #aaa;border-radius:4px;padding:2mm;min-height:11mm;overflow-wrap:anywhere}
             .full{grid-column:1/-1}
             small{display:block;color:#555;font-size:8px;font-weight:700;text-transform:uppercase;margin-bottom:1mm}
-            .codes{display:grid;grid-template-columns:28mm 1fr;gap:5mm;align-items:center}
-            .codes img:first-child{width:25mm;height:25mm}
-            .codes img:last-child{max-width:100%;max-height:18mm}
             .history{font-size:8.5px;line-height:1.25}
             .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;margin-top:2mm}
             .photos img{width:100%;height:24mm;object-fit:cover;border:1px solid #aaa;border-radius:4px}
@@ -3850,16 +3862,13 @@
                   ? item.lines.map(line=>`${escapeHtml(line.label)} — ${Number(line.qty||0)} × ${Number(line.unit||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}`).join("<br>")
                   : escapeHtml(item.parts || "—"))
               }</div>
-              <div class="box"><small>Prix de la réparation</small>${escapeHtml(item.price || "0")} € ${escapeHtml(item.priceMode || "TTC")}</div>
-              <div class="box"><small>Acompte</small>${escapeHtml(item.deposit || "0")} €</div>
+              <div class="box"><small>Prix avant remise TTC</small>${formatMoney(repairTotals.gross)}</div>
+              ${repairTotals.discount>0?`<div class="box"><small>${escapeHtml(repairItemDiscountLabel(item))}</small>− ${formatMoney(repairTotals.discount)}</div>`:""}
+              <div class="box"><small>Net TTC</small>${formatMoney(repairTotals.total)}</div>
+              <div class="box"><small>Acompte</small>${formatMoney(repairTotals.deposit)}</div>
+              <div class="box"><small>Reste à payer</small>${formatMoney(repairTotals.balance)}</div>
               <div class="box"><small>Date prévue</small>${formatDate(item.dueDate)}</div>
               <div class="box"><small>Technicien</small>${escapeHtml(item.technician||"—")}</div>
-              <div class="box full"><small>Identification du dossier</small>
-                <div class="codes">
-                  <img src="${repairQrUrl(item)}" alt="QR code">
-                  <img src="${repairBarcodeUrl(item)}" alt="Code-barres">
-                </div>
-              </div>
               ${historyRows.length ? `<div class="box full history"><small>Historique récent</small>${historyRows.map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)}${h.note?` — ${escapeHtml(h.note)}`:""}`).join("<br>")}</div>` : ""}
             </div>
 
@@ -4290,12 +4299,11 @@
       document.getElementById("documentType").value = type;
       document.querySelectorAll(".document-tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.docType===type));
       const nonRepair = type === "non-reparabilite";
-      const intake = type === "prise-en-charge";
-      document.getElementById("documentLinesBlock").classList.toggle("hidden",nonRepair||intake);
+      document.getElementById("documentLinesBlock").classList.toggle("hidden",nonRepair);
       document.getElementById("nonRepairBlock").classList.toggle("hidden",!nonRepair);
       document.getElementById("documentDeposit").closest(".field").classList.toggle("hidden",nonRepair);
-      document.querySelector(".document-total").classList.toggle("hidden",nonRepair||intake);
-      document.getElementById("documentDiscountControls").classList.toggle("hidden",nonRepair||intake);
+      document.querySelector(".document-total").classList.toggle("hidden",nonRepair);
+      document.getElementById("documentDiscountControls").classList.toggle("hidden",nonRepair);
       document.getElementById("documentClientSignModule").classList.toggle("hidden",nonRepair);
       if(!document.getElementById("documentEditId").value){
         document.getElementById("documentNumber").value = nextDocumentNumber(type,getAdminDocuments());
@@ -4341,7 +4349,7 @@
       setDocumentType("facture");
       document.getElementById("saveDocumentBtn").textContent = "Enregistrer";
       document.querySelectorAll("#documentForm input,#documentForm select,#documentForm textarea,#documentForm button").forEach(el=>{
-        if(!["previewCurrentDocumentBtn","printCurrentDocumentBtn","emailCurrentDocumentBtn","resetDocumentBtn"].includes(el.id)){
+        if(!["previewCurrentDocumentBtn","printCurrentDocumentBtn","downloadCurrentDocumentPdfBtn","resetDocumentBtn"].includes(el.id)){
           el.disabled = activeRole !== "admin";
         }
       });
@@ -4374,7 +4382,7 @@
           <td><div class="table-actions">
             <button class="mini-btn" data-doc-preview="${escapeHtml(item.id)}">Aperçu</button>
             <button class="mini-btn" data-doc-print="${escapeHtml(item.id)}">Imprimer</button>
-            <button class="mini-btn" data-doc-email="${escapeHtml(item.id)}">E-mail</button>
+            <button class="mini-btn" data-doc-pdf="${escapeHtml(item.id)}">PDF</button>
             ${item.type==="facture"&&activeRole==="admin"?`<button class="mini-btn" data-doc-pay="${escapeHtml(item.id)}">Encaisser</button>`:""}
             ${actions}
           </div></td>
@@ -4385,7 +4393,7 @@
       empty.classList.toggle("hidden",list.length>0);
       tbody.querySelectorAll("[data-doc-preview]").forEach(btn=>btn.addEventListener("click",()=>previewDocumentById(btn.dataset.docPreview)));
       tbody.querySelectorAll("[data-doc-print]").forEach(btn=>btn.addEventListener("click",()=>printDocumentById(btn.dataset.docPrint)));
-      tbody.querySelectorAll("[data-doc-email]").forEach(btn=>btn.addEventListener("click",()=>emailDocumentById(btn.dataset.docEmail)));
+      tbody.querySelectorAll("[data-doc-pdf]").forEach(btn=>btn.addEventListener("click",()=>downloadDocumentPdfById(btn.dataset.docPdf)));
       tbody.querySelectorAll("[data-doc-pay]").forEach(btn=>btn.addEventListener("click",()=>{const d=currentDocuments().find(x=>x.id===btn.dataset.docPay);if(!d)return;showPage("payments");resetPaymentForm();document.getElementById("paymentClient").value=d.client;refreshPaymentDocuments();document.getElementById("paymentDocument").value=d.id;const t=calculateDocumentTotals(d.lines||[],d.deposit||0,d.discountType||"none",d.discountValue||0);document.getElementById("paymentAmount").value=Math.max(0,t.total-paymentSumForDocument(d.id)).toFixed(2);showPaymentForm();}));
       tbody.querySelectorAll("[data-doc-edit]").forEach(btn=>btn.addEventListener("click",()=>editDocument(btn.dataset.docEdit)));
       tbody.querySelectorAll("[data-doc-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteDocument(btn.dataset.docDelete)));
@@ -4416,7 +4424,7 @@
         serial:document.getElementById("documentSerial").value.trim(),
         diagnosis:document.getElementById("documentDiagnosis").value.trim(),
         fault:document.getElementById("documentFault").value.trim(),
-        lines:(type==="non-reparabilite"||type==="prise-en-charge")?[]:getDocumentLines(),
+        lines:type==="non-reparabilite"?[]:getDocumentLines(),
         reason:document.getElementById("nonRepairReason").value.trim(),
         deposit:Number(document.getElementById("documentDeposit").value||0),
         discountType:documentDiscountType,
@@ -4474,7 +4482,7 @@
       updateDocumentClientSignatureStatus();
       document.getElementById("documentLines").innerHTML="";
       (item.lines||[]).forEach(addDocumentLine);
-      if(!(item.lines||[]).length && !["non-reparabilite","prise-en-charge"].includes(item.type)) addDocumentLine();
+      if(!(item.lines||[]).length && item.type!=="non-reparabilite") addDocumentLine();
       setDocumentType(item.type);
       document.getElementById("saveDocumentBtn").textContent="Enregistrer les modifications";
       updateDocumentTotals();
@@ -4510,7 +4518,7 @@
         serial:document.getElementById("documentSerial").value.trim(),
         diagnosis:document.getElementById("documentDiagnosis").value.trim(),
         fault:document.getElementById("documentFault").value.trim(),
-        lines:["non-reparabilite","prise-en-charge"].includes(document.getElementById("documentType").value)?[]:getDocumentLines(),
+        lines:document.getElementById("documentType").value==="non-reparabilite"?[]:getDocumentLines(),
         reason:document.getElementById("nonRepairReason").value.trim(),
         deposit:Number(document.getElementById("documentDeposit").value||0),
         discountType:documentDiscountType,
@@ -4522,7 +4530,7 @@
 
     document.getElementById("previewCurrentDocumentBtn").addEventListener("click",()=>previewDocument(currentFormDocument()));
     document.getElementById("printCurrentDocumentBtn").addEventListener("click",()=>printDocument(currentFormDocument()));
-    document.getElementById("emailCurrentDocumentBtn").addEventListener("click",()=>emailDocument(currentFormDocument()));
+    document.getElementById("downloadCurrentDocumentPdfBtn").addEventListener("click",()=>downloadDocumentPdf(currentFormDocument()));
 
     function previewDocumentById(id){
       const item = currentDocuments().find(d=>d.id===id);
@@ -4534,21 +4542,13 @@
       if(item) printDocument(item);
     }
 
-    function emailDocumentById(id){
+    function downloadDocumentPdfById(id){
       const item = currentDocuments().find(d=>d.id===id);
-      if(item) emailDocument(item);
+      if(item) downloadDocumentPdf(item);
     }
 
     function documentTypeLabel(type){
       return type==="facture"?"Facture":type==="devis"?"Devis":type==="prise-en-charge"?"Prise en charge":"Certificat de non-réparabilité";
-    }
-
-    function documentRecipient(item){
-      const clients=currentClients();
-      const client=clients.find(c=>c.id===item.clientId)||clients.find(c=>String(c.name||"").toLowerCase()===String(item.client||"").toLowerCase());
-      if(client?.email)return client.email;
-      const match=String(item.contact||"").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-      return match?match[0]:"";
     }
 
     function documentPrintableContent(item){
@@ -4562,6 +4562,17 @@
         return `<tr><td class="designation"><strong>${escapeHtml(line.label)}</strong></td><td class="number">${qty}</td><td class="number">${formatMoney(unitTTC)}</td><td class="number line-total">${formatMoney(qty*unitTTC)}</td></tr>`;
       }).join("");
       const discountDescription=documentDiscountDescription(item.discountType||"none",item.discountValue||0);
+      const pricingHtml=`
+        <table class="service-table"><thead><tr><th>Désignation</th><th>Qté</th><th>Prix unitaire TTC</th><th>Total TTC</th></tr></thead><tbody>${linesHtml||'<tr><td colspan="4">Aucune ligne</td></tr>'}</tbody></table>
+        <div class="totals">
+          <p class="gross"><span>Sous-total TTC avant remise</span><strong>${formatMoney(totals.grossTTC)}</strong></p>
+          ${totals.discount>0?`<p class="discount"><span>${escapeHtml(discountDescription)}</span><strong>− ${formatMoney(totals.discount)}</strong></p>`:""}
+          <p class="detail"><span>Total HT net</span><strong>${formatMoney(totals.subtotal)}</strong></p>
+          <p class="detail"><span>TVA (${TVA_RATE} %)</span><strong>${formatMoney(totals.tax)}</strong></p>
+          <p class="net"><span>Net TTC</span><strong>${formatMoney(totals.total)}</strong></p>
+          ${Number(item.deposit||0)>0?`<p class="deposit"><span>Acompte déjà versé</span><strong>− ${formatMoney(item.deposit||0)}</strong></p>`:""}
+          <p class="grand"><span>Reste à payer</span><strong>${formatMoney(totals.balance)}</strong></p>
+        </div>`;
 
       let main="";
       if(item.type==="prise-en-charge"){
@@ -4575,7 +4586,8 @@
               <div><small>Acompte versé</small><strong>${formatMoney(item.deposit||0)}</strong></div>
               <div><small>Statut</small><strong>${escapeHtml(item.status||"Brouillon")}</strong></div>
             </div>
-          </section>`;
+          </section>
+          ${pricingHtml}`;
       }else if(item.type==="non-reparabilite"){
         main=`
           <section class="doc-box"><h3>Appareil examiné</h3>
@@ -4593,16 +4605,7 @@
       }else{
         main=`
           ${device!=="Non précisé"?`<section class="doc-box device-summary"><div class="doc-grid"><div><small>Appareil concerné</small><strong>${escapeHtml(device)}</strong></div><div><small>IMEI / N° de série</small><strong>${escapeHtml(item.serial||"—")}</strong></div></div></section>`:""}
-          <table class="service-table"><thead><tr><th>Désignation</th><th>Qté</th><th>Prix unitaire TTC</th><th>Total TTC</th></tr></thead><tbody>${linesHtml||'<tr><td colspan="4">Aucune ligne</td></tr>'}</tbody></table>
-          <div class="totals">
-            <p class="gross"><span>Sous-total TTC avant remise</span><strong>${formatMoney(totals.grossTTC)}</strong></p>
-            ${totals.discount>0?`<p class="discount"><span>${escapeHtml(discountDescription)}</span><strong>− ${formatMoney(totals.discount)}</strong></p>`:""}
-            <p class="detail"><span>Total HT net</span><strong>${formatMoney(totals.subtotal)}</strong></p>
-            <p class="detail"><span>TVA (${TVA_RATE} %)</span><strong>${formatMoney(totals.tax)}</strong></p>
-            <p class="net"><span>Net TTC</span><strong>${formatMoney(totals.total)}</strong></p>
-            ${Number(item.deposit||0)>0?`<p class="deposit"><span>Acompte déjà versé</span><strong>− ${formatMoney(item.deposit||0)}</strong></p>`:""}
-            <p class="grand"><span>Reste à payer</span><strong>${formatMoney(totals.balance)}</strong></p>
-          </div>`;
+          ${pricingHtml}`;
       }
 
       const recipientTitle=item.type==="facture"?"Facturé à":item.type==="devis"?"Devis adressé à":"Client";
@@ -4610,7 +4613,7 @@
         <div class="a4-document">
           <div class="top-accent"></div>
           <header>
-            <div class="brand"><div class="logo-frame"><img src="logo.png" alt="TECH42SERVICE"></div><div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p class="brand-contact">${escapeHtml(DOCUMENT_EMAIL)}</p></div></div>
+            <div class="brand"><div class="logo-frame"><img src="logo.png" alt="TECH42SERVICE"></div><div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p class="brand-contact">${escapeHtml(CONTACT_EMAIL)}</p></div></div>
             <div class="meta"><span class="document-kind">${escapeHtml(documentTypeLabel(item.type))}</span><h2>${escapeHtml(t.title)}</h2><strong>${escapeHtml(item.number||"APERÇU")}</strong></div>
           </header>
           <div class="reference-strip">
@@ -4701,71 +4704,78 @@
       if(typeof html2pdf==="undefined")throw new Error("PDF_LIBRARY_UNAVAILABLE");
       const wrapper=document.createElement("div");
       wrapper.style.position="fixed";
-      wrapper.style.left="-10000px";
+      wrapper.style.left="0";
       wrapper.style.top="0";
+      wrapper.style.width="210mm";
+      wrapper.style.minHeight="297mm";
+      wrapper.style.zIndex="-2147483647";
+      wrapper.style.pointerEvents="none";
+      wrapper.style.background="#fff";
       wrapper.innerHTML=`<style>${documentPrintStyles()}</style>${documentPrintableContent(item)}`;
       document.body.appendChild(wrapper);
       try{
-        fitA4Element(wrapper.querySelector(".a4-document"),277);
+        const page=wrapper.querySelector(".a4-document");
+        page.style.zoom="1";
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+        await Promise.all([...page.querySelectorAll("img")].map(image=>{
+          if(image.complete) return Promise.resolve();
+          return new Promise(resolve=>{
+            image.addEventListener("load",resolve,{once:true});
+            image.addEventListener("error",resolve,{once:true});
+            setTimeout(resolve,1500);
+          });
+        }));
+
+        if(typeof window.html2canvas==="function" && window.jspdf?.jsPDF){
+          const canvas=await window.html2canvas(page,{
+            scale:2,
+            useCORS:true,
+            backgroundColor:"#ffffff",
+            logging:false
+          });
+          if(!canvas.width || !canvas.height) throw new Error("PDF_CANVAS_EMPTY");
+          const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+          const pageWidth=pdf.internal.pageSize.getWidth();
+          const pageHeight=pdf.internal.pageSize.getHeight();
+          const maximumWidth=pageWidth-10;
+          const maximumHeight=pageHeight-10;
+          let imageWidth=maximumWidth;
+          let imageHeight=canvas.height*imageWidth/canvas.width;
+          if(imageHeight>maximumHeight){
+            imageHeight=maximumHeight;
+            imageWidth=canvas.width*imageHeight/canvas.height;
+          }
+          const x=(pageWidth-imageWidth)/2;
+          const y=(pageHeight-imageHeight)/2;
+          pdf.addImage(canvas.toDataURL("image/jpeg",.98),"JPEG",x,y,imageWidth,imageHeight,undefined,"FAST");
+          return pdf.output("blob");
+        }
+
         return await html2pdf().set({
-          margin:0,
+          margin:5,
           filename:`${item.number||"document"}.pdf`,
           image:{type:"jpeg",quality:.98},
-          html2canvas:{scale:2,useCORS:true},
+          html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
           jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
-          pagebreak:{mode:["avoid-all","css","legacy"]}
-        }).from(wrapper.querySelector(".a4-document")).outputPdf("blob");
+          pagebreak:{mode:[]}
+        }).from(page).outputPdf("blob");
       }finally{
         wrapper.remove();
       }
     }
 
-    function gmailComposeUrl(recipient,subject,body){
-      const params=new URLSearchParams({
-        view:"cm",
-        fs:"1",
-        authuser:DOCUMENT_EMAIL,
-        to:recipient||"",
-        su:subject||"",
-        body:body||""
-      });
-      return `https://mail.google.com/mail/?${params.toString()}`;
-    }
-
-    function openServiceGmail(composeWindow,url){
-      if(composeWindow && !composeWindow.closed){
-        composeWindow.location.href=url;
-      }else{
-        window.location.href=url;
-      }
-    }
-
-    async function emailDocument(item){
-      const recipient=documentRecipient(item);
-      const subject=`${documentTypeLabel(item.type)} ${item.number||""} — TECH42SERVICE`;
-      const body=`Bonjour ${item.client||""},
-
-Veuillez trouver le document ${item.number||""} concernant ${item.subject||"votre appareil"}.
-
-Cordialement,
-TECH42SERVICE`;
-      const composeUrl=gmailComposeUrl(recipient,subject,body);
-      const composeWindow=window.open("","tech42service-gmail");
-      if(composeWindow){
-        composeWindow.document.write(`<!doctype html><html lang="fr"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Préparation Gmail</title><body style="margin:0;display:grid;place-items:center;min-height:100vh;background:#111;color:#fff;font-family:Arial;text-align:center;padding:24px"><div><h2 style="color:#f4b51f">Préparation du PDF…</h2><p>Gmail va s’ouvrir avec ${escapeHtml(DOCUMENT_EMAIL)}.</p><button onclick="window.close()" style="padding:10px 16px;border:0;border-radius:8px">Fermer</button></div></body></html>`);
-        composeWindow.document.close();
-      }
+    async function downloadDocumentPdf(item){
       try{
         const blob=await createDocumentPdf(item);
+        if(!blob || blob.size<1000) throw new Error("PDF_EMPTY");
         const url=URL.createObjectURL(blob);
         const a=document.createElement("a");
         a.href=url;a.download=`${item.number||"document"}.pdf`;document.body.appendChild(a);a.click();a.remove();
         setTimeout(()=>URL.revokeObjectURL(url),30000);
-        alert(`Le PDF a été téléchargé. Gmail va s’ouvrir avec ${DOCUMENT_EMAIL}. Il reste à joindre le PDF au message.`);
-        openServiceGmail(composeWindow,composeUrl);
+        if(typeof showMobileSaveToast==="function") showMobileSaveToast("PDF A4 téléchargé ✓",true);
       }catch(error){
-        console.error(error);
-        openServiceGmail(composeWindow,composeUrl);
+        console.error("Téléchargement PDF",error);
+        alert("Le PDF n’a pas pu être créé. Utilise le bouton Imprimer en attendant.");
       }
     }
 
@@ -4850,7 +4860,7 @@ TECH42SERVICE`;
         serial:repair.serial||"",
         diagnosis:repair.diagnosis||"",
         fault:repair.issue||"",
-        lines:["prise-en-charge","non-reparabilite"].includes(type)?[]:docLines,
+        lines:type==="non-reparabilite"?[]:docLines,
         reason:type==="non-reparabilite"?(repair.diagnosis||"Après diagnostic, l'appareil est déclaré non réparable."):"",
         deposit:Number(repair.deposit||0),
         discountType:repair.discountType||"none",
@@ -5972,15 +5982,6 @@ TECH42SERVICE`;
       document.getElementById(id)?.addEventListener("change",updateRepairProTotals);
     });
 
-    function repairQrUrl(item){
-      const payload=`TECH42SERVICE|${item.id}|${item.client}|${item.brand} ${item.model}|${item.status}`;
-      return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payload)}`;
-    }
-
-    function repairBarcodeUrl(item){
-      return `https://bwipjs-api.metafloor.com/?bcid=code128&scale=2&height=12&includetext&text=${encodeURIComponent(item.id)}`;
-    }
-
     function getRepairHistory(item){
       return Array.isArray(item.history) ? item.history : [];
     }
@@ -6465,7 +6466,7 @@ TECH42SERVICE`;
               <div>
                 <h1>TECH42SERVICE</h1>
                 <p>Réparation téléphone, tablette, ordinateur et console</p>
-                <p>${escapeHtml(DOCUMENT_EMAIL)}</p>
+                <p>${escapeHtml(CONTACT_EMAIL)}</p>
               </div>
               <div class="receipt-title"><small>Document client</small><strong>REÇU D’ENCAISSEMENT</strong></div>
             </header>
@@ -6481,7 +6482,7 @@ TECH42SERVICE`;
             <div class="amount-card"><span>Montant encaissé</span><strong>${formatMoney(p.amount)}</strong></div>
             <div class="legal">Ce reçu atteste de l’encaissement du montant mentionné. Il doit être conservé avec la facture correspondante lorsqu’une facture est indiquée.</div>
             <div class="signatures"><div>Signature du client</div><div>Signature et cachet TECH42SERVICE</div></div>
-            <footer><div>${escapeHtml(DOCUMENT_EMAIL)}</div><strong>TECH42SERVICE</strong></footer>
+            <footer><div>${escapeHtml(CONTACT_EMAIL)}</div><strong>TECH42SERVICE</strong></footer>
           </main>
           ${a4PopupScript(".receipt-page",277,false)}
         </body>
