@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.5 PDF, documents sans codes et remise PEC</title>
+  <title>TECH42SERVICE Gestion — V21.6 tous documents A4 une page</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -421,7 +421,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.5 — PDF fiable, documents sans QR ni code-barres et remise prise en charge */
+    /* V21.6 — Tous les documents et PDF sur une seule page A4 */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1774,7 +1774,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.5 PDF, documents sans codes et remise PEC</footer>
+      <footer>TECH42SERVICE Gestion — V21.6 tous documents A4 une page</footer>
     </main>
   </div>
 
@@ -1805,20 +1805,27 @@
       return `${year}-${month}-${day}`;
     }
 
-    function fitA4Element(element,maxHeightMm=277){
+    function fitA4Element(element,maxHeightMm=277,maxWidthMm=190){
       if(!element) return 1;
       const pixelsPerMillimeter=96/25.4;
       const maximumHeight=maxHeightMm*pixelsPerMillimeter;
+      const maximumWidth=maxWidthMm*pixelsPerMillimeter;
       element.style.zoom="1";
       const currentHeight=element.scrollHeight;
-      const scale=currentHeight>maximumHeight ? maximumHeight/currentHeight : 1;
+      const currentWidth=element.scrollWidth;
+      const scale=Math.min(
+        1,
+        currentHeight>0 ? maximumHeight/currentHeight : 1,
+        currentWidth>0 ? maximumWidth/currentWidth : 1
+      );
       element.style.zoom=String(Math.min(1,scale));
       element.style.pageBreakInside="avoid";
       element.style.breakInside="avoid";
+      element.style.pageBreakAfter="avoid";
       return scale;
     }
 
-    function a4PopupScript(selector,maxHeightMm=277,autoPrint=false){
+    function a4PopupScript(selector,maxHeightMm=277,autoPrint=false,maxWidthMm=190){
       return `<script>
         (() => {
           const fit=()=>{
@@ -1826,8 +1833,16 @@
             if(!page)return;
             page.style.zoom="1";
             const maximumHeight=${Number(maxHeightMm)}*(96/25.4);
-            const scale=page.scrollHeight>maximumHeight ? maximumHeight/page.scrollHeight : 1;
+            const maximumWidth=${Number(maxWidthMm)}*(96/25.4);
+            const scale=Math.min(
+              1,
+              page.scrollHeight>0 ? maximumHeight/page.scrollHeight : 1,
+              page.scrollWidth>0 ? maximumWidth/page.scrollWidth : 1
+            );
             page.style.zoom=String(Math.min(1,scale));
+            page.style.pageBreakInside="avoid";
+            page.style.breakInside="avoid";
+            page.style.pageBreakAfter="avoid";
           };
           window.addEventListener("beforeprint",fit);
           window.addEventListener("load",()=>setTimeout(()=>{
@@ -3820,7 +3835,8 @@
             .print-toolbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}
             .print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800;cursor:pointer}
             .print-toolbar .close-print{background:#fff;color:#111}
-            .a4-page{width:196mm;max-width:196mm;min-height:283mm;margin:0 auto;overflow:hidden;page-break-inside:avoid;break-inside:avoid}
+            .a4-stage{width:196mm;height:283mm;margin:0 auto;overflow:hidden;background:#fff;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
+            .a4-page{width:196mm;max-width:196mm;min-height:283mm;margin:0;overflow:hidden;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
             .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:4mm;margin-bottom:3mm}
             h1{font-size:20px;margin:0 0 1mm}
             .sub{color:#555;font-size:10px}
@@ -3836,11 +3852,13 @@
             .signature{border-top:1px solid #333;padding-top:2mm;min-height:24mm;font-size:9px}
             .signature img{display:block;max-width:100%;height:18mm;object-fit:contain;margin-top:1mm}
             .footer{margin-top:3mm;padding-top:2mm;border-top:1px solid #aaa;color:#555;font-size:7.5px;text-align:center}
-            @media print{.print-toolbar{display:none}.a4-page{margin:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid}}
+            @media(max-width:760px){.a4-stage{width:100%;height:auto}.a4-page{width:100%;max-width:100%;min-height:0;padding:14px}}
+            @media print{.print-toolbar{display:none}.a4-stage{width:196mm;height:283mm;margin:0;overflow:hidden;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid}.a4-page{width:196mm;max-width:196mm;min-height:283mm;margin:0;padding:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid}}
           </style>
         </head>
         <body>
           ${printableToolbarHtml("Imprimer en A4")}
+          <div class="a4-stage">
           <main id="printPage" class="a4-page">
             <header class="header">
               <div>
@@ -3880,7 +3898,8 @@
             </div>
             <div class="footer">Document de prise en charge client — Les informations internes de coût et de marge ne figurent pas sur ce document.</div>
           </main>
-          ${a4PopupScript("#printPage",283,autoPrint)}
+          </div>
+          ${a4PopupScript("#printPage",283,autoPrint,196)}
         </body>
         </html>
       `);
@@ -4636,7 +4655,8 @@
         @page{size:A4;margin:10mm}
         *{box-sizing:border-box}
         body{margin:0;background:#e8e8e8;color:#171717;font-family:Inter,"Segoe UI",Arial,Helvetica,sans-serif}
-        .a4-document{width:190mm;min-height:277mm;margin:8mm auto;padding:0 7mm 5mm;display:flex;flex-direction:column;background:#fff;box-shadow:0 4mm 14mm rgba(0,0,0,.14);page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
+        .a4-stage{width:190mm;height:277mm;margin:8mm auto;overflow:hidden;background:#fff;box-shadow:0 4mm 14mm rgba(0,0,0,.14);page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
+        .a4-document{width:190mm;min-height:277mm;margin:0;padding:0 7mm 5mm;display:flex;flex-direction:column;background:#fff;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
         .top-accent{height:2.2mm;margin:0 -7mm 6mm;background:linear-gradient(90deg,#111 0 72%,#d4a72c 72% 100%)}
         header{display:grid;grid-template-columns:1.35fr .72fr;gap:9mm;align-items:stretch;margin-bottom:4mm}
         .brand{display:flex;gap:5mm;align-items:center}
@@ -4682,21 +4702,22 @@
         .print-toolbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}
         .print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800;cursor:pointer}
         .print-toolbar .close-print{background:#fff;color:#111}
-        @media print{body{background:#fff}.print-toolbar{display:none}.a4-document{margin:0;padding:0 7mm 5mm;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}}
+        @media(max-width:760px){.a4-stage{width:100%;height:auto;margin:0;box-shadow:none}.a4-document{width:100%;min-height:0;padding:0 16px 16px}}
+        @media print{body{background:#fff}.print-toolbar{display:none}.a4-stage{width:190mm;height:277mm;margin:0;overflow:hidden;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}.a4-document{width:190mm;min-height:277mm;margin:0;padding:0 7mm 5mm;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}}
       `;
     }
 
     function previewDocument(item){
       const w=window.open("","_blank","width=980,height=820");
       if(!w){alert("Autorise les fenêtres pop-up pour afficher l’aperçu.");return;}
-      w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aperçu — ${escapeHtml(item.number||"Document")}</title><style>${documentPrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer en A4")}${documentPrintableContent(item)}${a4PopupScript(".a4-document",277,false)}</body></html>`);
+      w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aperçu — ${escapeHtml(item.number||"Document")}</title><style>${documentPrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer en A4")}<div class="a4-stage">${documentPrintableContent(item)}</div>${a4PopupScript(".a4-document",277,false,190)}</body></html>`);
       w.document.close();
     }
 
     function printDocument(item){
       const w=window.open("","_blank","width=980,height=820");
       if(!w){alert("Autorise les fenêtres pop-up pour imprimer le document.");return;}
-      w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(item.number||"Document")}</title><style>${documentPrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer en A4")}${documentPrintableContent(item)}${a4PopupScript(".a4-document",277,true)}</body></html>`);
+      w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(item.number||"Document")}</title><style>${documentPrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer en A4")}<div class="a4-stage">${documentPrintableContent(item)}</div>${a4PopupScript(".a4-document",277,true,190)}</body></html>`);
       w.document.close();
     }
 
@@ -4751,11 +4772,14 @@
           return pdf.output("blob");
         }
 
+        fitA4Element(page,277,190);
+        page.style.maxHeight="277mm";
+        page.style.overflow="hidden";
         return await html2pdf().set({
           margin:5,
           filename:`${item.number||"document"}.pdf`,
           image:{type:"jpeg",quality:.98},
-          html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
+          html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:794,windowHeight:1123},
           jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
           pagebreak:{mode:[]}
         }).from(page).outputPdf("blob");
@@ -6432,7 +6456,8 @@
             .print-toolbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}
             .print-toolbar button{padding:11px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800;cursor:pointer}
             .print-toolbar .close-print{background:#fff}
-            .receipt-page{width:190mm;min-height:277mm;margin:8mm auto;padding:0 10mm 8mm;display:flex;flex-direction:column;background:#fff;box-shadow:0 4mm 14mm #0002;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
+            .a4-stage{width:190mm;height:277mm;margin:8mm auto;overflow:hidden;background:#fff;box-shadow:0 4mm 14mm #0002;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
+            .receipt-page{width:190mm;min-height:277mm;margin:0;padding:0 10mm 8mm;display:flex;flex-direction:column;background:#fff;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
             .top-accent{height:2.2mm;margin:0 -10mm 8mm;background:linear-gradient(90deg,#111 0 72%,#d4a72c 72% 100%)}
             header{display:flex;justify-content:space-between;gap:12mm;align-items:flex-start;padding-bottom:6mm;border-bottom:1px solid #d8d2c4}
             h1{margin:0;font-size:23pt;letter-spacing:.8pt}
@@ -6454,12 +6479,13 @@
             .signatures div{height:30mm;padding-top:2mm;border-top:1px solid #555;color:#666;font-size:8.5pt}
             footer{display:flex;justify-content:space-between;gap:10mm;margin-top:auto;padding-top:4mm;border-top:1px solid #d0c9ba;color:#666;font-size:8pt}
             footer strong{color:#8b6500}
-            @media(max-width:760px){.receipt-page{width:100%;min-height:calc(100vh - 64px);margin:0;padding-left:18px;padding-right:18px;box-shadow:none}.receipt-grid{grid-template-columns:1fr}.receipt-grid div{border-right:0}.receipt-grid div:nth-last-child(-n+2){border-bottom:1px solid #e4dfd4}.receipt-grid div:last-child{border-bottom:0}.amount-card{width:100%}}
-            @media print{body{background:#fff}.print-toolbar{display:none}.receipt-page{width:190mm;min-height:277mm;margin:0;padding:0 10mm 8mm;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}}
+            @media(max-width:760px){.a4-stage{width:100%;height:auto;margin:0;box-shadow:none}.receipt-page{width:100%;min-height:calc(100vh - 64px);margin:0;padding-left:18px;padding-right:18px;box-shadow:none}.receipt-grid{grid-template-columns:1fr}.receipt-grid div{border-right:0}.receipt-grid div:nth-last-child(-n+2){border-bottom:1px solid #e4dfd4}.receipt-grid div:last-child{border-bottom:0}.amount-card{width:100%}}
+            @media print{body{background:#fff}.print-toolbar{display:none}.a4-stage{width:190mm;height:277mm;margin:0;overflow:hidden;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}.receipt-page{width:190mm;min-height:277mm;margin:0;padding:0 10mm 8mm;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}}
           </style>
         </head>
         <body>
           ${printableToolbarHtml("Imprimer le reçu en A4")}
+          <div class="a4-stage">
           <main class="receipt-page">
             <div class="top-accent"></div>
             <header>
@@ -6484,7 +6510,8 @@
             <div class="signatures"><div>Signature du client</div><div>Signature et cachet TECH42SERVICE</div></div>
             <footer><div>${escapeHtml(CONTACT_EMAIL)}</div><strong>TECH42SERVICE</strong></footer>
           </main>
-          ${a4PopupScript(".receipt-page",277,false)}
+          </div>
+          ${a4PopupScript(".receipt-page",277,false,190)}
         </body>
         </html>`);
       w.document.close();
