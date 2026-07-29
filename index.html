@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.8 sans module Appareils et rendez-vous modifiables</title>
+  <title>TECH42SERVICE Gestion — V21.9 synchronisation mobile vers PC corrigée</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -413,7 +413,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.8 — Module Appareils supprimé et rendez-vous terminés modifiables */
+    /* V21.9 — Envoi des sauvegardes du mobile vers le PC fiabilisé */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1716,7 +1716,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.8 sans module Appareils et rendez-vous modifiables</footer>
+      <footer>TECH42SERVICE Gestion — V21.9 synchronisation mobile vers PC corrigée</footer>
     </main>
   </div>
 
@@ -2497,6 +2497,55 @@
         console.error(error);
         setCloudStatus("Synchronisation impossible", false);
       }
+    }
+
+    async function ensureCloudUserForMobileSave(){
+      if(cloudUser) return true;
+      try{
+        const {data,error} = await supabaseClient.auth.getSession();
+        if(error) throw error;
+        const sessionUser = data?.session?.user;
+        if(!sessionUser) return false;
+        await initializeCloudForUser(sessionUser,{refresh:false});
+        return Boolean(cloudUser);
+      }catch(error){
+        console.error("Récupération session mobile",error);
+        return false;
+      }
+    }
+
+    async function syncMobileSaveToCloud(){
+      markCloudPending();
+      if(!navigator.onLine){
+        setCloudStatus("Mobile hors connexion — envoi au PC en attente",false);
+        return false;
+      }
+      if(!(await ensureCloudUserForMobileSave())){
+        setCloudStatus("Session cloud expirée — reconnecte-toi",false);
+        return false;
+      }
+
+      setCloudSyncing("Envoi du mobile vers le cloud…");
+      let saved = await cloudSaveNow(false);
+      if(!saved && navigator.onLine){
+        await new Promise(resolve=>setTimeout(resolve,450));
+        saved = await cloudSaveNow(false);
+      }
+      if(!saved) return false;
+
+      const verification = await readCloudState();
+      const localJson = canonicalCloudJson(collectCloudData());
+      const remoteJson = canonicalCloudJson(verification.row?.data || {});
+      if(!verification.ok || localJson !== remoteJson){
+        markCloudPending();
+        setCloudStatus("Envoi mobile non confirmé — nouvel essai nécessaire",false);
+        return false;
+      }
+
+      markCloudConfirmed(localJson,verification.row?.updated_at || lastCloudUpdatedAt);
+      const savedTime = new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+      setCloudStatus(`Sauvegarde mobile envoyée au PC à ${savedTime}`,true);
+      return true;
     }
 
     function subscribeCloud(){
@@ -6511,7 +6560,9 @@
       try{
         // Laisse d'abord le gestionnaire du formulaire écrire dans localStorage.
         await new Promise(resolve=>setTimeout(resolve,180));
-        const synced=typeof cloudSaveNow==='function' ? await cloudSaveNow(false) : false;
+        const synced=typeof syncMobileSaveToCloud==='function'
+          ? await syncMobileSaveToCloud()
+          : (typeof cloudSaveNow==='function' ? await cloudSaveNow(false) : false);
         if(synced){
           showMobileSaveToast('Enregistré et synchronisé ✓',true);
         }else if(!navigator.onLine){
@@ -6545,7 +6596,24 @@
     });
 
     window.addEventListener('online',()=>{
-      if(typeof cloudSaveNow==='function') cloudSaveNow(false);
+      if(typeof syncMobileSaveToCloud==='function' && typeof hasPendingCloudChanges==='function' && hasPendingCloudChanges()){
+        syncMobileSaveToCloud();
+      }
+    });
+
+    window.addEventListener('pageshow',()=>{
+      if(typeof syncMobileSaveToCloud==='function' && typeof hasPendingCloudChanges==='function' && hasPendingCloudChanges()){
+        syncMobileSaveToCloud();
+      }
+    });
+
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible' &&
+         typeof syncMobileSaveToCloud==='function' &&
+         typeof hasPendingCloudChanges==='function' &&
+         hasPendingCloudChanges()){
+        syncMobileSaveToCloud();
+      }
     });
   })();
   </script>
