@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.9 synchronisation mobile vers PC corrigée</title>
+  <title>TECH42SERVICE Gestion — V21.10 synchronisation PC/mobile stable</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -413,7 +413,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.9 — Envoi des sauvegardes du mobile vers le PC fiabilisé */
+    /* V21.10 — Synchronisation bidirectionnelle PC/mobile stable */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1716,7 +1716,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.9 synchronisation mobile vers PC corrigée</footer>
+      <footer>TECH42SERVICE Gestion — V21.10 synchronisation PC/mobile stable</footer>
     </main>
   </div>
 
@@ -1846,6 +1846,19 @@
     const CLOUD_PENDING_KEY = "tech42-cloud-save-pending";
     const CLOUD_FINGERPRINT_KEY = "tech42-cloud-last-fingerprint";
     const CLOUD_CONFIRMED_AT_KEY = "tech42-cloud-last-confirmed-at";
+    const CLOUD_DEVICE_ID_KEY = "tech42-cloud-device-id";
+    const CLOUD_RECORD_UPDATED_AT = "__tech42UpdatedAt";
+    const CLOUD_RECORD_DEVICE_ID = "__tech42DeviceId";
+
+    function getOrCreateCloudDeviceId(){
+      let id = localStorage.getItem(CLOUD_DEVICE_ID_KEY) || "";
+      if(id) return id;
+      id = globalThis.crypto?.randomUUID
+        ? globalThis.crypto.randomUUID()
+        : `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      try{ localStorage.setItem(CLOUD_DEVICE_ID_KEY,id); }catch(error){ console.warn("Identifiant appareil non mémorisé",error); }
+      return id;
+    }
 
     let cloudUser = null;
     let cloudChannel = null;
@@ -1864,6 +1877,7 @@
     let cloudConflictDetected = false;
     let cloudInitializedUserId = "";
     let cloudInitializationPromise = null;
+    const cloudDeviceId = getOrCreateCloudDeviceId();
     const REMOVED_LEGACY_KEYS = ["tech42-sites-links","tech42-devices"];
 
     function setCloudStatus(message, ok=false){
@@ -1963,6 +1977,73 @@
       });
     }
 
+    function cloudItemIdentity(key,item,index=0){
+      if(item && typeof item === "object"){
+        if(key === CLOUD_TOMBSTONE_KEY){
+          return `${String(item.collection||"")}:${String(item.id||"")}`;
+        }
+        return String(item.id || item.number || item.reference || JSON.stringify(item));
+      }
+      return `${index}:${JSON.stringify(item)}`;
+    }
+
+    function cloudRecordBusinessJson(item){
+      if(!item || typeof item !== "object") return JSON.stringify(item);
+      const copy = {...item};
+      delete copy[CLOUD_RECORD_UPDATED_AT];
+      delete copy[CLOUD_RECORD_DEVICE_ID];
+      return JSON.stringify(copy);
+    }
+
+    function prepareCloudCollectionForSave(key,list){
+      if(!CLOUD_COLLECTION_KEYS.includes(key) || !Array.isArray(list) || key === CLOUD_TOMBSTONE_KEY){
+        return Array.isArray(list) ? list : [];
+      }
+      const previous = parseCloudCollection(localStorage.getItem(key)) || [];
+      const previousById = new Map(
+        previous.map((item,index)=>[cloudItemIdentity(key,item,index),item])
+      );
+      const changedAt = new Date().toISOString();
+      return list.map((item,index)=>{
+        if(!item || typeof item !== "object") return item;
+        const previousItem = previousById.get(cloudItemIdentity(key,item,index));
+        const preparedItem = {...item};
+        if(previousItem && cloudRecordBusinessJson(previousItem) === cloudRecordBusinessJson(preparedItem)){
+          if(previousItem[CLOUD_RECORD_UPDATED_AT]){
+            preparedItem[CLOUD_RECORD_UPDATED_AT] = previousItem[CLOUD_RECORD_UPDATED_AT];
+          }
+          if(previousItem[CLOUD_RECORD_DEVICE_ID]){
+            preparedItem[CLOUD_RECORD_DEVICE_ID] = previousItem[CLOUD_RECORD_DEVICE_ID];
+          }
+        }else{
+          preparedItem[CLOUD_RECORD_UPDATED_AT] = changedAt;
+          preparedItem[CLOUD_RECORD_DEVICE_ID] = cloudDeviceId;
+        }
+        return preparedItem;
+      });
+    }
+
+    function cloudRecordTimestamp(item,key){
+      if(!item || typeof item !== "object") return 0;
+      const value = key === CLOUD_TOMBSTONE_KEY
+        ? item.deletedAt
+        : item[CLOUD_RECORD_UPDATED_AT];
+      const parsed = Date.parse(value || "");
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function chooseCloudRecord(key,remoteItem,localItem){
+      if(remoteItem === undefined) return localItem;
+      if(localItem === undefined) return remoteItem;
+      if(JSON.stringify(remoteItem) === JSON.stringify(localItem)) return localItem;
+      const remoteTime = cloudRecordTimestamp(remoteItem,key);
+      const localTime = cloudRecordTimestamp(localItem,key);
+      if(remoteTime !== localTime && (remoteTime || localTime)){
+        return localTime > remoteTime ? localItem : remoteItem;
+      }
+      return localItem;
+    }
+
     function mergeCloudDataPreservingLocal(remoteData, localData){
       const remote = remoteData && typeof remoteData === "object" ? remoteData : {};
       const local = localData && typeof localData === "object" ? localData : {};
@@ -1973,16 +2054,24 @@
           const remoteList = parseCloudCollection(remote[key]);
           const localList = parseCloudCollection(local[key]);
           if(remoteList && localList){
-            const byIdentity = new Map();
-            [...remoteList,...localList].forEach((item,index) => {
-              const identity = item && typeof item === "object"
-                ? (key === CLOUD_TOMBSTONE_KEY
-                  ? `${String(item.collection||"")}:${String(item.id||"")}`
-                  : String(item.id || item.number || item.reference || JSON.stringify(item)))
-                : `${index}:${JSON.stringify(item)}`;
-              byIdentity.set(identity,item);
+            const remoteById = new Map(
+              remoteList.map((item,index)=>[cloudItemIdentity(key,item,index),item])
+            );
+            const localById = new Map(
+              localList.map((item,index)=>[cloudItemIdentity(key,item,index),item])
+            );
+            const orderedIds = [];
+            const seenIds = new Set();
+            [...remoteList,...localList].forEach((item,index)=>{
+              const identity = cloudItemIdentity(key,item,index);
+              if(!seenIds.has(identity)){
+                seenIds.add(identity);
+                orderedIds.push(identity);
+              }
             });
-            merged[key] = JSON.stringify([...byIdentity.values()]);
+            merged[key] = JSON.stringify(orderedIds.map(identity=>
+              chooseCloudRecord(key,remoteById.get(identity),localById.get(identity))
+            ));
             return;
           }
         }
@@ -2316,23 +2405,44 @@
               continue;
             }
 
-            // Un conflit réel exige trois conditions :
-            // 1) le cloud a changé depuis la dernière synchronisation confirmée ;
-            // 2) le contenu cloud diffère de la base confirmée ;
-            // 3) le contenu local diffère lui aussi de cette base.
-            const localChangedSinceLastSync = Boolean(lastCloudJson && json !== lastCloudJson);
+            // Le contenu de référence est identifié par son empreinte persistante.
+            // Cette comparaison reste fiable après un rechargement du PC ou du mobile.
+            const localFingerprint = cloudFingerprint(json);
+            const remoteFingerprint = remoteJson ? cloudFingerprint(remoteJson) : "";
+            const localChangedSinceLastSync = !lastCloudFingerprint ||
+              localFingerprint !== lastCloudFingerprint;
             const remoteChangedSinceLastSync = Boolean(
-              lastCloudJson &&
               remoteJson &&
-              remoteJson !== lastCloudJson
+              (!lastCloudFingerprint || remoteFingerprint !== lastCloudFingerprint)
             );
+
+            // Si seul l'autre appareil a changé, on reçoit sa sauvegarde.
+            // Une ancienne copie locale ne peut plus écraser le cloud.
+            if(!localChangedSinceLastSync && remoteChangedSinceLastSync){
+              const appliedJson = applyCloudData(remote.data,false);
+              if(appliedJson !== remoteJson){
+                throw new Error("La sauvegarde reçue ne correspond pas au cloud");
+              }
+              markCloudConfirmed(remoteJson,remoteDate || lastCloudUpdatedAt);
+              refreshAllCloudModules();
+              setCloudStatus("Mise à jour de l’autre appareil reçue",true);
+              force = false;
+              continue;
+            }
 
             if(localChangedSinceLastSync && remoteChangedSinceLastSync){
               try{ await createLocalBackup("Avant fusion des appareils", true); }catch(error){ console.error("Sauvegarde avant fusion", error); }
               const mergedState = mergeCloudDataPreservingLocal(remote.data,state);
               applyCloudData(mergedState,false);
               lastCloudJson = remoteJson;
+              lastCloudFingerprint = remoteFingerprint;
               lastCloudUpdatedAt = remoteDate || lastCloudUpdatedAt;
+              try{
+                localStorage.setItem(CLOUD_FINGERPRINT_KEY,lastCloudFingerprint);
+                if(lastCloudUpdatedAt) localStorage.setItem(CLOUD_CONFIRMED_AT_KEY,lastCloudUpdatedAt);
+              }catch(error){
+                console.warn("Référence de fusion non mémorisée",error);
+              }
               markCloudPending();
               cloudConflictDetected = false;
               setCloudSyncing("Fusion sécurisée des modifications…");
@@ -2515,7 +2625,6 @@
     }
 
     async function syncMobileSaveToCloud(){
-      markCloudPending();
       if(!navigator.onLine){
         setCloudStatus("Mobile hors connexion — envoi au PC en attente",false);
         return false;
@@ -2523,6 +2632,13 @@
       if(!(await ensureCloudUserForMobileSave())){
         setCloudStatus("Session cloud expirée — reconnecte-toi",false);
         return false;
+      }
+
+      // Sans changement local réel, on reçoit d'abord la version de l'autre
+      // appareil au lieu de renvoyer une ancienne copie.
+      if(!hasPendingCloudChanges()){
+        await cloudFetchLatest(true);
+        return true;
       }
 
       setCloudSyncing("Envoi du mobile vers le cloud…");
@@ -3165,8 +3281,9 @@
     }
 
     function saveAdminRepairs(list){
-      clearCloudDeletionsForSavedItems("tech42-repairs",list);
-      localStorage.setItem("tech42-repairs", JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-repairs",list);
+      clearCloudDeletionsForSavedItems("tech42-repairs",preparedList);
+      localStorage.setItem("tech42-repairs", JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -3913,8 +4030,9 @@
     }
 
     function saveAdminStock(list){
-      clearCloudDeletionsForSavedItems("tech42-stock",list);
-      localStorage.setItem("tech42-stock", JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-stock",list);
+      clearCloudDeletionsForSavedItems("tech42-stock",preparedList);
+      localStorage.setItem("tech42-stock", JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -4135,8 +4253,9 @@
     }
 
     function saveAdminDocuments(list){
-      clearCloudDeletionsForSavedItems("tech42-documents",list);
-      localStorage.setItem("tech42-documents", JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-documents",list);
+      clearCloudDeletionsForSavedItems("tech42-documents",preparedList);
+      localStorage.setItem("tech42-documents", JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -4929,8 +5048,9 @@
     }
 
     function saveAdminAppointments(list){
-      clearCloudDeletionsForSavedItems("tech42-appointments",list);
-      localStorage.setItem("tech42-appointments", JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-appointments",list);
+      clearCloudDeletionsForSavedItems("tech42-appointments",preparedList);
+      localStorage.setItem("tech42-appointments", JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -5243,8 +5363,9 @@
     }
 
     function saveAdminClients(list){
-      clearCloudDeletionsForSavedItems("tech42-clients",list);
-      localStorage.setItem("tech42-clients", JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-clients",list);
+      clearCloudDeletionsForSavedItems("tech42-clients",preparedList);
+      localStorage.setItem("tech42-clients", JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -5451,8 +5572,9 @@
     }
 
     function saveAdminBuySell(list){
-      clearCloudDeletionsForSavedItems("tech42-buy-sell",list);
-      localStorage.setItem("tech42-buy-sell", JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-buy-sell",list);
+      clearCloudDeletionsForSavedItems("tech42-buy-sell",preparedList);
+      localStorage.setItem("tech42-buy-sell", JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -5622,8 +5744,9 @@
     }
 
     function saveStoredLinks(key,list){
-      clearCloudDeletionsForSavedItems(key,list);
-      localStorage.setItem(key,JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave(key,list);
+      clearCloudDeletionsForSavedItems(key,preparedList);
+      localStorage.setItem(key,JSON.stringify(preparedList));
       scheduleCloudSave();
     }
 
@@ -6025,8 +6148,9 @@
     // ===== V19.2 : Encaissements et historique client PRO =====
     function getAdminPayments(){try{return JSON.parse(localStorage.getItem("tech42-payments")||"[]")}catch{return []}}
     function saveAdminPayments(list){
-      clearCloudDeletionsForSavedItems("tech42-payments",list);
-      localStorage.setItem("tech42-payments",JSON.stringify(list));
+      const preparedList = prepareCloudCollectionForSave("tech42-payments",list);
+      clearCloudDeletionsForSavedItems("tech42-payments",preparedList);
+      localStorage.setItem("tech42-payments",JSON.stringify(preparedList));
       scheduleCloudSave();
       try{ updateDashboardStats(); }catch(error){ console.warn("Mise à jour du CA impossible",error); }
     }
