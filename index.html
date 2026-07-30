@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.10 synchronisation PC/mobile stable</title>
+  <title>TECH42SERVICE Gestion — V21.11 synchronisation par fiche</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -413,7 +413,7 @@
       input,select,textarea{font-size:16px!important}
     }
 
-    /* V21.10 — Synchronisation bidirectionnelle PC/mobile stable */
+    /* V21.11 — Synchronisation bidirectionnelle fiche par fiche */
     .cloud-sync-badge.conflict{color:#ff8585;border-color:#7a2a2a;background:#2b1111}
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
@@ -1716,7 +1716,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.10 synchronisation PC/mobile stable</footer>
+      <footer>TECH42SERVICE Gestion — V21.11 synchronisation fiche par fiche</footer>
     </main>
   </div>
 
@@ -2368,7 +2368,10 @@
       }
     }
 
-    async function cloudSaveNow(force=false){
+    async function legacyBlockCloudSaveNowDisabled(force=false){
+      // Conservé uniquement pour permettre la lecture/migration de l'ancien
+      // format. Aucun appel ne doit encore écrire le bloc app_state.
+      return false;
       if(!cloudUser || cloudApplying) return false;
       if(!navigator.onLine){
         markCloudPending();
@@ -2507,13 +2510,17 @@
     const originalLocalStorageRemoveItem = localStorage.removeItem.bind(localStorage);
     REMOVED_LEGACY_KEYS.forEach(key => originalLocalStorageRemoveItem(key));
     localStorage.setItem = function(key, value){
+      const previousValue = localStorage.getItem(String(key));
       originalLocalStorageSetItem(key, value);
+      trackRecordStorageMutation(String(key), previousValue, String(value));
       if(CLOUD_STORAGE_KEYS.includes(String(key)) && !cloudApplying){
         scheduleCloudSave();
       }
     };
     localStorage.removeItem = function(key){
+      const previousValue = localStorage.getItem(String(key));
       originalLocalStorageRemoveItem(key);
+      trackRecordStorageMutation(String(key), previousValue, null);
       if(CLOUD_STORAGE_KEYS.includes(String(key)) && !cloudApplying){
         scheduleCloudSave();
       }
@@ -2765,6 +2772,810 @@
         setCloudStatus("Connecté — sauvegarde cloud en attente", false);
       }else{
         setCloudStatus("PC, tablette et mobile synchronisés", true);
+      }
+      return data.user;
+    }
+
+    // ===== V21.11 : synchronisation cloud par enregistrement =====
+    // Chaque fiche possède désormais sa propre ligne Supabase. Une modification
+    // de client, réparation, rendez-vous, facture ou paiement n'écrit plus le
+    // gros bloc app_state et ne peut donc plus remplacer les autres fiches.
+    const CLOUD_RECORD_TABLE = "app_records";
+    const CLOUD_SETTINGS_COLLECTION = "__settings";
+    const CLOUD_RECORD_QUEUE_KEY = "tech42-cloud-record-queue-v2";
+    const CLOUD_RECORD_BASELINE_KEY = "tech42-cloud-record-baseline-v2";
+    const CLOUD_RECORD_COLLECTION_KEYS = CLOUD_COLLECTION_KEYS.filter(key => key !== CLOUD_TOMBSTONE_KEY);
+    let cloudRecordTableReady = null;
+    let cloudRecordLastProbeAt = 0;
+    let recordSyncQueue = readRecordSyncObject(CLOUD_RECORD_QUEUE_KEY);
+    let recordSyncBaseline = readRecordSyncObject(CLOUD_RECORD_BASELINE_KEY);
+
+    function readRecordSyncObject(key){
+      try{
+        const parsed = JSON.parse(localStorage.getItem(key) || "{}");
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      }catch{
+        return {};
+      }
+    }
+
+    function stableCloudValue(value){
+      if(Array.isArray(value)) return value.map(stableCloudValue);
+      if(value && typeof value === "object"){
+        return Object.keys(value).sort().reduce((result,key)=>{
+          result[key] = stableCloudValue(value[key]);
+          return result;
+        },{});
+      }
+      return value;
+    }
+
+    function recordRowFingerprint(row){
+      return cloudFingerprint(JSON.stringify(stableCloudValue({
+        deleted:Boolean(row?.deleted),
+        data:row?.deleted ? null : (row?.data ?? null)
+      })));
+    }
+
+    function recordIdentity(collection,recordId){
+      return `${encodeURIComponent(String(collection || ""))}|${encodeURIComponent(String(recordId || ""))}`;
+    }
+
+    function recordRowIdentity(row){
+      return recordIdentity(row?.collection,row?.record_id);
+    }
+
+    function persistRecordSyncQueue(){
+      originalLocalStorageSetItem(CLOUD_RECORD_QUEUE_KEY,JSON.stringify(recordSyncQueue));
+      if(Object.keys(recordSyncQueue).length){
+        cloudDirty = true;
+        originalLocalStorageSetItem(CLOUD_PENDING_KEY,"1");
+      }else{
+        originalLocalStorageRemoveItem(CLOUD_PENDING_KEY);
+        cloudDirty = false;
+      }
+    }
+
+    function persistRecordSyncBaseline(){
+      originalLocalStorageSetItem(CLOUD_RECORD_BASELINE_KEY,JSON.stringify(recordSyncBaseline));
+    }
+
+    function getRecordSyncQueue(){
+      recordSyncQueue = readRecordSyncObject(CLOUD_RECORD_QUEUE_KEY);
+      return recordSyncQueue;
+    }
+
+    function markRecordOperation(collection,recordId,deleted=false,queuedAt=""){
+      if(!collection || !recordId) return;
+      const identity = recordIdentity(collection,recordId);
+      recordSyncQueue = getRecordSyncQueue();
+      recordSyncQueue[identity] = {
+        collection:String(collection),
+        recordId:String(recordId),
+        deleted:Boolean(deleted),
+        queuedAt:queuedAt || new Date().toISOString(),
+        deviceId:cloudDeviceId
+      };
+      persistRecordSyncQueue();
+    }
+
+    function clearRecordOperation(identity,queuedAt=""){
+      recordSyncQueue = getRecordSyncQueue();
+      const current = recordSyncQueue[identity];
+      if(!current || (queuedAt && current.queuedAt !== queuedAt)) return false;
+      delete recordSyncQueue[identity];
+      persistRecordSyncQueue();
+      return true;
+    }
+
+    function collectionRecordMap(key,value){
+      const list = parseCloudCollection(value) || [];
+      return new Map(list.map((item,index)=>[cloudItemIdentity(key,item,index),item]));
+    }
+
+    function trackRecordStorageMutation(key,previousValue,nextValue){
+      if(cloudApplying || !CLOUD_STORAGE_KEYS.includes(key)) return;
+
+      if(CLOUD_RECORD_COLLECTION_KEYS.includes(key)){
+        const before = collectionRecordMap(key,previousValue);
+        const after = collectionRecordMap(key,nextValue);
+        const identities = new Set([...before.keys(),...after.keys()]);
+        identities.forEach(recordId=>{
+          const oldItem = before.get(recordId);
+          const newItem = after.get(recordId);
+          if(JSON.stringify(stableCloudValue(oldItem)) !== JSON.stringify(stableCloudValue(newItem))){
+            markRecordOperation(key,recordId,newItem === undefined);
+          }
+        });
+        return;
+      }
+
+      if(key === CLOUD_TOMBSTONE_KEY){
+        const before = parseCloudCollection(previousValue) || [];
+        const known = new Set(before.map(item=>`${item?.collection || ""}:${String(item?.id || "")}`));
+        (parseCloudCollection(nextValue) || []).forEach(item=>{
+          const tombstoneIdentity = `${item?.collection || ""}:${String(item?.id || "")}`;
+          if(item?.collection && item?.id && !known.has(tombstoneIdentity)){
+            markRecordOperation(item.collection,String(item.id),true,item.deletedAt || "");
+          }
+        });
+        return;
+      }
+
+      if(previousValue !== nextValue){
+        markRecordOperation(CLOUD_SETTINGS_COLLECTION,key,nextValue === null);
+      }
+    }
+
+    function localRecordRows(){
+      const rows = [];
+      CLOUD_RECORD_COLLECTION_KEYS.forEach(collection=>{
+        const list = parseCloudCollection(localStorage.getItem(collection)) || [];
+        list.forEach((item,index)=>{
+          rows.push({
+            collection,
+            record_id:cloudItemIdentity(collection,item,index),
+            data:item,
+            deleted:false,
+            device_id:item?.[CLOUD_RECORD_DEVICE_ID] || cloudDeviceId
+          });
+        });
+      });
+
+      CLOUD_STORAGE_KEYS
+        .filter(key=>!CLOUD_COLLECTION_KEYS.includes(key))
+        .forEach(key=>{
+          const value = localStorage.getItem(key);
+          if(value !== null){
+            rows.push({
+              collection:CLOUD_SETTINGS_COLLECTION,
+              record_id:key,
+              data:{value:String(value)},
+              deleted:false,
+              device_id:cloudDeviceId
+            });
+          }
+        });
+      return rows;
+    }
+
+    function localRecordPayload(operation){
+      const collection = operation.collection;
+      const recordId = operation.recordId;
+      if(collection === CLOUD_SETTINGS_COLLECTION){
+        const value = localStorage.getItem(recordId);
+        return {
+          collection,
+          record_id:recordId,
+          data:value === null ? null : {value:String(value)},
+          deleted:value === null || Boolean(operation.deleted),
+          device_id:cloudDeviceId
+        };
+      }
+
+      const map = collectionRecordMap(collection,localStorage.getItem(collection));
+      const item = map.get(recordId);
+      return {
+        collection,
+        record_id:recordId,
+        data:item === undefined ? null : item,
+        deleted:item === undefined || Boolean(operation.deleted),
+        device_id:cloudDeviceId
+      };
+    }
+
+    function markEveryLocalRecordPending(){
+      recordSyncQueue = getRecordSyncQueue();
+      const queuedAt = new Date().toISOString();
+      localRecordRows().forEach(row=>{
+        const identity = recordRowIdentity(row);
+        recordSyncQueue[identity] = {
+          collection:row.collection,
+          recordId:row.record_id,
+          deleted:false,
+          queuedAt,
+          deviceId:cloudDeviceId
+        };
+      });
+      (parseCloudCollection(localStorage.getItem(CLOUD_TOMBSTONE_KEY)) || []).forEach(item=>{
+        if(!item?.collection || !item?.id) return;
+        const identity = recordIdentity(item.collection,item.id);
+        recordSyncQueue[identity] = {
+          collection:String(item.collection),
+          recordId:String(item.id),
+          deleted:true,
+          queuedAt:item.deletedAt || queuedAt,
+          deviceId:cloudDeviceId
+        };
+      });
+      persistRecordSyncQueue();
+    }
+
+    function updateRecordBaseline(rows){
+      (Array.isArray(rows) ? rows : [rows]).filter(Boolean).forEach(row=>{
+        recordSyncBaseline[recordRowIdentity(row)] = {
+          collection:String(row.collection || ""),
+          recordId:String(row.record_id || ""),
+          fingerprint:recordRowFingerprint(row),
+          updatedAt:row.updated_at || "",
+          deleted:Boolean(row.deleted)
+        };
+      });
+    }
+
+    function removeRecordBaseline(identity){
+      delete recordSyncBaseline[identity];
+    }
+
+    function decodedRecordIdentity(identity,baseline={}){
+      if(baseline.collection && baseline.recordId){
+        return {collection:String(baseline.collection),recordId:String(baseline.recordId)};
+      }
+      const separator = String(identity).indexOf("|");
+      if(separator < 0) return {collection:"",recordId:""};
+      try{
+        return {
+          collection:decodeURIComponent(String(identity).slice(0,separator)),
+          recordId:decodeURIComponent(String(identity).slice(separator+1))
+        };
+      }catch{
+        return {collection:"",recordId:""};
+      }
+    }
+
+    // Ne dépend pas de la possibilité de remplacer Storage.setItem : Safari,
+    // certains WebView Android et quelques navigateurs verrouillent cette
+    // méthode. La comparaison par fiche garantit tout de même la détection.
+    function captureUnqueuedLocalRecordChanges(){
+      if(cloudApplying) return;
+      if(!cloudUser && !Object.keys(recordSyncBaseline).length) return;
+      recordSyncQueue = getRecordSyncQueue();
+      const localRows = localRecordRows();
+      const localByIdentity = new Map(localRows.map(row=>[recordRowIdentity(row),row]));
+      const queuedAt = new Date().toISOString();
+      let changed = false;
+
+      localRows.forEach(row=>{
+        const identity = recordRowIdentity(row);
+        const baseline = recordSyncBaseline[identity];
+        if((!baseline || baseline.fingerprint !== recordRowFingerprint(row)) && !recordSyncQueue[identity]){
+          recordSyncQueue[identity] = {
+            collection:row.collection,
+            recordId:row.record_id,
+            deleted:false,
+            queuedAt:row.data?.[CLOUD_RECORD_UPDATED_AT] || queuedAt,
+            deviceId:cloudDeviceId
+          };
+          changed = true;
+        }
+      });
+
+      Object.entries(recordSyncBaseline).forEach(([identity,baseline])=>{
+        if(baseline?.deleted || localByIdentity.has(identity) || recordSyncQueue[identity]) return;
+        const decoded = decodedRecordIdentity(identity,baseline);
+        if(!decoded.collection || !decoded.recordId) return;
+        recordSyncQueue[identity] = {
+          collection:decoded.collection,
+          recordId:decoded.recordId,
+          deleted:true,
+          queuedAt,
+          deviceId:cloudDeviceId
+        };
+        changed = true;
+      });
+
+      if(changed) persistRecordSyncQueue();
+    }
+
+    function hasPendingCloudChanges(){
+      captureUnqueuedLocalRecordChanges();
+      return Object.keys(getRecordSyncQueue()).length > 0 ||
+        cloudDirty ||
+        localStorage.getItem(CLOUD_PENDING_KEY) === "1";
+    }
+
+    function markCloudPending(){
+      cloudDirty = true;
+      originalLocalStorageSetItem(CLOUD_PENDING_KEY,"1");
+    }
+
+    function markCloudConfirmed(json="",updatedAt=""){
+      lastCloudJson = String(json || canonicalCloudJson(collectCloudData()));
+      lastCloudFingerprint = cloudFingerprint(lastCloudJson);
+      if(updatedAt) lastCloudUpdatedAt = updatedAt;
+      const stillPending = Object.keys(getRecordSyncQueue()).length > 0;
+      cloudDirty = stillPending;
+      cloudConflictDetected = false;
+      originalLocalStorageSetItem(CLOUD_FINGERPRINT_KEY,lastCloudFingerprint);
+      if(lastCloudUpdatedAt) originalLocalStorageSetItem(CLOUD_CONFIRMED_AT_KEY,lastCloudUpdatedAt);
+      if(stillPending) originalLocalStorageSetItem(CLOUD_PENDING_KEY,"1");
+      else originalLocalStorageRemoveItem(CLOUD_PENDING_KEY);
+    }
+
+    function isCloudRecordSchemaError(error){
+      return ["PGRST205","42P01","42703"].includes(String(error?.code || "")) ||
+        /app_records|schema cache|column/i.test(String(error?.message || ""));
+    }
+
+    function setCloudRecordSchemaMissing(error){
+      cloudRecordTableReady = false;
+      cloudRecordLastProbeAt = Date.now();
+      markCloudPending();
+      console.error("Table de synchronisation par fiche indisponible",error);
+      setCloudStatus("Configuration cloud V21.11 requise — données locales protégées",false);
+    }
+
+    async function readCloudRecordRows(){
+      if(!cloudUser || !navigator.onLine) return [];
+      const rows = [];
+      const pageSize = 1000;
+      for(let start=0;;start+=pageSize){
+        const {data,error} = await supabaseClient
+          .from(CLOUD_RECORD_TABLE)
+          .select("collection,record_id,data,deleted,device_id,updated_at")
+          .eq("user_id",cloudUser.id)
+          .order("collection",{ascending:true})
+          .order("record_id",{ascending:true})
+          .range(start,start+pageSize-1);
+        if(error){
+          if(isCloudRecordSchemaError(error)) setCloudRecordSchemaMissing(error);
+          throw error;
+        }
+        rows.push(...(data || []));
+        if(!data || data.length < pageSize) break;
+      }
+      cloudRecordTableReady = true;
+      cloudRecordLastProbeAt = Date.now();
+      return rows;
+    }
+
+    async function readOneCloudRecord(collection,recordId){
+      const {data,error} = await supabaseClient
+        .from(CLOUD_RECORD_TABLE)
+        .select("collection,record_id,data,deleted,device_id,updated_at")
+        .eq("user_id",cloudUser.id)
+        .eq("collection",collection)
+        .eq("record_id",recordId)
+        .maybeSingle();
+      if(error) throw error;
+      return data || null;
+    }
+
+    function applyCloudRecordRows(rows,{skipPending=true,refresh=true}={}){
+      const pending = getRecordSyncQueue();
+      const collectionMaps = new Map();
+      const changedCollections = new Set();
+      let tombstones = parseCloudCollection(localStorage.getItem(CLOUD_TOMBSTONE_KEY)) || [];
+      let tombstonesChanged = false;
+
+      const getCollectionMap = collection => {
+        if(!collectionMaps.has(collection)){
+          collectionMaps.set(collection,collectionRecordMap(collection,localStorage.getItem(collection)));
+        }
+        return collectionMaps.get(collection);
+      };
+
+      cloudApplying = true;
+      try{
+        (rows || []).forEach(row=>{
+          if(!row?.collection || !row?.record_id) return;
+          const identity = recordRowIdentity(row);
+          if(skipPending && pending[identity]) return;
+
+          if(row.collection === CLOUD_SETTINGS_COLLECTION){
+            if(row.deleted || row.data?.value === undefined){
+              originalLocalStorageRemoveItem(row.record_id);
+            }else{
+              originalLocalStorageSetItem(row.record_id,String(row.data.value));
+            }
+            updateRecordBaseline(row);
+            return;
+          }
+
+          if(!CLOUD_RECORD_COLLECTION_KEYS.includes(row.collection)) return;
+          const map = getCollectionMap(row.collection);
+          if(row.deleted){
+            if(map.delete(String(row.record_id))) changedCollections.add(row.collection);
+            const tombstoneIdentity = `${row.collection}:${String(row.record_id)}`;
+            const withoutOld = tombstones.filter(item=>
+              `${item?.collection || ""}:${String(item?.id || "")}` !== tombstoneIdentity
+            );
+            withoutOld.push({
+              collection:row.collection,
+              id:String(row.record_id),
+              deletedAt:row.updated_at || new Date().toISOString()
+            });
+            tombstones = withoutOld;
+            tombstonesChanged = true;
+          }else if(row.data && typeof row.data === "object"){
+            const previous = map.get(String(row.record_id));
+            if(JSON.stringify(stableCloudValue(previous)) !== JSON.stringify(stableCloudValue(row.data))){
+              map.set(String(row.record_id),row.data);
+              changedCollections.add(row.collection);
+            }
+            const tombstoneIdentity = `${row.collection}:${String(row.record_id)}`;
+            const filtered = tombstones.filter(item=>
+              `${item?.collection || ""}:${String(item?.id || "")}` !== tombstoneIdentity
+            );
+            if(filtered.length !== tombstones.length){
+              tombstones = filtered;
+              tombstonesChanged = true;
+            }
+          }
+          updateRecordBaseline(row);
+        });
+
+        changedCollections.forEach(collection=>{
+          originalLocalStorageSetItem(collection,JSON.stringify([...getCollectionMap(collection).values()]));
+        });
+        if(tombstonesChanged){
+          originalLocalStorageSetItem(CLOUD_TOMBSTONE_KEY,JSON.stringify(tombstones));
+        }
+      }finally{
+        cloudApplying = false;
+      }
+
+      persistRecordSyncBaseline();
+      lastCloudJson = canonicalCloudJson(collectCloudData());
+      if(refresh && (changedCollections.size || tombstonesChanged)) refreshAllCloudModules();
+      return changedCollections.size > 0 || tombstonesChanged;
+    }
+
+    function prepareInitialRecordReconciliation(remoteRows){
+      const remoteByIdentity = new Map((remoteRows || []).map(row=>[recordRowIdentity(row),row]));
+      const localRows = localRecordRows();
+
+      localRows.forEach(localRow=>{
+        const identity = recordRowIdentity(localRow);
+        if(getRecordSyncQueue()[identity]) return;
+        const remoteRow = remoteByIdentity.get(identity);
+        if(!remoteRow){
+          markRecordOperation(localRow.collection,localRow.record_id,false);
+          return;
+        }
+        if(recordRowFingerprint(localRow) === recordRowFingerprint(remoteRow)){
+          updateRecordBaseline(remoteRow);
+          return;
+        }
+
+        const localUpdatedAt = localRow.data?.[CLOUD_RECORD_UPDATED_AT] || "";
+        const localTime = Date.parse(localUpdatedAt);
+        const remoteTime = Date.parse(remoteRow.updated_at || "");
+        if(Number.isFinite(localTime) && (!Number.isFinite(remoteTime) || localTime > remoteTime)){
+          markRecordOperation(localRow.collection,localRow.record_id,false,localUpdatedAt);
+        }
+      });
+
+      (parseCloudCollection(localStorage.getItem(CLOUD_TOMBSTONE_KEY)) || []).forEach(item=>{
+        if(!item?.collection || !item?.id) return;
+        const identity = recordIdentity(item.collection,item.id);
+        const remoteRow = remoteByIdentity.get(identity);
+        const localTime = Date.parse(item.deletedAt || "");
+        const remoteTime = Date.parse(remoteRow?.updated_at || "");
+        if(!remoteRow || (Number.isFinite(localTime) && localTime > remoteTime)){
+          markRecordOperation(item.collection,item.id,true,item.deletedAt || "");
+        }
+      });
+
+      applyCloudRecordRows(remoteRows,{skipPending:true,refresh:false});
+      persistRecordSyncBaseline();
+    }
+
+    async function migrateLegacyCloudBlock(){
+      const localState = collectCloudData();
+      let migratedState = localState;
+      try{
+        const legacy = await readCloudState();
+        if(legacy?.row?.data){
+          migratedState = mergeCloudDataPreservingLocal(legacy.row.data,localState);
+        }
+      }catch(error){
+        console.warn("Ancien bloc cloud non lu pendant la migration",error);
+      }
+      applyCloudData(migratedState,false);
+      markEveryLocalRecordPending();
+      setCloudSyncing("Migration des fiches vers la nouvelle synchronisation…");
+      return cloudSaveNow(true);
+    }
+
+    async function cloudLoadOrCreate(){
+      try{
+        const rows = await readCloudRecordRows();
+        if(!rows.length){
+          return migrateLegacyCloudBlock();
+        }
+        prepareInitialRecordReconciliation(rows);
+        if(hasPendingCloudChanges()) await cloudSaveNow(false);
+        else markCloudConfirmed();
+        return true;
+      }catch(error){
+        if(isCloudRecordSchemaError(error)){
+          setCloudRecordSchemaMissing(error);
+          return false;
+        }
+        throw error;
+      }
+    }
+
+    async function resolvePendingRecordConflicts(remoteRows){
+      const remoteByIdentity = new Map((remoteRows || []).map(row=>[recordRowIdentity(row),row]));
+      const pending = {...getRecordSyncQueue()};
+      const remoteWinners = [];
+
+      Object.entries(pending).forEach(([identity,operation])=>{
+        const remoteRow = remoteByIdentity.get(identity);
+        if(!remoteRow) return;
+        const baseline = recordSyncBaseline[identity];
+        const remoteChanged = Boolean(
+          baseline?.fingerprint && baseline.fingerprint !== recordRowFingerprint(remoteRow)
+        );
+        if(!remoteChanged) return;
+
+        const localPayload = localRecordPayload(operation);
+        const localBusinessTime = Date.parse(
+          localPayload.data?.[CLOUD_RECORD_UPDATED_AT] || operation.queuedAt || ""
+        );
+        const remoteTime = Date.parse(remoteRow.updated_at || "");
+        if(!Number.isFinite(localBusinessTime) || (Number.isFinite(remoteTime) && remoteTime >= localBusinessTime)){
+          clearRecordOperation(identity,operation.queuedAt);
+          remoteWinners.push(remoteRow);
+          cloudConflictDetected = true;
+        }
+      });
+
+      if(remoteWinners.length){
+        try{ await createLocalBackup("Avant résolution d’un conflit de fiche",true); }catch(error){ console.warn(error); }
+        applyCloudRecordRows(remoteWinners,{skipPending:true,refresh:false});
+      }
+    }
+
+    async function writeOneCloudRecord(operation){
+      const payload = localRecordPayload(operation);
+      const updatedAt = new Date().toISOString();
+      const {data,error} = await supabaseClient
+        .from(CLOUD_RECORD_TABLE)
+        .upsert({
+          user_id:cloudUser.id,
+          collection:payload.collection,
+          record_id:payload.record_id,
+          data:payload.deleted ? null : payload.data,
+          deleted:Boolean(payload.deleted),
+          device_id:cloudDeviceId,
+          updated_at:updatedAt
+        },{onConflict:"user_id,collection,record_id"})
+        .select("collection,record_id,data,deleted,device_id,updated_at")
+        .single();
+      if(error) throw error;
+      return data;
+    }
+
+    async function cloudSaveNow(force=false){
+      if(!cloudUser || cloudApplying) return false;
+      captureUnqueuedLocalRecordChanges();
+      if(!navigator.onLine){
+        markCloudPending();
+        setCloudStatus("Hors connexion — fiches conservées sur cet appareil",false);
+        try{ await createLocalBackup("Hors connexion"); }catch(error){ console.warn(error); }
+        return false;
+      }
+      if(cloudSaving){
+        cloudSaveAgain = true;
+        return cloudSavePromise || false;
+      }
+
+      if(force && !Object.keys(getRecordSyncQueue()).length) markEveryLocalRecordPending();
+
+      const runSave = async () => {
+        cloudSaving = true;
+        setCloudSyncing("Synchronisation fiche par fiche…");
+        try{
+          do{
+            cloudSaveAgain = false;
+            const remoteRows = await readCloudRecordRows();
+            await resolvePendingRecordConflicts(remoteRows);
+            applyCloudRecordRows(remoteRows,{skipPending:true,refresh:false});
+
+            const pendingSnapshot = {...getRecordSyncQueue()};
+            for(const [identity,operation] of Object.entries(pendingSnapshot)){
+              const savedRow = await writeOneCloudRecord(operation);
+              updateRecordBaseline(savedRow);
+              clearRecordOperation(identity,operation.queuedAt);
+            }
+            persistRecordSyncBaseline();
+          }while(cloudSaveAgain || Object.keys(getRecordSyncQueue()).length);
+
+          const confirmedRows = await readCloudRecordRows();
+          applyCloudRecordRows(confirmedRows,{skipPending:true,refresh:true});
+          markCloudConfirmed("",confirmedRows.reduce((latest,row)=>
+            String(row.updated_at || "") > latest ? String(row.updated_at) : latest
+          ,""));
+          if(!cloudChannel) subscribeCloud();
+          const savedTime = new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+          const conflictNote = cloudConflictDetected ? " — conflit de fiche résolu" : "";
+          setCloudStatus(`Fiches synchronisées séparément à ${savedTime}${conflictNote}`,true);
+          try{ await createLocalBackup("Après synchronisation par fiche"); }catch(error){ console.warn(error); }
+          return true;
+        }catch(error){
+          if(isCloudRecordSchemaError(error)) setCloudRecordSchemaMissing(error);
+          else{
+            console.error("Erreur de synchronisation par fiche",error);
+            markCloudPending();
+            setCloudStatus("Échec cloud — fiches locales conservées",false);
+          }
+          return false;
+        }finally{
+          cloudSaving = false;
+          cloudSavePromise = null;
+        }
+      };
+
+      cloudSavePromise = runSave();
+      return cloudSavePromise;
+    }
+
+    function scheduleCloudSave(){
+      if(cloudApplying) return;
+      captureUnqueuedLocalRecordChanges();
+      markCloudPending();
+      if(!cloudUser) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(()=>cloudSaveNow(false),450);
+    }
+
+    async function cloudFetchLatest(refresh=true){
+      if(!cloudUser || cloudLoading || !navigator.onLine) return false;
+      cloudLoading = true;
+      try{
+        const rows = await readCloudRecordRows();
+        const changed = applyCloudRecordRows(rows,{skipPending:true,refresh});
+        if(!hasPendingCloudChanges()) markCloudConfirmed();
+        if(changed) setCloudStatus("Nouvelles fiches reçues d’un autre appareil",true);
+        return changed;
+      }catch(error){
+        if(isCloudRecordSchemaError(error)) setCloudRecordSchemaMissing(error);
+        else setCloudStatus("Réception cloud indisponible",false);
+        return false;
+      }finally{
+        cloudLoading = false;
+      }
+    }
+
+    function startCloudAutoSave(){
+      if(cloudAutoSaveStarted) return;
+      cloudAutoSaveStarted = true;
+      cloudPollTimer = setInterval(async()=>{
+        if(document.visibilityState !== "visible" || !navigator.onLine || !cloudUser) return;
+        if(hasPendingCloudChanges()) await cloudSaveNow(false);
+        else await cloudFetchLatest(true);
+      },12000);
+      window.addEventListener("focus",async()=>{
+        if(!cloudUser) return;
+        if(hasPendingCloudChanges()) await cloudSaveNow(false);
+        else await cloudFetchLatest(true);
+      });
+      document.addEventListener("visibilitychange",async()=>{
+        if(!cloudUser) return;
+        if(document.visibilityState === "hidden" && hasPendingCloudChanges()) await cloudSaveNow(false);
+        if(document.visibilityState === "visible"){
+          if(hasPendingCloudChanges()) await cloudSaveNow(false);
+          else await cloudFetchLatest(true);
+        }
+      });
+      window.addEventListener("online",async()=>{
+        setCloudSyncing("Connexion retrouvée…");
+        if(hasPendingCloudChanges()) await cloudSaveNow(false);
+        else await cloudFetchLatest(true);
+      });
+      window.addEventListener("offline",()=>setCloudStatus("Hors connexion — fiches conservées",false));
+    }
+
+    async function manualCloudSync(){
+      if(!cloudUser){
+        setCloudStatus("Connecte-toi pour synchroniser",false);
+        return;
+      }
+      if(!navigator.onLine){
+        setCloudStatus("Hors connexion — synchronisation impossible",false);
+        return;
+      }
+      setCloudSyncing("Synchronisation manuelle fiche par fiche…");
+      const saved = hasPendingCloudChanges()
+        ? await cloudSaveNow(false)
+        : true;
+      if(!saved) return;
+      await cloudFetchLatest(true);
+      if(Object.keys(getRecordSyncQueue()).length){
+        setCloudStatus("Certaines fiches restent en attente",false);
+        return;
+      }
+      const savedTime = new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+      setCloudStatus(`PC, tablette et mobile synchronisés fiche par fiche à ${savedTime}`,true);
+    }
+
+    async function syncMobileSaveToCloud(){
+      if(!navigator.onLine){
+        setCloudStatus("Mobile hors connexion — fiches en attente",false);
+        return false;
+      }
+      if(!(await ensureCloudUserForMobileSave())){
+        setCloudStatus("Session cloud expirée — reconnecte-toi",false);
+        return false;
+      }
+      const saved = hasPendingCloudChanges() ? await cloudSaveNow(false) : true;
+      if(!saved) return false;
+      await cloudFetchLatest(true);
+      const complete = Object.keys(getRecordSyncQueue()).length === 0;
+      setCloudStatus(
+        complete ? "Fiches du mobile envoyées séparément au PC" : "Certaines fiches mobiles restent en attente",
+        complete
+      );
+      return complete;
+    }
+
+    function subscribeCloud(){
+      if(!cloudUser || !cloudRecordTableReady) return;
+      if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
+      cloudChannel = supabaseClient
+        .channel("tech42-app-records-" + cloudUser.id)
+        .on("postgres_changes",{
+          event:"*",
+          schema:"public",
+          table:CLOUD_RECORD_TABLE,
+          filter:`user_id=eq.${cloudUser.id}`
+        },payload=>{
+          const row = payload.new;
+          if(!row?.collection || !row?.record_id) return;
+          const identity = recordRowIdentity(row);
+          if(getRecordSyncQueue()[identity]){
+            cloudConflictDetected = true;
+            clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(()=>cloudSaveNow(false),250);
+            return;
+          }
+          applyCloudRecordRows([row],{skipPending:true,refresh:true});
+          markCloudConfirmed("",row.updated_at || "");
+          setCloudStatus("Une fiche a été mise à jour depuis un autre appareil",true);
+        })
+        .subscribe();
+    }
+
+    async function initializeCloudForUser(user,{refresh=true}={}){
+      if(!user) return false;
+      cloudUser = user;
+      if(cloudInitializedUserId === user.id){
+        if(refresh) refreshAllCloudModules();
+        return true;
+      }
+      if(cloudInitializationPromise) return cloudInitializationPromise;
+
+      cloudInitializationPromise = (async()=>{
+        const loaded = await cloudLoadOrCreate();
+        if(refresh) refreshAllCloudModules();
+        if(loaded && cloudRecordTableReady) subscribeCloud();
+        startCloudAutoSave();
+        cloudInitializedUserId = user.id;
+        return true;
+      })();
+      try{
+        return await cloudInitializationPromise;
+      }finally{
+        cloudInitializationPromise = null;
+      }
+    }
+
+    async function cloudLogin(passwordValue){
+      const {data,error} = await supabaseClient.auth.signInWithPassword({
+        email:CLOUD_EMAIL,
+        password:passwordValue
+      });
+      if(error) throw error;
+      await initializeCloudForUser(data.user,{refresh:true});
+      if(cloudRecordTableReady === false){
+        setCloudStatus("Connecté — configuration cloud V21.11 à terminer",false);
+      }else if(hasPendingCloudChanges()){
+        setCloudStatus("Connecté — certaines fiches sont en attente",false);
+      }else{
+        setCloudStatus("Connecté — fiches synchronisées séparément",true);
       }
       return data.user;
     }
