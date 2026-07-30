@@ -1883,21 +1883,23 @@
     function setCloudStatus(message, ok=false){
       const el = document.getElementById("cloudStatus");
       if(el){
-        el.textContent = message;
-        el.className = ok ? "cloud-ok" : "cloud-error";
+        const nextClass = ok ? "cloud-ok" : "cloud-error";
+        if(el.textContent !== message) el.textContent = message;
+        if(el.className !== nextClass) el.className = nextClass;
       }
       const badge = document.getElementById("cloudSyncBadge");
       if(badge){
-        badge.textContent = message;
-        badge.className = "cloud-sync-badge " + (ok ? "online" : "offline");
+        const nextClass = "cloud-sync-badge " + (ok ? "online" : "offline");
+        if(badge.textContent !== message) badge.textContent = message;
+        if(badge.className !== nextClass) badge.className = nextClass;
       }
     }
 
     function setCloudSyncing(message="Synchronisation…"){
       const badge = document.getElementById("cloudSyncBadge");
       if(badge){
-        badge.textContent = message;
-        badge.className = "cloud-sync-badge syncing";
+        if(badge.textContent !== message) badge.textContent = message;
+        if(badge.className !== "cloud-sync-badge syncing") badge.className = "cloud-sync-badge syncing";
       }
     }
 
@@ -3352,6 +3354,11 @@
     async function cloudSaveNow(force=false){
       if(!cloudUser || cloudApplying) return false;
       captureUnqueuedLocalRecordChanges();
+      if(force && !Object.keys(getRecordSyncQueue()).length) markEveryLocalRecordPending();
+      if(!force && !Object.keys(getRecordSyncQueue()).length){
+        if(cloudDirty || localStorage.getItem(CLOUD_PENDING_KEY) === "1") markCloudConfirmed();
+        return true;
+      }
       if(!navigator.onLine){
         markCloudPending();
         setCloudStatus("Hors connexion — fiches conservées sur cet appareil",false);
@@ -3362,8 +3369,6 @@
         cloudSaveAgain = true;
         return cloudSavePromise || false;
       }
-
-      if(force && !Object.keys(getRecordSyncQueue()).length) markEveryLocalRecordPending();
 
       const runSave = async () => {
         cloudSaving = true;
@@ -3416,6 +3421,10 @@
     function scheduleCloudSave(){
       if(cloudApplying) return;
       captureUnqueuedLocalRecordChanges();
+      if(!Object.keys(getRecordSyncQueue()).length){
+        if(cloudDirty || localStorage.getItem(CLOUD_PENDING_KEY) === "1") markCloudConfirmed();
+        return;
+      }
       markCloudPending();
       if(!cloudUser) return;
       clearTimeout(cloudSaveTimer);
