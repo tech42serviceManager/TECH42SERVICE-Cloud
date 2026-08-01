@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.13 Vente et batterie</title>
+  <title>TECH42SERVICE Gestion — V21.14 Fiche appareil PDF</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -1866,7 +1866,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.13 Vente et batterie</footer>
+      <footer>TECH42SERVICE Gestion — V21.14 Fiche appareil PDF</footer>
     </main>
   </div>
 
@@ -5477,6 +5477,160 @@
       alert("Appareil marqué comme vendu et ajouté dans Rachat / Vente.");
     }
 
+    function personalDeviceSheetFileName(item){
+      const base=`Fiche_${item.reference||item.id}_${item.brand||""}_${item.model||""}`
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-zA-Z0-9_-]+/g,"_").replace(/^_+|_+$/g,"");
+      return `${base||"Fiche_appareil"}.pdf`;
+    }
+
+    function personalDevicePrintableContent(item){
+      const repairs=[...(Array.isArray(item.repairs)?item.repairs:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+      const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
+      const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
+      const battery=item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined
+        ? `${Math.max(0,Math.min(100,Number(item.batteryHealth)||0))} %`
+        : "—";
+      const logoUrl=escapeHtml(new URL("logo.png",window.location.href).href);
+      const repairRows=repairs.map(repair=>`<tr class="device-repair-row">
+        <td>${repair.date?formatDate(repair.date):"—"}</td>
+        <td>${escapeHtml(repair.fault||"—")}</td>
+        <td>${escapeHtml(repair.work||"—")}</td>
+        <td>${escapeHtml(repair.parts||"—")}</td>
+        <td class="money">${personalMoney(repair.cost)}</td>
+      </tr>`).join("");
+      return `<main class="device-print-sheet">
+        <header class="device-print-header">
+          <div class="device-print-brand">
+            <div class="device-print-logo"><img src="${logoUrl}" alt="TECH42SERVICE"></div>
+            <div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p>${escapeHtml(CONTACT_EMAIL)} · Tél. ${escapeHtml(CONTACT_PHONE)}</p></div>
+          </div>
+          <div class="device-print-title"><small>STOCK — MES APPAREILS</small><h2>FICHE APPAREIL</h2><strong>${escapeHtml(item.reference||item.id)}</strong></div>
+        </header>
+
+        <section class="device-print-box device-identity">
+          <h3>Identification de l’appareil</h3>
+          <div class="device-print-grid">
+            <div><small>Type</small><strong>${escapeHtml(item.deviceType||"—")}</strong></div>
+            <div><small>Marque / Modèle</small><strong>${escapeHtml(item.brand||"—")} ${escapeHtml(item.model||"")}</strong></div>
+            <div><small>Couleur</small><strong>${escapeHtml(item.color||"—")}</strong></div>
+            <div><small>Capacité / Configuration</small><strong>${escapeHtml(item.capacity||"—")}</strong></div>
+            <div><small>IMEI 1</small><strong>${escapeHtml(item.imei1||"—")}</strong></div>
+            <div><small>IMEI 2</small><strong>${escapeHtml(item.imei2||"—")}</strong></div>
+            <div><small>Numéro de série</small><strong>${escapeHtml(item.serial||"—")}</strong></div>
+            <div><small>État de la batterie</small><strong>${battery}</strong></div>
+          </div>
+        </section>
+
+        <section class="device-print-box">
+          <h3>État et situation</h3>
+          <div class="device-print-grid">
+            <div><small>État</small><strong>${escapeHtml(item.condition||"—")}</strong></div>
+            <div><small>Statut</small><strong>${escapeHtml(item.status||"Personnel")}</strong></div>
+            <div><small>Date d’achat</small><strong>${item.purchaseDate?formatDate(item.purchaseDate):"—"}</strong></div>
+            <div><small>Prix d’achat</small><strong>${personalMoney(item.purchasePrice)}</strong></div>
+            <div><small>Prix de vente</small><strong>${personalMoney(item.salePrice)}</strong></div>
+            <div><small>Date de vente</small><strong>${item.saleDate?formatDate(item.saleDate):"—"}</strong></div>
+            <div class="wide"><small>Acheteur / Client</small><strong>${escapeHtml(item.buyer||"—")}</strong></div>
+            <div class="wide"><small>Accessoires présents</small><span>${escapeHtml(item.accessories||"—")}</span></div>
+            <div class="wide"><small>Notes et état détaillé</small><span>${escapeHtml(item.notes||"—")}</span></div>
+          </div>
+        </section>
+
+        ${photos.length?`<section class="device-print-section"><h3>Photos de l’appareil</h3><div class="device-print-photos">${photos.map((src,index)=>`<div class="device-photo"><img src="${src}" alt="Photo appareil ${index+1}"><small>Photo ${index+1}</small></div>`).join("")}</div></section>`:""}
+
+        <section class="device-print-section device-history-section">
+          <div class="device-history-title"><h3>Historique des réparations</h3><strong>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</strong></div>
+          <table class="device-print-table"><thead><tr><th>Date</th><th>Panne</th><th>Réparation effectuée</th><th>Pièces utilisées</th><th>Coût</th></tr></thead><tbody>${repairRows||'<tr><td colspan="5">Aucune réparation enregistrée.</td></tr>'}</tbody></table>
+        </section>
+
+        <footer class="device-print-footer"><span>Fiche éditée le ${new Date().toLocaleDateString("fr-FR")} · ${escapeHtml(CONTACT_EMAIL)} · ${escapeHtml(CONTACT_PHONE)}</span><strong>TECH42SERVICE</strong></footer>
+      </main>`;
+    }
+
+    function personalDevicePrintStyles(){
+      return `
+        @page{size:A4 portrait;margin:10mm}
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:#e8e8e8;color:#171717;font-family:Arial,Helvetica,sans-serif}
+        .device-print-sheet{width:190mm;min-height:277mm;margin:8mm auto;padding:7mm;background:#fff;box-shadow:0 3mm 12mm #0002;font-size:9pt}
+        .device-print-header{display:grid;grid-template-columns:1.35fr .75fr;gap:7mm;align-items:stretch;margin-bottom:5mm;border-top:2mm solid #d4a72c;padding-top:5mm}
+        .device-print-brand{display:flex;gap:4mm;align-items:center}.device-print-logo{width:25mm;height:25mm;display:grid;place-items:center;background:#080808;border:1px solid #d4a72c;border-radius:2mm;overflow:hidden;flex:0 0 25mm}.device-print-logo img{width:100%;height:100%;object-fit:contain}
+        .device-print-brand h1{margin:0;color:#111;font-size:20pt;letter-spacing:.7pt}.device-print-brand p{margin:1mm 0;color:#666;font-size:8pt}.device-print-title{padding:4mm;text-align:right;background:#111;color:#fff;border-radius:2mm;border-bottom:1.5mm solid #d4a72c}.device-print-title small{color:#d4a72c;font-weight:800;letter-spacing:.8pt}.device-print-title h2{margin:2mm 0;font-size:15pt}.device-print-title strong{color:#f1d783}
+        .device-print-box,.device-print-section{margin:4mm 0;padding:4mm;border:1px solid #d9d2c1;border-radius:2mm;background:#fff;break-inside:avoid;page-break-inside:avoid}.device-identity{background:#fbfaf7;border-left:1.2mm solid #d4a72c}
+        h3{margin:0 0 3mm;color:#8b6500;font-size:10pt;text-transform:uppercase;letter-spacing:.35pt}.device-print-grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm 7mm}.device-print-grid .wide{grid-column:1/-1}.device-print-grid small{display:block;margin-bottom:1mm;color:#777;font-size:7pt;font-weight:800;text-transform:uppercase}.device-print-grid strong,.device-print-grid span{white-space:pre-wrap;line-height:1.35}
+        .device-print-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}.device-photo{border:1px solid #d9d2c1;border-radius:2mm;padding:1.5mm;break-inside:avoid;page-break-inside:avoid}.device-photo img{display:block;width:100%;height:42mm;object-fit:cover;border-radius:1mm}.device-photo small{display:block;margin-top:1mm;text-align:center;color:#777}
+        .device-history-section{break-inside:auto;page-break-inside:auto}.device-history-title{display:flex;justify-content:space-between;align-items:center;gap:6mm}.device-history-title strong{color:#8b6500;font-size:8.5pt}.device-print-table{width:100%;border-collapse:collapse;font-size:7.6pt}.device-print-table th,.device-print-table td{padding:2.2mm;border:1px solid #ddd7c9;text-align:left;vertical-align:top;white-space:pre-wrap}.device-print-table th{background:#111;color:#fff;text-transform:uppercase;font-size:6.8pt}.device-print-table .money{text-align:right;white-space:nowrap}.device-repair-row{break-inside:avoid;page-break-inside:avoid}
+        .device-print-footer{display:flex;justify-content:space-between;gap:8mm;margin-top:7mm;padding-top:3mm;border-top:1px solid #cfc8b8;color:#666;font-size:7.5pt}.device-print-footer strong{color:#8b6500;white-space:nowrap}
+        .print-toolbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}.print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800;cursor:pointer}.print-toolbar .close-print{background:#fff;color:#111}
+        @media(max-width:760px){.device-print-sheet{width:100%;min-height:0;margin:0;padding:14px;box-shadow:none}.device-print-header{grid-template-columns:1fr}.device-print-grid{grid-template-columns:1fr}.device-print-grid .wide{grid-column:auto}.device-print-photos{grid-template-columns:1fr 1fr}}
+        @media print{html,body{background:#fff}.print-toolbar{display:none}.device-print-sheet{width:190mm;min-height:277mm;margin:0;padding:7mm;box-shadow:none}.device-print-box,.device-photo,.device-repair-row{break-inside:avoid;page-break-inside:avoid}}
+      `;
+    }
+
+    function printPersonalDeviceSheet(id){
+      const item=currentPersonalDevices().find(device=>device.id===id);
+      if(!item) return;
+      const popup=window.open("","_blank","width=980,height=820");
+      if(!popup){alert("Autorise les fenêtres pop-up pour imprimer la fiche.");return;}
+      popup.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche ${escapeHtml(item.reference||item.id)}</title><style>${personalDevicePrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer en A4")}${personalDevicePrintableContent(item)}<script>window.addEventListener("load",()=>{const images=[...document.images];Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener("load",resolve,{once:true});img.addEventListener("error",resolve,{once:true});setTimeout(resolve,1500)}))).then(()=>setTimeout(()=>window.print(),250))});<\/script></body></html>`);
+      popup.document.close();
+    }
+
+    async function createPersonalDevicePdf(item){
+      if(typeof html2pdf==="undefined") throw new Error("PDF_LIBRARY_UNAVAILABLE");
+      const wrapper=document.createElement("div");
+      wrapper.style.position="fixed";
+      wrapper.style.left="-300mm";
+      wrapper.style.top="0";
+      wrapper.style.width="210mm";
+      wrapper.style.background="#fff";
+      wrapper.style.zIndex="-2147483647";
+      wrapper.innerHTML=`<style>${personalDevicePrintStyles()}</style>${personalDevicePrintableContent(item)}`;
+      document.body.appendChild(wrapper);
+      try{
+        const sheet=wrapper.querySelector(".device-print-sheet");
+        Object.assign(sheet.style,{width:"190mm",minWidth:"190mm",maxWidth:"190mm",margin:"0",boxShadow:"none"});
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+        await Promise.all([...sheet.querySelectorAll("img")].map(image=>image.complete?Promise.resolve():new Promise(resolve=>{
+          image.addEventListener("load",resolve,{once:true});
+          image.addEventListener("error",resolve,{once:true});
+          setTimeout(resolve,1500);
+        })));
+        return await html2pdf().set({
+          margin:[10,10,10,10],
+          filename:personalDeviceSheetFileName(item),
+          image:{type:"jpeg",quality:.96},
+          html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:1200},
+          jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+          pagebreak:{mode:["css","legacy"],avoid:[".device-print-box",".device-photo",".device-repair-row"]}
+        }).from(sheet).outputPdf("blob");
+      }finally{
+        wrapper.remove();
+      }
+    }
+
+    async function downloadPersonalDevicePdf(id){
+      const item=currentPersonalDevices().find(device=>device.id===id);
+      if(!item) return;
+      try{
+        const blob=await createPersonalDevicePdf(item);
+        if(!blob||blob.size<1000) throw new Error("PDF_EMPTY");
+        const url=URL.createObjectURL(blob);
+        const link=document.createElement("a");
+        link.href=url;
+        link.download=personalDeviceSheetFileName(item);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+        if(typeof showMobileSaveToast==="function") showMobileSaveToast("Fiche PDF A4 téléchargée ✓",true);
+      }catch(error){
+        console.error("PDF fiche appareil",error);
+        alert("Le PDF n’a pas pu être créé. Utilise le bouton Imprimer en attendant.");
+      }
+    }
+
     function openPersonalDeviceDetails(id){
       const item=currentPersonalDevices().find(device=>device.id===id);
       if(!item) return;
@@ -5507,11 +5661,16 @@
         ${photos.length?`<div class="personal-device-gallery">${photos.map((src,index)=>`<img src="${src}" alt="Photo appareil ${index+1}">`).join("")}</div>`:""}`;
 
       const actions=document.getElementById("personalDeviceDetailActions");
-      actions.innerHTML=activeRole==="admin"?`
-        <button class="action-btn" type="button" data-detail-edit="${escapeHtml(item.id)}">Modifier la fiche</button>
-        ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
-        ${item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
-        <button class="mini-btn danger" type="button" data-detail-delete="${escapeHtml(item.id)}">Supprimer</button>`:"";
+      actions.innerHTML=`
+        <button class="action-btn" type="button" data-detail-print="${escapeHtml(item.id)}">Imprimer A4</button>
+        <button class="action-btn secondary" type="button" data-detail-pdf="${escapeHtml(item.id)}">Télécharger PDF A4</button>
+        ${activeRole==="admin"?`
+          <button class="action-btn" type="button" data-detail-edit="${escapeHtml(item.id)}">Modifier la fiche</button>
+          ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
+          ${item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
+          <button class="mini-btn danger" type="button" data-detail-delete="${escapeHtml(item.id)}">Supprimer</button>`:""}`;
+      actions.querySelector("[data-detail-print]")?.addEventListener("click",()=>printPersonalDeviceSheet(id));
+      actions.querySelector("[data-detail-pdf]")?.addEventListener("click",()=>downloadPersonalDevicePdf(id));
       actions.querySelector("[data-detail-edit]")?.addEventListener("click",()=>editPersonalDevice(id));
       actions.querySelector("[data-detail-sale]")?.addEventListener("click",()=>markPersonalDeviceForSale(id));
       actions.querySelector("[data-detail-sold]")?.addEventListener("click",()=>markPersonalDeviceSold(id));
