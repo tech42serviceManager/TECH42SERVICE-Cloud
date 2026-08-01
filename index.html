@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.14 Fiche appareil PDF</title>
+  <title>TECH42SERVICE Gestion — V21.15 Fiche appareil A4 une page</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -1866,7 +1866,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.14 Fiche appareil PDF</footer>
+      <footer>TECH42SERVICE Gestion — V21.15 Fiche appareil A4 une page</footer>
     </main>
   </div>
 
@@ -5553,7 +5553,8 @@
         @page{size:A4 portrait;margin:10mm}
         *{box-sizing:border-box}
         html,body{margin:0;padding:0;background:#e8e8e8;color:#171717;font-family:Arial,Helvetica,sans-serif}
-        .device-print-sheet{width:190mm;min-height:277mm;margin:8mm auto;padding:7mm;background:#fff;box-shadow:0 3mm 12mm #0002;font-size:9pt}
+        .device-a4-page{width:190mm;height:277mm;margin:8mm auto;overflow:hidden;background:#fff;box-shadow:0 3mm 12mm #0002;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
+        .device-print-sheet{width:190mm;min-height:0;margin:0;padding:7mm;background:#fff;font-size:9pt;transform-origin:top left;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}
         .device-print-header{display:grid;grid-template-columns:1.35fr .75fr;gap:7mm;align-items:stretch;margin-bottom:5mm;border-top:2mm solid #d4a72c;padding-top:5mm}
         .device-print-brand{display:flex;gap:4mm;align-items:center}.device-print-logo{width:25mm;height:25mm;display:grid;place-items:center;background:#080808;border:1px solid #d4a72c;border-radius:2mm;overflow:hidden;flex:0 0 25mm}.device-print-logo img{width:100%;height:100%;object-fit:contain}
         .device-print-brand h1{margin:0;color:#111;font-size:20pt;letter-spacing:.7pt}.device-print-brand p{margin:1mm 0;color:#666;font-size:8pt}.device-print-title{padding:4mm;text-align:right;background:#111;color:#fff;border-radius:2mm;border-bottom:1.5mm solid #d4a72c}.device-print-title small{color:#d4a72c;font-weight:800;letter-spacing:.8pt}.device-print-title h2{margin:2mm 0;font-size:15pt}.device-print-title strong{color:#f1d783}
@@ -5563,9 +5564,56 @@
         .device-history-section{break-inside:auto;page-break-inside:auto}.device-history-title{display:flex;justify-content:space-between;align-items:center;gap:6mm}.device-history-title strong{color:#8b6500;font-size:8.5pt}.device-print-table{width:100%;border-collapse:collapse;font-size:7.6pt}.device-print-table th,.device-print-table td{padding:2.2mm;border:1px solid #ddd7c9;text-align:left;vertical-align:top;white-space:pre-wrap}.device-print-table th{background:#111;color:#fff;text-transform:uppercase;font-size:6.8pt}.device-print-table .money{text-align:right;white-space:nowrap}.device-repair-row{break-inside:avoid;page-break-inside:avoid}
         .device-print-footer{display:flex;justify-content:space-between;gap:8mm;margin-top:7mm;padding-top:3mm;border-top:1px solid #cfc8b8;color:#666;font-size:7.5pt}.device-print-footer strong{color:#8b6500;white-space:nowrap}
         .print-toolbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}.print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800;cursor:pointer}.print-toolbar .close-print{background:#fff;color:#111}
-        @media(max-width:760px){.device-print-sheet{width:100%;min-height:0;margin:0;padding:14px;box-shadow:none}.device-print-header{grid-template-columns:1fr}.device-print-grid{grid-template-columns:1fr}.device-print-grid .wide{grid-column:auto}.device-print-photos{grid-template-columns:1fr 1fr}}
-        @media print{html,body{background:#fff}.print-toolbar{display:none}.device-print-sheet{width:190mm;min-height:277mm;margin:0;padding:7mm;box-shadow:none}.device-print-box,.device-photo,.device-repair-row{break-inside:avoid;page-break-inside:avoid}}
+        @media(max-width:760px){.device-a4-page{max-width:100%;margin:0 auto;box-shadow:none}.device-print-header{grid-template-columns:1fr}}
+        @media print{html,body{width:210mm;height:297mm;overflow:hidden;background:#fff}.print-toolbar{display:none}.device-a4-page{width:190mm;height:277mm;margin:0;overflow:hidden;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}.device-print-sheet{width:190mm;min-height:0;margin:0;padding:7mm;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}.device-print-box,.device-photo,.device-repair-row{break-inside:avoid;page-break-inside:avoid}}
       `;
+    }
+
+    function fitPersonalDeviceA4(page){
+      if(!page) return 1;
+      const sheet=page.querySelector(".device-print-sheet");
+      if(!sheet) return 1;
+      sheet.style.transform="none";
+      sheet.style.zoom="1";
+      const pixelsPerMillimeter=96/25.4;
+      const maximumWidth=page.clientWidth||190*pixelsPerMillimeter;
+      const maximumHeight=page.clientHeight||277*pixelsPerMillimeter;
+      const naturalWidth=Math.max(1,sheet.scrollWidth);
+      const naturalHeight=Math.max(1,sheet.scrollHeight);
+      const scale=Math.min(1,maximumWidth/naturalWidth,maximumHeight/naturalHeight);
+      sheet.style.transform=`scale(${scale})`;
+      sheet.style.transformOrigin="top left";
+      page.dataset.a4Scale=String(scale);
+      return scale;
+    }
+
+    function personalDeviceA4PopupScript(autoPrint=true){
+      return `<script>
+        (()=>{
+          const fit=()=>{
+            const page=document.querySelector(".device-a4-page");
+            const sheet=page?.querySelector(".device-print-sheet");
+            if(!page||!sheet)return;
+            sheet.style.transform="none";
+            sheet.style.zoom="1";
+            const maximumWidth=page.clientWidth||190*(96/25.4);
+            const maximumHeight=page.clientHeight||277*(96/25.4);
+            const scale=Math.min(1,maximumWidth/Math.max(1,sheet.scrollWidth),maximumHeight/Math.max(1,sheet.scrollHeight));
+            sheet.style.transform="scale("+scale+")";
+            sheet.style.transformOrigin="top left";
+            page.dataset.a4Scale=String(scale);
+          };
+          window.addEventListener("beforeprint",fit);
+          window.addEventListener("load",()=>{
+            const images=[...document.images];
+            Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{
+              img.addEventListener("load",resolve,{once:true});
+              img.addEventListener("error",resolve,{once:true});
+              setTimeout(resolve,1500);
+            }))).then(()=>setTimeout(()=>{fit();${autoPrint?"window.print();":""}},250));
+          });
+        })();
+      <\/script>`;
     }
 
     function printPersonalDeviceSheet(id){
@@ -5573,7 +5621,7 @@
       if(!item) return;
       const popup=window.open("","_blank","width=980,height=820");
       if(!popup){alert("Autorise les fenêtres pop-up pour imprimer la fiche.");return;}
-      popup.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche ${escapeHtml(item.reference||item.id)}</title><style>${personalDevicePrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer en A4")}${personalDevicePrintableContent(item)}<script>window.addEventListener("load",()=>{const images=[...document.images];Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener("load",resolve,{once:true});img.addEventListener("error",resolve,{once:true});setTimeout(resolve,1500)}))).then(()=>setTimeout(()=>window.print(),250))});<\/script></body></html>`);
+      popup.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche ${escapeHtml(item.reference||item.id)}</title><style>${personalDevicePrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer sur une feuille A4")}<div class="device-a4-page">${personalDevicePrintableContent(item)}</div>${personalDeviceA4PopupScript(true)}</body></html>`);
       popup.document.close();
     }
 
@@ -5584,27 +5632,32 @@
       wrapper.style.left="-300mm";
       wrapper.style.top="0";
       wrapper.style.width="210mm";
+      wrapper.style.height="297mm";
+      wrapper.style.overflow="hidden";
       wrapper.style.background="#fff";
       wrapper.style.zIndex="-2147483647";
-      wrapper.innerHTML=`<style>${personalDevicePrintStyles()}</style>${personalDevicePrintableContent(item)}`;
+      wrapper.innerHTML=`<style>${personalDevicePrintStyles()}</style><div class="device-a4-page">${personalDevicePrintableContent(item)}</div>`;
       document.body.appendChild(wrapper);
       try{
-        const sheet=wrapper.querySelector(".device-print-sheet");
-        Object.assign(sheet.style,{width:"190mm",minWidth:"190mm",maxWidth:"190mm",margin:"0",boxShadow:"none"});
+        const page=wrapper.querySelector(".device-a4-page");
+        const sheet=page.querySelector(".device-print-sheet");
+        Object.assign(page.style,{width:"190mm",minWidth:"190mm",maxWidth:"190mm",height:"277mm",minHeight:"277mm",maxHeight:"277mm",margin:"0",overflow:"hidden",boxShadow:"none"});
+        Object.assign(sheet.style,{width:"190mm",minWidth:"190mm",maxWidth:"190mm",minHeight:"0",margin:"0",boxShadow:"none"});
         await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
         await Promise.all([...sheet.querySelectorAll("img")].map(image=>image.complete?Promise.resolve():new Promise(resolve=>{
           image.addEventListener("load",resolve,{once:true});
           image.addEventListener("error",resolve,{once:true});
           setTimeout(resolve,1500);
         })));
+        fitPersonalDeviceA4(page);
         return await html2pdf().set({
           margin:[10,10,10,10],
           filename:personalDeviceSheetFileName(item),
           image:{type:"jpeg",quality:.96},
           html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:1200},
           jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
-          pagebreak:{mode:["css","legacy"],avoid:[".device-print-box",".device-photo",".device-repair-row"]}
-        }).from(sheet).outputPdf("blob");
+          pagebreak:{mode:[]}
+        }).from(page).outputPdf("blob");
       }finally{
         wrapper.remove();
       }
