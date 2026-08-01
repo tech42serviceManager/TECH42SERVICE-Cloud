@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.12 catégories stock</title>
+  <title>TECH42SERVICE Gestion — V21.12 Mes appareils</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -151,6 +151,48 @@
     .summary-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
     .summary-card small{display:block;color:var(--muted);margin-bottom:7px}
     .summary-card strong{font-size:24px;color:var(--accent)}
+
+    .stock-subnav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;padding:6px;background:#0d0d0d;border:1px solid var(--border);border-radius:12px}
+    .stock-subnav button{padding:11px 16px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--text);font-weight:700;cursor:pointer}
+    .stock-subnav button.active{background:var(--accent);color:#080808}
+    .personal-device-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .personal-device-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .personal-device-form .full{grid-column:1/-1}
+    .personal-device-form input,.personal-device-form select,.personal-device-form textarea,
+    .personal-repair-form input,.personal-repair-form select,.personal-repair-form textarea{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .personal-device-form textarea,.personal-repair-form textarea{min-height:85px;resize:vertical}
+    .personal-device-toolbar{display:grid;grid-template-columns:1fr 210px 210px;gap:12px;margin-bottom:16px}
+    .personal-device-toolbar input,.personal-device-toolbar select{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}
+    .personal-device-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .personal-device-card{display:grid;grid-template-columns:130px 1fr;gap:15px;background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px}
+    .personal-device-cover{width:130px;height:130px;border-radius:11px;object-fit:cover;background:#080808;border:1px solid #2c2c2c}
+    .personal-device-placeholder{width:130px;height:130px;border-radius:11px;display:grid;place-items:center;background:#0b0b0b;border:1px solid #2c2c2c;color:var(--accent);font-size:42px}
+    .personal-device-card h3{margin:0 0 7px;color:var(--accent)}
+    .personal-device-meta{color:var(--muted);font-size:14px;line-height:1.55}
+    .personal-device-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    .personal-device-badge{display:inline-block;padding:5px 9px;margin:0 5px 6px 0;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--border);background:#201b0d;color:#ffd66b}
+    .personal-device-badge.green{background:#102518;color:#74ef8b;border-color:#245f35}
+    .personal-device-badge.red{background:#2b1111;color:#ff8585;border-color:#7a2a2a}
+    .personal-device-badge.blue{background:#102033;color:#82bfff;border-color:#355b82}
+    .personal-photo-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px;margin-top:8px}
+    .personal-photo-item{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#0b0b0b}
+    .personal-photo-item img{display:block;width:100%;height:115px;object-fit:cover}
+    .personal-photo-item button{position:absolute;top:6px;right:6px;width:28px;height:28px;border:0;border-radius:50%;background:#000d;color:#fff;cursor:pointer}
+    .personal-device-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+    .personal-device-detail-grid .full{grid-column:1/-1}
+    .personal-device-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0 18px}
+    .personal-device-gallery img{width:100%;height:145px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+    .personal-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px}
+    .personal-history-head h3{margin:0;color:var(--accent)}
+    .personal-repair-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c}
+    .personal-repair-form .full{grid-column:1/-1}
+    .personal-repair-table{width:100%;border-collapse:collapse;margin-top:12px}
+    .personal-repair-table th,.personal-repair-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}
+    .personal-repair-table th{color:var(--accent)}
+    @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid{grid-template-columns:1fr}.personal-device-detail-grid .full{grid-column:auto}}
 
     
     .document-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
@@ -358,7 +400,7 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.personal-device-form,.personal-device-toolbar,.personal-device-summary,.personal-repair-form,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
       .document-discount-controls{grid-template-columns:1fr}
       .document-discount-title{grid-column:1}
       .discount-editor{grid-template-columns:1fr}
@@ -813,6 +855,13 @@
           MODE PRÉSENTATION — Données fictives — Aucune modification autorisée
         </div>
 
+        <div class="stock-subnav" aria-label="Sections du stock">
+          <button id="stockItemsTab" class="active" type="button">Articles et pièces</button>
+          <button id="personalDevicesTab" type="button">Mes appareils</button>
+        </div>
+
+        <div id="stockItemsPanel">
+
         <div class="stock-summary">
           <div class="summary-card"><small>Articles</small><strong id="stockTotalArticles">0</strong></div>
           <div class="summary-card"><small>Quantité totale</small><strong id="stockTotalQty">0</strong></div>
@@ -845,10 +894,6 @@
                 <option>Pièce d'occasion</option>
                 <option>Accessoire</option>
                 <option>Outillage</option>
-                <option>Téléphone</option>
-                <option>Console</option>
-                <option>Tablette</option>
-                <option>Ordinateur</option>
               </select>
             </div>
 
@@ -918,10 +963,6 @@
               <option>Pièce d'occasion</option>
               <option>Accessoire</option>
               <option>Outillage</option>
-              <option>Téléphone</option>
-              <option>Console</option>
-              <option>Tablette</option>
-              <option>Ordinateur</option>
             </select>
             <select id="stockStateFilter">
               <option value="">Tous les états</option>
@@ -952,7 +993,105 @@
           </div>
           <div id="stockEmpty" class="empty-state">Aucun article enregistré.</div>
         </section>
+        </div>
+
+        <div id="personalDevicesPanel" class="hidden">
+          <div class="personal-device-summary">
+            <div class="summary-card"><small>Appareils personnels</small><strong id="personalDeviceTotal">0</strong></div>
+            <div class="summary-card"><small>À réparer</small><strong id="personalDeviceRepairCount">0</strong></div>
+            <div class="summary-card"><small>En vente</small><strong id="personalDeviceSaleCount">0</strong></div>
+            <div class="summary-card"><small>Valeur de vente estimée</small><strong id="personalDeviceSaleValue">0 €</strong></div>
+          </div>
+
+          <section class="panel">
+            <div class="page-actions">
+              <button id="newPersonalDeviceBtn" class="action-btn write-action" type="button">Ajouter un appareil</button>
+              <button id="cancelPersonalDeviceBtn" class="action-btn secondary hidden" type="button">Fermer le formulaire</button>
+            </div>
+
+            <form id="personalDeviceForm" class="personal-device-form hidden">
+              <input id="personalDeviceEditId" type="hidden">
+
+              <div class="field">
+                <label>Type d’appareil</label>
+                <select id="personalDeviceType" required>
+                  <option>Téléphone</option><option>Tablette</option><option>Ordinateur</option><option>Console</option><option>Autre</option>
+                </select>
+              </div>
+              <div class="field"><label>Marque</label><input id="personalDeviceBrand" type="text" required></div>
+              <div class="field"><label>Modèle</label><input id="personalDeviceModel" type="text" required></div>
+              <div class="field"><label>Couleur</label><input id="personalDeviceColor" type="text"></div>
+              <div class="field"><label>Capacité / configuration</label><input id="personalDeviceCapacity" type="text" placeholder="Ex. 256 Go, 16 Go RAM..."></div>
+              <div class="field"><label>Référence interne</label><input id="personalDeviceReference" type="text" placeholder="Générée automatiquement si vide"></div>
+              <div class="field"><label>IMEI 1</label><input id="personalDeviceImei1" type="text"></div>
+              <div class="field"><label>IMEI 2</label><input id="personalDeviceImei2" type="text"></div>
+              <div class="field"><label>Numéro de série</label><input id="personalDeviceSerial" type="text"></div>
+              <div class="field"><label>Date d’achat</label><input id="personalDevicePurchaseDate" type="date"></div>
+              <div class="field"><label>Prix d’achat (€)</label><input id="personalDevicePurchasePrice" type="number" min="0" step="0.01"></div>
+              <div class="field"><label>Prix de vente prévu (€)</label><input id="personalDeviceSalePrice" type="number" min="0" step="0.01"></div>
+              <div class="field">
+                <label>État</label>
+                <select id="personalDeviceCondition">
+                  <option>Comme neuf</option><option>Bon état</option><option>État correct</option><option>À réparer</option><option>Pour pièces</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Statut</label>
+                <select id="personalDeviceStatus">
+                  <option>Personnel</option><option>À réparer</option><option>Prêt à vendre</option><option>En vente</option><option>Vendu</option>
+                </select>
+              </div>
+              <div class="field"><label>Acheteur / Client</label><input id="personalDeviceBuyer" type="text" placeholder="À renseigner lors de la vente"></div>
+              <div class="field full"><label>Accessoires présents</label><input id="personalDeviceAccessories" type="text" placeholder="Boîte, chargeur, câble, manette..."></div>
+              <div class="field full"><label>Notes et état détaillé</label><textarea id="personalDeviceNotes" placeholder="Rayures, tests effectués, défauts connus..."></textarea></div>
+              <div class="field full">
+                <label>Photos de l’appareil</label>
+                <input id="personalDevicePhotos" type="file" accept="image/*" multiple>
+                <div id="personalDevicePhotosPreview" class="personal-photo-preview"></div>
+              </div>
+              <div class="full"><button id="savePersonalDeviceBtn" class="save-btn" type="submit">Enregistrer l’appareil</button></div>
+            </form>
+
+            <div class="personal-device-toolbar">
+              <input id="personalDeviceSearch" type="search" placeholder="Rechercher marque, modèle, IMEI, série...">
+              <select id="personalDeviceTypeFilter"><option value="">Tous les appareils</option><option>Téléphone</option><option>Tablette</option><option>Ordinateur</option><option>Console</option><option>Autre</option></select>
+              <select id="personalDeviceStatusFilter"><option value="">Tous les statuts</option><option>Personnel</option><option>À réparer</option><option>Prêt à vendre</option><option>En vente</option><option>Vendu</option></select>
+            </div>
+
+            <div id="personalDeviceList" class="personal-device-list"></div>
+            <div id="personalDeviceEmpty" class="empty-state">Aucun appareil personnel enregistré.</div>
+          </section>
+        </div>
       </section>
+
+      <div id="personalDeviceModal" class="modal-backdrop hidden">
+        <div class="modal-card" style="width:min(1100px,100%)">
+          <div class="modal-head"><h2 id="personalDeviceModalTitle">Fiche appareil</h2><button id="closePersonalDeviceModal" class="close-btn" type="button">Fermer</button></div>
+          <div id="personalDeviceDetail"></div>
+          <div id="personalDeviceDetailActions" class="page-actions"></div>
+
+          <div class="personal-history-head">
+            <h3>Historique des réparations</h3>
+            <button id="addPersonalRepairBtn" class="action-btn write-action" type="button">Ajouter une réparation</button>
+          </div>
+          <form id="personalRepairForm" class="personal-repair-form hidden">
+            <input id="personalRepairEditId" type="hidden">
+            <div class="field"><label>Date</label><input id="personalRepairDate" type="date" required></div>
+            <div class="field"><label>Coût total (€)</label><input id="personalRepairCost" type="number" min="0" step="0.01"></div>
+            <div class="field full"><label>Panne / problème constaté</label><textarea id="personalRepairFault" required></textarea></div>
+            <div class="field full"><label>Réparation effectuée</label><textarea id="personalRepairWork" required></textarea></div>
+            <div class="field full"><label>Pièces utilisées</label><input id="personalRepairParts" type="text"></div>
+            <div class="full page-actions"><button id="savePersonalRepairBtn" class="save-btn" type="submit">Enregistrer la réparation</button><button id="cancelPersonalRepairBtn" class="action-btn secondary" type="button">Annuler</button></div>
+          </form>
+          <div class="table-wrap">
+            <table class="personal-repair-table">
+              <thead><tr><th>Date</th><th>Panne</th><th>Réparation effectuée</th><th>Pièces</th><th>Coût</th><th>Actions</th></tr></thead>
+              <tbody id="personalRepairTableBody"></tbody>
+            </table>
+          </div>
+          <div id="personalRepairEmpty" class="empty-state">Aucune réparation enregistrée pour cet appareil.</div>
+        </div>
+      </div>
 
 
       <section id="documentsPage" class="hidden">
@@ -1724,7 +1863,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.12 catégories stock</footer>
+      <footer>TECH42SERVICE Gestion — V21.12 Mes appareils</footer>
     </main>
   </div>
 
@@ -1827,6 +1966,7 @@
     const CLOUD_STORAGE_KEYS = [
       "tech42-repairs",
       "tech42-stock",
+      "tech42-personal-devices",
       "tech42-documents",
       "tech42-document-templates",
       "tech42-appointments",
@@ -1843,6 +1983,7 @@
     const CLOUD_COLLECTION_KEYS = [
       "tech42-repairs",
       "tech42-stock",
+      "tech42-personal-devices",
       "tech42-documents",
       "tech42-appointments",
       "tech42-clients",
@@ -2757,6 +2898,7 @@
       try{ reconcileAllInvoicesAndPayments(); }catch(e){ console.warn("Réconciliation financière impossible",e); }
       try{ renderRepairs(); }catch(e){ console.warn(e); }
       try{ renderStock(); refreshStockPartsList(); }catch(e){ console.warn(e); }
+      try{ renderPersonalDevices(); }catch(e){ console.warn(e); }
       try{ renderDocuments(); loadDocumentTemplates(); }catch(e){ console.warn(e); }
       try{ renderPayments(); }catch(e){ console.warn(e); }
       try{ renderAppointments(); }catch(e){ console.warn(e); }
@@ -3926,7 +4068,7 @@
       settingsPage.classList.toggle("hidden", page !== "settings");
 
       if(page === "repairs") renderRepairs();
-      if(page === "stock") renderStock();
+      if(page === "stock"){ renderStock(); renderPersonalDevices(); }
       if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
       if(page === "invoices") renderDocuments();
       if(page === "payments") renderPayments();
@@ -5045,6 +5187,476 @@
       saveAdminStock(getAdminStock().filter(i=>i.id!==id));
       renderStock();
     }
+
+
+    // ===== V21.12 : appareils personnels =====
+    const PERSONAL_DEVICE_STORAGE_KEY = "tech42-personal-devices";
+    const demoPersonalDevices = [
+      {
+        id:"APP-0001",reference:"PERSO-IPHONE",deviceType:"Téléphone",brand:"Apple",model:"iPhone 13",
+        color:"Noir",capacity:"128 Go",imei1:"356789000003333",imei2:"",serial:"F2LDEMO13",
+        purchaseDate:"2025-11-12",purchasePrice:320,salePrice:449,condition:"Bon état",status:"Personnel",
+        buyer:"",accessories:"Boîte et câble",notes:"Appareil personnel entièrement testé.",photos:[],
+        repairs:[{id:"RAPP-0001",date:"2026-03-15",fault:"Batterie usée",work:"Remplacement de la batterie",parts:"Batterie compatible",cost:39.9}]
+      },
+      {
+        id:"APP-0002",reference:"PERSO-PS5",deviceType:"Console",brand:"Sony",model:"PlayStation 5",
+        color:"Blanc",capacity:"825 Go",imei1:"",imei2:"",serial:"PS5-DEMO-2026",
+        purchaseDate:"2024-08-20",purchasePrice:420,salePrice:350,condition:"À réparer",status:"À réparer",
+        buyer:"",accessories:"Câble secteur et manette",notes:"Port HDMI à contrôler.",photos:[],repairs:[]
+      }
+    ];
+
+    let currentPersonalDevicePhotos = [];
+    let openPersonalDeviceId = "";
+
+    function getAdminPersonalDevices(){
+      try{return JSON.parse(localStorage.getItem(PERSONAL_DEVICE_STORAGE_KEY) || "[]")}catch{return []}
+    }
+
+    function saveAdminPersonalDevices(list){
+      const preparedList = prepareCloudCollectionForSave(PERSONAL_DEVICE_STORAGE_KEY,list);
+      clearCloudDeletionsForSavedItems(PERSONAL_DEVICE_STORAGE_KEY,preparedList);
+      localStorage.setItem(PERSONAL_DEVICE_STORAGE_KEY,JSON.stringify(preparedList));
+      scheduleCloudSave();
+    }
+
+    function currentPersonalDevices(){
+      return activeRole === "visuel" ? demoPersonalDevices : getAdminPersonalDevices();
+    }
+
+    function nextPersonalDeviceId(list){
+      const max=list.reduce((highest,item)=>{
+        const match=String(item.id||"").match(/(\d+)$/);
+        return Math.max(highest,match?Number(match[1]):0);
+      },0);
+      return `APP-${String(max+1).padStart(4,"0")}`;
+    }
+
+    function personalDeviceIcon(type){
+      return ({"Téléphone":"☎","Tablette":"▣","Ordinateur":"▰","Console":"◈"})[type] || "◆";
+    }
+
+    function personalDeviceBadgeClass(status){
+      if(status === "Vendu" || status === "Personnel") return "green";
+      if(status === "À réparer") return "red";
+      if(status === "En vente" || status === "Prêt à vendre") return "blue";
+      return "";
+    }
+
+    function personalDevicePhotoSource(photo){
+      const value=String(typeof photo === "string" ? photo : photo?.src || "");
+      return value.startsWith("data:image/") ? value : "";
+    }
+
+    function personalMoney(value){
+      return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+    }
+
+    function filteredPersonalDevices(){
+      const search=document.getElementById("personalDeviceSearch").value.trim().toLowerCase();
+      const type=document.getElementById("personalDeviceTypeFilter").value;
+      const status=document.getElementById("personalDeviceStatusFilter").value;
+      return currentPersonalDevices().filter(item=>{
+        const repairs=(Array.isArray(item.repairs)?item.repairs:[]).map(r=>[r.fault,r.work,r.parts].join(" ")).join(" ");
+        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,repairs].join(" ").toLowerCase();
+        return (!search||text.includes(search))&&(!type||item.deviceType===type)&&(!status||item.status===status);
+      });
+    }
+
+    function renderPersonalDevices(){
+      const box=document.getElementById("personalDeviceList");
+      if(!box) return;
+      const empty=document.getElementById("personalDeviceEmpty");
+      const fullList=currentPersonalDevices();
+      const list=filteredPersonalDevices();
+
+      document.getElementById("personalDeviceTotal").textContent=fullList.length;
+      document.getElementById("personalDeviceRepairCount").textContent=fullList.filter(item=>item.status==="À réparer"||item.condition==="À réparer").length;
+      document.getElementById("personalDeviceSaleCount").textContent=fullList.filter(item=>item.status==="En vente").length;
+      document.getElementById("personalDeviceSaleValue").textContent=personalMoney(fullList.filter(item=>item.status!=="Vendu").reduce((sum,item)=>sum+Number(item.salePrice||0),0));
+
+      box.innerHTML="";
+      list.forEach(item=>{
+        const repairs=Array.isArray(item.repairs)?item.repairs:[];
+        const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
+        const cover=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).find(Boolean);
+        const adminActions=activeRole==="admin" ? `
+          <button class="mini-btn" type="button" data-personal-edit="${escapeHtml(item.id)}">Modifier</button>
+          ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="mini-btn" type="button" data-personal-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
+          ${item.status!=="Vendu"?`<button class="mini-btn" type="button" data-personal-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
+          <button class="mini-btn danger" type="button" data-personal-delete="${escapeHtml(item.id)}">Supprimer</button>` : "";
+
+        const card=document.createElement("article");
+        card.className="personal-device-card";
+        card.innerHTML=`
+          <div>${cover?`<img class="personal-device-cover" src="${cover}" alt="${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}">`:`<div class="personal-device-placeholder" aria-hidden="true">${personalDeviceIcon(item.deviceType)}</div>`}</div>
+          <div>
+            <h3>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</h3>
+            <div><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span><span class="personal-device-badge">${escapeHtml(item.condition||"État non renseigné")}</span></div>
+            <div class="personal-device-meta">
+              ${escapeHtml(item.deviceType||"Appareil")} · ${escapeHtml(item.color||"Couleur non renseignée")} · ${escapeHtml(item.capacity||"Configuration non renseignée")}<br>
+              IMEI : ${escapeHtml(item.imei1||item.imei2||"—")} · Série : ${escapeHtml(item.serial||"—")}<br>
+              ${repairs.length} réparation(s) · Coût réparations : ${personalMoney(repairCost)}<br>
+              Prix de vente prévu : <strong>${personalMoney(item.salePrice)}</strong>
+            </div>
+            <div class="personal-device-actions"><button class="mini-btn" type="button" data-personal-view="${escapeHtml(item.id)}">Voir la fiche</button>${adminActions}</div>
+          </div>`;
+        box.appendChild(card);
+      });
+
+      empty.classList.toggle("hidden",list.length>0);
+      box.querySelectorAll("[data-personal-view]").forEach(btn=>btn.addEventListener("click",()=>openPersonalDeviceDetails(btn.dataset.personalView)));
+      box.querySelectorAll("[data-personal-edit]").forEach(btn=>btn.addEventListener("click",()=>editPersonalDevice(btn.dataset.personalEdit)));
+      box.querySelectorAll("[data-personal-sale]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceForSale(btn.dataset.personalSale)));
+      box.querySelectorAll("[data-personal-sold]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceSold(btn.dataset.personalSold)));
+      box.querySelectorAll("[data-personal-delete]").forEach(btn=>btn.addEventListener("click",()=>deletePersonalDevice(btn.dataset.personalDelete)));
+    }
+
+    function showStockSubmodule(section){
+      const devices=section==="devices";
+      document.getElementById("stockItemsPanel").classList.toggle("hidden",devices);
+      document.getElementById("personalDevicesPanel").classList.toggle("hidden",!devices);
+      document.getElementById("stockItemsTab").classList.toggle("active",!devices);
+      document.getElementById("personalDevicesTab").classList.toggle("active",devices);
+      if(devices) renderPersonalDevices();
+      else renderStock();
+    }
+
+    function resetPersonalDeviceForm(){
+      document.getElementById("personalDeviceForm").reset();
+      document.getElementById("personalDeviceEditId").value="";
+      currentPersonalDevicePhotos=[];
+      renderPersonalDevicePhotosPreview();
+      document.getElementById("savePersonalDeviceBtn").textContent="Enregistrer l’appareil";
+    }
+
+    function showPersonalDeviceForm(){
+      if(activeRole!=="admin"){alert("Action impossible en mode présentation.");return;}
+      showStockSubmodule("devices");
+      document.getElementById("personalDeviceForm").classList.remove("hidden");
+      document.getElementById("cancelPersonalDeviceBtn").classList.remove("hidden");
+      document.getElementById("personalDeviceForm").scrollIntoView({behavior:"smooth",block:"start"});
+    }
+
+    function hidePersonalDeviceForm(){
+      document.getElementById("personalDeviceForm").classList.add("hidden");
+      document.getElementById("cancelPersonalDeviceBtn").classList.add("hidden");
+      resetPersonalDeviceForm();
+    }
+
+    function renderPersonalDevicePhotosPreview(){
+      const box=document.getElementById("personalDevicePhotosPreview");
+      if(!box) return;
+      box.innerHTML=currentPersonalDevicePhotos.map((photo,index)=>{
+        const src=personalDevicePhotoSource(photo);
+        return src?`<div class="personal-photo-item"><img src="${src}" alt="Photo appareil ${index+1}"><button type="button" data-personal-photo-remove="${index}" aria-label="Supprimer la photo">×</button></div>`:"";
+      }).join("");
+      box.querySelectorAll("[data-personal-photo-remove]").forEach(btn=>btn.addEventListener("click",()=>{
+        currentPersonalDevicePhotos.splice(Number(btn.dataset.personalPhotoRemove),1);
+        renderPersonalDevicePhotosPreview();
+      }));
+    }
+
+    function compressPersonalDevicePhoto(file){
+      return new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onerror=reject;
+        reader.onload=()=>{
+          const image=new Image();
+          image.onerror=reject;
+          image.onload=()=>{
+            const max=1000;
+            const ratio=Math.min(1,max/Math.max(image.width,image.height));
+            const canvas=document.createElement("canvas");
+            canvas.width=Math.max(1,Math.round(image.width*ratio));
+            canvas.height=Math.max(1,Math.round(image.height*ratio));
+            canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+            resolve(canvas.toDataURL("image/jpeg",.70));
+          };
+          image.src=reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function editPersonalDevice(id){
+      if(activeRole!=="admin") return;
+      const item=getAdminPersonalDevices().find(device=>device.id===id);
+      if(!item) return;
+      document.getElementById("personalDeviceEditId").value=item.id;
+      document.getElementById("personalDeviceType").value=item.deviceType||"Téléphone";
+      document.getElementById("personalDeviceBrand").value=item.brand||"";
+      document.getElementById("personalDeviceModel").value=item.model||"";
+      document.getElementById("personalDeviceColor").value=item.color||"";
+      document.getElementById("personalDeviceCapacity").value=item.capacity||"";
+      document.getElementById("personalDeviceReference").value=item.reference||"";
+      document.getElementById("personalDeviceImei1").value=item.imei1||"";
+      document.getElementById("personalDeviceImei2").value=item.imei2||"";
+      document.getElementById("personalDeviceSerial").value=item.serial||"";
+      document.getElementById("personalDevicePurchaseDate").value=item.purchaseDate||"";
+      document.getElementById("personalDevicePurchasePrice").value=item.purchasePrice??0;
+      document.getElementById("personalDeviceSalePrice").value=item.salePrice??0;
+      document.getElementById("personalDeviceCondition").value=item.condition||"Bon état";
+      document.getElementById("personalDeviceStatus").value=item.status||"Personnel";
+      document.getElementById("personalDeviceBuyer").value=item.buyer||"";
+      document.getElementById("personalDeviceAccessories").value=item.accessories||"";
+      document.getElementById("personalDeviceNotes").value=item.notes||"";
+      currentPersonalDevicePhotos=Array.isArray(item.photos)?[...item.photos]:[];
+      renderPersonalDevicePhotosPreview();
+      document.getElementById("savePersonalDeviceBtn").textContent="Enregistrer les modifications";
+      document.getElementById("personalDeviceModal").classList.add("hidden");
+      showPersonalDeviceForm();
+    }
+
+    function deletePersonalDevice(id){
+      if(activeRole!=="admin") return;
+      if(!confirm("Supprimer définitivement cet appareil personnel et son historique ?")) return;
+      recordCloudDeletion(PERSONAL_DEVICE_STORAGE_KEY,id);
+      saveAdminPersonalDevices(getAdminPersonalDevices().filter(item=>item.id!==id));
+      document.getElementById("personalDeviceModal").classList.add("hidden");
+      renderPersonalDevices();
+    }
+
+    function markPersonalDeviceForSale(id){
+      if(activeRole!=="admin") return;
+      const list=getAdminPersonalDevices();
+      const item=list.find(device=>device.id===id);
+      if(!item) return;
+      if(!Number(item.salePrice||0)){
+        const answer=prompt("Prix de vente prévu (€)","");
+        if(answer===null) return;
+        item.salePrice=Math.max(0,Number(String(answer).replace(",","."))||0);
+      }
+      item.status="En vente";
+      saveAdminPersonalDevices(list);
+      renderPersonalDevices();
+      if(openPersonalDeviceId===id) openPersonalDeviceDetails(id);
+    }
+
+    function markPersonalDeviceSold(id){
+      if(activeRole!=="admin") return;
+      const list=getAdminPersonalDevices();
+      const item=list.find(device=>device.id===id);
+      if(!item) return;
+      const priceAnswer=prompt("Prix de vente final (€)",String(Number(item.salePrice||0)));
+      if(priceAnswer===null) return;
+      const buyerAnswer=prompt("Nom de l’acheteur / client (facultatif)",item.buyer||"");
+      if(buyerAnswer===null) return;
+      item.salePrice=Math.max(0,Number(String(priceAnswer).replace(",","."))||0);
+      item.buyer=buyerAnswer.trim();
+      item.status="Vendu";
+      item.saleDate=localIsoDate();
+
+      if(!item.saleOperationId){
+        const operations=getAdminBuySell();
+        const operation={
+          id:nextBuySellId(operations),type:"Vente",sourceType:"Particulier",
+          contactName:item.buyer||"Vente appareil personnel",phone:"",email:"",date:item.saleDate,
+          deviceType:item.deviceType||"Autre",model:[item.brand,item.model].filter(Boolean).join(" "),
+          serial:item.imei1||item.imei2||item.serial||"",condition:item.condition||"Bon état",
+          buyPrice:Number(item.purchasePrice||0),buyMode:"TTC",sellPrice:Number(item.salePrice||0),sellMode:"TTC",
+          accessories:item.accessories||"",notes:`Appareil personnel ${item.reference||item.id}. ${item.notes||""}`.trim()
+        };
+        operations.unshift(operation);
+        saveAdminBuySell(operations);
+        item.saleOperationId=operation.id;
+      }
+
+      saveAdminPersonalDevices(list);
+      renderPersonalDevices();
+      try{renderBuySell();updateDashboardStats();}catch(error){console.warn(error);}
+      if(openPersonalDeviceId===id) openPersonalDeviceDetails(id);
+      alert("Appareil marqué comme vendu et ajouté dans Rachat / Vente.");
+    }
+
+    function openPersonalDeviceDetails(id){
+      const item=currentPersonalDevices().find(device=>device.id===id);
+      if(!item) return;
+      openPersonalDeviceId=id;
+      document.getElementById("personalDeviceModalTitle").textContent=`${item.brand||""} ${item.model||""}`.trim()||"Fiche appareil";
+      const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
+      const repairs=Array.isArray(item.repairs)?item.repairs:[];
+      const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
+      document.getElementById("personalDeviceDetail").innerHTML=`
+        <div class="personal-device-detail-grid">
+          <div class="detail-box"><small>Référence</small>${escapeHtml(item.reference||item.id)}</div>
+          <div class="detail-box"><small>Type</small>${escapeHtml(item.deviceType||"—")}</div>
+          <div class="detail-box"><small>Statut</small><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span></div>
+          <div class="detail-box"><small>Marque / Modèle</small>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</div>
+          <div class="detail-box"><small>Couleur / Capacité</small>${escapeHtml(item.color||"—")} · ${escapeHtml(item.capacity||"—")}</div>
+          <div class="detail-box"><small>État</small>${escapeHtml(item.condition||"—")}</div>
+          <div class="detail-box"><small>IMEI 1</small>${escapeHtml(item.imei1||"—")}</div>
+          <div class="detail-box"><small>IMEI 2</small>${escapeHtml(item.imei2||"—")}</div>
+          <div class="detail-box"><small>Numéro de série</small>${escapeHtml(item.serial||"—")}</div>
+          <div class="detail-box"><small>Achat</small>${item.purchaseDate?formatDate(item.purchaseDate):"—"} · ${personalMoney(item.purchasePrice)}</div>
+          <div class="detail-box"><small>Vente prévue / réalisée</small>${personalMoney(item.salePrice)}${item.saleDate?` · ${formatDate(item.saleDate)}`:""}</div>
+          <div class="detail-box"><small>Acheteur / Client</small>${escapeHtml(item.buyer||"—")}</div>
+          <div class="detail-box full"><small>Accessoires</small>${escapeHtml(item.accessories||"—")}</div>
+          <div class="detail-box full"><small>Notes et état détaillé</small>${escapeHtml(item.notes||"—")}</div>
+          <div class="detail-box full"><small>Total des réparations</small>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</div>
+        </div>
+        ${photos.length?`<div class="personal-device-gallery">${photos.map((src,index)=>`<img src="${src}" alt="Photo appareil ${index+1}">`).join("")}</div>`:""}`;
+
+      const actions=document.getElementById("personalDeviceDetailActions");
+      actions.innerHTML=activeRole==="admin"?`
+        <button class="action-btn" type="button" data-detail-edit="${escapeHtml(item.id)}">Modifier la fiche</button>
+        ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
+        ${item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
+        <button class="mini-btn danger" type="button" data-detail-delete="${escapeHtml(item.id)}">Supprimer</button>`:"";
+      actions.querySelector("[data-detail-edit]")?.addEventListener("click",()=>editPersonalDevice(id));
+      actions.querySelector("[data-detail-sale]")?.addEventListener("click",()=>markPersonalDeviceForSale(id));
+      actions.querySelector("[data-detail-sold]")?.addEventListener("click",()=>markPersonalDeviceSold(id));
+      actions.querySelector("[data-detail-delete]")?.addEventListener("click",()=>deletePersonalDevice(id));
+      document.getElementById("addPersonalRepairBtn").classList.toggle("hidden",activeRole!=="admin");
+      hidePersonalRepairForm();
+      renderPersonalRepairHistory(item);
+      document.getElementById("personalDeviceModal").classList.remove("hidden");
+    }
+
+    function renderPersonalRepairHistory(item){
+      const tbody=document.getElementById("personalRepairTableBody");
+      const repairs=[...(Array.isArray(item.repairs)?item.repairs:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+      tbody.innerHTML=repairs.map(repair=>`<tr>
+        <td>${repair.date?formatDate(repair.date):"—"}</td>
+        <td>${escapeHtml(repair.fault||"—")}</td>
+        <td>${escapeHtml(repair.work||"—")}</td>
+        <td>${escapeHtml(repair.parts||"—")}</td>
+        <td>${personalMoney(repair.cost)}</td>
+        <td><div class="table-actions">${activeRole==="admin"?`<button class="mini-btn" type="button" data-personal-repair-edit="${escapeHtml(repair.id)}">Modifier</button><button class="mini-btn danger" type="button" data-personal-repair-delete="${escapeHtml(repair.id)}">Supprimer</button>`:"Consultation"}</div></td>
+      </tr>`).join("");
+      document.getElementById("personalRepairEmpty").classList.toggle("hidden",repairs.length>0);
+      tbody.querySelectorAll("[data-personal-repair-edit]").forEach(btn=>btn.addEventListener("click",()=>showPersonalRepairForm(btn.dataset.personalRepairEdit)));
+      tbody.querySelectorAll("[data-personal-repair-delete]").forEach(btn=>btn.addEventListener("click",()=>deletePersonalRepair(btn.dataset.personalRepairDelete)));
+    }
+
+    function showPersonalRepairForm(repairId=""){
+      if(activeRole!=="admin"||!openPersonalDeviceId) return;
+      const item=getAdminPersonalDevices().find(device=>device.id===openPersonalDeviceId);
+      if(!item) return;
+      const repair=(Array.isArray(item.repairs)?item.repairs:[]).find(entry=>entry.id===repairId);
+      document.getElementById("personalRepairForm").reset();
+      document.getElementById("personalRepairEditId").value=repair?.id||"";
+      document.getElementById("personalRepairDate").value=repair?.date||localIsoDate();
+      document.getElementById("personalRepairCost").value=repair?.cost??0;
+      document.getElementById("personalRepairFault").value=repair?.fault||"";
+      document.getElementById("personalRepairWork").value=repair?.work||"";
+      document.getElementById("personalRepairParts").value=repair?.parts||"";
+      document.getElementById("savePersonalRepairBtn").textContent=repair?"Enregistrer les modifications":"Enregistrer la réparation";
+      document.getElementById("personalRepairForm").classList.remove("hidden");
+      document.getElementById("personalRepairForm").scrollIntoView({behavior:"smooth",block:"center"});
+    }
+
+    function hidePersonalRepairForm(){
+      const form=document.getElementById("personalRepairForm");
+      if(!form) return;
+      form.classList.add("hidden");
+      form.reset();
+      document.getElementById("personalRepairEditId").value="";
+      document.getElementById("savePersonalRepairBtn").textContent="Enregistrer la réparation";
+    }
+
+    function deletePersonalRepair(repairId){
+      if(activeRole!=="admin"||!openPersonalDeviceId) return;
+      if(!confirm("Supprimer cette réparation de l’historique ?")) return;
+      const list=getAdminPersonalDevices();
+      const item=list.find(device=>device.id===openPersonalDeviceId);
+      if(!item) return;
+      item.repairs=(Array.isArray(item.repairs)?item.repairs:[]).filter(repair=>repair.id!==repairId);
+      saveAdminPersonalDevices(list);
+      renderPersonalDevices();
+      openPersonalDeviceDetails(item.id);
+    }
+
+    document.getElementById("stockItemsTab").addEventListener("click",()=>showStockSubmodule("items"));
+    document.getElementById("personalDevicesTab").addEventListener("click",()=>showStockSubmodule("devices"));
+    document.getElementById("newPersonalDeviceBtn").addEventListener("click",()=>{resetPersonalDeviceForm();showPersonalDeviceForm();});
+    document.getElementById("cancelPersonalDeviceBtn").addEventListener("click",hidePersonalDeviceForm);
+    document.getElementById("personalDeviceSearch").addEventListener("input",renderPersonalDevices);
+    document.getElementById("personalDeviceTypeFilter").addEventListener("change",renderPersonalDevices);
+    document.getElementById("personalDeviceStatusFilter").addEventListener("change",renderPersonalDevices);
+    document.getElementById("closePersonalDeviceModal").addEventListener("click",()=>document.getElementById("personalDeviceModal").classList.add("hidden"));
+    document.getElementById("personalDeviceModal").addEventListener("click",event=>{if(event.target.id==="personalDeviceModal") event.currentTarget.classList.add("hidden");});
+    document.getElementById("addPersonalRepairBtn").addEventListener("click",()=>showPersonalRepairForm());
+    document.getElementById("cancelPersonalRepairBtn").addEventListener("click",hidePersonalRepairForm);
+
+    document.getElementById("personalDevicePhotos").addEventListener("change",async event=>{
+      const files=[...event.target.files].filter(file=>file.type.startsWith("image/"));
+      for(const file of files){
+        if(currentPersonalDevicePhotos.length>=6){alert("Maximum 6 photos par appareil.");break;}
+        try{currentPersonalDevicePhotos.push(await compressPersonalDevicePhoto(file));}
+        catch(error){console.error("Photo appareil",error);alert("Une photo n’a pas pu être ajoutée.");}
+      }
+      event.target.value="";
+      renderPersonalDevicePhotosPreview();
+    });
+
+    document.getElementById("personalDeviceForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const list=getAdminPersonalDevices();
+      const editId=document.getElementById("personalDeviceEditId").value;
+      const previous=list.find(item=>item.id===editId);
+      const id=editId||nextPersonalDeviceId(list);
+      const item={
+        id,
+        reference:document.getElementById("personalDeviceReference").value.trim()||id,
+        deviceType:document.getElementById("personalDeviceType").value,
+        brand:document.getElementById("personalDeviceBrand").value.trim(),
+        model:document.getElementById("personalDeviceModel").value.trim(),
+        color:document.getElementById("personalDeviceColor").value.trim(),
+        capacity:document.getElementById("personalDeviceCapacity").value.trim(),
+        imei1:document.getElementById("personalDeviceImei1").value.trim(),
+        imei2:document.getElementById("personalDeviceImei2").value.trim(),
+        serial:document.getElementById("personalDeviceSerial").value.trim(),
+        purchaseDate:document.getElementById("personalDevicePurchaseDate").value,
+        purchasePrice:Number(document.getElementById("personalDevicePurchasePrice").value||0),
+        salePrice:Number(document.getElementById("personalDeviceSalePrice").value||0),
+        condition:document.getElementById("personalDeviceCondition").value,
+        status:document.getElementById("personalDeviceStatus").value,
+        buyer:document.getElementById("personalDeviceBuyer").value.trim(),
+        accessories:document.getElementById("personalDeviceAccessories").value.trim(),
+        notes:document.getElementById("personalDeviceNotes").value.trim(),
+        photos:[...currentPersonalDevicePhotos],
+        repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
+        saleDate:previous?.saleDate||"",
+        saleOperationId:previous?.saleOperationId||""
+      };
+      if(editId){
+        const index=list.findIndex(entry=>entry.id===editId);
+        if(index!==-1) list[index]=item;
+      }else list.unshift(item);
+      saveAdminPersonalDevices(list);
+      hidePersonalDeviceForm();
+      renderPersonalDevices();
+    });
+
+    document.getElementById("personalRepairForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin"||!openPersonalDeviceId) return;
+      const list=getAdminPersonalDevices();
+      const item=list.find(device=>device.id===openPersonalDeviceId);
+      if(!item) return;
+      const repairs=Array.isArray(item.repairs)?item.repairs:[];
+      const editId=document.getElementById("personalRepairEditId").value;
+      const repair={
+        id:editId||`RAPP-${Date.now()}`,
+        date:document.getElementById("personalRepairDate").value,
+        cost:Number(document.getElementById("personalRepairCost").value||0),
+        fault:document.getElementById("personalRepairFault").value.trim(),
+        work:document.getElementById("personalRepairWork").value.trim(),
+        parts:document.getElementById("personalRepairParts").value.trim()
+      };
+      if(editId){
+        const index=repairs.findIndex(entry=>entry.id===editId);
+        if(index!==-1) repairs[index]=repair;
+      }else repairs.unshift(repair);
+      item.repairs=repairs;
+      saveAdminPersonalDevices(list);
+      hidePersonalRepairForm();
+      renderPersonalDevices();
+      openPersonalDeviceDetails(item.id);
+    });
 
 
     const DEFAULT_DOCUMENT_TEMPLATES = {
