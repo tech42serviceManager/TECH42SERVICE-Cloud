@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.12 Mes appareils</title>
+  <title>TECH42SERVICE Gestion — V21.13 Vente et batterie</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -76,6 +76,7 @@
     .dashboard-open-panel h2 span{color:var(--accent);font-size:28px;line-height:1}
     .card .label{color:var(--muted);font-size:14px}
     .card .value{margin-top:10px;font-size:34px;font-weight:800;color:var(--accent)}
+    .dashboard-card-link{margin-top:10px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#0c0c0c;color:var(--accent);font-weight:700;cursor:pointer}
     .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px}
     .panel h2{margin:0 0 14px;font-size:20px}
     .quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
@@ -565,6 +566,7 @@
           <article class="card dashboard-card" data-open-page="stock"><div class="label">Stock faible</div><div id="statLowStock" class="value">0</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Rachats du mois</div><div id="statMonthlyPurchases" class="value">0 €</div></article>
           <article class="card dashboard-card" data-open-page="buySell"><div class="label">Ventes du mois</div><div id="statMonthlySales" class="value">0 €</div></article>
+          <article id="devicesForSaleDashboardCard" class="card dashboard-card" data-open-page="stock"><div class="label">Appareils à vendre</div><div id="statDevicesForSale" class="value">0</div><button class="dashboard-card-link" type="button">Mes prix de vente</button></article>
         </section>
 
 
@@ -1022,6 +1024,7 @@
               <div class="field"><label>Modèle</label><input id="personalDeviceModel" type="text" required></div>
               <div class="field"><label>Couleur</label><input id="personalDeviceColor" type="text"></div>
               <div class="field"><label>Capacité / configuration</label><input id="personalDeviceCapacity" type="text" placeholder="Ex. 256 Go, 16 Go RAM..."></div>
+              <div class="field"><label>État de la batterie (%)</label><input id="personalDeviceBatteryHealth" type="number" min="0" max="100" step="1" placeholder="Ex. 87"></div>
               <div class="field"><label>Référence interne</label><input id="personalDeviceReference" type="text" placeholder="Générée automatiquement si vide"></div>
               <div class="field"><label>IMEI 1</label><input id="personalDeviceImei1" type="text"></div>
               <div class="field"><label>IMEI 2</label><input id="personalDeviceImei2" type="text"></div>
@@ -1863,7 +1866,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.12 Mes appareils</footer>
+      <footer>TECH42SERVICE Gestion — V21.13 Vente et batterie</footer>
     </main>
   </div>
 
@@ -5194,14 +5197,14 @@
     const demoPersonalDevices = [
       {
         id:"APP-0001",reference:"PERSO-IPHONE",deviceType:"Téléphone",brand:"Apple",model:"iPhone 13",
-        color:"Noir",capacity:"128 Go",imei1:"356789000003333",imei2:"",serial:"F2LDEMO13",
+        color:"Noir",capacity:"128 Go",batteryHealth:88,imei1:"356789000003333",imei2:"",serial:"F2LDEMO13",
         purchaseDate:"2025-11-12",purchasePrice:320,salePrice:449,condition:"Bon état",status:"Personnel",
         buyer:"",accessories:"Boîte et câble",notes:"Appareil personnel entièrement testé.",photos:[],
         repairs:[{id:"RAPP-0001",date:"2026-03-15",fault:"Batterie usée",work:"Remplacement de la batterie",parts:"Batterie compatible",cost:39.9}]
       },
       {
         id:"APP-0002",reference:"PERSO-PS5",deviceType:"Console",brand:"Sony",model:"PlayStation 5",
-        color:"Blanc",capacity:"825 Go",imei1:"",imei2:"",serial:"PS5-DEMO-2026",
+        color:"Blanc",capacity:"825 Go",batteryHealth:"",imei1:"",imei2:"",serial:"PS5-DEMO-2026",
         purchaseDate:"2024-08-20",purchasePrice:420,salePrice:350,condition:"À réparer",status:"À réparer",
         buyer:"",accessories:"Câble secteur et manette",notes:"Port HDMI à contrôler.",photos:[],repairs:[]
       }
@@ -5259,7 +5262,7 @@
       const status=document.getElementById("personalDeviceStatusFilter").value;
       return currentPersonalDevices().filter(item=>{
         const repairs=(Array.isArray(item.repairs)?item.repairs:[]).map(r=>[r.fault,r.work,r.parts].join(" ")).join(" ");
-        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,repairs].join(" ").toLowerCase();
+        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,repairs].join(" ").toLowerCase();
         return (!search||text.includes(search))&&(!type||item.deviceType===type)&&(!status||item.status===status);
       });
     }
@@ -5280,6 +5283,8 @@
       list.forEach(item=>{
         const repairs=Array.isArray(item.repairs)?item.repairs:[];
         const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
+        const hasBattery=item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined;
+        const batteryHealth=hasBattery?Math.max(0,Math.min(100,Number(item.batteryHealth)||0)):null;
         const cover=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).find(Boolean);
         const adminActions=activeRole==="admin" ? `
           <button class="mini-btn" type="button" data-personal-edit="${escapeHtml(item.id)}">Modifier</button>
@@ -5296,6 +5301,7 @@
             <div><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span><span class="personal-device-badge">${escapeHtml(item.condition||"État non renseigné")}</span></div>
             <div class="personal-device-meta">
               ${escapeHtml(item.deviceType||"Appareil")} · ${escapeHtml(item.color||"Couleur non renseignée")} · ${escapeHtml(item.capacity||"Configuration non renseignée")}<br>
+              ${batteryHealth!==null?`Batterie : <strong>${batteryHealth}%</strong><br>`:""}
               IMEI : ${escapeHtml(item.imei1||item.imei2||"—")} · Série : ${escapeHtml(item.serial||"—")}<br>
               ${repairs.length} réparation(s) · Coût réparations : ${personalMoney(repairCost)}<br>
               Prix de vente prévu : <strong>${personalMoney(item.salePrice)}</strong>
@@ -5390,6 +5396,7 @@
       document.getElementById("personalDeviceModel").value=item.model||"";
       document.getElementById("personalDeviceColor").value=item.color||"";
       document.getElementById("personalDeviceCapacity").value=item.capacity||"";
+      document.getElementById("personalDeviceBatteryHealth").value=item.batteryHealth??"";
       document.getElementById("personalDeviceReference").value=item.reference||"";
       document.getElementById("personalDeviceImei1").value=item.imei1||"";
       document.getElementById("personalDeviceImei2").value=item.imei2||"";
@@ -5456,7 +5463,7 @@
           deviceType:item.deviceType||"Autre",model:[item.brand,item.model].filter(Boolean).join(" "),
           serial:item.imei1||item.imei2||item.serial||"",condition:item.condition||"Bon état",
           buyPrice:Number(item.purchasePrice||0),buyMode:"TTC",sellPrice:Number(item.salePrice||0),sellMode:"TTC",
-          accessories:item.accessories||"",notes:`Appareil personnel ${item.reference||item.id}. ${item.notes||""}`.trim()
+          accessories:item.accessories||"",notes:`Appareil personnel ${item.reference||item.id}.${item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined?` Batterie : ${item.batteryHealth}%.`:""} ${item.notes||""}`.trim()
         };
         operations.unshift(operation);
         saveAdminBuySell(operations);
@@ -5485,6 +5492,7 @@
           <div class="detail-box"><small>Statut</small><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span></div>
           <div class="detail-box"><small>Marque / Modèle</small>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</div>
           <div class="detail-box"><small>Couleur / Capacité</small>${escapeHtml(item.color||"—")} · ${escapeHtml(item.capacity||"—")}</div>
+          <div class="detail-box"><small>État de la batterie</small>${item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined?`${Math.max(0,Math.min(100,Number(item.batteryHealth)||0))} %`:"—"}</div>
           <div class="detail-box"><small>État</small>${escapeHtml(item.condition||"—")}</div>
           <div class="detail-box"><small>IMEI 1</small>${escapeHtml(item.imei1||"—")}</div>
           <div class="detail-box"><small>IMEI 2</small>${escapeHtml(item.imei2||"—")}</div>
@@ -5598,6 +5606,7 @@
       const editId=document.getElementById("personalDeviceEditId").value;
       const previous=list.find(item=>item.id===editId);
       const id=editId||nextPersonalDeviceId(list);
+      const batteryValue=document.getElementById("personalDeviceBatteryHealth").value;
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
@@ -5606,6 +5615,7 @@
         model:document.getElementById("personalDeviceModel").value.trim(),
         color:document.getElementById("personalDeviceColor").value.trim(),
         capacity:document.getElementById("personalDeviceCapacity").value.trim(),
+        batteryHealth:batteryValue===""?"":Math.max(0,Math.min(100,Number(batteryValue)||0)),
         imei1:document.getElementById("personalDeviceImei1").value.trim(),
         imei2:document.getElementById("personalDeviceImei2").value.trim(),
         serial:document.getElementById("personalDeviceSerial").value.trim(),
@@ -6718,6 +6728,7 @@
         document.getElementById("statLowStock").textContent = "6";
         document.getElementById("statMonthlyPurchases").textContent = "1 240 €";
         document.getElementById("statMonthlySales").textContent = "2 980 €";
+        document.getElementById("statDevicesForSale").textContent = "3";
         return;
       }
 
@@ -6726,6 +6737,7 @@
       const stock = getAdminStock();
       const documents = getAdminDocuments();
       const buySell = getAdminBuySell();
+      const personalDevices = getAdminPersonalDevices();
 
       const activeRepairs = repairs.filter(item => !["Terminé","Restitué"].includes(item.status)).length;
       const today = localIsoDate();
@@ -6733,6 +6745,7 @@
       const todayAppointments = appointments.filter(item => item.date === today && item.status !== "Annulé").length;
       const totalStock = stock.reduce((sum,item)=>sum+Number(item.quantity||0),0);
       const lowStock = stock.filter(item=>["low","out"].includes(stockState(item).key)).length;
+      const devicesForSale = personalDevices.filter(item=>item.status==="En vente").length;
 
       // Le chiffre d'affaires correspond aux encaissements validés.
       // Les factures payées génèrent automatiquement leur encaissement lié.
@@ -6755,12 +6768,20 @@
       document.getElementById("statLowStock").textContent = lowStock;
       document.getElementById("statMonthlyPurchases").textContent = formatMoney(monthlyPurchases);
       document.getElementById("statMonthlySales").textContent = formatMoney(monthlySales);
+      document.getElementById("statDevicesForSale").textContent = devicesForSale;
     }
 
     document.querySelectorAll("[data-open-page]").forEach(card=>{
       card.addEventListener("click",()=>{
         showPage(card.dataset.openPage);
       });
+    });
+
+    document.getElementById("devicesForSaleDashboardCard").addEventListener("click",()=>{
+      showPage("stock");
+      showStockSubmodule("devices");
+      document.getElementById("personalDeviceStatusFilter").value="En vente";
+      renderPersonalDevices();
     });
 
     document.getElementById("quickRepair").addEventListener("click",()=>{
