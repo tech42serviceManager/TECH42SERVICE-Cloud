@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.16 Fiche appareil A4 une page stable</title>
+  <title>TECH42SERVICE Gestion — V21.17 Vente, garantie, SAV et rachat</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -13,6 +13,24 @@
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
     button,input,select{font:inherit}
     .hidden{display:none!important}
+
+    .startup-splash{
+      position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;
+      background:radial-gradient(circle at 50% 25%,#30230a 0,#090909 43%,#020202 100%);
+      animation:splash-exit .55s ease 2.75s forwards
+    }
+    .startup-splash::before{content:"";position:absolute;width:min(520px,82vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#f4b51f28,transparent 65%);filter:blur(10px);animation:splash-glow 1.7s ease-in-out infinite alternate}
+    .startup-content{position:relative;text-align:center;display:grid;justify-items:center;gap:15px}
+    .startup-logo-frame{width:min(300px,72vw);padding:9px;border:1px solid #8f6a18;border-radius:22px;background:#050505;box-shadow:0 0 45px #f4b51f33;animation:splash-logo .8s cubic-bezier(.2,.8,.2,1) both}
+    .startup-logo-frame img{display:block;width:100%;max-height:150px;object-fit:contain;border-radius:15px}
+    .startup-content h1{margin:0;color:#f4b51f;font-size:clamp(24px,5vw,40px);letter-spacing:.6px;animation:splash-text .7s ease .35s both}
+    .startup-content p{margin:0;color:#d8d8d8;font-size:15px;letter-spacing:2px;text-transform:uppercase;animation:splash-text .7s ease .55s both}
+    .startup-loader{width:190px;height:3px;border-radius:999px;background:#ffffff18;overflow:hidden;margin-top:5px}.startup-loader span{display:block;width:100%;height:100%;background:linear-gradient(90deg,#8e6400,#f4b51f,#ffe18b);transform-origin:left;animation:splash-progress 2.65s ease both}
+    @keyframes splash-logo{from{opacity:0;transform:translateY(18px) scale(.88)}to{opacity:1;transform:none}}
+    @keyframes splash-text{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes splash-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    @keyframes splash-glow{from{transform:scale(.88);opacity:.55}to{transform:scale(1.08);opacity:1}}
+    @keyframes splash-exit{to{opacity:0;visibility:hidden;pointer-events:none}}
 
     .login-screen{
       min-height:100vh;display:grid;place-items:center;padding:20px;
@@ -65,9 +83,15 @@
     .topbar h1{margin:0;font-size:28px}
     .topbar p{margin:6px 0 0;color:var(--muted)}
     .theme-select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:10px}
-    .hero{background:linear-gradient(145deg,#111,#080808);border:1px solid var(--border);border-radius:16px;padding:26px;margin-bottom:20px;text-align:center;display:grid;place-items:center}
-    .clock{color:var(--accent);font-size:56px;font-weight:800;letter-spacing:2px}
-    .date{margin-top:6px;font-size:20px;color:var(--muted);text-align:center}
+    .hero{position:relative;overflow:hidden;background:linear-gradient(145deg,#111,#080808);border:1px solid var(--border);border-radius:16px;padding:26px;margin-bottom:20px;text-align:center;display:grid;place-items:center}
+    .hero::before{content:"";position:absolute;inset:-80%;background:conic-gradient(from 0deg,transparent 0 44%,#f4b51f18 49%,transparent 54% 100%);animation:clock-sweep 16s linear infinite}
+    .hero::after{content:"";position:absolute;inset:1px;border-radius:15px;background:radial-gradient(circle at 50% 45%,#f4b51f0f,transparent 50%);pointer-events:none}
+    .clock-shell{position:relative;z-index:1;padding:10px 26px;border-radius:18px;border:1px solid #f4b51f2b;background:#050505aa;box-shadow:inset 0 0 28px #000,0 0 24px #f4b51f12}
+    .clock{color:var(--accent);font-size:56px;font-weight:800;letter-spacing:2px;text-shadow:0 0 18px #f4b51f38;animation:clock-pulse 1s ease-in-out infinite}
+    .date{position:relative;z-index:1;margin-top:6px;font-size:20px;color:var(--muted);text-align:center}
+    .clock-greeting{position:relative;z-index:1;margin-top:9px;color:#e8d7a1;font-size:14px;font-weight:700;letter-spacing:.4px}
+    @keyframes clock-sweep{to{transform:rotate(360deg)}}
+    @keyframes clock-pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.13)}}
     .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}.dashboard-card{cursor:pointer;transition:.18s transform,.18s border-color}.dashboard-card:hover{transform:translateY(-2px);border-color:var(--accent)}
     .dashboard-open-panel{cursor:pointer;transition:.18s transform,.18s border-color,.18s background}
@@ -156,7 +180,7 @@
     .stock-subnav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;padding:6px;background:#0d0d0d;border:1px solid var(--border);border-radius:12px}
     .stock-subnav button{padding:11px 16px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--text);font-weight:700;cursor:pointer}
     .stock-subnav button.active{background:var(--accent);color:#080808}
-    .personal-device-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .personal-device-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
     .personal-device-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
     .personal-device-form .full{grid-column:1/-1}
     .personal-device-form input,.personal-device-form select,.personal-device-form textarea,
@@ -192,8 +216,14 @@
     .personal-repair-table{width:100%;border-collapse:collapse;margin-top:12px}
     .personal-repair-table th,.personal-repair-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}
     .personal-repair-table th{color:var(--accent)}
+    .warranty-badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid #2f6941;background:#102518;color:#74ef8b}
+    .warranty-badge.warning{border-color:#846715;background:#2d2409;color:#ffd66b}.warranty-badge.expired{border-color:#7a2a2a;background:#2b1111;color:#ff8585}.warranty-badge.none{border-color:#555;background:#202020;color:#c7c7c7}
+    .sav-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+    .sav-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c}.sav-form .full{grid-column:1/-1}
+    .sav-form input,.sav-form select,.sav-form textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}.sav-form textarea{min-height:78px;resize:vertical}
+    .sav-table{width:100%;border-collapse:collapse;margin-top:12px}.sav-table th,.sav-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.sav-table th{color:var(--accent)}
     @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid{grid-template-columns:1fr}.personal-device-detail-grid .full{grid-column:auto}}
+    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}}
 
     
     .document-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
@@ -300,6 +330,12 @@
       width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
     }
     .buysell-form textarea{min-height:90px;resize:vertical}
+    .buyback-identity{grid-column:1/-1;padding:16px;border:1px solid #6e5517;border-radius:12px;background:linear-gradient(145deg,#19150b,#0d0d0d)}
+    .buyback-identity h3{margin:0 0 8px;color:var(--accent)}.buyback-identity>p{margin:0 0 15px;color:var(--muted);font-size:13px}
+    .buyback-identity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.buyback-identity-grid .full{grid-column:1/-1}
+    .id-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.id-photo-preview{min-height:125px;margin-top:8px;border:1px dashed #5e4a18;border-radius:10px;background:#090909;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:13px}.id-photo-preview img{width:100%;height:150px;object-fit:contain;background:#050505}
+    .buyback-attestation{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #4b3c18;border-radius:10px;background:#121007;line-height:1.45}.buyback-attestation input{width:auto;margin-top:3px;flex:0 0 auto}
+    .signature-inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.signature-inline .client-sign-status{margin:0}
     .buysell-toolbar{display:grid;grid-template-columns:1fr 220px;gap:12px;margin-bottom:14px}
     .buysell-toolbar input,.buysell-toolbar select{
       width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
@@ -402,12 +438,14 @@
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
       .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.personal-device-form,.personal-device-toolbar,.personal-device-summary,.personal-repair-form,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
+      .buyback-identity-grid,.id-photo-grid{grid-template-columns:1fr}.buyback-identity-grid .full{grid-column:auto}
       .document-discount-controls{grid-template-columns:1fr}
       .document-discount-title{grid-column:1}
       .discount-editor{grid-template-columns:1fr}
       .discount-presets{display:grid;grid-template-columns:1fr 1fr}
       .document-discount-controls .discount-summary{min-width:0}
     }
+    @media(prefers-reduced-motion:reduce){.startup-splash,.startup-splash::before,.startup-logo-frame,.startup-content h1,.startup-content p,.startup-loader span,.hero::before,.clock{animation:none!important}.startup-splash{animation:splash-exit .2s linear .6s forwards}}
 
     /* V19.2 — Historique client PRO + Encaissements */
     .client-pro-stats,.payment-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
@@ -468,6 +506,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
+  <section id="startupSplash" class="startup-splash" aria-label="Démarrage de TECH42SERVICE Gestion">
+    <div class="startup-content">
+      <div class="startup-logo-frame"><img src="logo.png" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzYwIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjM2MCIgcng9IjM2IiBmaWxsPSIjMDUwNTA1Ii8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iNzY0IiBoZWlnaHQ9IjMyNCIgcng9IjI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNGI1MWYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjcwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3MCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2Y0YjUxZiI+NDI8L3RleHQ+PHRleHQgeD0iMzUwIiB5PSIxMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjYyIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIj5URUNIPC90ZXh0Pjx0ZXh0IHg9IjM1MCIgeT0iMjIwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2Y0YjUxZiI+U0VSVklDRTwvdGV4dD48dGV4dCB4PSIzNTAiIHk9IjI3MyIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiN2I3YjciPlLDiVBBUkFUSU9OIMOJTEVDVFJPTklRVUU8L3RleHQ+PC9zdmc+'" alt="Logo TECH42SERVICE"></div>
+      <h1>Bonjour, bonne journée</h1>
+      <p>TECH42SERVICE Gestion</p>
+      <div class="startup-loader" aria-hidden="true"><span></span></div>
+    </div>
+  </section>
   <section id="loginScreen" class="login-screen">
     <form id="loginForm" class="login-box" autocomplete="off">
       <img src="logo.png" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzYwIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjM2MCIgcng9IjM2IiBmaWxsPSIjMDUwNTA1Ii8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iNzY0IiBoZWlnaHQ9IjMyNCIgcng9IjI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNGI1MWYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjcwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3MCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2Y0YjUxZiI+NDI8L3RleHQ+PHRleHQgeD0iMzUwIiB5PSIxMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjYyIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIj5URUNIPC90ZXh0Pjx0ZXh0IHg9IjM1MCIgeT0iMjIwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2Y0YjUxZiI+U0VSVklDRTwvdGV4dD48dGV4dCB4PSIzNTAiIHk9IjI3MyIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiN2I3YjciPlLDiVBBUkFUSU9OIMOJTEVDVFJPTklRVUU8L3RleHQ+PC9zdmc+'" alt="Logo TECH42SERVICE" class="login-logo">
@@ -554,8 +600,9 @@
         <div id="readonlyNote" class="demo-banner hidden">MODE PRÉSENTATION — Données fictives — Aucune modification autorisée</div>
 
         <section class="hero">
-          <div id="clock" class="clock">00:00:00</div>
+          <div class="clock-shell"><div id="clock" class="clock">00:00:00</div></div>
           <div id="date" class="date"></div>
+          <div id="clockGreeting" class="clock-greeting">Bonne journée dans votre atelier</div>
         </section>
 
         <section class="cards dashboard-links">
@@ -1002,6 +1049,7 @@
             <div class="summary-card"><small>Appareils personnels</small><strong id="personalDeviceTotal">0</strong></div>
             <div class="summary-card"><small>À réparer</small><strong id="personalDeviceRepairCount">0</strong></div>
             <div class="summary-card"><small>En vente</small><strong id="personalDeviceSaleCount">0</strong></div>
+            <div class="summary-card"><small>Alertes garantie / SAV</small><strong id="personalDeviceWarrantyAlertCount">0</strong></div>
           </div>
 
           <section class="panel">
@@ -1031,6 +1079,11 @@
               <div class="field"><label>Date d’achat</label><input id="personalDevicePurchaseDate" type="date"></div>
               <div class="field"><label>Prix d’achat (€)</label><input id="personalDevicePurchasePrice" type="number" min="0" step="0.01"></div>
               <div class="field"><label>Prix de vente prévu (€)</label><input id="personalDeviceSalePrice" type="number" min="0" step="0.01"></div>
+              <div class="field"><label>Date de mise en vente</label><input id="personalDeviceListingDate" type="date"></div>
+              <div class="field">
+                <label>Durée de garantie après la vente (mois)</label>
+                <input id="personalDeviceWarrantyMonths" type="number" min="0" max="120" step="1" value="0" placeholder="Ex. 3">
+              </div>
               <div class="field">
                 <label>État</label>
                 <select id="personalDeviceCondition">
@@ -1092,6 +1145,29 @@
             </table>
           </div>
           <div id="personalRepairEmpty" class="empty-state">Aucune réparation enregistrée pour cet appareil.</div>
+
+          <section class="sav-panel">
+            <div class="personal-history-head">
+              <h3>Garantie et SAV</h3>
+              <button id="addPersonalSavBtn" class="action-btn write-action" type="button">Ajouter un retour SAV</button>
+            </div>
+            <form id="personalSavForm" class="sav-form hidden">
+              <input id="personalSavEditId" type="hidden">
+              <div class="field"><label>Date du retour</label><input id="personalSavDate" type="date" required></div>
+              <div class="field"><label>Retour sous garantie</label><select id="personalSavUnderWarranty"><option value="Oui">Oui</option><option value="Non">Non</option><option value="À vérifier">À vérifier</option></select></div>
+              <div class="field"><label>Statut</label><select id="personalSavStatus"><option>Ouvert</option><option>Diagnostic</option><option>En cours</option><option>En attente pièce</option><option>Clôturé</option></select></div>
+              <div class="field"><label>Date de clôture</label><input id="personalSavClosedDate" type="date"></div>
+              <div class="field full"><label>Motif du retour</label><textarea id="personalSavReason" required></textarea></div>
+              <div class="field full"><label>Diagnostic SAV</label><textarea id="personalSavDiagnosis"></textarea></div>
+              <div class="field full"><label>Intervention / solution apportée</label><textarea id="personalSavWork"></textarea></div>
+              <div class="field full"><label>Notes</label><textarea id="personalSavNotes"></textarea></div>
+              <div class="full page-actions"><button id="savePersonalSavBtn" class="save-btn" type="submit">Enregistrer le retour SAV</button><button id="cancelPersonalSavBtn" class="action-btn secondary" type="button">Annuler</button></div>
+            </form>
+            <div class="table-wrap">
+              <table class="sav-table"><thead><tr><th>Date</th><th>Garantie</th><th>Motif</th><th>Diagnostic / Solution</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="personalSavTableBody"></tbody></table>
+            </div>
+            <div id="personalSavEmpty" class="empty-state">Aucun retour SAV enregistré pour cet appareil.</div>
+          </section>
         </div>
       </div>
 
@@ -1683,6 +1759,27 @@
               </div>
             </div>
 
+            <section id="buyBackIdentityBlock" class="buyback-identity hidden">
+              <h3>Fiche de rachat à un particulier</h3>
+              <p>Ces informations sont sensibles et restent réservées au compte administrateur.</p>
+              <div class="buyback-identity-grid">
+                <div class="field full"><label>Adresse complète du vendeur</label><input id="buySellSellerAddress" type="text"></div>
+                <div class="field"><label>Date de naissance</label><input id="buySellSellerBirthDate" type="date"></div>
+                <div class="field"><label>Lieu de naissance</label><input id="buySellSellerBirthPlace" type="text"></div>
+                <div class="field"><label>Type de pièce d’identité</label><select id="buySellIdType"><option>Carte nationale d’identité</option><option>Passeport</option><option>Permis de conduire</option><option>Autre</option></select></div>
+                <div class="field"><label>Numéro de la pièce d’identité</label><input id="buySellIdNumber" type="text"></div>
+                <div class="field full">
+                  <label>Photos de la pièce d’identité</label>
+                  <div class="id-photo-grid">
+                    <div><input id="buySellIdFrontFile" type="file" accept="image/*"><div id="buySellIdFrontPreview" class="id-photo-preview">Recto non ajouté</div></div>
+                    <div><input id="buySellIdBackFile" type="file" accept="image/*"><div id="buySellIdBackPreview" class="id-photo-preview">Verso non ajouté</div></div>
+                  </div>
+                </div>
+                <label class="buyback-attestation full"><input id="buySellOwnershipAttestation" type="checkbox"><span>Le vendeur atteste être le propriétaire légitime de l’appareil, que celui-ci n’est ni volé, ni perdu, ni soumis à un financement ou à une opposition.</span></label>
+                <div class="signature-inline full"><button id="openBuySellSignatureBtn" class="action-btn" type="button">Faire signer le vendeur</button><span id="buySellSignatureStatus" class="client-sign-status">Non signé</span></div>
+              </div>
+            </section>
+
             <div class="field full">
               <label>Accessoires fournis</label>
               <input id="buySellAccessories" type="text" placeholder="Chargeur, boîte, câble...">
@@ -1865,7 +1962,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.16 Fiche appareil A4 une page stable</footer>
+      <footer>TECH42SERVICE Gestion — V21.17 Vente, garantie, SAV et rachat</footer>
     </main>
   </div>
 
@@ -5194,7 +5291,7 @@
     }
 
 
-    // ===== V21.12 : appareils personnels =====
+    // ===== V21.17 : appareils, vente, garantie et SAV =====
     const PERSONAL_DEVICE_STORAGE_KEY = "tech42-personal-devices";
     const PERSONAL_DEVICE_PHOTO_TARGET_BYTES = 220 * 1024;
     const PERSONAL_DEVICE_PHOTO_TOTAL_LIMIT = 3.2 * 1024 * 1024;
@@ -5203,14 +5300,14 @@
         id:"APP-0001",reference:"PERSO-IPHONE",deviceType:"Téléphone",brand:"Apple",model:"iPhone 13",
         color:"Noir",capacity:"128 Go",batteryHealth:88,imei1:"356789000003333",imei2:"",serial:"F2LDEMO13",
         purchaseDate:"2025-11-12",purchasePrice:320,salePrice:449,condition:"Bon état",status:"Personnel",
-        buyer:"",accessories:"Boîte et câble",notes:"Appareil personnel entièrement testé.",photos:[],
-        repairs:[{id:"RAPP-0001",date:"2026-03-15",fault:"Batterie usée",work:"Remplacement de la batterie",parts:"Batterie compatible",cost:39.9}]
+        buyer:"",listingDate:"",warrantyMonths:3,warrantyEndDate:"",accessories:"Boîte et câble",notes:"Appareil personnel entièrement testé.",photos:[],
+        repairs:[{id:"RAPP-0001",date:"2026-03-15",fault:"Batterie usée",work:"Remplacement de la batterie",parts:"Batterie compatible",cost:39.9}],savReturns:[]
       },
       {
         id:"APP-0002",reference:"PERSO-PS5",deviceType:"Console",brand:"Sony",model:"PlayStation 5",
         color:"Blanc",capacity:"825 Go",batteryHealth:"",imei1:"",imei2:"",serial:"PS5-DEMO-2026",
         purchaseDate:"2024-08-20",purchasePrice:420,salePrice:350,condition:"À réparer",status:"À réparer",
-        buyer:"",accessories:"Câble secteur et manette",notes:"Port HDMI à contrôler.",photos:[],repairs:[]
+        buyer:"",listingDate:"",warrantyMonths:0,warrantyEndDate:"",accessories:"Câble secteur et manette",notes:"Port HDMI à contrôler.",photos:[],repairs:[],savReturns:[]
       }
     ];
 
@@ -5283,13 +5380,50 @@
       return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
     }
 
+    function addMonthsToIsoDate(dateValue,months){
+      if(!dateValue||!Number(months)) return "";
+      const [year,month,day]=String(dateValue).split("-").map(Number);
+      if(!year||!month||!day) return "";
+      const result=new Date(year,month-1,day,12,0,0);
+      result.setMonth(result.getMonth()+Number(months));
+      return `${result.getFullYear()}-${String(result.getMonth()+1).padStart(2,"0")}-${String(result.getDate()).padStart(2,"0")}`;
+    }
+
+    function personalWarrantyEndDate(item){
+      return item?.warrantyEndDate||addMonthsToIsoDate(item?.saleDate,Number(item?.warrantyMonths||0));
+    }
+
+    function personalWarrantyState(item){
+      const endDate=personalWarrantyEndDate(item);
+      if(!endDate) return {key:"none",label:"Garantie non renseignée",endDate:"",days:null};
+      const today=new Date(`${localIsoDate()}T12:00:00`);
+      const end=new Date(`${endDate}T12:00:00`);
+      const days=Math.ceil((end-today)/86400000);
+      if(days<0) return {key:"expired",label:`Garantie terminée le ${formatDate(endDate)}`,endDate,days};
+      if(days<=30) return {key:"warning",label:`Garantie : ${days} jour(s) restant(s)`,endDate,days};
+      return {key:"active",label:`Garantie jusqu’au ${formatDate(endDate)}`,endDate,days};
+    }
+
+    function warrantyBadgeHtml(item){
+      const state=personalWarrantyState(item);
+      const className=state.key==="warning"?"warning":state.key==="expired"?"expired":state.key==="none"?"none":"";
+      return `<span class="warranty-badge ${className}">${escapeHtml(state.label)}</span>`;
+    }
+
+    function personalDeviceHasWarrantyAlert(item){
+      const state=personalWarrantyState(item);
+      const openSav=(Array.isArray(item?.savReturns)?item.savReturns:[]).some(entry=>entry.status!=="Clôturé");
+      return state.key==="warning"||(state.key==="expired"&&state.days>=-30)||openSav;
+    }
+
     function filteredPersonalDevices(){
       const search=document.getElementById("personalDeviceSearch").value.trim().toLowerCase();
       const type=document.getElementById("personalDeviceTypeFilter").value;
       const status=document.getElementById("personalDeviceStatusFilter").value;
       return currentPersonalDevices().filter(item=>{
         const repairs=(Array.isArray(item.repairs)?item.repairs:[]).map(r=>[r.fault,r.work,r.parts].join(" ")).join(" ");
-        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,repairs].join(" ").toLowerCase();
+        const sav=(Array.isArray(item.savReturns)?item.savReturns:[]).map(r=>[r.reason,r.diagnosis,r.work,r.status].join(" ")).join(" ");
+        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,item.listingDate,personalWarrantyEndDate(item),repairs,sav].join(" ").toLowerCase();
         return (!search||text.includes(search))&&(!type||item.deviceType===type)&&(!status||item.status===status);
       });
     }
@@ -5304,9 +5438,11 @@
       document.getElementById("personalDeviceTotal").textContent=fullList.length;
       document.getElementById("personalDeviceRepairCount").textContent=fullList.filter(item=>item.status==="À réparer"||item.condition==="À réparer").length;
       document.getElementById("personalDeviceSaleCount").textContent=fullList.filter(item=>item.status==="En vente").length;
+      document.getElementById("personalDeviceWarrantyAlertCount").textContent=fullList.filter(personalDeviceHasWarrantyAlert).length;
       box.innerHTML="";
       list.forEach(item=>{
         const repairs=Array.isArray(item.repairs)?item.repairs:[];
+        const savReturns=Array.isArray(item.savReturns)?item.savReturns:[];
         const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
         const hasBattery=item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined;
         const batteryHealth=hasBattery?Math.max(0,Math.min(100,Number(item.batteryHealth)||0)):null;
@@ -5315,6 +5451,7 @@
           <button class="mini-btn" type="button" data-personal-edit="${escapeHtml(item.id)}">Modifier</button>
           ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="mini-btn" type="button" data-personal-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
           ${item.status!=="Vendu"?`<button class="mini-btn" type="button" data-personal-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
+          ${item.status==="Vendu"?`<button class="mini-btn" type="button" data-personal-invoice="${escapeHtml(item.id)}">${item.invoiceId?"Ouvrir la facture":"Créer une facture"}</button>`:""}
           <button class="mini-btn danger" type="button" data-personal-delete="${escapeHtml(item.id)}">Supprimer</button>` : "";
 
         const card=document.createElement("article");
@@ -5328,8 +5465,9 @@
               ${escapeHtml(item.deviceType||"Appareil")} · ${escapeHtml(item.color||"Couleur non renseignée")} · ${escapeHtml(item.capacity||"Configuration non renseignée")}<br>
               ${batteryHealth!==null?`Batterie : <strong>${batteryHealth}%</strong><br>`:""}
               IMEI : ${escapeHtml(item.imei1||item.imei2||"—")} · Série : ${escapeHtml(item.serial||"—")}<br>
-              ${repairs.length} réparation(s) · Coût réparations : ${personalMoney(repairCost)}<br>
-              Prix de vente prévu : <strong>${personalMoney(item.salePrice)}</strong>
+              ${repairs.length} réparation(s) · ${savReturns.length} retour(s) SAV · Coût réparations : ${personalMoney(repairCost)}<br>
+              ${item.status==="Vendu"?`${warrantyBadgeHtml(item)}<br>`:item.listingDate?`Mise en vente : ${formatDate(item.listingDate)}<br>`:""}
+              ${item.status==="Vendu"?"Prix de vente":"Prix de vente prévu"} : <strong>${personalMoney(item.salePrice)}</strong>
             </div>
             <div class="personal-device-actions"><button class="mini-btn" type="button" data-personal-view="${escapeHtml(item.id)}">Voir la fiche</button>${adminActions}</div>
           </div>`;
@@ -5341,6 +5479,7 @@
       box.querySelectorAll("[data-personal-edit]").forEach(btn=>btn.addEventListener("click",()=>editPersonalDevice(btn.dataset.personalEdit)));
       box.querySelectorAll("[data-personal-sale]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceForSale(btn.dataset.personalSale)));
       box.querySelectorAll("[data-personal-sold]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceSold(btn.dataset.personalSold)));
+      box.querySelectorAll("[data-personal-invoice]").forEach(btn=>btn.addEventListener("click",()=>createPersonalDeviceInvoice(btn.dataset.personalInvoice)));
       box.querySelectorAll("[data-personal-delete]").forEach(btn=>btn.addEventListener("click",()=>deletePersonalDevice(btn.dataset.personalDelete)));
     }
 
@@ -5439,6 +5578,8 @@
       document.getElementById("personalDevicePurchaseDate").value=item.purchaseDate||"";
       document.getElementById("personalDevicePurchasePrice").value=item.purchasePrice??0;
       document.getElementById("personalDeviceSalePrice").value=item.salePrice??0;
+      document.getElementById("personalDeviceListingDate").value=item.listingDate||"";
+      document.getElementById("personalDeviceWarrantyMonths").value=String(Number(item.warrantyMonths||0));
       document.getElementById("personalDeviceCondition").value=item.condition||"Bon état";
       document.getElementById("personalDeviceStatus").value=item.status||"Personnel";
       document.getElementById("personalDeviceBuyer").value=item.buyer||"";
@@ -5471,6 +5612,7 @@
         item.salePrice=Math.max(0,Number(String(answer).replace(",","."))||0);
       }
       item.status="En vente";
+      item.listingDate=item.listingDate||localIsoDate();
       if(!saveAdminPersonalDevices(list)) return;
       renderPersonalDevices();
       if(openPersonalDeviceId===id) openPersonalDeviceDetails(id);
@@ -5485,10 +5627,15 @@
       if(priceAnswer===null) return;
       const buyerAnswer=prompt("Nom de l’acheteur / client (facultatif)",item.buyer||"");
       if(buyerAnswer===null) return;
+      const warrantyAnswer=prompt("Durée de garantie en mois (0 si aucune durée renseignée)",String(Number(item.warrantyMonths||0)));
+      if(warrantyAnswer===null) return;
       item.salePrice=Math.max(0,Number(String(priceAnswer).replace(",","."))||0);
       item.buyer=buyerAnswer.trim();
       item.status="Vendu";
       item.saleDate=localIsoDate();
+      item.listingDate=item.listingDate||item.saleDate;
+      item.warrantyMonths=Math.max(0,Math.round(Number(String(warrantyAnswer).replace(",","."))||0));
+      item.warrantyEndDate=addMonthsToIsoDate(item.saleDate,item.warrantyMonths);
 
       if(!item.saleOperationId){
         const operations=getAdminBuySell();
@@ -5501,7 +5648,7 @@
           accessories:item.accessories||"",notes:`Appareil personnel ${item.reference||item.id}.${item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined?` Batterie : ${item.batteryHealth}%.`:""} ${item.notes||""}`.trim()
         };
         operations.unshift(operation);
-        saveAdminBuySell(operations);
+        if(!saveAdminBuySell(operations)) return;
         item.saleOperationId=operation.id;
       }
 
@@ -5510,6 +5657,55 @@
       try{renderBuySell();updateDashboardStats();}catch(error){console.warn(error);}
       if(openPersonalDeviceId===id) openPersonalDeviceDetails(id);
       alert("Appareil marqué comme vendu et ajouté dans Rachat / Vente.");
+    }
+
+    function createPersonalDeviceInvoice(id){
+      if(activeRole!=="admin") return;
+      const devices=getAdminPersonalDevices();
+      const item=devices.find(device=>device.id===id);
+      if(!item||item.status!=="Vendu") return;
+      const documents=getAdminDocuments();
+      const existing=documents.find(documentItem=>documentItem.id===item.invoiceId||documentItem.personalDeviceId===item.id);
+      if(existing){
+        if(item.invoiceId!==existing.id){item.invoiceId=existing.id;saveAdminPersonalDevices(devices);}
+        document.getElementById("personalDeviceModal").classList.add("hidden");
+        editDocument(existing.id);
+        return;
+      }
+      if(!item.buyer){
+        const buyer=prompt("Nom de l’acheteur pour la facture","");
+        if(buyer===null||!buyer.trim()) return;
+        item.buyer=buyer.trim();
+      }
+      const knownClient=getAdminClients().find(client=>String(client.name||"").toLowerCase()===item.buyer.toLowerCase());
+      const clientId=knownClient?.id||upsertClientFromFields(item.buyer,knownClient?.phone||"",knownClient?.email||"");
+      const warrantyEnd=personalWarrantyEndDate(item);
+      const warrantyText=Number(item.warrantyMonths||0)>0
+        ? `Garantie renseignée : ${Number(item.warrantyMonths)} mois${warrantyEnd?` — jusqu’au ${formatDate(warrantyEnd)}`:""}.`
+        : "Durée de garantie non renseignée.";
+      const invoice={
+        id:`DOC-${Date.now()}`,clientId,type:"facture",number:nextDocumentNumber("facture",documents),
+        date:item.saleDate||localIsoDate(),client:item.buyer,contact:[knownClient?.phone,knownClient?.email].filter(Boolean).join(" / "),
+        subject:`Vente ${[item.brand,item.model].filter(Boolean).join(" ")}`,
+        deviceType:item.deviceType||"Appareil",brand:item.brand||"",model:item.model||"",serial:item.imei1||item.imei2||item.serial||"",
+        diagnosis:warrantyText,fault:"",lines:[{label:`Vente ${[item.brand,item.model,item.capacity].filter(Boolean).join(" ")}`,qty:1,unit:Number(item.salePrice||0),mode:"TTC",tax:0}],
+        reason:"",deposit:0,discountType:"none",discountValue:0,status:"Brouillon",paidConfirmedAt:"",clientSignature:"",repairId:"",personalDeviceId:item.id
+      };
+      documents.unshift(invoice);
+      item.invoiceId=invoice.id;
+      if(!saveAdminPersonalDevices(devices)) return;
+      try{saveAdminDocuments(documents);}catch(error){
+        console.error("Création facture appareil",error);
+        item.invoiceId="";
+        saveAdminPersonalDevices(devices);
+        alert("La facture n’a pas pu être créée.");
+        return;
+      }
+      renderPersonalDevices();
+      renderDocuments();
+      document.getElementById("personalDeviceModal").classList.add("hidden");
+      editDocument(invoice.id);
+      alert("Facture créée et prête à être vérifiée.");
     }
 
     function personalDeviceSheetFileName(item){
@@ -5521,10 +5717,11 @@
 
     function personalDevicePrintableContent(item){
       const repairs=[...(Array.isArray(item.repairs)?item.repairs:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+      const savReturns=[...(Array.isArray(item.savReturns)?item.savReturns:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
       const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
       const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
-      const textVolume=[item.accessories,item.notes,...repairs.flatMap(repair=>[repair.fault,repair.work,repair.parts])].join(" ").length;
-      const layoutClasses=[photos.length>3?"many-photos":"",repairs.length>4?"long-history":"",textVolume>900?"dense-sheet":""].filter(Boolean).join(" ");
+      const textVolume=[item.accessories,item.notes,...repairs.flatMap(repair=>[repair.fault,repair.work,repair.parts]),...savReturns.flatMap(entry=>[entry.reason,entry.diagnosis,entry.work,entry.notes])].join(" ").length;
+      const layoutClasses=[photos.length>3?"many-photos":"",repairs.length+savReturns.length>4?"long-history":"",textVolume>900?"dense-sheet":""].filter(Boolean).join(" ");
       const battery=item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined
         ? `${Math.max(0,Math.min(100,Number(item.batteryHealth)||0))} %`
         : "—";
@@ -5536,6 +5733,8 @@
         <td>${escapeHtml(repair.parts||"—")}</td>
         <td class="money">${personalMoney(repair.cost)}</td>
       </tr>`).join("");
+      const savRows=savReturns.map(entry=>`<tr class="device-repair-row"><td>${entry.date?formatDate(entry.date):"—"}</td><td>${escapeHtml(entry.underWarranty||"À vérifier")}</td><td>${escapeHtml(entry.reason||"—")}</td><td>${escapeHtml([entry.diagnosis,entry.work].filter(Boolean).join(" — ")||"—")}</td><td>${escapeHtml(entry.status||"Ouvert")}</td></tr>`).join("");
+      const warrantyEnd=personalWarrantyEndDate(item);
       return `<main class="device-print-sheet ${layoutClasses}">
         <header class="device-print-header">
           <div class="device-print-brand">
@@ -5568,6 +5767,9 @@
             <div><small>Prix d’achat</small><strong>${personalMoney(item.purchasePrice)}</strong></div>
             <div><small>Prix de vente</small><strong>${personalMoney(item.salePrice)}</strong></div>
             <div><small>Date de vente</small><strong>${item.saleDate?formatDate(item.saleDate):"—"}</strong></div>
+            <div><small>Date de mise en vente</small><strong>${item.listingDate?formatDate(item.listingDate):"—"}</strong></div>
+            <div><small>Durée de garantie</small><strong>${Number(item.warrantyMonths||0)>0?`${Number(item.warrantyMonths)} mois`:"Non renseignée"}</strong></div>
+            <div class="wide"><small>Fin de garantie</small><strong>${warrantyEnd?formatDate(warrantyEnd):"—"}</strong></div>
             <div class="wide"><small>Acheteur / Client</small><strong>${escapeHtml(item.buyer||"—")}</strong></div>
             <div class="wide"><small>Accessoires présents</small><span>${escapeHtml(item.accessories||"—")}</span></div>
             <div class="wide"><small>Notes et état détaillé</small><span>${escapeHtml(item.notes||"—")}</span></div>
@@ -5579,6 +5781,11 @@
         <section class="device-print-section device-history-section">
           <div class="device-history-title"><h3>Historique des réparations</h3><strong>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</strong></div>
           <table class="device-print-table"><thead><tr><th>Date</th><th>Panne</th><th>Réparation effectuée</th><th>Pièces utilisées</th><th>Coût</th></tr></thead><tbody>${repairRows||'<tr><td colspan="5">Aucune réparation enregistrée.</td></tr>'}</tbody></table>
+        </section>
+
+        <section class="device-print-section device-history-section">
+          <div class="device-history-title"><h3>Historique garantie et SAV</h3><strong>${savReturns.length} retour(s)</strong></div>
+          <table class="device-print-table"><thead><tr><th>Date</th><th>Garantie</th><th>Motif</th><th>Diagnostic / Solution</th><th>Statut</th></tr></thead><tbody>${savRows||'<tr><td colspan="5">Aucun retour SAV enregistré.</td></tr>'}</tbody></table>
         </section>
 
         <footer class="device-print-footer"><span>Fiche éditée le ${new Date().toLocaleDateString("fr-FR")} · ${escapeHtml(CONTACT_EMAIL)} · ${escapeHtml(CONTACT_PHONE)}</span><strong>TECH42SERVICE</strong></footer>
@@ -5739,7 +5946,9 @@
       document.getElementById("personalDeviceModalTitle").textContent=`${item.brand||""} ${item.model||""}`.trim()||"Fiche appareil";
       const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
       const repairs=Array.isArray(item.repairs)?item.repairs:[];
+      const savReturns=Array.isArray(item.savReturns)?item.savReturns:[];
       const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
+      const warrantyEnd=personalWarrantyEndDate(item);
       document.getElementById("personalDeviceDetail").innerHTML=`
         <div class="personal-device-detail-grid">
           <div class="detail-box"><small>Référence</small>${escapeHtml(item.reference||item.id)}</div>
@@ -5754,10 +5963,14 @@
           <div class="detail-box"><small>Numéro de série</small>${escapeHtml(item.serial||"—")}</div>
           <div class="detail-box"><small>Achat</small>${item.purchaseDate?formatDate(item.purchaseDate):"—"} · ${personalMoney(item.purchasePrice)}</div>
           <div class="detail-box"><small>Vente prévue / réalisée</small>${personalMoney(item.salePrice)}${item.saleDate?` · ${formatDate(item.saleDate)}`:""}</div>
+          <div class="detail-box"><small>Mise en vente</small>${item.listingDate?formatDate(item.listingDate):"—"}</div>
+          <div class="detail-box"><small>Durée de garantie</small>${Number(item.warrantyMonths||0)>0?`${Number(item.warrantyMonths)} mois`:"Non renseignée"}</div>
+          <div class="detail-box"><small>Fin de garantie</small>${warrantyEnd?formatDate(warrantyEnd):"—"}<br>${item.status==="Vendu"?warrantyBadgeHtml(item):""}</div>
           <div class="detail-box"><small>Acheteur / Client</small>${escapeHtml(item.buyer||"—")}</div>
           <div class="detail-box full"><small>Accessoires</small>${escapeHtml(item.accessories||"—")}</div>
           <div class="detail-box full"><small>Notes et état détaillé</small>${escapeHtml(item.notes||"—")}</div>
           <div class="detail-box full"><small>Total des réparations</small>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</div>
+          <div class="detail-box full"><small>Suivi SAV</small>${savReturns.length} retour(s) · ${savReturns.filter(entry=>entry.status!=="Clôturé").length} dossier(s) ouvert(s)</div>
         </div>
         ${photos.length?`<div class="personal-device-gallery">${photos.map((src,index)=>`<img src="${src}" alt="Photo appareil ${index+1}">`).join("")}</div>`:""}`;
 
@@ -5769,16 +5982,21 @@
           <button class="action-btn" type="button" data-detail-edit="${escapeHtml(item.id)}">Modifier la fiche</button>
           ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
           ${item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
+          ${item.status==="Vendu"?`<button class="action-btn" type="button" data-detail-invoice="${escapeHtml(item.id)}">${item.invoiceId?"Ouvrir la facture":"Créer une facture"}</button>`:""}
           <button class="mini-btn danger" type="button" data-detail-delete="${escapeHtml(item.id)}">Supprimer</button>`:""}`;
       actions.querySelector("[data-detail-print]")?.addEventListener("click",()=>printPersonalDeviceSheet(id));
       actions.querySelector("[data-detail-pdf]")?.addEventListener("click",()=>downloadPersonalDevicePdf(id));
       actions.querySelector("[data-detail-edit]")?.addEventListener("click",()=>editPersonalDevice(id));
       actions.querySelector("[data-detail-sale]")?.addEventListener("click",()=>markPersonalDeviceForSale(id));
       actions.querySelector("[data-detail-sold]")?.addEventListener("click",()=>markPersonalDeviceSold(id));
+      actions.querySelector("[data-detail-invoice]")?.addEventListener("click",()=>createPersonalDeviceInvoice(id));
       actions.querySelector("[data-detail-delete]")?.addEventListener("click",()=>deletePersonalDevice(id));
       document.getElementById("addPersonalRepairBtn").classList.toggle("hidden",activeRole!=="admin");
+      document.getElementById("addPersonalSavBtn").classList.toggle("hidden",activeRole!=="admin");
       hidePersonalRepairForm();
+      hidePersonalSavForm();
       renderPersonalRepairHistory(item);
+      renderPersonalSavHistory(item);
       document.getElementById("personalDeviceModal").classList.remove("hidden");
     }
 
@@ -5836,6 +6054,64 @@
       openPersonalDeviceDetails(item.id);
     }
 
+    function renderPersonalSavHistory(item){
+      const tbody=document.getElementById("personalSavTableBody");
+      const entries=[...(Array.isArray(item.savReturns)?item.savReturns:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+      tbody.innerHTML=entries.map(entry=>`<tr>
+        <td>${entry.date?formatDate(entry.date):"—"}${entry.closedDate?`<br><small>Clôturé le ${formatDate(entry.closedDate)}</small>`:""}</td>
+        <td>${escapeHtml(entry.underWarranty||"À vérifier")}</td>
+        <td>${escapeHtml(entry.reason||"—")}</td>
+        <td>${escapeHtml([entry.diagnosis,entry.work].filter(Boolean).join(" — ")||"—")}</td>
+        <td><span class="status ${entry.status==="Clôturé"?"status-green":"status-orange"}">${escapeHtml(entry.status||"Ouvert")}</span></td>
+        <td><div class="table-actions">${activeRole==="admin"?`<button class="mini-btn" type="button" data-sav-edit="${escapeHtml(entry.id)}">Modifier</button><button class="mini-btn danger" type="button" data-sav-delete="${escapeHtml(entry.id)}">Supprimer</button>`:"Consultation"}</div></td>
+      </tr>`).join("");
+      document.getElementById("personalSavEmpty").classList.toggle("hidden",entries.length>0);
+      tbody.querySelectorAll("[data-sav-edit]").forEach(btn=>btn.addEventListener("click",()=>showPersonalSavForm(btn.dataset.savEdit)));
+      tbody.querySelectorAll("[data-sav-delete]").forEach(btn=>btn.addEventListener("click",()=>deletePersonalSav(btn.dataset.savDelete)));
+    }
+
+    function showPersonalSavForm(entryId=""){
+      if(activeRole!=="admin"||!openPersonalDeviceId) return;
+      const item=getAdminPersonalDevices().find(device=>device.id===openPersonalDeviceId);
+      if(!item) return;
+      const entry=(Array.isArray(item.savReturns)?item.savReturns:[]).find(value=>value.id===entryId);
+      document.getElementById("personalSavForm").reset();
+      document.getElementById("personalSavEditId").value=entry?.id||"";
+      document.getElementById("personalSavDate").value=entry?.date||localIsoDate();
+      const warrantyState=personalWarrantyState(item);
+      document.getElementById("personalSavUnderWarranty").value=entry?.underWarranty||(warrantyState.key==="active"||warrantyState.key==="warning"?"Oui":"À vérifier");
+      document.getElementById("personalSavStatus").value=entry?.status||"Ouvert";
+      document.getElementById("personalSavClosedDate").value=entry?.closedDate||"";
+      document.getElementById("personalSavReason").value=entry?.reason||"";
+      document.getElementById("personalSavDiagnosis").value=entry?.diagnosis||"";
+      document.getElementById("personalSavWork").value=entry?.work||"";
+      document.getElementById("personalSavNotes").value=entry?.notes||"";
+      document.getElementById("savePersonalSavBtn").textContent=entry?"Enregistrer les modifications":"Enregistrer le retour SAV";
+      document.getElementById("personalSavForm").classList.remove("hidden");
+      document.getElementById("personalSavForm").scrollIntoView({behavior:"smooth",block:"center"});
+    }
+
+    function hidePersonalSavForm(){
+      const form=document.getElementById("personalSavForm");
+      if(!form) return;
+      form.classList.add("hidden");
+      form.reset();
+      document.getElementById("personalSavEditId").value="";
+      document.getElementById("savePersonalSavBtn").textContent="Enregistrer le retour SAV";
+    }
+
+    function deletePersonalSav(entryId){
+      if(activeRole!=="admin"||!openPersonalDeviceId) return;
+      if(!confirm("Supprimer ce retour de l’historique SAV ?")) return;
+      const list=getAdminPersonalDevices();
+      const item=list.find(device=>device.id===openPersonalDeviceId);
+      if(!item) return;
+      item.savReturns=(Array.isArray(item.savReturns)?item.savReturns:[]).filter(entry=>entry.id!==entryId);
+      if(!saveAdminPersonalDevices(list)) return;
+      renderPersonalDevices();
+      openPersonalDeviceDetails(item.id);
+    }
+
     document.getElementById("stockItemsTab").addEventListener("click",()=>showStockSubmodule("items"));
     document.getElementById("personalDevicesTab").addEventListener("click",()=>showStockSubmodule("devices"));
     document.getElementById("newPersonalDeviceBtn").addEventListener("click",()=>{resetPersonalDeviceForm();showPersonalDeviceForm();});
@@ -5847,6 +6123,8 @@
     document.getElementById("personalDeviceModal").addEventListener("click",event=>{if(event.target.id==="personalDeviceModal") event.currentTarget.classList.add("hidden");});
     document.getElementById("addPersonalRepairBtn").addEventListener("click",()=>showPersonalRepairForm());
     document.getElementById("cancelPersonalRepairBtn").addEventListener("click",hidePersonalRepairForm);
+    document.getElementById("addPersonalSavBtn").addEventListener("click",()=>showPersonalSavForm());
+    document.getElementById("cancelPersonalSavBtn").addEventListener("click",hidePersonalSavForm);
 
     document.getElementById("personalDevicePhotos").addEventListener("change",async event=>{
       const files=[...event.target.files].filter(file=>file.type.startsWith("image/"));
@@ -5877,6 +6155,7 @@
       const previous=list.find(item=>item.id===editId);
       const id=editId||nextPersonalDeviceId(list);
       const batteryValue=document.getElementById("personalDeviceBatteryHealth").value;
+      const warrantyMonths=Math.max(0,Number(document.getElementById("personalDeviceWarrantyMonths").value||0));
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
@@ -5892,6 +6171,8 @@
         purchaseDate:document.getElementById("personalDevicePurchaseDate").value,
         purchasePrice:Number(document.getElementById("personalDevicePurchasePrice").value||0),
         salePrice:Number(document.getElementById("personalDeviceSalePrice").value||0),
+        listingDate:document.getElementById("personalDeviceListingDate").value,
+        warrantyMonths,
         condition:document.getElementById("personalDeviceCondition").value,
         status:document.getElementById("personalDeviceStatus").value,
         buyer:document.getElementById("personalDeviceBuyer").value.trim(),
@@ -5899,8 +6180,11 @@
         notes:document.getElementById("personalDeviceNotes").value.trim(),
         photos:[...currentPersonalDevicePhotos],
         repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
+        savReturns:Array.isArray(previous?.savReturns)?previous.savReturns:[],
         saleDate:previous?.saleDate||"",
-        saleOperationId:previous?.saleOperationId||""
+        warrantyEndDate:previous?.saleDate?addMonthsToIsoDate(previous.saleDate,warrantyMonths):(previous?.warrantyEndDate||""),
+        saleOperationId:previous?.saleOperationId||"",
+        invoiceId:previous?.invoiceId||""
       };
       if(editId){
         const index=list.findIndex(entry=>entry.id===editId);
@@ -5934,6 +6218,30 @@
       item.repairs=repairs;
       if(!saveAdminPersonalDevices(list)) return;
       hidePersonalRepairForm();
+      renderPersonalDevices();
+      openPersonalDeviceDetails(item.id);
+    });
+
+    document.getElementById("personalSavForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin"||!openPersonalDeviceId) return;
+      const list=getAdminPersonalDevices();
+      const item=list.find(device=>device.id===openPersonalDeviceId);
+      if(!item) return;
+      const entries=Array.isArray(item.savReturns)?item.savReturns:[];
+      const editId=document.getElementById("personalSavEditId").value;
+      const status=document.getElementById("personalSavStatus").value;
+      const entry={
+        id:editId||`SAV-${Date.now()}`,date:document.getElementById("personalSavDate").value,
+        underWarranty:document.getElementById("personalSavUnderWarranty").value,status,
+        closedDate:status==="Clôturé"?(document.getElementById("personalSavClosedDate").value||localIsoDate()):document.getElementById("personalSavClosedDate").value,
+        reason:document.getElementById("personalSavReason").value.trim(),diagnosis:document.getElementById("personalSavDiagnosis").value.trim(),
+        work:document.getElementById("personalSavWork").value.trim(),notes:document.getElementById("personalSavNotes").value.trim()
+      };
+      if(editId){const index=entries.findIndex(value=>value.id===editId);if(index!==-1) entries[index]=entry;}else entries.unshift(entry);
+      item.savReturns=entries;
+      if(!saveAdminPersonalDevices(list)) return;
+      hidePersonalSavForm();
       renderPersonalDevices();
       openPersonalDeviceDetails(item.id);
     });
@@ -6284,7 +6592,8 @@
           ? (previousDocument?.paidConfirmedAt || new Date().toISOString())
           : "",
         clientSignature:documentClientSignatureData,
-        repairId:previousDocument?.repairId || ""
+        repairId:previousDocument?.repairId || "",
+        personalDeviceId:previousDocument?.personalDeviceId || ""
       };
 
       if(editId){
@@ -7294,9 +7603,13 @@
 
 
     const demoBuySell = [
-      {id:"RV-0001",type:"Rachat",sourceType:"Particulier",contactName:"Marc Durand",phone:"06 10 20 30 40",email:"",date:"2026-07-20",deviceType:"Téléphone",model:"Samsung Galaxy S22",serial:"356789000001111",condition:"Bon état",buyPrice:180,sellPrice:299,accessories:"Boîte, câble",notes:"Batterie à contrôler"},
+      {id:"RV-0001",type:"Rachat",sourceType:"Particulier",contactName:"Marc Durand",phone:"06 10 20 30 40",email:"",date:"2026-07-20",deviceType:"Téléphone",model:"Samsung Galaxy S22",serial:"356789000001111",condition:"Bon état",buyPrice:180,sellPrice:299,accessories:"Boîte, câble",notes:"Batterie à contrôler",sellerAddress:"12 rue de la République",sellerBirthDate:"1988-04-12",sellerBirthPlace:"Saint-Étienne",idType:"Carte nationale d’identité",idNumber:"DEMO-IDENTITE",idFront:"",idBack:"",ownershipAttestation:true,sellerSignature:""},
       {id:"RV-0002",type:"Vente",sourceType:"Particulier",contactName:"Claire Robert",phone:"06 22 33 44 55",email:"claire@example.fr",date:"2026-07-22",deviceType:"Téléphone",model:"iPhone 12 128 Go",serial:"356789000002222",condition:"Comme neuf",buyPrice:220,sellPrice:389,accessories:"Chargeur",notes:"Garantie 3 mois"}
     ];
+
+    let buySellIdFrontData="";
+    let buySellIdBackData="";
+    let buySellSellerSignatureData="";
 
     function getAdminBuySell(){
       try{return JSON.parse(localStorage.getItem("tech42-buy-sell") || "[]")}catch{return []}
@@ -7305,8 +7618,10 @@
     function saveAdminBuySell(list){
       const preparedList = prepareCloudCollectionForSave("tech42-buy-sell",list);
       clearCloudDeletionsForSavedItems("tech42-buy-sell",preparedList);
-      localStorage.setItem("tech42-buy-sell", JSON.stringify(preparedList));
+      try{localStorage.setItem("tech42-buy-sell", JSON.stringify(preparedList));}
+      catch(error){console.error("Stockage rachat / vente",error);alert("Le stockage des fiches de rachat est saturé. Supprime d’anciennes photos de pièces d’identité avant de réessayer.");return false;}
       scheduleCloudSave();
+      return true;
     }
 
     function currentBuySell(){
@@ -7319,6 +7634,29 @@
         return Math.max(highest, match ? Number(match[1]) : 0);
       },0);
       return `RV-${String(max+1).padStart(4,"0")}`;
+    }
+
+    function isPrivateBuyBack(type=document.getElementById("buySellType")?.value,source=document.getElementById("buySellSourceType")?.value){
+      return type==="Rachat"&&source==="Particulier";
+    }
+
+    function renderBuySellIdentityPreviews(){
+      const front=document.getElementById("buySellIdFrontPreview");
+      const back=document.getElementById("buySellIdBackPreview");
+      if(front) front.innerHTML=buySellIdFrontData?`<img src="${buySellIdFrontData}" alt="Pièce d’identité recto">`:"Recto non ajouté";
+      if(back) back.innerHTML=buySellIdBackData?`<img src="${buySellIdBackData}" alt="Pièce d’identité verso">`:"Verso non ajouté";
+    }
+
+    function updateBuySellSignatureStatus(){
+      const status=document.getElementById("buySellSignatureStatus");
+      if(!status) return;
+      const signed=Boolean(buySellSellerSignatureData);
+      status.textContent=signed?"Signature enregistrée":"Non signé";
+      status.classList.toggle("signed",signed);
+    }
+
+    function updateBuyBackIdentityVisibility(){
+      document.getElementById("buyBackIdentityBlock")?.classList.toggle("hidden",!isPrivateBuyBack());
     }
 
     function filteredBuySell(){
@@ -7340,6 +7678,7 @@
         const margin=amountToTTC(item.sellPrice,item.sellMode||"TTC")-amountToTTC(item.buyPrice,item.buyMode||"TTC");
         const actions = activeRole==="admin"
           ? `<button class="mini-btn" data-rv-edit="${escapeHtml(item.id)}">Modifier</button>
+             ${isPrivateBuyBack(item.type,item.sourceType)?`<button class="mini-btn" data-rv-sheet="${escapeHtml(item.id)}">Fiche de rachat A4</button>`:""}
              <button class="mini-btn danger" data-rv-delete="${escapeHtml(item.id)}">Supprimer</button>`
           : "";
 
@@ -7353,6 +7692,7 @@
                 ${escapeHtml(item.contactName)} · ${escapeHtml(item.sourceType)}<br>
                 ${escapeHtml(item.deviceType)} · ${escapeHtml(item.condition)}<br>
                 IMEI / Série : ${escapeHtml(item.serial||"—")}<br>
+                ${isPrivateBuyBack(item.type,item.sourceType)?`<span class="workflow-badge">${item.ownershipAttestation&&item.sellerSignature?"Attestation signée":"Fiche à compléter"}</span><br>`:""}
                 Rachat : ${Number(item.buyPrice||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})} ·
                 Vente : ${Number(item.sellPrice||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"})} ·
                 Marge : ${margin.toLocaleString("fr-FR",{style:"currency",currency:"EUR"})}
@@ -7366,6 +7706,7 @@
 
       empty.classList.toggle("hidden", list.length>0);
       box.querySelectorAll("[data-rv-edit]").forEach(btn=>btn.addEventListener("click",()=>editBuySell(btn.dataset.rvEdit)));
+      box.querySelectorAll("[data-rv-sheet]").forEach(btn=>btn.addEventListener("click",()=>printBuySellPurchaseSheet(btn.dataset.rvSheet)));
       box.querySelectorAll("[data-rv-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteBuySell(btn.dataset.rvDelete)));
     }
 
@@ -7373,6 +7714,12 @@
       document.getElementById("buySellForm").reset();
       document.getElementById("buySellEditId").value="";
       document.getElementById("buySellDate").value=localIsoDate();
+      buySellIdFrontData="";
+      buySellIdBackData="";
+      buySellSellerSignatureData="";
+      renderBuySellIdentityPreviews();
+      updateBuySellSignatureStatus();
+      updateBuyBackIdentityVisibility();
       document.getElementById("saveBuySellBtn").textContent="Enregistrer l'opération";
     }
 
@@ -7392,6 +7739,18 @@
     document.getElementById("cancelBuySellBtn").addEventListener("click",hideBuySellForm);
     document.getElementById("buySellSearch").addEventListener("input",renderBuySell);
     document.getElementById("buySellFilter").addEventListener("change",renderBuySell);
+    document.getElementById("buySellType").addEventListener("change",updateBuyBackIdentityVisibility);
+    document.getElementById("buySellSourceType").addEventListener("change",updateBuyBackIdentityVisibility);
+    document.getElementById("buySellIdFrontFile").addEventListener("change",async event=>{
+      const file=event.target.files?.[0];
+      if(file) try{buySellIdFrontData=await compressPersonalDevicePhoto(file);renderBuySellIdentityPreviews();}catch(error){console.error(error);alert("La photo recto n’a pas pu être ajoutée.");}
+      event.target.value="";
+    });
+    document.getElementById("buySellIdBackFile").addEventListener("change",async event=>{
+      const file=event.target.files?.[0];
+      if(file) try{buySellIdBackData=await compressPersonalDevicePhoto(file);renderBuySellIdentityPreviews();}catch(error){console.error(error);alert("La photo verso n’a pas pu être ajoutée.");}
+      event.target.value="";
+    });
 
     document.getElementById("buySellForm").addEventListener("submit",(event)=>{
       event.preventDefault();
@@ -7399,6 +7758,11 @@
 
       const list=getAdminBuySell();
       const editId=document.getElementById("buySellEditId").value;
+      const privateBuyBack=isPrivateBuyBack();
+      if(privateBuyBack&&(!document.getElementById("buySellSellerAddress").value.trim()||!document.getElementById("buySellIdNumber").value.trim()||!buySellIdFrontData||!buySellIdBackData||!buySellSellerSignatureData||!document.getElementById("buySellOwnershipAttestation").checked)){
+        alert("Complète l’adresse, la pièce d’identité recto/verso, l’attestation de propriété et la signature du vendeur.");
+        return;
+      }
       const item={
         id:editId||nextBuySellId(list),
         type:document.getElementById("buySellType").value,
@@ -7415,6 +7779,14 @@
         buyMode:document.getElementById("buySellBuyMode").value,
         sellPrice:Number(document.getElementById("buySellSellPrice").value||0),
         sellMode:document.getElementById("buySellSellMode").value,
+        sellerAddress:privateBuyBack?document.getElementById("buySellSellerAddress").value.trim():"",
+        sellerBirthDate:privateBuyBack?document.getElementById("buySellSellerBirthDate").value:"",
+        sellerBirthPlace:privateBuyBack?document.getElementById("buySellSellerBirthPlace").value.trim():"",
+        idType:privateBuyBack?document.getElementById("buySellIdType").value:"",
+        idNumber:privateBuyBack?document.getElementById("buySellIdNumber").value.trim():"",
+        idFront:privateBuyBack?buySellIdFrontData:"",idBack:privateBuyBack?buySellIdBackData:"",
+        ownershipAttestation:privateBuyBack&&document.getElementById("buySellOwnershipAttestation").checked,
+        sellerSignature:privateBuyBack?buySellSellerSignatureData:"",
         accessories:document.getElementById("buySellAccessories").value.trim(),
         notes:document.getElementById("buySellNotes").value.trim()
       };
@@ -7426,7 +7798,7 @@
         list.unshift(item);
       }
 
-      saveAdminBuySell(list);
+      if(!saveAdminBuySell(list)) return;
       hideBuySellForm();
       renderBuySell();
     });
@@ -7450,6 +7822,18 @@
       document.getElementById("buySellBuyMode").value=item.buyMode||"TTC";
       document.getElementById("buySellSellPrice").value=item.sellPrice??0;
       document.getElementById("buySellSellMode").value=item.sellMode||"TTC";
+      document.getElementById("buySellSellerAddress").value=item.sellerAddress||"";
+      document.getElementById("buySellSellerBirthDate").value=item.sellerBirthDate||"";
+      document.getElementById("buySellSellerBirthPlace").value=item.sellerBirthPlace||"";
+      document.getElementById("buySellIdType").value=item.idType||"Carte nationale d’identité";
+      document.getElementById("buySellIdNumber").value=item.idNumber||"";
+      document.getElementById("buySellOwnershipAttestation").checked=Boolean(item.ownershipAttestation);
+      buySellIdFrontData=item.idFront||"";
+      buySellIdBackData=item.idBack||"";
+      buySellSellerSignatureData=item.sellerSignature||"";
+      renderBuySellIdentityPreviews();
+      updateBuySellSignatureStatus();
+      updateBuyBackIdentityVisibility();
       document.getElementById("buySellAccessories").value=item.accessories||"";
       document.getElementById("buySellNotes").value=item.notes||"";
       document.getElementById("saveBuySellBtn").textContent="Enregistrer les modifications";
@@ -7458,9 +7842,29 @@
 
     function deleteBuySell(id){
       if(!confirm("Supprimer définitivement cette opération ?")) return;
+      if(!saveAdminBuySell(getAdminBuySell().filter(i=>i.id!==id))) return;
       recordCloudDeletion("tech42-buy-sell",id);
-      saveAdminBuySell(getAdminBuySell().filter(i=>i.id!==id));
       renderBuySell();
+    }
+
+    function printBuySellPurchaseSheet(id){
+      const item=currentBuySell().find(entry=>entry.id===id);
+      if(!item||!isPrivateBuyBack(item.type,item.sourceType)) return;
+      const popup=window.open("","_blank","width=980,height=820");
+      if(!popup){alert("Autorise les fenêtres pop-up pour imprimer la fiche de rachat.");return;}
+      const identityPhotos=[item.idFront?`<div class="id-card"><img src="${item.idFront}" alt="Pièce d’identité recto"><small>Pièce d’identité — Recto</small></div>`:"",item.idBack?`<div class="id-card"><img src="${item.idBack}" alt="Pièce d’identité verso"><small>Pièce d’identité — Verso</small></div>`:""].join("");
+      popup.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche de rachat ${escapeHtml(item.id)}</title><style>
+        @page{size:A4 portrait;margin:10mm}*{box-sizing:border-box}html,body{margin:0;background:#e8e8e8;color:#171717;font-family:Arial,Helvetica,sans-serif}.print-toolbar{position:sticky;top:0;z-index:10;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}.print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800}.print-toolbar .close-print{background:#fff}.a4-page{width:190mm;height:277mm;margin:8mm auto;overflow:hidden;background:#fff}.sheet{width:190mm;padding:8mm;transform-origin:top left}.head{display:flex;justify-content:space-between;gap:8mm;align-items:center;border-top:2mm solid #d4a72c;padding-top:5mm}.brand{display:flex;align-items:center;gap:4mm}.brand img{width:28mm;height:28mm;object-fit:contain;background:#050505;border-radius:2mm}.brand h1{margin:0;font-size:19pt}.brand p{margin:1mm 0;color:#666;font-size:8pt}.title{max-width:75mm;padding:4mm;background:#111;color:#fff;text-align:right;border-radius:2mm;border-bottom:1.5mm solid #d4a72c}.title h2{margin:1mm 0;font-size:13pt}.title strong{color:#f2d270}.box{margin:4mm 0;padding:4mm;border:1px solid #d7d0bf;border-radius:2mm;break-inside:avoid}.box h3{margin:0 0 3mm;color:#896500;font-size:10pt;text-transform:uppercase}.grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm 7mm}.wide{grid-column:1/-1}.grid small{display:block;color:#777;font-size:7pt;font-weight:800;text-transform:uppercase;margin-bottom:1mm}.grid strong,.grid span{font-size:9pt;overflow-wrap:anywhere}.id-grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm}.id-card{border:1px solid #d7d0bf;border-radius:2mm;padding:2mm}.id-card img{display:block;width:100%;height:38mm;object-fit:contain;background:#f5f5f5}.id-card small{display:block;margin-top:1mm;text-align:center;color:#666}.attestation{padding:4mm;border-left:1.2mm solid #d4a72c;background:#fbfaf7;font-size:9pt;line-height:1.5}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-top:5mm}.signature{height:38mm;border:1px solid #aaa;border-radius:2mm;padding:3mm;font-size:8pt;color:#666}.signature img{display:block;width:100%;height:27mm;object-fit:contain;margin-top:1mm}.footer{display:flex;justify-content:space-between;margin-top:5mm;padding-top:3mm;border-top:1px solid #ccc;color:#666;font-size:7.5pt}@media print{html,body{width:210mm;height:297mm;overflow:hidden;background:#fff}.print-toolbar{display:none}.a4-page{margin:0;box-shadow:none}}
+      </style></head><body>${printableToolbarHtml("Imprimer la fiche de rachat A4")}<div class="a4-page"><main id="buybackSheet" class="sheet">
+        <header class="head"><div class="brand"><img src="${EMBEDDED_LOGO_DATA_URL}" alt="TECH42SERVICE"><div><h1>TECH42SERVICE</h1><p>${escapeHtml(CONTACT_EMAIL)}</p><p>Tél. ${escapeHtml(CONTACT_PHONE)}</p></div></div><div class="title"><small>RACHAT À UN PARTICULIER</small><h2>ATTESTATION DE CESSION</h2><strong>${escapeHtml(item.id)}</strong></div></header>
+        <section class="box"><h3>Identité du vendeur</h3><div class="grid"><div><small>Nom et prénom</small><strong>${escapeHtml(item.contactName||"—")}</strong></div><div><small>Téléphone / E-mail</small><strong>${escapeHtml([item.phone,item.email].filter(Boolean).join(" / ")||"—")}</strong></div><div class="wide"><small>Adresse</small><strong>${escapeHtml(item.sellerAddress||"—")}</strong></div><div><small>Naissance</small><strong>${item.sellerBirthDate?formatDate(item.sellerBirthDate):"—"} ${item.sellerBirthPlace?`à ${escapeHtml(item.sellerBirthPlace)}`:""}</strong></div><div><small>Pièce d’identité</small><strong>${escapeHtml(item.idType||"—")} — ${escapeHtml(item.idNumber||"—")}</strong></div></div></section>
+        <section class="box"><h3>Appareil cédé</h3><div class="grid"><div><small>Type / Modèle</small><strong>${escapeHtml(item.deviceType||"—")} — ${escapeHtml(item.model||"—")}</strong></div><div><small>IMEI / Série</small><strong>${escapeHtml(item.serial||"—")}</strong></div><div><small>État</small><strong>${escapeHtml(item.condition||"—")}</strong></div><div><small>Date du rachat</small><strong>${item.date?formatDate(item.date):"—"}</strong></div><div><small>Prix de rachat</small><strong>${personalMoney(item.buyPrice)} ${escapeHtml(item.buyMode||"TTC")}</strong></div><div><small>Accessoires</small><span>${escapeHtml(item.accessories||"—")}</span></div></div></section>
+        ${identityPhotos?`<section class="box"><h3>Justificatif d’identité</h3><div class="id-grid">${identityPhotos}</div></section>`:""}
+        <section class="attestation"><strong>Attestation de propriété</strong><br>Le vendeur atteste être le propriétaire légitime de l’appareil décrit ci-dessus, que celui-ci n’est ni volé, ni perdu, ni soumis à un financement ou à une opposition. Il confirme l’exactitude des informations fournies et cède l’appareil à TECH42SERVICE au prix indiqué.</section>
+        <div class="signatures"><div class="signature">Signature du vendeur${item.sellerSignature?`<img src="${item.sellerSignature}" alt="Signature du vendeur">`:""}</div><div class="signature">Signature et cachet TECH42SERVICE</div></div>
+        <footer class="footer"><span>Document établi le ${item.date?formatDate(item.date):new Date().toLocaleDateString("fr-FR")} en deux exemplaires.</span><strong>TECH42SERVICE</strong></footer>
+      </main></div>${a4PopupScript("#buybackSheet",277,true,190)}</body></html>`);
+      popup.document.close();
     }
 
 
@@ -7655,7 +8059,8 @@
     const clientSignaturePad=setupSignatureCanvas(
       "clientSignatureCanvas","clearClientSignature",
       value=>{
-        if(clientSignatureContext==="document") documentClientSignatureData=value;
+        if(clientSignatureContext==="buySell"){buySellSellerSignatureData=value;updateBuySellSignatureStatus();}
+        else if(clientSignatureContext==="document") documentClientSignatureData=value;
         else clientSignatureData=value;
       }
     );
@@ -7688,10 +8093,17 @@
       clientSignatureContext=context;
       const screen=document.getElementById("clientSignatureScreen");
       const isDocument=context==="document";
+      const isBuySell=context==="buySell";
       const type=document.getElementById("documentType")?.value||"facture";
       const typeLabel=documentTypeLabel(type);
-      document.querySelector("#clientSignatureScreen .client-sign-header h1").textContent=isDocument?`Signature du client — ${typeLabel}`:"Signature du client";
-      document.getElementById("clientSignatureInfo").innerHTML=isDocument?`
+      document.querySelector("#clientSignatureScreen .client-sign-header h1").textContent=isBuySell?"Signature du vendeur — Fiche de rachat":isDocument?`Signature du client — ${typeLabel}`:"Signature du client";
+      document.getElementById("clientSignatureInfo").innerHTML=isBuySell?`
+        <div class="client-only-card"><small>Vendeur</small><strong>${clientInfoValue("buySellContactName")}</strong></div>
+        <div class="client-only-card"><small>Adresse</small><strong>${clientInfoValue("buySellSellerAddress")}</strong></div>
+        <div class="client-only-card"><small>Appareil</small><strong>${clientInfoValue("buySellDeviceType")} — ${clientInfoValue("buySellModel")}</strong></div>
+        <div class="client-only-card"><small>IMEI / Série</small><strong>${clientInfoValue("buySellSerial")}</strong></div>
+        <div class="client-only-card"><small>Prix de rachat</small><strong>${clientInfoValue("buySellBuyPrice","0")} €</strong></div>
+        <div class="client-only-card"><small>Attestation</small><strong>Le vendeur confirme être le propriétaire légitime de l’appareil.</strong></div>`:isDocument?`
         <div class="client-only-card"><small>Document</small><strong>${escapeHtml(typeLabel)}</strong></div>
         <div class="client-only-card"><small>Numéro</small><strong>${clientInfoValue("documentNumber")}</strong></div>
         <div class="client-only-card"><small>Client</small><strong>${clientInfoValue("documentClient")}</strong></div>
@@ -7706,26 +8118,35 @@
         <div class="client-only-card"><small>Prix de la réparation</small><strong>${clientInfoValue("repairPrice","0")} € ${clientInfoValue("repairPriceMode","TTC")}</strong></div>`;
       screen.classList.remove("hidden");
       document.body.style.overflow="hidden";
-      clientSignaturePad.load(isDocument?documentClientSignatureData:clientSignatureData);
+      clientSignaturePad.load(isBuySell?buySellSellerSignatureData:isDocument?documentClientSignatureData:clientSignatureData);
     }
 
     function closeClientSignatureScreen(){
       document.getElementById("clientSignatureScreen").classList.add("hidden");
       document.body.style.overflow="";
-      const returnButton=clientSignatureContext==="document"?document.getElementById("openDocumentClientSignatureBtn"):document.getElementById("openClientSignatureBtn");
+      const returnButton=clientSignatureContext==="buySell"?document.getElementById("openBuySellSignatureBtn"):clientSignatureContext==="document"?document.getElementById("openDocumentClientSignatureBtn"):document.getElementById("openClientSignatureBtn");
       returnButton?.scrollIntoView({behavior:"smooth",block:"center"});
     }
 
     document.getElementById("openClientSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("repair"));
     document.getElementById("openDocumentClientSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("document"));
+    document.getElementById("openBuySellSignatureBtn").addEventListener("click",()=>openClientSignatureScreen("buySell"));
     document.getElementById("cancelClientSignature").addEventListener("click",closeClientSignatureScreen);
     document.getElementById("confirmClientSignature").addEventListener("click",()=>{
-      const currentData=clientSignatureContext==="document"?documentClientSignatureData:clientSignatureData;
+      const currentData=clientSignatureContext==="buySell"?buySellSellerSignatureData:clientSignatureContext==="document"?documentClientSignatureData:clientSignatureData;
       if(!currentData){
         alert("Le client doit signer avant de valider.");
         return;
       }
-      if(clientSignatureContext==="document"){
+      if(clientSignatureContext==="buySell"){
+        const editId=document.getElementById("buySellEditId").value;
+        if(editId){
+          const operations=getAdminBuySell();
+          const index=operations.findIndex(item=>item.id===editId);
+          if(index!==-1){operations[index].sellerSignature=buySellSellerSignatureData;saveAdminBuySell(operations);}
+        }
+        updateBuySellSignatureStatus();
+      }else if(clientSignatureContext==="document"){
         const editId=document.getElementById("documentEditId").value;
         if(editId){
           const documents=getAdminDocuments();
@@ -7752,6 +8173,7 @@
     });
     updateClientSignatureStatus();
     updateDocumentClientSignatureStatus();
+    updateBuySellSignatureStatus();
 
     function getStockPurchaseCostTTC(stockItem){
       if(!stockItem) return 0;
@@ -7856,9 +8278,14 @@
       document.getElementById("date").textContent = now.toLocaleDateString("fr-FR", {
         weekday:"long",day:"2-digit",month:"long",year:"numeric"
       });
+      const hour=now.getHours();
+      const greeting=hour<6?"Bonne nuit dans votre atelier":hour<12?"Bonjour, bonne matinée":hour<18?"Bonjour, bon après-midi":"Bonsoir, bonne fin de journée";
+      const greetingBox=document.getElementById("clockGreeting");
+      if(greetingBox) greetingBox.textContent=greeting;
     }
     updateClock();
     setInterval(updateClock,1000);
+    setTimeout(()=>document.getElementById("startupSplash")?.remove(),3400);
     setTimeout(async()=>{
       try{
         const recoveredRepairs=await recoverMissingRepairsFromBackups();
