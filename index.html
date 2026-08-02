@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.15 Fiche appareil A4 une page</title>
+  <title>TECH42SERVICE Gestion — V21.16 Fiche appareil A4 une page stable</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -156,7 +156,7 @@
     .stock-subnav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;padding:6px;background:#0d0d0d;border:1px solid var(--border);border-radius:12px}
     .stock-subnav button{padding:11px 16px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--text);font-weight:700;cursor:pointer}
     .stock-subnav button.active{background:var(--accent);color:#080808}
-    .personal-device-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .personal-device-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
     .personal-device-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
     .personal-device-form .full{grid-column:1/-1}
     .personal-device-form input,.personal-device-form select,.personal-device-form textarea,
@@ -470,7 +470,7 @@
 <body>
   <section id="loginScreen" class="login-screen">
     <form id="loginForm" class="login-box" autocomplete="off">
-      <img src="logo.png" alt="Logo TECH42SERVICE" class="login-logo">
+      <img src="logo.png" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzYwIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjM2MCIgcng9IjM2IiBmaWxsPSIjMDUwNTA1Ii8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iNzY0IiBoZWlnaHQ9IjMyNCIgcng9IjI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNGI1MWYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjcwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3MCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2Y0YjUxZiI+NDI8L3RleHQ+PHRleHQgeD0iMzUwIiB5PSIxMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjYyIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIj5URUNIPC90ZXh0Pjx0ZXh0IHg9IjM1MCIgeT0iMjIwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2Y0YjUxZiI+U0VSVklDRTwvdGV4dD48dGV4dCB4PSIzNTAiIHk9IjI3MyIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiN2I3YjciPlLDiVBBUkFUSU9OIMOJTEVDVFJPTklRVUU8L3RleHQ+PC9zdmc+'" alt="Logo TECH42SERVICE" class="login-logo">
       <h1>Connexion</h1>
       <p>TECH42SERVICE Gestion</p>
 
@@ -519,7 +519,7 @@
 
   <div id="app" class="app hidden">
     <aside class="sidebar">
-      <img src="logo.png" alt="Logo TECH42SERVICE" class="logo">
+      <img src="logo.png" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzYwIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjM2MCIgcng9IjM2IiBmaWxsPSIjMDUwNTA1Ii8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iNzY0IiBoZWlnaHQ9IjMyNCIgcng9IjI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNGI1MWYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjcwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3MCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2Y0YjUxZiI+NDI8L3RleHQ+PHRleHQgeD0iMzUwIiB5PSIxMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjYyIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIj5URUNIPC90ZXh0Pjx0ZXh0IHg9IjM1MCIgeT0iMjIwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2Y0YjUxZiI+U0VSVklDRTwvdGV4dD48dGV4dCB4PSIzNTAiIHk9IjI3MyIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiN2I3YjciPlLDiVBBUkFUSU9OIMOJTEVDVFJPTklRVUU8L3RleHQ+PC9zdmc+'" alt="Logo TECH42SERVICE" class="logo">
       <div class="user-badge">Connecté : <strong id="currentUser">Administrateur</strong></div>
 
       <nav class="menu">
@@ -1002,7 +1002,6 @@
             <div class="summary-card"><small>Appareils personnels</small><strong id="personalDeviceTotal">0</strong></div>
             <div class="summary-card"><small>À réparer</small><strong id="personalDeviceRepairCount">0</strong></div>
             <div class="summary-card"><small>En vente</small><strong id="personalDeviceSaleCount">0</strong></div>
-            <div class="summary-card"><small>Valeur de vente estimée</small><strong id="personalDeviceSaleValue">0 €</strong></div>
           </div>
 
           <section class="panel">
@@ -1866,7 +1865,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.15 Fiche appareil A4 une page</footer>
+      <footer>TECH42SERVICE Gestion — V21.16 Fiche appareil A4 une page stable</footer>
     </main>
   </div>
 
@@ -1957,6 +1956,7 @@
     const CLOUD_EMAIL = "tech42service@gmail.com";
     const CONTACT_EMAIL = "gestiontech42service@gmail.com";
     const CONTACT_PHONE = "0743262415";
+    const EMBEDDED_LOGO_DATA_URL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzYwIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjM2MCIgcng9IjM2IiBmaWxsPSIjMDUwNTA1Ii8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iNzY0IiBoZWlnaHQ9IjMyNCIgcng9IjI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNGI1MWYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjcwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3MCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2Y0YjUxZiI+NDI8L3RleHQ+PHRleHQgeD0iMzUwIiB5PSIxMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjYyIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIj5URUNIPC90ZXh0Pjx0ZXh0IHg9IjM1MCIgeT0iMjIwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2Y0YjUxZiI+U0VSVklDRTwvdGV4dD48dGV4dCB4PSIzNTAiIHk9IjI3MyIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiN2I3YjciPlLDiVBBUkFUSU9OIMOJTEVDVFJPTklRVUU8L3RleHQ+PC9zdmc+";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: {
         persistSession: true,
@@ -2089,18 +2089,20 @@
       return `${text.length}:${(first>>>0).toString(16)}:${(second>>>0).toString(16)}`;
     }
 
-    function hasPendingCloudChanges(){
+    // Ancien bloc global conservé uniquement pour relire et migrer les sauvegardes V21.10.
+    // Les noms sont isolés afin qu'il ne puisse pas remplacer la synchronisation par fiche active.
+    function legacyBlockHasPendingCloudChanges(){
       if(cloudDirty || localStorage.getItem(CLOUD_PENDING_KEY) === "1") return true;
       if(!lastCloudFingerprint) return false;
       return cloudFingerprint(canonicalCloudJson(collectCloudData())) !== lastCloudFingerprint;
     }
 
-    function markCloudPending(){
+    function legacyBlockMarkCloudPending(){
       cloudDirty = true;
       try{ localStorage.setItem(CLOUD_PENDING_KEY,"1"); }catch(error){ console.warn("Marqueur de sauvegarde indisponible",error); }
     }
 
-    function markCloudConfirmed(json, updatedAt=""){
+    function legacyBlockMarkCloudConfirmed(json, updatedAt=""){
       lastCloudJson = String(json || "");
       lastCloudFingerprint = cloudFingerprint(lastCloudJson);
       if(updatedAt) lastCloudUpdatedAt = updatedAt;
@@ -2425,7 +2427,7 @@
       return {ok:true, row:data || null};
     }
 
-    async function cloudFetchLatest(refresh=true){
+    async function legacyBlockCloudFetchLatest(refresh=true){
       if(!cloudUser || cloudLoading || !navigator.onLine) return false;
       if(cloudDirty || canonicalCloudJson(collectCloudData()) !== lastCloudJson){
         setCloudStatus("Modifications locales en attente — réception cloud suspendue", false);
@@ -2473,7 +2475,7 @@
       }
     }
 
-    async function cloudLoadOrCreate(){
+    async function legacyBlockCloudLoadOrCreate(){
       const localState = collectCloudData();
       const localJson = canonicalCloudJson(localState);
       const {data, error} = await supabaseClient
@@ -2652,7 +2654,7 @@
       return cloudSavePromise;
     }
 
-    function scheduleCloudSave(){
+    function legacyBlockScheduleCloudSave(){
       if(!cloudUser || cloudApplying) return;
       markCloudPending();
       clearTimeout(cloudSaveTimer);
@@ -2680,7 +2682,7 @@
       }
     };
 
-    function startCloudAutoSave(){
+    function legacyBlockStartCloudAutoSave(){
       if(cloudAutoSaveStarted) return;
       cloudAutoSaveStarted = true;
 
@@ -2721,7 +2723,7 @@
       });
     }
 
-    async function manualCloudSync(){
+    async function legacyBlockManualCloudSync(){
       if(!cloudUser){
         setCloudStatus("Connecte-toi pour synchroniser", false);
         return;
@@ -2785,7 +2787,7 @@
       }
     }
 
-    async function syncMobileSaveToCloud(){
+    async function legacyBlockSyncMobileSaveToCloud(){
       if(!navigator.onLine){
         setCloudStatus("Mobile hors connexion — envoi au PC en attente",false);
         return false;
@@ -2825,7 +2827,7 @@
       return true;
     }
 
-    function subscribeCloud(){
+    function legacyBlockSubscribeCloud(){
       if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
       cloudChannel = supabaseClient
         .channel("tech42-app-state-" + cloudUser.id)
@@ -2871,7 +2873,7 @@
         .subscribe();
     }
 
-    async function initializeCloudForUser(user,{refresh=true}={}){
+    async function legacyBlockInitializeCloudForUser(user,{refresh=true}={}){
       if(!user) return false;
       cloudUser = user;
 
@@ -2916,7 +2918,7 @@
       }catch(e){ console.warn(e); }
     }
 
-    async function cloudLogin(passwordValue){
+    async function legacyBlockCloudLogin(passwordValue){
       const {data, error} = await supabaseClient.auth.signInWithPassword({
         email: CLOUD_EMAIL,
         password: passwordValue
@@ -5194,6 +5196,8 @@
 
     // ===== V21.12 : appareils personnels =====
     const PERSONAL_DEVICE_STORAGE_KEY = "tech42-personal-devices";
+    const PERSONAL_DEVICE_PHOTO_TARGET_BYTES = 220 * 1024;
+    const PERSONAL_DEVICE_PHOTO_TOTAL_LIMIT = 3.2 * 1024 * 1024;
     const demoPersonalDevices = [
       {
         id:"APP-0001",reference:"PERSO-IPHONE",deviceType:"Téléphone",brand:"Apple",model:"iPhone 13",
@@ -5220,8 +5224,15 @@
     function saveAdminPersonalDevices(list){
       const preparedList = prepareCloudCollectionForSave(PERSONAL_DEVICE_STORAGE_KEY,list);
       clearCloudDeletionsForSavedItems(PERSONAL_DEVICE_STORAGE_KEY,preparedList);
-      localStorage.setItem(PERSONAL_DEVICE_STORAGE_KEY,JSON.stringify(preparedList));
+      try{
+        localStorage.setItem(PERSONAL_DEVICE_STORAGE_KEY,JSON.stringify(preparedList));
+      }catch(error){
+        console.error("Stockage des appareils personnels",error);
+        alert("Le stockage des photos est saturé. Supprime une ou plusieurs photos puis réessaie : aucune donnée n’a été écrasée.");
+        return false;
+      }
       scheduleCloudSave();
+      return true;
     }
 
     function currentPersonalDevices(){
@@ -5252,6 +5263,22 @@
       return value.startsWith("data:image/") ? value : "";
     }
 
+    function personalDeviceDataUrlBytes(value){
+      const source=String(value||"");
+      const comma=source.indexOf(",");
+      if(comma<0) return new Blob([source]).size;
+      const payload=source.slice(comma+1);
+      return Math.ceil(payload.length*3/4);
+    }
+
+    function personalDeviceStoredPhotoBytes(excludedDeviceId=""){
+      return getAdminPersonalDevices()
+        .filter(item=>item.id!==excludedDeviceId)
+        .flatMap(item=>Array.isArray(item.photos)?item.photos:[])
+        .map(personalDevicePhotoSource)
+        .reduce((sum,photo)=>sum+personalDeviceDataUrlBytes(photo),0);
+    }
+
     function personalMoney(value){
       return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
     }
@@ -5277,8 +5304,6 @@
       document.getElementById("personalDeviceTotal").textContent=fullList.length;
       document.getElementById("personalDeviceRepairCount").textContent=fullList.filter(item=>item.status==="À réparer"||item.condition==="À réparer").length;
       document.getElementById("personalDeviceSaleCount").textContent=fullList.filter(item=>item.status==="En vente").length;
-      document.getElementById("personalDeviceSaleValue").textContent=personalMoney(fullList.filter(item=>item.status!=="Vendu").reduce((sum,item)=>sum+Number(item.salePrice||0),0));
-
       box.innerHTML="";
       list.forEach(item=>{
         const repairs=Array.isArray(item.repairs)?item.repairs:[];
@@ -5372,13 +5397,23 @@
           const image=new Image();
           image.onerror=reject;
           image.onload=()=>{
-            const max=1000;
-            const ratio=Math.min(1,max/Math.max(image.width,image.height));
             const canvas=document.createElement("canvas");
-            canvas.width=Math.max(1,Math.round(image.width*ratio));
-            canvas.height=Math.max(1,Math.round(image.height*ratio));
-            canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
-            resolve(canvas.toDataURL("image/jpeg",.70));
+            let maximumSize=1000;
+            let quality=.74;
+            let compressed="";
+            for(let attempt=0;attempt<7;attempt+=1){
+              const ratio=Math.min(1,maximumSize/Math.max(image.width,image.height));
+              canvas.width=Math.max(1,Math.round(image.width*ratio));
+              canvas.height=Math.max(1,Math.round(image.height*ratio));
+              const context=canvas.getContext("2d");
+              context.clearRect(0,0,canvas.width,canvas.height);
+              context.drawImage(image,0,0,canvas.width,canvas.height);
+              compressed=canvas.toDataURL("image/jpeg",quality);
+              if(personalDeviceDataUrlBytes(compressed)<=PERSONAL_DEVICE_PHOTO_TARGET_BYTES) break;
+              maximumSize=Math.max(560,Math.round(maximumSize*.84));
+              quality=Math.max(.44,quality-.06);
+            }
+            resolve(compressed);
           };
           image.src=reader.result;
         };
@@ -5419,8 +5454,8 @@
     function deletePersonalDevice(id){
       if(activeRole!=="admin") return;
       if(!confirm("Supprimer définitivement cet appareil personnel et son historique ?")) return;
+      if(!saveAdminPersonalDevices(getAdminPersonalDevices().filter(item=>item.id!==id))) return;
       recordCloudDeletion(PERSONAL_DEVICE_STORAGE_KEY,id);
-      saveAdminPersonalDevices(getAdminPersonalDevices().filter(item=>item.id!==id));
       document.getElementById("personalDeviceModal").classList.add("hidden");
       renderPersonalDevices();
     }
@@ -5436,7 +5471,7 @@
         item.salePrice=Math.max(0,Number(String(answer).replace(",","."))||0);
       }
       item.status="En vente";
-      saveAdminPersonalDevices(list);
+      if(!saveAdminPersonalDevices(list)) return;
       renderPersonalDevices();
       if(openPersonalDeviceId===id) openPersonalDeviceDetails(id);
     }
@@ -5470,7 +5505,7 @@
         item.saleOperationId=operation.id;
       }
 
-      saveAdminPersonalDevices(list);
+      if(!saveAdminPersonalDevices(list)) return;
       renderPersonalDevices();
       try{renderBuySell();updateDashboardStats();}catch(error){console.warn(error);}
       if(openPersonalDeviceId===id) openPersonalDeviceDetails(id);
@@ -5488,10 +5523,12 @@
       const repairs=[...(Array.isArray(item.repairs)?item.repairs:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
       const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
       const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
+      const textVolume=[item.accessories,item.notes,...repairs.flatMap(repair=>[repair.fault,repair.work,repair.parts])].join(" ").length;
+      const layoutClasses=[photos.length>3?"many-photos":"",repairs.length>4?"long-history":"",textVolume>900?"dense-sheet":""].filter(Boolean).join(" ");
       const battery=item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined
         ? `${Math.max(0,Math.min(100,Number(item.batteryHealth)||0))} %`
         : "—";
-      const logoUrl=escapeHtml(new URL("logo.png",window.location.href).href);
+      const logoUrl=EMBEDDED_LOGO_DATA_URL;
       const repairRows=repairs.map(repair=>`<tr class="device-repair-row">
         <td>${repair.date?formatDate(repair.date):"—"}</td>
         <td>${escapeHtml(repair.fault||"—")}</td>
@@ -5499,7 +5536,7 @@
         <td>${escapeHtml(repair.parts||"—")}</td>
         <td class="money">${personalMoney(repair.cost)}</td>
       </tr>`).join("");
-      return `<main class="device-print-sheet">
+      return `<main class="device-print-sheet ${layoutClasses}">
         <header class="device-print-header">
           <div class="device-print-brand">
             <div class="device-print-logo"><img src="${logoUrl}" alt="TECH42SERVICE"></div>
@@ -5559,10 +5596,14 @@
         .device-print-brand{display:flex;gap:4mm;align-items:center}.device-print-logo{width:25mm;height:25mm;display:grid;place-items:center;background:#080808;border:1px solid #d4a72c;border-radius:2mm;overflow:hidden;flex:0 0 25mm}.device-print-logo img{width:100%;height:100%;object-fit:contain}
         .device-print-brand h1{margin:0;color:#111;font-size:20pt;letter-spacing:.7pt}.device-print-brand p{margin:1mm 0;color:#666;font-size:8pt}.device-print-title{padding:4mm;text-align:right;background:#111;color:#fff;border-radius:2mm;border-bottom:1.5mm solid #d4a72c}.device-print-title small{color:#d4a72c;font-weight:800;letter-spacing:.8pt}.device-print-title h2{margin:2mm 0;font-size:15pt}.device-print-title strong{color:#f1d783}
         .device-print-box,.device-print-section{margin:4mm 0;padding:4mm;border:1px solid #d9d2c1;border-radius:2mm;background:#fff;break-inside:avoid;page-break-inside:avoid}.device-identity{background:#fbfaf7;border-left:1.2mm solid #d4a72c}
-        h3{margin:0 0 3mm;color:#8b6500;font-size:10pt;text-transform:uppercase;letter-spacing:.35pt}.device-print-grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm 7mm}.device-print-grid .wide{grid-column:1/-1}.device-print-grid small{display:block;margin-bottom:1mm;color:#777;font-size:7pt;font-weight:800;text-transform:uppercase}.device-print-grid strong,.device-print-grid span{white-space:pre-wrap;line-height:1.35}
-        .device-print-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}.device-photo{border:1px solid #d9d2c1;border-radius:2mm;padding:1.5mm;break-inside:avoid;page-break-inside:avoid}.device-photo img{display:block;width:100%;height:42mm;object-fit:cover;border-radius:1mm}.device-photo small{display:block;margin-top:1mm;text-align:center;color:#777}
+        h3{margin:0 0 3mm;color:#8b6500;font-size:10pt;text-transform:uppercase;letter-spacing:.35pt}.device-print-grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm 7mm}.device-print-grid .wide{grid-column:1/-1}.device-print-grid small{display:block;margin-bottom:1mm;color:#777;font-size:7pt;font-weight:800;text-transform:uppercase}.device-print-grid strong,.device-print-grid span{white-space:pre-wrap;line-height:1.35;overflow-wrap:anywhere}
+        .device-print-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}.device-photo{border:1px solid #d9d2c1;border-radius:2mm;padding:1.5mm;break-inside:avoid;page-break-inside:avoid}.device-photo img{display:block;width:100%;height:36mm;object-fit:cover;border-radius:1mm}.device-photo small{display:block;margin-top:1mm;text-align:center;color:#777}
         .device-history-section{break-inside:auto;page-break-inside:auto}.device-history-title{display:flex;justify-content:space-between;align-items:center;gap:6mm}.device-history-title strong{color:#8b6500;font-size:8.5pt}.device-print-table{width:100%;border-collapse:collapse;font-size:7.6pt}.device-print-table th,.device-print-table td{padding:2.2mm;border:1px solid #ddd7c9;text-align:left;vertical-align:top;white-space:pre-wrap}.device-print-table th{background:#111;color:#fff;text-transform:uppercase;font-size:6.8pt}.device-print-table .money{text-align:right;white-space:nowrap}.device-repair-row{break-inside:avoid;page-break-inside:avoid}
         .device-print-footer{display:flex;justify-content:space-between;gap:8mm;margin-top:7mm;padding-top:3mm;border-top:1px solid #cfc8b8;color:#666;font-size:7.5pt}.device-print-footer strong{color:#8b6500;white-space:nowrap}
+        .device-print-sheet.many-photos .device-print-photos{grid-template-columns:repeat(6,1fr);gap:1.5mm}.device-print-sheet.many-photos .device-photo{padding:1mm}.device-print-sheet.many-photos .device-photo img{height:21mm}.device-print-sheet.many-photos .device-photo small{font-size:6pt;margin-top:.5mm}
+        .device-print-sheet.long-history .device-history-section{margin-top:2.5mm;padding:2.5mm}.device-print-sheet.long-history .device-print-table{font-size:6.8pt}.device-print-sheet.long-history .device-print-table th,.device-print-sheet.long-history .device-print-table td{padding:1.4mm}.device-print-sheet.long-history .device-print-table th{font-size:6.2pt}
+        .device-print-sheet.dense-sheet .device-print-box,.device-print-sheet.dense-sheet .device-print-section{margin:2.5mm 0;padding:2.8mm}.device-print-sheet.dense-sheet .device-print-grid{gap:2mm 5mm}.device-print-sheet.dense-sheet .device-print-footer{margin-top:3mm}
+        .device-print-sheet.ultra-compact{padding:5mm;font-size:8pt}.device-print-sheet.ultra-compact .device-print-header{margin-bottom:3mm;padding-top:3mm}.device-print-sheet.ultra-compact .device-print-box,.device-print-sheet.ultra-compact .device-print-section{margin:2mm 0;padding:2.3mm}.device-print-sheet.ultra-compact .device-print-grid{gap:1.6mm 4mm}.device-print-sheet.ultra-compact .device-photo img{height:18mm}.device-print-sheet.ultra-compact .device-print-table{font-size:6.3pt}.device-print-sheet.ultra-compact .device-print-table th,.device-print-sheet.ultra-compact .device-print-table td{padding:1.1mm}.device-print-sheet.ultra-compact .device-print-footer{margin-top:2mm;padding-top:2mm}
         .print-toolbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}.print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800;cursor:pointer}.print-toolbar .close-print{background:#fff;color:#111}
         @media(max-width:760px){.device-a4-page{max-width:100%;margin:0 auto;box-shadow:none}.device-print-header{grid-template-columns:1fr}}
         @media print{html,body{width:210mm;height:297mm;overflow:hidden;background:#fff}.print-toolbar{display:none}.device-a4-page{width:190mm;height:277mm;margin:0;overflow:hidden;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}.device-print-sheet{width:190mm;min-height:0;margin:0;padding:7mm;box-shadow:none;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid}.device-print-box,.device-photo,.device-repair-row{break-inside:avoid;page-break-inside:avoid}}
@@ -5573,14 +5614,18 @@
       if(!page) return 1;
       const sheet=page.querySelector(".device-print-sheet");
       if(!sheet) return 1;
+      sheet.classList.remove("ultra-compact");
       sheet.style.transform="none";
       sheet.style.zoom="1";
       const pixelsPerMillimeter=96/25.4;
       const maximumWidth=page.clientWidth||190*pixelsPerMillimeter;
       const maximumHeight=page.clientHeight||277*pixelsPerMillimeter;
-      const naturalWidth=Math.max(1,sheet.scrollWidth);
-      const naturalHeight=Math.max(1,sheet.scrollHeight);
-      const scale=Math.min(1,maximumWidth/naturalWidth,maximumHeight/naturalHeight);
+      const measureScale=()=>Math.min(1,maximumWidth/Math.max(1,sheet.scrollWidth),maximumHeight/Math.max(1,sheet.scrollHeight));
+      let scale=measureScale();
+      if(scale<.86){
+        sheet.classList.add("ultra-compact");
+        scale=measureScale();
+      }
       sheet.style.transform=`scale(${scale})`;
       sheet.style.transformOrigin="top left";
       page.dataset.a4Scale=String(scale);
@@ -5594,11 +5639,14 @@
             const page=document.querySelector(".device-a4-page");
             const sheet=page?.querySelector(".device-print-sheet");
             if(!page||!sheet)return;
+            sheet.classList.remove("ultra-compact");
             sheet.style.transform="none";
             sheet.style.zoom="1";
             const maximumWidth=page.clientWidth||190*(96/25.4);
             const maximumHeight=page.clientHeight||277*(96/25.4);
-            const scale=Math.min(1,maximumWidth/Math.max(1,sheet.scrollWidth),maximumHeight/Math.max(1,sheet.scrollHeight));
+            const measureScale=()=>Math.min(1,maximumWidth/Math.max(1,sheet.scrollWidth),maximumHeight/Math.max(1,sheet.scrollHeight));
+            let scale=measureScale();
+            if(scale<.86){sheet.classList.add("ultra-compact");scale=measureScale();}
             sheet.style.transform="scale("+scale+")";
             sheet.style.transformOrigin="top left";
             page.dataset.a4Scale=String(scale);
@@ -5783,7 +5831,7 @@
       const item=list.find(device=>device.id===openPersonalDeviceId);
       if(!item) return;
       item.repairs=(Array.isArray(item.repairs)?item.repairs:[]).filter(repair=>repair.id!==repairId);
-      saveAdminPersonalDevices(list);
+      if(!saveAdminPersonalDevices(list)) return;
       renderPersonalDevices();
       openPersonalDeviceDetails(item.id);
     }
@@ -5802,9 +5850,19 @@
 
     document.getElementById("personalDevicePhotos").addEventListener("change",async event=>{
       const files=[...event.target.files].filter(file=>file.type.startsWith("image/"));
+      const editingId=document.getElementById("personalDeviceEditId").value;
+      const otherDevicesBytes=personalDeviceStoredPhotoBytes(editingId);
       for(const file of files){
         if(currentPersonalDevicePhotos.length>=6){alert("Maximum 6 photos par appareil.");break;}
-        try{currentPersonalDevicePhotos.push(await compressPersonalDevicePhoto(file));}
+        try{
+          const compressed=await compressPersonalDevicePhoto(file);
+          const currentBytes=currentPersonalDevicePhotos.map(personalDevicePhotoSource).reduce((sum,photo)=>sum+personalDeviceDataUrlBytes(photo),0);
+          if(otherDevicesBytes+currentBytes+personalDeviceDataUrlBytes(compressed)>PERSONAL_DEVICE_PHOTO_TOTAL_LIMIT){
+            alert("Limite de stockage des photos atteinte. Supprime une ancienne photo avant d’en ajouter une nouvelle.");
+            break;
+          }
+          currentPersonalDevicePhotos.push(compressed);
+        }
         catch(error){console.error("Photo appareil",error);alert("Une photo n’a pas pu être ajoutée.");}
       }
       event.target.value="";
@@ -5848,7 +5906,7 @@
         const index=list.findIndex(entry=>entry.id===editId);
         if(index!==-1) list[index]=item;
       }else list.unshift(item);
-      saveAdminPersonalDevices(list);
+      if(!saveAdminPersonalDevices(list)) return;
       hidePersonalDeviceForm();
       renderPersonalDevices();
     });
@@ -5874,7 +5932,7 @@
         if(index!==-1) repairs[index]=repair;
       }else repairs.unshift(repair);
       item.repairs=repairs;
-      saveAdminPersonalDevices(list);
+      if(!saveAdminPersonalDevices(list)) return;
       hidePersonalRepairForm();
       renderPersonalDevices();
       openPersonalDeviceDetails(item.id);
@@ -6406,7 +6464,7 @@
         <div class="a4-document">
           <div class="top-accent"></div>
           <header>
-            <div class="brand"><div class="logo-frame"><img src="logo.png" alt="TECH42SERVICE"></div><div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p class="brand-contact">${escapeHtml(CONTACT_EMAIL)}<br>Tél. ${escapeHtml(CONTACT_PHONE)}</p></div></div>
+            <div class="brand"><div class="logo-frame"><img src="${EMBEDDED_LOGO_DATA_URL}" alt="TECH42SERVICE"></div><div><h1>TECH42SERVICE</h1><p>Réparation téléphone, tablette, ordinateur et console</p><p class="brand-contact">${escapeHtml(CONTACT_EMAIL)}<br>Tél. ${escapeHtml(CONTACT_PHONE)}</p></div></div>
             <div class="meta"><span class="document-kind">${escapeHtml(documentTypeLabel(item.type))}</span><h2>${escapeHtml(t.title)}</h2><strong>${escapeHtml(item.number||"APERÇU")}</strong></div>
           </header>
           <div class="reference-strip">
