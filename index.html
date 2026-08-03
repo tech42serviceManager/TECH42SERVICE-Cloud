@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH42SERVICE Gestion — V21.17 Vente, garantie, SAV et rachat</title>
+  <title>TECH42SERVICE Gestion — V21.18 Mobile simplifiée</title>
   <style>
     :root{
       --bg:#080808;--panel:#121212;--panel2:#181818;--text:#f5f5f5;
@@ -499,6 +499,157 @@
 
       /* V20.4 — Factures, acomptes, encaissements et stock liés */
     .workflow-badge{vertical-align:middle}
+
+    /* V21.18 — Interface mobile volontairement simplifiée */
+    .mobile-app-header,.mobile-bottom-nav,.mobile-more-sheet{display:none}
+    @media(max-width:700px){
+      html{scroll-behavior:smooth;scroll-padding-top:76px}
+      body{overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+      body.mobile-menu-open{overflow:hidden}
+      .app{display:block;min-height:100dvh}
+      .sidebar{display:none!important}
+
+      .mobile-app-header{
+        position:fixed;z-index:45;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;
+        min-height:62px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+        background:#090909f2;border-bottom:1px solid var(--border);backdrop-filter:blur(12px)
+      }
+      .mobile-brand-mark{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;background:linear-gradient(145deg,#f4b51f,#9d6d00);color:#080808;font-weight:900;font-size:17px}
+      .mobile-page-name{min-width:0;flex:1}
+      .mobile-page-name strong{display:block;color:var(--accent);font-size:12px;letter-spacing:.7px}
+      .mobile-page-name span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:17px;font-weight:800}
+      .mobile-header-actions{display:flex;align-items:center;gap:8px}
+      .mobile-cloud-dot{width:10px;height:10px;border-radius:50%;background:#ffd66b;box-shadow:0 0 0 4px #ffd66b20}
+      .mobile-cloud-dot.online{background:#74ef8b;box-shadow:0 0 0 4px #74ef8b20}
+      .mobile-cloud-dot.offline{background:#ff6d6d;box-shadow:0 0 0 4px #ff6d6d20}
+      .mobile-menu-trigger{display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid var(--border);border-radius:11px;background:var(--panel2);color:var(--text);font-size:22px;cursor:pointer}
+
+      .main{width:100%;padding:calc(74px + env(safe-area-inset-top)) 10px calc(92px + env(safe-area-inset-bottom))}
+      .main>section>.topbar{display:none}
+      .module-home-btn{display:none!important}
+      footer{margin:14px 0 4px;font-size:11px}
+
+      .mobile-bottom-nav{
+        position:fixed;z-index:46;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));
+        display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px;
+        border:1px solid var(--border);border-radius:18px;background:#0b0b0bf2;box-shadow:0 10px 35px #000;backdrop-filter:blur(12px)
+      }
+      .mobile-bottom-nav button{min-width:0;min-height:56px;padding:5px 2px;border:0;border-radius:12px;background:transparent;color:#aaa;font-size:10px;font-weight:700;cursor:pointer}
+      .mobile-bottom-nav button span{display:block;margin-bottom:3px;color:#ddd;font-size:21px;line-height:1}
+      .mobile-bottom-nav button.active{background:linear-gradient(145deg,#f4b51f,#a97806);color:#080808}
+      .mobile-bottom-nav button.active span{color:#080808}
+
+      .mobile-more-sheet{position:fixed;z-index:70;inset:0;display:block;visibility:hidden;background:#000a;opacity:0;transition:opacity .18s ease,visibility .18s ease}
+      .mobile-more-sheet.open{visibility:visible;opacity:1}
+      .mobile-more-panel{position:absolute;left:0;right:0;bottom:0;max-height:82dvh;overflow:auto;padding:12px 14px calc(20px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;border-top:1px solid var(--border);background:#101010;transform:translateY(104%);transition:transform .2s ease}
+      .mobile-more-sheet.open .mobile-more-panel{transform:none}
+      .mobile-more-handle{width:46px;height:4px;margin:0 auto 12px;border-radius:999px;background:#555}
+      .mobile-more-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+      .mobile-more-head h2{margin:0;font-size:20px}
+      .mobile-more-close{width:40px;height:40px;border:1px solid var(--border);border-radius:11px;background:var(--panel2);color:#fff;font-size:22px;cursor:pointer}
+      .mobile-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+      .mobile-more-grid button{min-height:58px;padding:10px;border:1px solid #332c1a;border-radius:12px;background:#191919;color:#fff;text-align:left;font-weight:700;cursor:pointer}
+      .mobile-more-grid button.active{border-color:var(--accent);color:var(--accent);background:#211b0c}
+      .mobile-more-grid button.mobile-danger{border-color:#6e2424;color:#ff8585}
+      .mobile-more-grid button.mobile-wide{grid-column:1/-1;text-align:center}
+
+      .hero{min-height:0;padding:10px 12px;margin-bottom:10px;border-radius:13px}
+      #dashboardPage{display:flex;flex-direction:column}
+      #dashboardPage>.hero{order:1}
+      #dashboardPage>.quick{order:2}
+      #dashboardPage>.cards{order:3}
+      #dashboardPage>.dashboard-pro-grid{order:4}
+      #dashboardPage>.demo-banner{order:0}
+      .clock-shell{padding:5px 16px;border:0;background:transparent;box-shadow:none}
+      .clock{font-size:29px;letter-spacing:1px}
+      .date{margin-top:1px;font-size:13px}
+      .clock-greeting{display:none}
+      .cards{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+      .card{min-width:0;padding:11px;border-radius:12px}
+      .card .label{font-size:12px;line-height:1.25}
+      .card .value{margin-top:6px;font-size:24px}
+      #dashboardPage .cards .dashboard-card:nth-child(n+5){display:none}
+      .dashboard-card-link{display:none}
+      .dashboard-pro-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+      .dashboard-open-panel{margin:0;padding:12px;min-height:58px;display:flex;align-items:center}
+      .dashboard-open-panel h2{width:100%;margin:0;font-size:14px;line-height:1.2}
+      .dashboard-open-panel h2 span{font-size:22px}
+      #dashboardTodayPlanning,#dashboardPriorities{display:none}
+      .quick{padding:12px;margin-bottom:10px}
+      .quick h2{margin-bottom:9px;font-size:16px}
+      .quick-grid{grid-template-columns:1fr 1fr;gap:8px}
+      .quick button{min-height:52px;padding:8px;font-size:13px;font-weight:700}
+
+      .panel{padding:12px;margin-bottom:12px;border-radius:12px}
+      .panel h2{margin-bottom:11px;font-size:18px}
+      .settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,
+      .personal-device-form,.personal-device-toolbar,.personal-repair-form,.personal-device-detail-grid,
+      .sav-form,.document-form,.document-device-grid,.template-grid,.document-line,.repair-line,
+      .appt-form,.appt-toolbar,.client-form,.payment-form,.buysell-form,.buysell-toolbar,
+      .buyback-identity-grid,.id-photo-grid,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,
+      .signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr!important}
+      .repair-form .full,.repair-details .full,.stock-form .full,.personal-device-form .full,
+      .personal-repair-form .full,.personal-device-detail-grid .full,.sav-form .full,
+      .document-form .full,.payment-form .full,.buyback-identity-grid .full{grid-column:auto!important}
+      .settings-card,.doc-pro-card,.summary-card,.client-pro-card,.payment-stat,.finance-card{padding:12px;border-radius:10px}
+      .settings-card h3,.doc-pro-card h3{font-size:16px}
+      .page-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+      .page-actions>*{width:100%;min-height:48px}
+      .page-actions>*:only-child{grid-column:1/-1}
+      .action-btn,.save-btn,.primary{min-height:50px}
+      .mini-btn{min-height:40px;padding:8px 10px}
+      .field{margin-bottom:10px}
+      input,select,textarea{font-size:16px!important;min-height:48px}
+      input[type="checkbox"],input[type="radio"],input[type="file"]{min-height:0}
+      textarea{min-height:90px}
+      form .full:has(> .save-btn){bottom:78px}
+      .mobile-save-toast{bottom:88px;max-width:calc(100vw - 24px);text-align:center;font-size:13px}
+
+      .stock-subnav,.document-tabs,.client-tabs{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;padding-bottom:7px;scrollbar-width:none}
+      .stock-subnav::-webkit-scrollbar,.document-tabs::-webkit-scrollbar,.client-tabs::-webkit-scrollbar{display:none}
+      .stock-subnav button,.document-tab,.client-tab{flex:0 0 auto;white-space:nowrap}
+      .stock-summary,.personal-device-summary,.client-pro-stats,.payment-summary{grid-template-columns:1fr 1fr!important;gap:8px}
+      .summary-card strong,.client-pro-card strong,.payment-stat strong{font-size:20px}
+      .repair-toolbar,.stock-toolbar,.personal-device-toolbar,.appt-toolbar,.buysell-toolbar{gap:8px;margin-bottom:10px}
+      .personal-device-card{padding:11px}
+      .personal-device-cover,.personal-device-placeholder{height:150px}
+      .personal-device-actions,.table-actions,.link-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+      .personal-device-actions button,.table-actions button,.link-card-actions>*{width:100%;min-height:42px;text-align:center}
+
+      .table-wrap{overflow:visible}
+      .table-wrap table{display:block;width:100%!important;min-width:0!important;margin-top:8px}
+      .table-wrap thead{display:none}
+      .table-wrap tbody{display:grid;gap:10px}
+      .table-wrap tbody tr{display:block;padding:6px 10px;border:1px solid var(--border);border-radius:12px;background:#101010}
+      .table-wrap tbody td{display:grid;grid-template-columns:minmax(92px,36%) minmax(0,1fr);gap:9px;align-items:start;width:100%;padding:9px 0!important;border-bottom:1px solid #292929!important;white-space:normal!important;overflow-wrap:anywhere;text-align:left!important}
+      .table-wrap tbody td:last-child{border-bottom:0!important}
+      .table-wrap tbody td::before{content:attr(data-label);color:var(--accent);font-size:11px;font-weight:800;text-transform:uppercase;line-height:1.35}
+      .table-wrap tbody td[colspan]{display:block;text-align:center!important;color:var(--muted)}
+      .table-wrap tbody td[colspan]::before{display:none}
+      .table-wrap .table-actions{grid-column:2}
+      .empty-state{padding:18px 8px}
+
+      .modal-backdrop{align-items:stretch;padding:0;z-index:80}
+      .modal-card{width:100%;max-height:100dvh;min-height:100dvh;padding:14px 12px calc(92px + env(safe-area-inset-bottom));border:0;border-radius:0}
+      .modal-head{position:sticky;z-index:5;top:-14px;margin:-14px -12px 14px;padding:12px;background:#101010;border-bottom:1px solid var(--border)}
+      .modal-head h2{font-size:20px}
+      .close-btn{min-width:44px;min-height:44px}
+      .signature-actions,.client-sign-actions{display:grid;grid-template-columns:1fr;gap:8px}
+      .signature-actions button,.client-sign-actions button{width:100%;min-width:0;min-height:48px}
+      .client-sign-screen{padding:10px 10px calc(18px + env(safe-area-inset-bottom))}
+      .client-sign-header{padding-bottom:10px;margin-bottom:10px}
+      .client-sign-header h1{font-size:23px}
+      .client-sign-pad{padding:10px}
+      .client-sign-pad canvas{height:30vh}
+    }
+
+    @media(max-width:380px){
+      .mobile-bottom-nav button{font-size:9px}
+      .mobile-bottom-nav button span{font-size:19px}
+      .mobile-more-grid{grid-template-columns:1fr}
+      .mobile-more-grid button.mobile-wide{grid-column:auto}
+      .cards,.quick-grid,.dashboard-pro-grid{grid-template-columns:1fr 1fr}
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -564,6 +715,46 @@
   </section>
 
   <div id="app" class="app hidden">
+    <header class="mobile-app-header" aria-label="En-tête mobile">
+      <div class="mobile-brand-mark" aria-hidden="true">42</div>
+      <div class="mobile-page-name">
+        <strong>TECH42SERVICE</strong>
+        <span id="mobileCurrentPage">Accueil</span>
+      </div>
+      <div class="mobile-header-actions">
+        <span id="mobileCloudDot" class="mobile-cloud-dot" role="status" aria-label="État de la sauvegarde"></span>
+        <button id="mobileMenuButton" class="mobile-menu-trigger" type="button" aria-label="Ouvrir tous les modules" aria-expanded="false">☰</button>
+      </div>
+    </header>
+
+    <nav class="mobile-bottom-nav" aria-label="Navigation mobile principale">
+      <button class="active" type="button" data-mobile-page="dashboard"><span aria-hidden="true">⌂</span>Accueil</button>
+      <button type="button" data-mobile-page="repairs"><span aria-hidden="true">⌕</span>Réparations</button>
+      <button type="button" data-mobile-page="appointments"><span aria-hidden="true">▣</span>Rendez-vous</button>
+      <button type="button" data-mobile-page="stock"><span aria-hidden="true">▦</span>Stock</button>
+      <button id="mobileMoreButton" type="button" aria-haspopup="dialog" aria-controls="mobileMoreSheet"><span aria-hidden="true">•••</span>Plus</button>
+    </nav>
+
+    <div id="mobileMoreSheet" class="mobile-more-sheet" role="dialog" aria-modal="true" aria-labelledby="mobileMoreTitle" aria-hidden="true">
+      <div class="mobile-more-panel">
+        <div class="mobile-more-handle" aria-hidden="true"></div>
+        <div class="mobile-more-head">
+          <h2 id="mobileMoreTitle">Tous les modules</h2>
+          <button id="mobileMoreClose" class="mobile-more-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <div class="mobile-more-grid">
+          <button type="button" data-mobile-page="clients">Clients</button>
+          <button type="button" data-mobile-page="documents">Documents</button>
+          <button type="button" data-mobile-page="invoices">Factures</button>
+          <button type="button" data-mobile-page="payments">Encaissements</button>
+          <button type="button" data-mobile-page="buySell">Rachat / Vente</button>
+          <button type="button" data-mobile-page="repairHelp">Aide réparations</button>
+          <button type="button" data-mobile-page="settings">Paramètres</button>
+          <button id="mobileSyncButton" type="button">Synchroniser</button>
+          <button id="mobileLogoutButton" class="mobile-danger mobile-wide" type="button">Déconnexion</button>
+        </div>
+      </div>
+    </div>
     <aside class="sidebar">
       <img src="logo.png" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzYwIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjM2MCIgcng9IjM2IiBmaWxsPSIjMDUwNTA1Ii8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iNzY0IiBoZWlnaHQ9IjMyNCIgcng9IjI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNGI1MWYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjcwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3MCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2Y0YjUxZiI+NDI8L3RleHQ+PHRleHQgeD0iMzUwIiB5PSIxMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjYyIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIj5URUNIPC90ZXh0Pjx0ZXh0IHg9IjM1MCIgeT0iMjIwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2Y0YjUxZiI+U0VSVklDRTwvdGV4dD48dGV4dCB4PSIzNTAiIHk9IjI3MyIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiN2I3YjciPlLDiVBBUkFUSU9OIMOJTEVDVFJPTklRVUU8L3RleHQ+PC9zdmc+'" alt="Logo TECH42SERVICE" class="logo">
       <div class="user-badge">Connecté : <strong id="currentUser">Administrateur</strong></div>
@@ -1962,7 +2153,7 @@
         </div>
       </section>
 
-      <footer>TECH42SERVICE Gestion — V21.17 Vente, garantie, SAV et rachat</footer>
+      <footer>TECH42SERVICE Gestion — V21.18 Mobile simplifiée</footer>
     </main>
   </div>
 
@@ -4183,6 +4374,7 @@
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
         visualSettingsBlocked.classList.toggle("hidden", activeRole === "admin");
       }
+      window.updateMobileNavigation?.(page);
     }
 
     function installModuleHomeButtons(){
@@ -8792,6 +8984,98 @@
   </script>
 <datalist id="clientNamesList"></datalist>
   <datalist id="stockPartsList"></datalist>
+
+<script>
+  (function enableSimplifiedMobileNavigation(){
+    const mobileTitles={
+      dashboard:"Accueil",repairs:"Réparations",clients:"Clients",stock:"Stock",
+      appointments:"Rendez-vous",documents:"Documents",invoices:"Factures",
+      payments:"Encaissements",buySell:"Rachat / Vente",repairHelp:"Aide réparations",
+      settings:"Paramètres"
+    };
+    const primaryPages=new Set(["dashboard","repairs","appointments","stock"]);
+    const currentPage=document.getElementById("mobileCurrentPage");
+    const moreSheet=document.getElementById("mobileMoreSheet");
+    const moreButton=document.getElementById("mobileMoreButton");
+    const menuButton=document.getElementById("mobileMenuButton");
+    const closeButton=document.getElementById("mobileMoreClose");
+
+    function openMoreMenu(){
+      if(!moreSheet) return;
+      moreSheet.classList.add("open");
+      moreSheet.setAttribute("aria-hidden","false");
+      menuButton?.setAttribute("aria-expanded","true");
+      document.body.classList.add("mobile-menu-open");
+      closeButton?.focus({preventScroll:true});
+    }
+
+    function closeMoreMenu(returnFocus=false){
+      if(!moreSheet) return;
+      moreSheet.classList.remove("open");
+      moreSheet.setAttribute("aria-hidden","true");
+      menuButton?.setAttribute("aria-expanded","false");
+      document.body.classList.remove("mobile-menu-open");
+      if(returnFocus) moreButton?.focus({preventScroll:true});
+    }
+
+    window.updateMobileNavigation=function(page){
+      if(currentPage) currentPage.textContent=mobileTitles[page]||"TECH42SERVICE";
+      document.querySelectorAll("[data-mobile-page]").forEach(button=>{
+        button.classList.toggle("active",button.dataset.mobilePage===page);
+      });
+      if(moreButton) moreButton.classList.toggle("active",!primaryPages.has(page));
+      closeMoreMenu(false);
+      if(window.matchMedia("(max-width:700px)").matches){
+        requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"auto"}));
+      }
+    };
+
+    document.querySelectorAll("[data-mobile-page]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        if(typeof showPage==="function") showPage(button.dataset.mobilePage);
+      });
+    });
+    moreButton?.addEventListener("click",openMoreMenu);
+    menuButton?.addEventListener("click",openMoreMenu);
+    closeButton?.addEventListener("click",()=>closeMoreMenu(true));
+    moreSheet?.addEventListener("click",event=>{
+      if(event.target===moreSheet) closeMoreMenu(true);
+    });
+    document.addEventListener("keydown",event=>{
+      if(event.key==="Escape"&&moreSheet?.classList.contains("open")) closeMoreMenu(true);
+    });
+    window.addEventListener("resize",()=>{
+      if(!window.matchMedia("(max-width:700px)").matches) closeMoreMenu(false);
+    });
+
+    document.getElementById("mobileSyncButton")?.addEventListener("click",()=>{
+      document.getElementById("manualCloudSyncBtn")?.click();
+      closeMoreMenu(false);
+    });
+    document.getElementById("mobileLogoutButton")?.addEventListener("click",()=>{
+      closeMoreMenu(false);
+      document.getElementById("logoutBtn")?.click();
+    });
+
+    const cloudBadge=document.getElementById("cloudSyncBadge");
+    const cloudDot=document.getElementById("mobileCloudDot");
+    function updateCloudDot(){
+      if(!cloudBadge||!cloudDot) return;
+      const status=(cloudBadge.textContent||"").trim();
+      const state=(cloudBadge.className+" "+status).toLowerCase();
+      cloudDot.classList.remove("online","offline");
+      if(/offline|erreur|refus|conflit|non confirmé|indisponible/.test(state)) cloudDot.classList.add("offline");
+      else if(/online|synchronis|enregistr|sauvegardé/.test(state)) cloudDot.classList.add("online");
+      cloudDot.setAttribute("aria-label",status||"État de la sauvegarde");
+      cloudDot.title=status||"État de la sauvegarde";
+    }
+    if(cloudBadge){
+      new MutationObserver(updateCloudDot).observe(cloudBadge,{attributes:true,childList:true,characterData:true,subtree:true});
+      updateCloudDot();
+    }
+    window.updateMobileNavigation("dashboard");
+  })();
+</script>
 
 <script>
   (function enableMobileTableCards(){
