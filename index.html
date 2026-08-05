@@ -117,9 +117,17 @@
     .quick button:hover{border-color:var(--accent);color:var(--accent)}
     .quick-note-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
     .quick-note-button strong{font-size:15px}.quick-note-button small{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:11px;font-weight:500}
-    .quick-note-card{width:min(760px,100%)}
-    .quick-note-card textarea{width:100%;min-height:340px;padding:16px;border:1px solid #6f5718;border-radius:12px;background:#17140b;color:#fff3c0;font:500 16px/1.55 Arial,Helvetica,sans-serif;resize:vertical}
-    .quick-note-card textarea:focus{outline:2px solid #d4a72c55;border-color:var(--accent)}
+    .quick-note-card{width:min(960px,100%)}
+    .quick-notes-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px;min-height:430px}
+    .quick-notes-sidebar{display:flex;flex-direction:column;gap:10px;padding:10px;border:1px solid #403616;border-radius:12px;background:#0b0b0b}
+    .quick-notes-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
+    .quick-note-list-item{width:100%;min-height:0!important;padding:10px!important;text-align:left;border:1px solid #303030!important;border-radius:9px!important;background:#171717!important;color:var(--text)!important}
+    .quick-note-list-item strong,.quick-note-list-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.quick-note-list-item small{margin-top:4px;color:var(--muted)}
+    .quick-note-list-item.active{border-color:var(--accent)!important;background:#2a2109!important}.quick-note-list-item.active strong{color:#ffd45c}
+    .quick-note-editor{display:flex;flex-direction:column;gap:10px}.quick-note-editor-empty{display:grid;place-items:center;min-height:340px;border:1px dashed #5f4a17;border-radius:12px;color:var(--muted)}
+    .quick-note-title-input{width:100%;padding:12px 14px;border:1px solid #6f5718;border-radius:10px;background:#12100a;color:#ffd45c;font-size:18px;font-weight:900}
+    .quick-note-card textarea{width:100%;min-height:330px;padding:16px;border:1px solid #6f5718;border-radius:12px;background:#17140b;color:#fff3c0;font:500 16px/1.55 Arial,Helvetica,sans-serif;resize:vertical}
+    .quick-note-card textarea:focus,.quick-note-title-input:focus{outline:2px solid #d4a72c55;border-color:var(--accent)}
     .quick-note-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}.quick-note-status{color:#74ef8b;font-size:13px}
     .stock-reference-group-row td{padding:9px 12px!important;background:#211a08!important;border-top:2px solid #9f7818!important;border-bottom:1px solid #5f4a17!important}
     .stock-reference-group{display:flex;align-items:center;justify-content:space-between;gap:15px}.stock-reference-group strong{color:#ffd45c;font-size:14px;letter-spacing:.45px}.stock-reference-group span{color:#e3d39b;font-size:12px;font-weight:700}
@@ -288,8 +296,8 @@
     .sav-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c}.sav-form .full{grid-column:1/-1}
     .sav-form input,.sav-form select,.sav-form textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}.sav-form textarea{min-height:78px;resize:vertical}
     .sav-table{width:100%;border-collapse:collapse;margin-top:12px}.sav-table th,.sav-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.sav-table th{color:var(--accent)}
-    @media(max-width:900px){.personal-device-status-grid{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}}
-    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}.device-test-checklist,.device-part-row{grid-template-columns:1fr}.device-part-row .part-notes{grid-column:auto}}
+    @media(max-width:900px){.personal-device-status-grid{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}.quick-notes-layout{grid-template-columns:1fr;min-height:0}.quick-notes-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:180px}}
+    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}.device-test-checklist,.device-part-row{grid-template-columns:1fr}.device-part-row .part-notes{grid-column:auto}.quick-notes-list{grid-template-columns:1fr}.quick-note-card textarea{min-height:260px}}
 
     
     .document-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
@@ -916,19 +924,29 @@
             <button id="quickStock" class="write-action">Nouvel article stock</button>
             <button id="quickQuote" class="write-action">Nouveau devis</button>
             <button id="quickAppointment" class="write-action">Nouveau rendez-vous</button>
-            <button id="quickNote" class="write-action quick-note-button" type="button"><strong>📝 Pense-bête</strong><small id="quickNotePreview">Note libre</small></button>
+            <button id="quickNote" class="write-action quick-note-button" type="button"><strong>📝 Mes notes</strong><small id="quickNotePreview">Aucune note</small></button>
           </div>
         </section>
       </section>
 
-      <div id="quickNoteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quickNoteTitle">
+      <div id="quickNoteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quickNotesModalTitle">
         <div class="modal-card quick-note-card">
-          <div class="modal-head"><h2 id="quickNoteTitle">📝 Pense-bête</h2><button id="closeQuickNoteBtn" class="close-btn" type="button">Fermer</button></div>
-          <textarea id="quickNoteText" maxlength="12000" placeholder="Écris ici tout ce que tu veux retenir : appel à passer, pièce à chercher, appareil à contrôler, idée…"></textarea>
+          <div class="modal-head"><h2 id="quickNotesModalTitle">📝 Mes notes</h2><button id="closeQuickNoteBtn" class="close-btn" type="button">Fermer</button></div>
+          <div class="quick-notes-layout">
+            <aside class="quick-notes-sidebar">
+              <button id="addQuickNoteBtn" class="action-btn" type="button">+ Nouvelle note</button>
+              <div id="quickNotesList" class="quick-notes-list"></div>
+            </aside>
+            <section id="quickNoteEditor" class="quick-note-editor">
+              <input id="quickNoteTitleInput" class="quick-note-title-input" type="text" maxlength="100" placeholder="Titre de la note">
+              <textarea id="quickNoteText" maxlength="12000" placeholder="Écris ici tout ce que tu veux retenir : appel à passer, pièce à chercher, appareil à contrôler, idée…"></textarea>
+            </section>
+            <div id="quickNoteEditorEmpty" class="quick-note-editor-empty hidden">Ajoute une note pour commencer.</div>
+          </div>
           <div class="quick-note-actions">
             <span id="quickNoteStatus" class="quick-note-status">Enregistrement automatique</span>
             <div class="page-actions">
-              <button id="clearQuickNoteBtn" class="mini-btn danger" type="button">Effacer la note</button>
+              <button id="deleteQuickNoteBtn" class="mini-btn danger" type="button">Supprimer cette note</button>
               <button id="saveQuickNoteBtn" class="action-btn" type="button">Enregistrer et fermer</button>
             </div>
           </div>
@@ -2732,6 +2750,7 @@ using (
       "tech42-parts-orders",
       "tech42-repair-help-links",
       "tech42-quick-note",
+      "tech42-quick-notes",
       CLOUD_TOMBSTONE_KEY,
       "tech42-theme",
       "tech42-visual-password-hash",
@@ -2749,6 +2768,7 @@ using (
       "tech42-buy-sell",
       "tech42-parts-orders",
       "tech42-repair-help-links",
+      "tech42-quick-notes",
       CLOUD_TOMBSTONE_KEY
     ];
     const CLOUD_PENDING_KEY = "tech42-cloud-save-pending";
@@ -8838,66 +8858,158 @@ using (
       renderPersonalDevices();
     });
 
-    const QUICK_NOTE_STORAGE_KEY="tech42-quick-note";
+    const QUICK_NOTES_STORAGE_KEY="tech42-quick-notes";
+    const LEGACY_QUICK_NOTE_STORAGE_KEY="tech42-quick-note";
     let quickNoteSaveTimer=null;
+    let openQuickNoteId="";
+    let quickNoteDirty=false;
 
-    function quickNoteText(){
-      return localStorage.getItem(QUICK_NOTE_STORAGE_KEY)||"";
+    function rawQuickNotes(){
+      try{
+        const parsed=JSON.parse(localStorage.getItem(QUICK_NOTES_STORAGE_KEY)||"[]");
+        return Array.isArray(parsed)?parsed:[];
+      }catch{return []}
+    }
+
+    function saveAdminQuickNotes(list){
+      const prepared=prepareCloudCollectionForSave(QUICK_NOTES_STORAGE_KEY,list);
+      clearCloudDeletionsForSavedItems(QUICK_NOTES_STORAGE_KEY,prepared);
+      localStorage.setItem(QUICK_NOTES_STORAGE_KEY,JSON.stringify(prepared));
+      scheduleCloudSave();
+      return prepared;
+    }
+
+    function getAdminQuickNotes(){
+      let notes=rawQuickNotes();
+      const legacy=localStorage.getItem(LEGACY_QUICK_NOTE_STORAGE_KEY)||"";
+      if(!notes.length&&legacy.trim()){
+        const now=new Date().toISOString();
+        const firstLine=legacy.split(/\r?\n/).map(line=>line.trim()).find(Boolean)||"Ancien pense-bête";
+        notes=saveAdminQuickNotes([{id:`NOTE-${Date.now()}`,title:firstLine.slice(0,100),content:legacy,createdAt:now,updatedAt:now}]);
+        localStorage.setItem(LEGACY_QUICK_NOTE_STORAGE_KEY,"");
+      }
+      return notes;
+    }
+
+    function sortedQuickNotes(){
+      return [...getAdminQuickNotes()].sort((a,b)=>String(b.updatedAt||b.createdAt||"").localeCompare(String(a.updatedAt||a.createdAt||"")));
     }
 
     function refreshQuickNotePreview(){
       const preview=document.getElementById("quickNotePreview");
       if(!preview) return;
-      const firstLine=quickNoteText().split(/\r?\n/).map(line=>line.trim()).find(Boolean)||"Note libre";
-      preview.textContent=firstLine.length>42?`${firstLine.slice(0,42)}…`:firstLine;
-      preview.title=firstLine;
+      const notes=sortedQuickNotes();
+      const latestTitle=String(notes[0]?.title||"Note sans titre");
+      preview.textContent=notes.length?`${notes.length} note${notes.length>1?"s":""} · ${latestTitle}`:"Aucune note";
+      preview.title=notes.length?latestTitle:"Aucune note enregistrée";
+    }
+
+    function renderQuickNotesList(){
+      const listBox=document.getElementById("quickNotesList");
+      const notes=sortedQuickNotes();
+      listBox.innerHTML=notes.map(note=>{
+        const preview=String(note.content||"").replace(/\s+/g," ").trim()||"Note vide";
+        return `<button class="quick-note-list-item${note.id===openQuickNoteId?" active":""}" type="button" data-quick-note-id="${escapeHtml(note.id)}"><strong>${escapeHtml(note.title||"Note sans titre")}</strong><small>${escapeHtml(preview)}</small></button>`;
+      }).join("");
+      listBox.querySelectorAll("[data-quick-note-id]").forEach(button=>button.addEventListener("click",()=>{
+        if(button.dataset.quickNoteId===openQuickNoteId) return;
+        persistQuickNote();
+        loadQuickNoteEditor(button.dataset.quickNoteId);
+      }));
+      refreshQuickNotePreview();
+    }
+
+    function loadQuickNoteEditor(id){
+      const note=getAdminQuickNotes().find(item=>item.id===id);
+      openQuickNoteId=note?.id||"";
+      quickNoteDirty=false;
+      document.getElementById("quickNoteEditor").classList.toggle("hidden",!note);
+      document.getElementById("quickNoteEditorEmpty").classList.toggle("hidden",Boolean(note));
+      document.getElementById("deleteQuickNoteBtn").disabled=!note;
+      if(note){
+        document.getElementById("quickNoteTitleInput").value=note.title||"";
+        document.getElementById("quickNoteText").value=note.content||"";
+      }
+      document.getElementById("quickNoteStatus").textContent=note?"Enregistrement automatique":"Ajoute une nouvelle note";
+      renderQuickNotesList();
     }
 
     function persistQuickNote(){
-      if(activeRole!=="admin") return;
       clearTimeout(quickNoteSaveTimer);
       quickNoteSaveTimer=null;
-      const field=document.getElementById("quickNoteText");
-      localStorage.setItem(QUICK_NOTE_STORAGE_KEY,field?.value||"");
-      scheduleCloudSave();
-      refreshQuickNotePreview();
-      const status=document.getElementById("quickNoteStatus");
-      if(status) status.textContent=`Enregistré automatiquement à ${new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}`;
+      if(activeRole!=="admin"||!openQuickNoteId||!quickNoteDirty) return;
+      const notes=getAdminQuickNotes();
+      const index=notes.findIndex(note=>note.id===openQuickNoteId);
+      if(index<0) return;
+      notes[index]={
+        ...notes[index],
+        title:document.getElementById("quickNoteTitleInput").value.trim()||"Note sans titre",
+        content:document.getElementById("quickNoteText").value,
+        updatedAt:new Date().toISOString()
+      };
+      saveAdminQuickNotes(notes);
+      quickNoteDirty=false;
+      renderQuickNotesList();
+      document.getElementById("quickNoteStatus").textContent=`Enregistré automatiquement à ${new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}`;
     }
 
-    function openQuickNote(){
+    function queueQuickNoteSave(){
+      if(!openQuickNoteId) return;
+      quickNoteDirty=true;
+      clearTimeout(quickNoteSaveTimer);
+      document.getElementById("quickNoteStatus").textContent="Enregistrement…";
+      quickNoteSaveTimer=setTimeout(persistQuickNote,350);
+    }
+
+    function addQuickNote(){
       if(activeRole!=="admin") return;
-      const modal=document.getElementById("quickNoteModal");
-      const field=document.getElementById("quickNoteText");
-      field.value=quickNoteText();
-      document.getElementById("quickNoteStatus").textContent="Enregistrement automatique";
-      modal.classList.remove("hidden");
-      requestAnimationFrame(()=>field.focus());
+      persistQuickNote();
+      const now=new Date().toISOString();
+      const note={id:`NOTE-${Date.now()}-${Math.random().toString(16).slice(2,7)}`,title:"Nouvelle note",content:"",createdAt:now,updatedAt:now};
+      const notes=getAdminQuickNotes();
+      notes.unshift(note);
+      saveAdminQuickNotes(notes);
+      loadQuickNoteEditor(note.id);
+      requestAnimationFrame(()=>{const field=document.getElementById("quickNoteTitleInput");field.focus();field.select();});
     }
 
-    function closeQuickNote(){
+    function openQuickNotes(){
+      if(activeRole!=="admin") return;
+      document.getElementById("quickNoteModal").classList.remove("hidden");
+      const notes=sortedQuickNotes();
+      if(notes.length) loadQuickNoteEditor(notes[0].id);
+      else addQuickNote();
+    }
+
+    function closeQuickNotes(){
       persistQuickNote();
       document.getElementById("quickNoteModal").classList.add("hidden");
     }
 
-    document.getElementById("quickNote").addEventListener("click",openQuickNote);
-    document.getElementById("quickNoteText").addEventListener("input",()=>{
+    function deleteQuickNote(){
+      if(activeRole!=="admin"||!openQuickNoteId) return;
+      const note=getAdminQuickNotes().find(item=>item.id===openQuickNoteId);
+      if(!note||!confirm(`Supprimer définitivement la note « ${note.title||"Sans titre"} » ?`)) return;
       clearTimeout(quickNoteSaveTimer);
-      document.getElementById("quickNoteStatus").textContent="Enregistrement…";
-      quickNoteSaveTimer=setTimeout(persistQuickNote,350);
-    });
-    document.getElementById("closeQuickNoteBtn").addEventListener("click",closeQuickNote);
-    document.getElementById("saveQuickNoteBtn").addEventListener("click",closeQuickNote);
-    document.getElementById("clearQuickNoteBtn").addEventListener("click",()=>{
-      if(!confirm("Effacer complètement le pense-bête ?")) return;
-      document.getElementById("quickNoteText").value="";
-      persistQuickNote();
-    });
+      quickNoteDirty=false;
+      recordCloudDeletion(QUICK_NOTES_STORAGE_KEY,note.id);
+      saveAdminQuickNotes(getAdminQuickNotes().filter(item=>item.id!==note.id));
+      const remaining=sortedQuickNotes();
+      loadQuickNoteEditor(remaining[0]?.id||"");
+    }
+
+    document.getElementById("quickNote").addEventListener("click",openQuickNotes);
+    document.getElementById("addQuickNoteBtn").addEventListener("click",addQuickNote);
+    document.getElementById("quickNoteTitleInput").addEventListener("input",queueQuickNoteSave);
+    document.getElementById("quickNoteText").addEventListener("input",queueQuickNoteSave);
+    document.getElementById("closeQuickNoteBtn").addEventListener("click",closeQuickNotes);
+    document.getElementById("saveQuickNoteBtn").addEventListener("click",closeQuickNotes);
+    document.getElementById("deleteQuickNoteBtn").addEventListener("click",deleteQuickNote);
     document.getElementById("quickNoteModal").addEventListener("click",event=>{
-      if(event.target===event.currentTarget) closeQuickNote();
+      if(event.target===event.currentTarget) closeQuickNotes();
     });
     document.addEventListener("keydown",event=>{
-      if(event.key==="Escape"&&!document.getElementById("quickNoteModal").classList.contains("hidden")) closeQuickNote();
+      if(event.key==="Escape"&&!document.getElementById("quickNoteModal").classList.contains("hidden")) closeQuickNotes();
     });
     refreshQuickNotePreview();
 
