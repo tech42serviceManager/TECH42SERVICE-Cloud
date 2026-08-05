@@ -217,16 +217,24 @@
     .personal-device-toolbar{display:grid;grid-template-columns:1fr 210px 210px;gap:12px;margin-bottom:16px}
     .personal-device-toolbar input,.personal-device-toolbar select{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}
     .personal-device-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .personal-device-card{display:grid;grid-template-columns:130px 1fr;gap:15px;background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px}
+    .personal-device-card{display:grid;grid-template-columns:130px 1fr;gap:15px;background:var(--panel2);border:2px solid var(--device-status-color,var(--border));border-left-width:8px;border-radius:14px;padding:14px;box-shadow:0 8px 22px var(--device-status-shadow,#0004);transition:.18s border-color,.18s box-shadow}
+    .personal-device-card.device-status-personal{--device-status-color:#b6b6b6;--device-status-shadow:#b6b6b633}
+    .personal-device-card.device-status-repair{--device-status-color:#ff4d4d;--device-status-shadow:#ff4d4d55;background:linear-gradient(135deg,#2b1111 0,var(--panel2) 44%)}
+    .personal-device-card.device-status-ready{--device-status-color:#ffc928;--device-status-shadow:#ffc92855;background:linear-gradient(135deg,#2d2409 0,var(--panel2) 44%)}
+    .personal-device-card.device-status-sale{--device-status-color:#429dff;--device-status-shadow:#429dff55;background:linear-gradient(135deg,#102033 0,var(--panel2) 44%)}
+    .personal-device-card.device-status-sold{--device-status-color:#48d66b;--device-status-shadow:#48d66b55;background:linear-gradient(135deg,#102518 0,var(--panel2) 44%)}
     .personal-device-cover{width:130px;height:130px;border-radius:11px;object-fit:cover;background:#080808;border:1px solid #2c2c2c}
     .personal-device-placeholder{width:130px;height:130px;border-radius:11px;display:grid;place-items:center;background:#0b0b0b;border:1px solid #2c2c2c;color:var(--accent);font-size:42px}
     .personal-device-card h3{margin:0 0 7px;color:var(--accent)}
+    .personal-device-reference{display:inline-block;margin:0 0 8px;padding:4px 8px;border:1px solid #4a4026;border-radius:7px;background:#12100a;color:#f1d783;font-size:12px;font-weight:800;letter-spacing:.25px}
     .personal-device-meta{color:var(--muted);font-size:14px;line-height:1.55}
     .personal-device-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
     .personal-device-badge{display:inline-block;padding:5px 9px;margin:0 5px 6px 0;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--border);background:#201b0d;color:#ffd66b}
-    .personal-device-badge.green{background:#102518;color:#74ef8b;border-color:#245f35}
-    .personal-device-badge.red{background:#2b1111;color:#ff8585;border-color:#7a2a2a}
-    .personal-device-badge.blue{background:#102033;color:#82bfff;border-color:#355b82}
+    .personal-device-badge.status-personal{background:#b6b6b6;color:#101010;border-color:#eeeeee}
+    .personal-device-badge.status-repair{background:#ff4d4d;color:#fff;border-color:#ff8d8d}
+    .personal-device-badge.status-ready{background:#ffc928;color:#111;border-color:#ffe28a}
+    .personal-device-badge.status-sale{background:#298bea;color:#fff;border-color:#82c3ff}
+    .personal-device-badge.status-sold{background:#37b957;color:#fff;border-color:#83e59a}
     .personal-photo-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px;margin-top:8px}
     .personal-photo-item{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#0b0b0b}
     .personal-photo-item img{display:block;width:100%;height:115px;object-fit:cover}
@@ -487,8 +495,9 @@
   
 
     /* V19.3 — Tableau de bord & Planning atelier */
-    .dashboard-pro-grid{display:grid;grid-template-columns:1.25fr .8fr 1fr;gap:16px;margin-bottom:20px}
-    .dashboard-parts-order-button{width:100%;min-height:92px;margin:0;color:var(--text);font:inherit;text-align:left}
+    .dashboard-pro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:16px;margin-bottom:20px}
+    .dashboard-pro-grid>.panel{width:100%;min-width:0;height:100%;margin:0;box-sizing:border-box}
+    .dashboard-parts-order-button{min-height:92px;color:var(--text);font:inherit;text-align:left;align-self:stretch}
     .dashboard-parts-order-button h2{margin:0}
     .dash-list{display:grid;gap:9px}.dash-row{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid #2c2c2c;border-radius:10px;background:#101010}
     .dash-row small{color:var(--muted)}.dash-row strong{color:var(--accent)}
@@ -5977,11 +5986,12 @@
       return ({"Téléphone":"☎","Tablette":"▣","Ordinateur":"▰","Console":"◈"})[type] || "◆";
     }
 
+    function personalDeviceStatusKey(status){
+      return ({"Personnel":"personal","À réparer":"repair","Prêt à vendre":"ready","En vente":"sale","Vendu":"sold"})[status]||"personal";
+    }
+
     function personalDeviceBadgeClass(status){
-      if(status === "Vendu" || status === "Personnel") return "green";
-      if(status === "À réparer") return "red";
-      if(status === "En vente" || status === "Prêt à vendre") return "blue";
-      return "";
+      return `status-${personalDeviceStatusKey(status)}`;
     }
 
     function personalDevicePhotoSource(photo){
@@ -6090,11 +6100,12 @@
           <button class="mini-btn danger" type="button" data-personal-delete="${escapeHtml(item.id)}">Supprimer</button>` : "";
 
         const card=document.createElement("article");
-        card.className="personal-device-card";
+        card.className=`personal-device-card device-status-${personalDeviceStatusKey(item.status)}`;
         card.innerHTML=`
           <div>${cover?`<img class="personal-device-cover" src="${cover}" alt="${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}">`:`<div class="personal-device-placeholder" aria-hidden="true">${personalDeviceIcon(item.deviceType)}</div>`}</div>
           <div>
             <h3>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</h3>
+            <div class="personal-device-reference">Réf. : ${escapeHtml(item.reference||item.id)}</div>
             <div><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span><span class="personal-device-badge">${escapeHtml(item.condition||"État non renseigné")}</span></div>
             <div class="personal-device-meta">
               ${escapeHtml(item.deviceType||"Appareil")} · ${escapeHtml(item.color||"Couleur non renseignée")} · ${escapeHtml(item.capacity||"Configuration non renseignée")}<br>
