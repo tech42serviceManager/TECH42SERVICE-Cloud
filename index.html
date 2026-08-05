@@ -98,6 +98,20 @@
     .dashboard-open-panel:hover,.dashboard-open-panel:focus{transform:translateY(-2px);border-color:var(--accent);background:#17140b;outline:none}
     .dashboard-open-panel h2{display:flex;justify-content:space-between;align-items:center}
     .dashboard-open-panel h2 span{color:var(--accent);font-size:28px;line-height:1}
+    .parts-order-dashboard{border-color:#6a5015;background:linear-gradient(145deg,var(--panel),#151207)}
+    .parts-order-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+    .parts-order-head h2{margin:0 0 4px}.parts-order-head p{margin:0;color:var(--muted);font-size:13px}
+    .parts-order-counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+    .parts-order-counter{padding:10px;border:1px solid #342c19;border-radius:10px;background:#101010;text-align:center}
+    .parts-order-counter small{display:block;color:var(--muted);margin-bottom:4px}.parts-order-counter strong{font-size:23px;color:var(--accent)}
+    .parts-order-dashboard-list{display:grid;gap:8px}.parts-order-dash-row{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(180px,1fr) auto auto;gap:10px;align-items:center;padding:10px;border:1px solid #302a1b;border-radius:9px;background:#101010}
+    .parts-order-dash-row small{display:block;color:var(--muted);margin-top:3px}.parts-order-dash-row strong{color:#fff}.parts-order-dash-row .status{white-space:nowrap}
+    .parts-order-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px;margin-bottom:16px;border:1px solid #5f4a17;border-radius:12px;background:#111007}
+    .parts-order-form .full{grid-column:1/-1}.parts-order-form .double{grid-column:span 2}
+    .parts-order-form input,.parts-order-form select,.parts-order-form textarea,.parts-order-toolbar input,.parts-order-toolbar select{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}
+    .parts-order-form textarea{min-height:76px;resize:vertical}.parts-order-form label{display:block;margin-bottom:6px;color:var(--muted);font-size:13px}
+    .parts-order-toolbar{display:grid;grid-template-columns:1fr 210px;gap:10px;margin-bottom:12px}.parts-order-source-note{margin:0 0 12px;padding:10px;border-left:3px solid var(--accent);background:#17140b;color:#efd98e;border-radius:7px}
+    .parts-order-table{width:100%;border-collapse:collapse}.parts-order-table th,.parts-order-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.parts-order-table th{color:var(--accent);font-size:12px}.parts-order-table small{color:var(--muted)}
     .card .label{color:var(--muted);font-size:14px}
     .card .value{margin-top:10px;font-size:34px;font-weight:800;color:var(--accent)}
     .dashboard-card-detail{margin-top:8px;color:var(--muted);font-size:13px}.dashboard-card-detail strong{color:var(--text)}
@@ -501,6 +515,8 @@
     .month-day{min-height:125px;border-right:1px solid #222;border-bottom:1px solid #222;padding:7px}.month-day.outside{opacity:.38}.month-number{font-weight:800;color:var(--accent);margin-bottom:6px}
     .google-sync-note{font-size:13px;color:var(--muted);margin-top:8px}.google-sync-ok{color:#74ef8b}
     @media(max-width:900px){.dashboard-pro-grid{grid-template-columns:1fr}}
+    @media(max-width:760px){.parts-order-form{grid-template-columns:1fr 1fr}.parts-order-form .full,.parts-order-form .double{grid-column:1/-1}.parts-order-dash-row{grid-template-columns:1fr auto}.parts-order-dash-row .parts-order-source{grid-column:1/-1}.parts-order-toolbar{grid-template-columns:1fr}}
+    @media(max-width:520px){.parts-order-form{grid-template-columns:1fr}.parts-order-form .full,.parts-order-form .double{grid-column:auto}.parts-order-counters{grid-template-columns:repeat(3,1fr)}.parts-order-counter{padding:8px 5px}.parts-order-counter strong{font-size:19px}}
     @media(max-width:520px){.planner-toolbar{align-items:stretch}.planner-nav,.planner-views{width:100%}.planner-nav button,.planner-views button{flex:1}.dashboard-pro-grid{grid-template-columns:1fr}.dash-row{grid-template-columns:70px 1fr}}
 
     /* V20.1 — Sauvegarde mobile renforcée */
@@ -579,6 +595,7 @@
       #dashboardPage>.quick{order:2}
       #dashboardPage>.cards{order:3}
       #dashboardPage>.dashboard-pro-grid{order:4}
+      #dashboardPage>.parts-order-dashboard{order:5}
       #dashboardPage>.demo-banner{order:0}
       .clock-shell{padding:5px 16px;border:0;background:transparent;box-shadow:none}
       .clock{font-size:29px;letter-spacing:1px}
@@ -855,6 +872,19 @@
           </div>
         </section>
 
+        <section id="dashboardPartsOrdersModule" class="panel parts-order-dashboard">
+          <div class="parts-order-head">
+            <div><h2>Pièces à commander</h2><p>Demandes provenant des réparations et de Mes appareils.</p></div>
+            <button id="openPartsOrderManagerBtn" class="action-btn" type="button">Gérer les pièces</button>
+          </div>
+          <div class="parts-order-counters">
+            <div class="parts-order-counter"><small>À commander</small><strong id="partsOrderPendingCount">0</strong></div>
+            <div class="parts-order-counter"><small>Commandées</small><strong id="partsOrderOrderedCount">0</strong></div>
+            <div class="parts-order-counter"><small>Reçues</small><strong id="partsOrderReceivedCount">0</strong></div>
+          </div>
+          <div id="dashboardPartsOrdersList" class="parts-order-dashboard-list"></div>
+        </section>
+
         <section class="panel quick">
           <h2>Accès rapides</h2>
           <div class="quick-grid">
@@ -1095,8 +1125,33 @@
             <button id="repairToQuoteBtn" class="action-btn secondary">Basculer en devis</button>
             <button id="repairToInvoiceBtn" class="action-btn secondary">Basculer en facture</button>
             <button id="repairToNonRepairBtn" class="action-btn secondary">Créer certificat non-réparabilité</button>
+            <button id="repairPartsOrderBtn" class="action-btn secondary">Pièces à commander</button>
             <button id="closeRepairBtn" class="action-btn secondary">Clôturer la réparation</button>
           </div>
+        </div>
+      </div>
+
+      <div id="partsOrderModal" class="modal-backdrop hidden">
+        <div class="modal-card" style="width:min(1150px,100%)">
+          <div class="modal-head"><h2 id="partsOrderModalTitle">Pièces à commander</h2><button id="closePartsOrderModal" class="close-btn" type="button">Fermer</button></div>
+          <div id="partsOrderSourceNote" class="parts-order-source-note hidden"></div>
+          <form id="partsOrderForm" class="parts-order-form">
+            <input id="partsOrderEditId" type="hidden">
+            <div class="double"><label>Dossier lié</label><select id="partsOrderSource" required></select></div>
+            <div><label>Statut</label><select id="partsOrderStatus"><option>À commander</option><option>Commandée</option><option>Reçue</option><option>Annulée</option></select></div>
+            <div class="double"><label>Pièce à commander</label><input id="partsOrderName" type="text" required placeholder="Ex. Écran OLED iPhone 13"></div>
+            <div><label>Quantité</label><input id="partsOrderQuantity" type="number" min="1" step="1" value="1" required></div>
+            <div><label>Fournisseur</label><input id="partsOrderSupplier" type="text" placeholder="Ex. Mobilax"></div>
+            <div><label>Référence fournisseur</label><input id="partsOrderReference" type="text"></div>
+            <div><label>Coût prévu TTC</label><input id="partsOrderCost" type="number" min="0" step="0.01" value="0"></div>
+            <div class="double"><label>Lien de commande</label><input id="partsOrderLink" type="url" placeholder="https://..."></div>
+            <div><label>Date souhaitée</label><input id="partsOrderNeededDate" type="date"></div>
+            <div class="full"><label>Notes</label><textarea id="partsOrderNotes" placeholder="Couleur, qualité, compatibilité, consignes…"></textarea></div>
+            <div class="full page-actions" style="margin:0"><button class="save-btn" type="submit">Enregistrer la pièce</button><button id="cancelPartsOrderEditBtn" class="action-btn secondary" type="button">Vider le formulaire</button></div>
+          </form>
+          <div class="parts-order-toolbar"><input id="partsOrderSearch" type="search" placeholder="Rechercher une pièce, un dossier ou un fournisseur"><select id="partsOrderFilter"><option value="">Tous les statuts</option><option>À commander</option><option>Commandée</option><option>Reçue</option><option>Annulée</option></select></div>
+          <div class="table-wrap"><table class="parts-order-table"><thead><tr><th>Dossier</th><th>Pièce</th><th>Qté</th><th>Fournisseur / Réf.</th><th>Coût</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="partsOrderTableBody"></tbody></table></div>
+          <div id="partsOrderEmpty" class="empty-state">Aucune pièce à commander.</div>
         </div>
       </div>
 
@@ -2331,6 +2386,7 @@
       "tech42-clients",
       "tech42-payments",
       "tech42-buy-sell",
+      "tech42-parts-orders",
       "tech42-repair-help-links",
       CLOUD_TOMBSTONE_KEY,
       "tech42-theme",
@@ -2347,6 +2403,7 @@
       "tech42-clients",
       "tech42-payments",
       "tech42-buy-sell",
+      "tech42-parts-orders",
       "tech42-repair-help-links",
       CLOUD_TOMBSTONE_KEY
     ];
@@ -3265,6 +3322,7 @@
       try{ renderClients(); }catch(e){ console.warn(e); }
       try{ renderBuySell(); }catch(e){ console.warn(e); }
       try{ renderRepairHelp(); }catch(e){ console.warn(e); }
+      try{ renderDashboardPartsOrders(); }catch(e){ console.warn(e); }
       try{ updateDashboardStats(); }catch(e){ console.warn(e); }
       try{
         const savedTheme = localStorage.getItem("tech42-theme") || "gold";
@@ -4623,6 +4681,224 @@
       return activeRole === "visuel" ? demoRepairs : getAdminRepairs();
     }
 
+    const PARTS_ORDER_STORAGE_KEY="tech42-parts-orders";
+    const demoPartsOrders=[
+      {id:"CMD-DEMO-001",sourceType:"repair",sourceId:"REP-2026-0001",sourceLabel:"REP-2026-0001 — Jean Martin — Apple iPhone 13",name:"Écran OLED iPhone 13",quantity:1,supplier:"Fournisseur démo",reference:"OLED-IP13",cost:79,status:"À commander",neededDate:"2026-08-08",notes:"Qualité premium"},
+      {id:"CMD-DEMO-002",sourceType:"repair",sourceId:"REP-2026-0003",sourceLabel:"REP-2026-0003 — Lucas Petit — Sony PlayStation 5",name:"Connecteur HDMI PS5",quantity:2,supplier:"Fournisseur démo",reference:"HDMI-PS5",cost:12,status:"Commandée",neededDate:"2026-08-07",notes:""}
+    ];
+    let partsOrderContext={sourceType:"",sourceId:""};
+
+    function getAdminPartsOrders(){
+      try{return JSON.parse(localStorage.getItem(PARTS_ORDER_STORAGE_KEY)||"[]")}catch{return []}
+    }
+
+    function saveAdminPartsOrders(list){
+      if(activeRole!=="admin") return false;
+      const prepared=prepareCloudCollectionForSave(PARTS_ORDER_STORAGE_KEY,list);
+      clearCloudDeletionsForSavedItems(PARTS_ORDER_STORAGE_KEY,prepared);
+      localStorage.setItem(PARTS_ORDER_STORAGE_KEY,JSON.stringify(prepared));
+      scheduleCloudSave();
+      renderDashboardPartsOrders();
+      return true;
+    }
+
+    function currentPartsOrders(){
+      return activeRole==="visuel"?demoPartsOrders:getAdminPartsOrders();
+    }
+
+    function partsOrderSourceValue(sourceType,sourceId){
+      return `${sourceType||"general"}::${sourceId||"atelier"}`;
+    }
+
+    function parsePartsOrderSource(value){
+      const separator=String(value||"").indexOf("::");
+      if(separator<0) return {sourceType:"general",sourceId:"atelier"};
+      return {sourceType:String(value).slice(0,separator)||"general",sourceId:String(value).slice(separator+2)||"atelier"};
+    }
+
+    function partsOrderLiveSourceLabel(sourceType,sourceId,fallback=""){
+      if(sourceType==="repair"){
+        const repair=currentRepairList().find(item=>item.id===sourceId);
+        if(repair) return `${repair.id} — ${repair.client||"Client"} — ${[repair.brand,repair.model].filter(Boolean).join(" ")||repair.deviceType||"Appareil"}`;
+      }
+      if(sourceType==="device"){
+        const device=currentPersonalDevices().find(item=>item.id===sourceId);
+        if(device) return `${device.reference||device.id} — ${[device.brand,device.model].filter(Boolean).join(" ")||device.deviceType||"Appareil stock"}`;
+      }
+      return fallback||"Atelier — sans dossier lié";
+    }
+
+    function partsOrderSourceLabel(item){
+      return partsOrderLiveSourceLabel(item?.sourceType,item?.sourceId,item?.sourceLabel||"");
+    }
+
+    function partsOrderStatusClass(status){
+      if(status==="Reçue") return "status-green";
+      if(status==="Commandée") return "status-blue";
+      if(status==="Annulée") return "status-grey";
+      return "status-orange";
+    }
+
+    function partsOrdersForSource(sourceType,sourceId){
+      return currentPartsOrders().filter(item=>item.sourceType===sourceType&&item.sourceId===sourceId);
+    }
+
+    function partsOrderInlineHtml(sourceType,sourceId){
+      const list=partsOrdersForSource(sourceType,sourceId);
+      if(!list.length) return '<span class="device-test-pending">Aucune pièce à commander.</span>';
+      return list.map(item=>`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #292929"><span><strong>${escapeHtml(item.name)}</strong> × ${Math.max(1,Number(item.quantity)||1)}${item.supplier?`<br><small>${escapeHtml(item.supplier)}</small>`:""}</span><span class="status ${partsOrderStatusClass(item.status)}">${escapeHtml(item.status||"À commander")}</span></div>`).join("");
+    }
+
+    function partsOrderSortValue(status){
+      return {"À commander":0,"Commandée":1,"Reçue":2,"Annulée":3}[status]??4;
+    }
+
+    function sortedPartsOrders(list){
+      return [...list].sort((a,b)=>partsOrderSortValue(a.status)-partsOrderSortValue(b.status)||String(a.neededDate||"9999").localeCompare(String(b.neededDate||"9999"))||String(b.updatedAt||b.createdAt||"").localeCompare(String(a.updatedAt||a.createdAt||"")));
+    }
+
+    function renderDashboardPartsOrders(){
+      const list=currentPartsOrders();
+      const quantityFor=status=>list.filter(item=>item.status===status).reduce((sum,item)=>sum+Math.max(1,Number(item.quantity)||1),0);
+      const pending=document.getElementById("partsOrderPendingCount");
+      if(!pending) return;
+      pending.textContent=quantityFor("À commander");
+      document.getElementById("partsOrderOrderedCount").textContent=quantityFor("Commandée");
+      document.getElementById("partsOrderReceivedCount").textContent=quantityFor("Reçue");
+      const container=document.getElementById("dashboardPartsOrdersList");
+      const active=sortedPartsOrders(list.filter(item=>!["Reçue","Annulée"].includes(item.status))).slice(0,6);
+      container.innerHTML=active.length?active.map(item=>`<div class="parts-order-dash-row">
+        <div><strong>${escapeHtml(item.name)}</strong><small>Quantité : ${Math.max(1,Number(item.quantity)||1)}${item.neededDate?` · souhaitée ${formatDate(item.neededDate)}`:""}</small></div>
+        <div class="parts-order-source"><small>Dossier</small>${escapeHtml(partsOrderSourceLabel(item))}</div>
+        <span class="status ${partsOrderStatusClass(item.status)}">${escapeHtml(item.status||"À commander")}</span>
+        <strong>${formatMoney(Number(item.cost||0)*Math.max(1,Number(item.quantity)||1))}</strong>
+      </div>`).join(""):'<div class="empty-state" style="padding:12px">Aucune commande en attente.</div>';
+    }
+
+    function populatePartsOrderSources(selectedValue="",fallbackLabel=""){
+      const select=document.getElementById("partsOrderSource");
+      const options=[{value:partsOrderSourceValue("general","atelier"),label:"Atelier — sans dossier lié"}];
+      currentRepairList().forEach(item=>options.push({value:partsOrderSourceValue("repair",item.id),label:`Réparation · ${partsOrderLiveSourceLabel("repair",item.id)}`}));
+      currentPersonalDevices().forEach(item=>options.push({value:partsOrderSourceValue("device",item.id),label:`Mes appareils · ${partsOrderLiveSourceLabel("device",item.id)}`}));
+      if(selectedValue&&!options.some(option=>option.value===selectedValue)) options.push({value:selectedValue,label:fallbackLabel||"Ancien dossier lié"});
+      select.innerHTML=options.map(option=>`<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("");
+      select.value=selectedValue&&options.some(option=>option.value===selectedValue)?selectedValue:options[0].value;
+    }
+
+    function resetPartsOrderForm(){
+      const form=document.getElementById("partsOrderForm");
+      form.reset();
+      document.getElementById("partsOrderEditId").value="";
+      document.getElementById("partsOrderQuantity").value="1";
+      document.getElementById("partsOrderCost").value="0";
+      document.getElementById("partsOrderStatus").value="À commander";
+      const selected=partsOrderContext.sourceType?partsOrderSourceValue(partsOrderContext.sourceType,partsOrderContext.sourceId):partsOrderSourceValue("general","atelier");
+      populatePartsOrderSources(selected);
+    }
+
+    function renderPartsOrderTable(){
+      const search=document.getElementById("partsOrderSearch").value.trim().toLowerCase();
+      const status=document.getElementById("partsOrderFilter").value;
+      let list=currentPartsOrders();
+      if(partsOrderContext.sourceType) list=list.filter(item=>item.sourceType===partsOrderContext.sourceType&&item.sourceId===partsOrderContext.sourceId);
+      list=sortedPartsOrders(list.filter(item=>{
+        const text=[item.name,item.supplier,item.reference,item.notes,partsOrderSourceLabel(item)].join(" ").toLowerCase();
+        return (!search||text.includes(search))&&(!status||item.status===status);
+      }));
+      const body=document.getElementById("partsOrderTableBody");
+      body.innerHTML=list.map(item=>{
+        const safeLink=safeExternalUrl(item.link||"");
+        return `<tr><td>${escapeHtml(partsOrderSourceLabel(item))}</td><td><strong>${escapeHtml(item.name)}</strong>${item.neededDate?`<br><small>Souhaitée : ${formatDate(item.neededDate)}</small>`:""}${item.notes?`<br><small>${escapeHtml(item.notes)}</small>`:""}</td><td>${Math.max(1,Number(item.quantity)||1)}</td><td>${escapeHtml(item.supplier||"—")}<br><small>${escapeHtml(item.reference||"—")}</small>${safeLink!=="#"?`<br><a href="${escapeHtml(safeLink)}" target="_blank" rel="noopener">Ouvrir le lien</a>`:""}</td><td>${formatMoney(Number(item.cost||0))}</td><td><span class="status ${partsOrderStatusClass(item.status)}">${escapeHtml(item.status||"À commander")}</span></td><td><div class="table-actions">${activeRole==="admin"?`<button class="mini-btn" type="button" data-parts-order-edit="${escapeHtml(item.id)}">Modifier</button><button class="mini-btn danger" type="button" data-parts-order-delete="${escapeHtml(item.id)}">Supprimer</button>`:"Consultation"}</div></td></tr>`;
+      }).join("");
+      document.getElementById("partsOrderEmpty").classList.toggle("hidden",list.length>0);
+      body.querySelectorAll("[data-parts-order-edit]").forEach(button=>button.addEventListener("click",()=>editPartsOrder(button.dataset.partsOrderEdit)));
+      body.querySelectorAll("[data-parts-order-delete]").forEach(button=>button.addEventListener("click",()=>deletePartsOrder(button.dataset.partsOrderDelete)));
+    }
+
+    function openPartsOrderModal(sourceType="",sourceId=""){
+      partsOrderContext={sourceType,sourceId};
+      const contextLabel=sourceType?partsOrderLiveSourceLabel(sourceType,sourceId):"";
+      document.getElementById("partsOrderModalTitle").textContent=sourceType?"Pièces à commander — fiche liée":"Toutes les pièces à commander";
+      const note=document.getElementById("partsOrderSourceNote");
+      note.classList.toggle("hidden",!sourceType);
+      note.textContent=sourceType?`Dossier sélectionné : ${contextLabel}`:"";
+      document.getElementById("partsOrderSearch").value="";
+      document.getElementById("partsOrderFilter").value="";
+      document.getElementById("partsOrderForm").classList.toggle("hidden",activeRole!=="admin");
+      resetPartsOrderForm();
+      renderPartsOrderTable();
+      document.getElementById("partsOrderModal").classList.remove("hidden");
+    }
+
+    function editPartsOrder(id){
+      if(activeRole!=="admin") return;
+      const item=getAdminPartsOrders().find(entry=>entry.id===id);
+      if(!item) return;
+      document.getElementById("partsOrderEditId").value=item.id;
+      populatePartsOrderSources(partsOrderSourceValue(item.sourceType,item.sourceId),item.sourceLabel);
+      document.getElementById("partsOrderStatus").value=item.status||"À commander";
+      document.getElementById("partsOrderName").value=item.name||"";
+      document.getElementById("partsOrderQuantity").value=Math.max(1,Number(item.quantity)||1);
+      document.getElementById("partsOrderSupplier").value=item.supplier||"";
+      document.getElementById("partsOrderReference").value=item.reference||"";
+      document.getElementById("partsOrderCost").value=Number(item.cost||0);
+      document.getElementById("partsOrderLink").value=item.link||"";
+      document.getElementById("partsOrderNeededDate").value=item.neededDate||"";
+      document.getElementById("partsOrderNotes").value=item.notes||"";
+      document.getElementById("partsOrderName").focus();
+    }
+
+    function deletePartsOrder(id){
+      if(activeRole!=="admin"||!confirm("Supprimer cette pièce de la liste des commandes ?")) return;
+      recordCloudDeletion(PARTS_ORDER_STORAGE_KEY,id);
+      saveAdminPartsOrders(getAdminPartsOrders().filter(item=>item.id!==id));
+      renderPartsOrderTable();
+    }
+
+    function deletePartsOrdersForSource(sourceType,sourceId){
+      const list=getAdminPartsOrders();
+      const removed=list.filter(item=>item.sourceType===sourceType&&item.sourceId===sourceId);
+      removed.forEach(item=>recordCloudDeletion(PARTS_ORDER_STORAGE_KEY,item.id));
+      if(removed.length) saveAdminPartsOrders(list.filter(item=>!(item.sourceType===sourceType&&item.sourceId===sourceId)));
+    }
+
+    document.getElementById("partsOrderForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const list=getAdminPartsOrders();
+      const editId=document.getElementById("partsOrderEditId").value;
+      const previous=list.find(item=>item.id===editId);
+      const sourceSelect=document.getElementById("partsOrderSource");
+      const source=parsePartsOrderSource(sourceSelect.value);
+      const now=new Date().toISOString();
+      const item={
+        id:editId||`CMD-${Date.now()}-${Math.random().toString(16).slice(2,7)}`,
+        sourceType:source.sourceType,sourceId:source.sourceId,sourceLabel:sourceSelect.options[sourceSelect.selectedIndex]?.textContent||"Atelier",
+        name:document.getElementById("partsOrderName").value.trim(),
+        quantity:Math.max(1,Number(document.getElementById("partsOrderQuantity").value)||1),
+        supplier:document.getElementById("partsOrderSupplier").value.trim(),
+        reference:document.getElementById("partsOrderReference").value.trim(),
+        cost:Math.max(0,Number(document.getElementById("partsOrderCost").value)||0),
+        link:document.getElementById("partsOrderLink").value.trim(),
+        neededDate:document.getElementById("partsOrderNeededDate").value,
+        status:document.getElementById("partsOrderStatus").value,
+        notes:document.getElementById("partsOrderNotes").value.trim(),
+        createdAt:previous?.createdAt||now,updatedAt:now
+      };
+      if(editId){const index=list.findIndex(entry=>entry.id===editId);if(index!==-1) list[index]=item;}
+      else list.unshift(item);
+      if(!saveAdminPartsOrders(list)) return;
+      resetPartsOrderForm();
+      renderPartsOrderTable();
+    });
+
+    document.getElementById("openPartsOrderManagerBtn").addEventListener("click",()=>openPartsOrderModal());
+    document.getElementById("cancelPartsOrderEditBtn").addEventListener("click",resetPartsOrderForm);
+    document.getElementById("partsOrderSearch").addEventListener("input",renderPartsOrderTable);
+    document.getElementById("partsOrderFilter").addEventListener("change",renderPartsOrderTable);
+    document.getElementById("closePartsOrderModal").addEventListener("click",()=>document.getElementById("partsOrderModal").classList.add("hidden"));
+    document.getElementById("partsOrderModal").addEventListener("click",event=>{if(event.target.id==="partsOrderModal") event.currentTarget.classList.add("hidden");});
+
     function formatDate(value){
       if(!value) return "—";
       return new Date(value + "T00:00:00").toLocaleDateString("fr-FR");
@@ -4670,7 +4946,8 @@
       list.forEach(item => {
         const tr = document.createElement("tr");
         const adminActions = activeRole === "admin"
-          ? `<button class="mini-btn" data-edit="${escapeHtml(item.id)}">Modifier</button>
+          ? `<button class="mini-btn" data-repair-parts-order="${escapeHtml(item.id)}">Pièces à commander</button>
+             <button class="mini-btn" data-edit="${escapeHtml(item.id)}">Modifier</button>
              <button class="mini-btn danger" data-delete="${escapeHtml(item.id)}">Supprimer</button>`
           : "";
 
@@ -4698,6 +4975,10 @@
 
       tbody.querySelectorAll("[data-edit]").forEach(btn => {
         btn.addEventListener("click", () => editRepair(btn.dataset.edit));
+      });
+
+      tbody.querySelectorAll("[data-repair-parts-order]").forEach(btn => {
+        btn.addEventListener("click", () => openPartsOrderModal("repair",btn.dataset.repairPartsOrder));
       });
 
       tbody.querySelectorAll("[data-delete]").forEach(btn => {
@@ -5119,6 +5400,7 @@
       if(!confirm("Supprimer définitivement ce dossier ? Les pièces utilisées seront remises en stock.")) return;
       const repair=getAdminRepairs().find(r=>r.id===id);
       restoreRepairStock(repair);
+      deletePartsOrdersForSource("repair",id);
       recordCloudDeletion("tech42-repairs",id);
       saveAdminRepairs(getAdminRepairs().filter(r => r.id !== id));
       renderRepairs();
@@ -5158,6 +5440,7 @@
         <div class="detail-box"><small>Coût pièces TTC</small>${formatMoney(item.partsCostTTC !== undefined ? item.partsCostTTC : amountToTTC(item.partsCost||0,item.partsCostMode||"TTC"))}</div>
         <div class="detail-box"><small>Marge</small>${formatMoney(item.margin||0)}</div>
         <div class="detail-box full"><small>État du dossier</small>${item.closed?'<span class="closed-badge">Dossier clôturé</span>':'Dossier ouvert'}</div>
+        <div class="detail-box full"><small>Pièces à commander</small>${partsOrderInlineHtml("repair",item.id)}</div>
         <div class="detail-box full">
           <small>Historique des interventions</small>
           <div id="repairHistoryList" class="history-list">${renderRepairHistory(item)}</div>
@@ -5208,6 +5491,8 @@
       }
       document.getElementById("closeRepairBtn").disabled=Boolean(item.closed)||activeRole!=="admin";
       document.getElementById("closeRepairBtn").style.opacity=(item.closed||activeRole!=="admin")?".45":"1";
+      document.getElementById("repairPartsOrderBtn").disabled=activeRole!=="admin";
+      document.getElementById("repairPartsOrderBtn").style.opacity=activeRole!=="admin"?".45":"1";
     }
 
     document.getElementById("closeRepairModal").addEventListener("click", () => {
@@ -5218,6 +5503,11 @@
       if(event.target.id === "repairModal"){
         document.getElementById("repairModal").classList.add("hidden");
       }
+    });
+
+    document.getElementById("repairPartsOrderBtn").addEventListener("click",()=>{
+      if(activeRole!=="admin"||!openedRepairId) return;
+      openPartsOrderModal("repair",openedRepairId);
     });
 
 
@@ -5830,6 +6120,7 @@
         const deviceParts=personalDeviceParts(item);
         const cover=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).find(Boolean);
         const adminActions=activeRole==="admin" ? `
+          <button class="mini-btn" type="button" data-personal-parts-order="${escapeHtml(item.id)}">Pièces à commander</button>
           <button class="mini-btn" type="button" data-personal-edit="${escapeHtml(item.id)}">Modifier</button>
           ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="mini-btn" type="button" data-personal-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
           ${item.status!=="Vendu"?`<button class="mini-btn" type="button" data-personal-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
@@ -5860,6 +6151,7 @@
 
       empty.classList.toggle("hidden",list.length>0);
       box.querySelectorAll("[data-personal-view]").forEach(btn=>btn.addEventListener("click",()=>openPersonalDeviceDetails(btn.dataset.personalView)));
+      box.querySelectorAll("[data-personal-parts-order]").forEach(btn=>btn.addEventListener("click",()=>openPartsOrderModal("device",btn.dataset.personalPartsOrder)));
       box.querySelectorAll("[data-personal-edit]").forEach(btn=>btn.addEventListener("click",()=>editPersonalDevice(btn.dataset.personalEdit)));
       box.querySelectorAll("[data-personal-sale]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceForSale(btn.dataset.personalSale)));
       box.querySelectorAll("[data-personal-sold]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceSold(btn.dataset.personalSold)));
@@ -5986,6 +6278,7 @@
       if(activeRole!=="admin") return;
       if(!confirm("Supprimer définitivement cet appareil personnel et son historique ?")) return;
       if(!saveAdminPersonalDevices(getAdminPersonalDevices().filter(item=>item.id!==id))) return;
+      deletePartsOrdersForSource("device",id);
       recordCloudDeletion(PERSONAL_DEVICE_STORAGE_KEY,id);
       document.getElementById("personalDeviceModal").classList.add("hidden");
       renderPersonalDevices();
@@ -6376,6 +6669,7 @@
           ${item.condition==="Pour pièces"||deviceParts.length?`<div class="detail-box full"><small>Liste détaillée des pièces</small>
             ${deviceParts.length?`<div class="table-wrap"><table class="device-parts-table"><thead><tr><th>Pièce</th><th>État</th><th>Qté</th><th>Prix unitaire</th><th>Rangement</th><th>Détails</th></tr></thead><tbody>${deviceParts.map(part=>`<tr><td>${escapeHtml(part.name)}</td><td>${escapeHtml(part.state)}</td><td>${part.quantity}</td><td>${personalMoney(part.salePrice)}</td><td>${escapeHtml(part.location||"—")}</td><td>${escapeHtml(part.notes||"—")}</td></tr>`).join("")}</tbody></table></div>`:`<div class="device-test-pending">Aucune pièce détaillée.</div>`}
           </div>`:""}
+          <div class="detail-box full"><small>Pièces à commander</small>${partsOrderInlineHtml("device",item.id)}</div>
           <div class="detail-box full"><small>Notes et état détaillé</small>${escapeHtml(item.notes||"—")}</div>
           <div class="detail-box full"><small>Total des réparations</small>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</div>
           <div class="detail-box full"><small>Suivi SAV</small>${savReturns.length} retour(s) · ${savReturns.filter(entry=>entry.status!=="Clôturé").length} dossier(s) ouvert(s)</div>
@@ -6387,6 +6681,7 @@
         <button class="action-btn" type="button" data-detail-print="${escapeHtml(item.id)}">Imprimer A4</button>
         <button class="action-btn secondary" type="button" data-detail-pdf="${escapeHtml(item.id)}">Télécharger PDF A4</button>
         ${activeRole==="admin"?`
+          <button class="action-btn secondary" type="button" data-detail-parts-order="${escapeHtml(item.id)}">Pièces à commander</button>
           <button class="action-btn" type="button" data-detail-edit="${escapeHtml(item.id)}">Modifier la fiche</button>
           ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
           ${item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sold="${escapeHtml(item.id)}">Marquer vendu</button>`:""}
@@ -6394,6 +6689,7 @@
           <button class="mini-btn danger" type="button" data-detail-delete="${escapeHtml(item.id)}">Supprimer</button>`:""}`;
       actions.querySelector("[data-detail-print]")?.addEventListener("click",()=>printPersonalDeviceSheet(id));
       actions.querySelector("[data-detail-pdf]")?.addEventListener("click",()=>downloadPersonalDevicePdf(id));
+      actions.querySelector("[data-detail-parts-order]")?.addEventListener("click",()=>openPartsOrderModal("device",id));
       actions.querySelector("[data-detail-edit]")?.addEventListener("click",()=>editPersonalDevice(id));
       actions.querySelector("[data-detail-sale]")?.addEventListener("click",()=>markPersonalDeviceForSale(id));
       actions.querySelector("[data-detail-sold]")?.addEventListener("click",()=>markPersonalDeviceSold(id));
@@ -7732,6 +8028,7 @@
         document.getElementById("statMonthlySales").textContent = "2 980 €";
         document.getElementById("statDevicesForSale").textContent = "3";
         document.getElementById("statDevicesInStock").textContent = String(personalDevicesInStock(demoPersonalDevices));
+        renderDashboardPartsOrders();
         return;
       }
 
@@ -7774,6 +8071,7 @@
       document.getElementById("statMonthlySales").textContent = formatMoney(monthlySales);
       document.getElementById("statDevicesForSale").textContent = devicesForSale;
       document.getElementById("statDevicesInStock").textContent = devicesInStock;
+      renderDashboardPartsOrders();
     }
 
     document.querySelectorAll("[data-open-page]").forEach(card=>{
