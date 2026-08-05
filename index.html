@@ -199,6 +199,15 @@
     .device-test-summary{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
     .device-test-chip{display:inline-block;padding:5px 8px;border:1px solid #2f6941;border-radius:999px;background:#102518;color:#74ef8b;font-size:12px}
     .device-test-pending{color:#ffd66b}
+    .device-parts-fieldset{margin:0 0 14px;padding:14px;border:1px solid #6a5015;border-radius:12px;background:#111007}
+    .device-parts-fieldset legend{padding:0 8px;color:var(--accent);font-weight:800}
+    .device-parts-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .device-parts-head p{margin:0;color:var(--muted);font-size:13px}
+    .device-parts-list{display:grid;gap:10px}
+    .device-part-row{display:grid;grid-template-columns:minmax(170px,1.4fr) minmax(130px,1fr) 85px 120px minmax(120px,1fr) auto;gap:9px;align-items:end;padding:12px;border:1px solid #302a1b;border-radius:10px;background:#0d0d0d}
+    .device-part-row .field{margin:0}.device-part-row .part-notes{grid-column:1/-2}.device-part-row .part-remove{align-self:end}
+    .device-parts-empty{padding:14px;text-align:center;color:var(--muted);border:1px dashed #4b3c18;border-radius:9px}
+    .device-parts-table{width:100%;border-collapse:collapse;margin-top:8px}.device-parts-table th,.device-parts-table td{padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.device-parts-table th{color:var(--accent);font-size:12px}
     .personal-device-toolbar{display:grid;grid-template-columns:1fr 210px 210px;gap:12px;margin-bottom:16px}
     .personal-device-toolbar input,.personal-device-toolbar select{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}
     .personal-device-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -233,8 +242,8 @@
     .sav-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c}.sav-form .full{grid-column:1/-1}
     .sav-form input,.sav-form select,.sav-form textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}.sav-form textarea{min-height:78px;resize:vertical}
     .sav-table{width:100%;border-collapse:collapse;margin-top:12px}.sav-table th,.sav-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.sav-table th{color:var(--accent)}
-    @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}.device-test-checklist{grid-template-columns:1fr}}
+    @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}}
+    @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}.device-test-checklist,.device-part-row{grid-template-columns:1fr}.device-part-row .part-notes{grid-column:auto}}
 
     
     .document-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
@@ -1337,6 +1346,15 @@
                   <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Compte constructeur et verrouillage" value="Compte constructeur et verrouillage" maxlength="90" required aria-label="Intitulé du test"></div>
                   <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Réinitialisation complète" value="Réinitialisation complète" maxlength="90" required aria-label="Intitulé du test"></div>
                 </div>
+              </fieldset>
+              <fieldset id="personalDevicePartsFieldset" class="device-parts-fieldset full hidden">
+                <legend>Liste détaillée des pièces</legend>
+                <div class="device-parts-head">
+                  <p>Ajoute les pièces récupérables de cet appareil. Toutes les lignes restent modifiables.</p>
+                  <button id="addPersonalDevicePartBtn" class="action-btn" type="button">Ajouter une pièce</button>
+                </div>
+                <div id="personalDevicePartsList" class="device-parts-list"></div>
+                <div id="personalDevicePartsEmpty" class="device-parts-empty">Aucune pièce ajoutée.</div>
               </fieldset>
               <div class="field full"><label>Notes et état détaillé</label><textarea id="personalDeviceNotes" placeholder="Rayures, tests effectués, défauts connus..."></textarea></div>
               <div class="field full">
@@ -5631,6 +5649,71 @@
       });
     }
 
+    const PERSONAL_DEVICE_PART_STATES=["Disponible","À tester","Défectueuse","Utilisée","Vendue"];
+
+    function personalDeviceParts(item){
+      return (Array.isArray(item?.partsInventory)?item.partsInventory:[]).map((part,index)=>({
+        id:String(part?.id||`PIECE-${index+1}`),
+        name:String(part?.name||"").trim(),
+        state:PERSONAL_DEVICE_PART_STATES.includes(part?.state)?part.state:"À tester",
+        quantity:Math.max(1,Math.round(Number(part?.quantity||1))),
+        salePrice:Math.max(0,Number(part?.salePrice||0)),
+        location:String(part?.location||"").trim(),
+        notes:String(part?.notes||"").trim()
+      })).filter(part=>part.name);
+    }
+
+    function nextPersonalDevicePartId(){
+      return `PIECE-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    }
+
+    function personalDevicePartRowHtml(part={}){
+      const id=String(part.id||nextPersonalDevicePartId());
+      const state=PERSONAL_DEVICE_PART_STATES.includes(part.state)?part.state:"À tester";
+      return `<div class="device-part-row" data-device-part-id="${escapeHtml(id)}">
+        <div class="field"><label>Désignation de la pièce</label><input type="text" data-part-name maxlength="100" placeholder="Ex. Écran, caméra, carte mère..." value="${escapeHtml(part.name||"")}"></div>
+        <div class="field"><label>État</label><select data-part-state>${PERSONAL_DEVICE_PART_STATES.map(value=>`<option${value===state?" selected":""}>${escapeHtml(value)}</option>`).join("")}</select></div>
+        <div class="field"><label>Quantité</label><input type="number" data-part-quantity min="1" step="1" value="${Math.max(1,Math.round(Number(part.quantity||1)))}"></div>
+        <div class="field"><label>Prix unitaire (€)</label><input type="number" data-part-price min="0" step="0.01" value="${Math.max(0,Number(part.salePrice||0))}"></div>
+        <div class="field"><label>Rangement</label><input type="text" data-part-location maxlength="70" placeholder="Ex. Bac P2" value="${escapeHtml(part.location||"")}"></div>
+        <button class="mini-btn danger part-remove" type="button" data-part-remove>Supprimer</button>
+        <div class="field part-notes"><label>Détails / défauts connus</label><input type="text" data-part-notes maxlength="180" placeholder="Test effectué, rayures, connecteur abîmé..." value="${escapeHtml(part.notes||"")}"></div>
+      </div>`;
+    }
+
+    function renderPersonalDeviceParts(parts=[]){
+      const box=document.getElementById("personalDevicePartsList");
+      const empty=document.getElementById("personalDevicePartsEmpty");
+      const list=Array.isArray(parts)?parts:[];
+      box.innerHTML=list.map(personalDevicePartRowHtml).join("");
+      empty.classList.toggle("hidden",list.length>0);
+    }
+
+    function addPersonalDevicePart(part={}){
+      const box=document.getElementById("personalDevicePartsList");
+      box.insertAdjacentHTML("beforeend",personalDevicePartRowHtml(part));
+      document.getElementById("personalDevicePartsEmpty").classList.add("hidden");
+      box.lastElementChild?.querySelector("[data-part-name]")?.focus();
+    }
+
+    function readPersonalDeviceParts(){
+      return [...document.querySelectorAll("#personalDevicePartsList .device-part-row")].map(row=>({
+        id:row.dataset.devicePartId||nextPersonalDevicePartId(),
+        name:row.querySelector("[data-part-name]").value.trim(),
+        state:row.querySelector("[data-part-state]").value,
+        quantity:Math.max(1,Math.round(Number(row.querySelector("[data-part-quantity]").value||1))),
+        salePrice:Math.max(0,Number(row.querySelector("[data-part-price]").value||0)),
+        location:row.querySelector("[data-part-location]").value.trim(),
+        notes:row.querySelector("[data-part-notes]").value.trim()
+      })).filter(part=>part.name);
+    }
+
+    function togglePersonalDevicePartsSection(){
+      const forParts=document.getElementById("personalDeviceCondition").value==="Pour pièces";
+      document.getElementById("personalDevicePartsFieldset").classList.toggle("hidden",!forParts);
+      if(forParts&&!document.querySelector("#personalDevicePartsList .device-part-row")) addPersonalDevicePart();
+    }
+
     function nextPersonalDeviceId(list){
       const max=list.reduce((highest,item)=>{
         const match=String(item.id||"").match(/(\d+)$/);
@@ -5718,7 +5801,8 @@
       return currentPersonalDevices().filter(item=>{
         const repairs=(Array.isArray(item.repairs)?item.repairs:[]).map(r=>[r.fault,r.work,r.parts].join(" ")).join(" ");
         const sav=(Array.isArray(item.savReturns)?item.savReturns:[]).map(r=>[r.reason,r.diagnosis,r.work,r.status].join(" ")).join(" ");
-        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,item.listingDate,personalWarrantyEndDate(item),personalDeviceTests(item).join(" "),repairs,sav].join(" ").toLowerCase();
+        const deviceParts=personalDeviceParts(item).map(part=>[part.name,part.state,part.location,part.notes].join(" ")).join(" ");
+        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,item.listingDate,personalWarrantyEndDate(item),personalDeviceTests(item).join(" "),deviceParts,repairs,sav].join(" ").toLowerCase();
         return (!search||text.includes(search))&&(!type||item.deviceType===type)&&(!status||item.status===status);
       });
     }
@@ -5744,6 +5828,7 @@
         const batteryHealth=hasBattery?Math.max(0,Math.min(100,Number(item.batteryHealth)||0)):null;
         const completedTests=personalDeviceTests(item);
         const totalTests=personalDeviceTestOptions().length;
+        const deviceParts=personalDeviceParts(item);
         const cover=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).find(Boolean);
         const adminActions=activeRole==="admin" ? `
           <button class="mini-btn" type="button" data-personal-edit="${escapeHtml(item.id)}">Modifier</button>
@@ -5765,6 +5850,7 @@
               IMEI : ${escapeHtml(item.imei1||item.imei2||"—")} · Série : ${escapeHtml(item.serial||"—")}<br>
               ${repairs.length} réparation(s) · ${savReturns.length} retour(s) SAV · Coût réparations : ${personalMoney(repairCost)}<br>
               Tests effectués : <strong>${completedTests.length}/${totalTests}</strong><br>
+              ${deviceParts.length?`Pièces détaillées : <strong>${deviceParts.reduce((sum,part)=>sum+part.quantity,0)}</strong><br>`:""}
               ${item.status==="Vendu"?`${warrantyBadgeHtml(item)}<br>`:item.listingDate?`Mise en vente : ${formatDate(item.listingDate)}<br>`:""}
               ${item.status==="Vendu"?"Prix de vente":"Prix de vente prévu"} : <strong>${personalMoney(item.salePrice)}</strong>
             </div>
@@ -5796,6 +5882,8 @@
       document.getElementById("personalDeviceForm").reset();
       document.getElementById("personalDeviceEditId").value="";
       restorePersonalDeviceTests();
+      renderPersonalDeviceParts([]);
+      togglePersonalDevicePartsSection();
       currentPersonalDevicePhotos=[];
       renderPersonalDevicePhotosPreview();
       document.getElementById("savePersonalDeviceBtn").textContent="Enregistrer l’appareil";
@@ -5881,6 +5969,8 @@
       document.getElementById("personalDeviceListingDate").value=item.listingDate||"";
       document.getElementById("personalDeviceWarrantyMonths").value=String(Number(item.warrantyMonths||0));
       document.getElementById("personalDeviceCondition").value=item.condition||"Bon état";
+      renderPersonalDeviceParts(personalDeviceParts(item));
+      togglePersonalDevicePartsSection();
       document.getElementById("personalDeviceStatus").value=item.status||"Personnel";
       document.getElementById("personalDeviceBuyer").value=item.buyer||"";
       document.getElementById("personalDeviceAccessories").value=item.accessories||"";
@@ -6023,8 +6113,9 @@
       const savReturns=[...(Array.isArray(item.savReturns)?item.savReturns:[])].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
       const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
       const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
-      const textVolume=[item.accessories,item.notes,...repairs.flatMap(repair=>[repair.fault,repair.work,repair.parts]),...savReturns.flatMap(entry=>[entry.reason,entry.diagnosis,entry.work,entry.notes])].join(" ").length;
-      const layoutClasses=[photos.length>3?"many-photos":"",repairs.length+savReturns.length>4?"long-history":"",textVolume>900?"dense-sheet":""].filter(Boolean).join(" ");
+      const deviceParts=personalDeviceParts(item);
+      const textVolume=[item.accessories,item.notes,...deviceParts.flatMap(part=>[part.name,part.state,part.location,part.notes]),...repairs.flatMap(repair=>[repair.fault,repair.work,repair.parts]),...savReturns.flatMap(entry=>[entry.reason,entry.diagnosis,entry.work,entry.notes])].join(" ").length;
+      const layoutClasses=[photos.length>3?"many-photos":"",repairs.length+savReturns.length+deviceParts.length>4?"long-history":"",textVolume>900?"dense-sheet":""].filter(Boolean).join(" ");
       const battery=item.batteryHealth!==""&&item.batteryHealth!==null&&item.batteryHealth!==undefined
         ? `${Math.max(0,Math.min(100,Number(item.batteryHealth)||0))} %`
         : "—";
@@ -6039,6 +6130,7 @@
         <td class="money">${personalMoney(repair.cost)}</td>
       </tr>`).join("");
       const savRows=savReturns.map(entry=>`<tr class="device-repair-row"><td>${entry.date?formatDate(entry.date):"—"}</td><td>${escapeHtml(entry.underWarranty||"À vérifier")}</td><td>${escapeHtml(entry.reason||"—")}</td><td>${escapeHtml([entry.diagnosis,entry.work].filter(Boolean).join(" — ")||"—")}</td><td>${escapeHtml(entry.status||"Ouvert")}</td></tr>`).join("");
+      const partRows=deviceParts.map(part=>`<tr class="device-repair-row"><td>${escapeHtml(part.name)}</td><td>${escapeHtml(part.state)}</td><td>${part.quantity}</td><td class="money">${personalMoney(part.salePrice)}</td><td>${escapeHtml(part.location||"—")}</td><td>${escapeHtml(part.notes||"—")}</td></tr>`).join("");
       const warrantyEnd=personalWarrantyEndDate(item);
       return `<main class="device-print-sheet ${layoutClasses}">
         <header class="device-print-header">
@@ -6081,6 +6173,8 @@
             <div class="wide"><small>Notes et état détaillé</small><span>${escapeHtml(item.notes||"—")}</span></div>
           </div>
         </section>
+
+        ${deviceParts.length?`<section class="device-print-section device-history-section"><div class="device-history-title"><h3>Liste détaillée des pièces</h3><strong>${deviceParts.reduce((sum,part)=>sum+part.quantity,0)} pièce(s)</strong></div><table class="device-print-table"><thead><tr><th>Pièce</th><th>État</th><th>Qté</th><th>Prix unitaire</th><th>Rangement</th><th>Détails</th></tr></thead><tbody>${partRows}</tbody></table></section>`:""}
 
         ${photos.length?`<section class="device-print-section"><h3>Photos de l’appareil</h3><div class="device-print-photos">${photos.map((src,index)=>`<div class="device-photo"><img src="${src}" alt="Photo appareil ${index+1}"><small>Photo ${index+1}</small></div>`).join("")}</div></section>`:""}
 
@@ -6257,6 +6351,7 @@
       const warrantyEnd=personalWarrantyEndDate(item);
       const completedTests=personalDeviceTests(item);
       const totalTests=personalDeviceTestOptions().length;
+      const deviceParts=personalDeviceParts(item);
       document.getElementById("personalDeviceDetail").innerHTML=`
         <div class="personal-device-detail-grid">
           <div class="detail-box"><small>Référence</small>${escapeHtml(item.reference||item.id)}</div>
@@ -6279,6 +6374,9 @@
           <div class="detail-box full"><small>Tests effectués</small><strong>${completedTests.length}/${totalTests}</strong>
             ${completedTests.length?`<div class="device-test-summary">${completedTests.map(test=>`<span class="device-test-chip">✓ ${escapeHtml(test)}</span>`).join("")}</div>`:`<div class="device-test-pending">Aucun test coché pour le moment.</div>`}
           </div>
+          ${item.condition==="Pour pièces"||deviceParts.length?`<div class="detail-box full"><small>Liste détaillée des pièces</small>
+            ${deviceParts.length?`<div class="table-wrap"><table class="device-parts-table"><thead><tr><th>Pièce</th><th>État</th><th>Qté</th><th>Prix unitaire</th><th>Rangement</th><th>Détails</th></tr></thead><tbody>${deviceParts.map(part=>`<tr><td>${escapeHtml(part.name)}</td><td>${escapeHtml(part.state)}</td><td>${part.quantity}</td><td>${personalMoney(part.salePrice)}</td><td>${escapeHtml(part.location||"—")}</td><td>${escapeHtml(part.notes||"—")}</td></tr>`).join("")}</tbody></table></div>`:`<div class="device-test-pending">Aucune pièce détaillée.</div>`}
+          </div>`:""}
           <div class="detail-box full"><small>Notes et état détaillé</small>${escapeHtml(item.notes||"—")}</div>
           <div class="detail-box full"><small>Total des réparations</small>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</div>
           <div class="detail-box full"><small>Suivi SAV</small>${savReturns.length} retour(s) · ${savReturns.filter(entry=>entry.status!=="Clôturé").length} dossier(s) ouvert(s)</div>
@@ -6430,6 +6528,15 @@
     document.getElementById("personalDeviceSearch").addEventListener("input",renderPersonalDevices);
     document.getElementById("personalDeviceTypeFilter").addEventListener("change",renderPersonalDevices);
     document.getElementById("personalDeviceStatusFilter").addEventListener("change",renderPersonalDevices);
+    document.getElementById("personalDeviceCondition").addEventListener("change",togglePersonalDevicePartsSection);
+    document.getElementById("addPersonalDevicePartBtn").addEventListener("click",()=>addPersonalDevicePart());
+    document.getElementById("personalDevicePartsList").addEventListener("click",event=>{
+      const button=event.target.closest("[data-part-remove]");
+      if(!button) return;
+      button.closest(".device-part-row")?.remove();
+      const hasParts=Boolean(document.querySelector("#personalDevicePartsList .device-part-row"));
+      document.getElementById("personalDevicePartsEmpty").classList.toggle("hidden",hasParts);
+    });
     document.getElementById("closePersonalDeviceModal").addEventListener("click",()=>document.getElementById("personalDeviceModal").classList.add("hidden"));
     document.getElementById("personalDeviceModal").addEventListener("click",event=>{if(event.target.id==="personalDeviceModal") event.currentTarget.classList.add("hidden");});
     document.getElementById("addPersonalRepairBtn").addEventListener("click",()=>showPersonalRepairForm());
@@ -6468,6 +6575,7 @@
       const batteryValue=document.getElementById("personalDeviceBatteryHealth").value;
       const warrantyMonths=Math.max(0,Number(document.getElementById("personalDeviceWarrantyMonths").value||0));
       const testChecklist=readPersonalDeviceTestChecklist();
+      const partsInventory=readPersonalDeviceParts();
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
@@ -6491,6 +6599,7 @@
         accessories:document.getElementById("personalDeviceAccessories").value.trim(),
         tests:testChecklist.filter(entry=>entry.checked).map(entry=>entry.label),
         testChecklist,
+        partsInventory,
         notes:document.getElementById("personalDeviceNotes").value.trim(),
         photos:[...currentPersonalDevicePhotos],
         repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
