@@ -250,6 +250,7 @@
     .personal-device-placeholder{width:130px;height:130px;border-radius:11px;display:grid;place-items:center;background:#0b0b0b;border:1px solid #2c2c2c;color:var(--accent);font-size:42px}
     .personal-device-card h3{margin:0 0 7px;color:var(--accent)}
     .personal-device-reference{display:inline-block;margin:0 0 8px;padding:4px 8px;border:1px solid #4a4026;border-radius:7px;background:#12100a;color:#f1d783;font-size:12px;font-weight:800;letter-spacing:.25px}
+    .personal-device-location{display:inline-flex;align-items:center;gap:5px;margin:0 0 8px 6px;padding:4px 8px;border:1px solid #d4a72c;border-radius:7px;background:#2b2107;color:#ffe08a;font-size:12px;font-weight:900;letter-spacing:.2px}
     .personal-device-meta{color:var(--muted);font-size:14px;line-height:1.55}
     .personal-device-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
     .personal-device-badge{display:inline-block;padding:5px 9px;margin:0 5px 6px 0;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--border);background:#201b0d;color:#ffd66b}
@@ -1370,6 +1371,7 @@
               <div class="field"><label>Capacité / configuration</label><input id="personalDeviceCapacity" type="text" placeholder="Ex. 256 Go, 16 Go RAM..."></div>
               <div class="field"><label>État de la batterie (%)</label><input id="personalDeviceBatteryHealth" type="number" min="0" max="100" step="1" placeholder="Ex. 87"></div>
               <div class="field"><label>Référence interne</label><input id="personalDeviceReference" type="text" placeholder="Générée automatiquement si vide"></div>
+              <div class="field"><label>Emplacement de stockage</label><input id="personalDeviceStorageLocation" type="text" maxlength="90" placeholder="Ex. Étagère A, Bac 3, Atelier..."></div>
               <div class="field"><label>IMEI 1</label><input id="personalDeviceImei1" type="text"></div>
               <div class="field"><label>IMEI 2</label><input id="personalDeviceImei2" type="text"></div>
               <div class="field"><label>Numéro de série</label><input id="personalDeviceSerial" type="text"></div>
@@ -2218,7 +2220,7 @@
               <div class="storage-details">
                 <div class="storage-detail"><small>Images/signatures locales</small><strong id="storageImageCount">0 élément</strong></div>
                 <div class="storage-detail"><small>Poids local des images</small><strong id="storageImageBytes">0 Ko</strong></div>
-                <div class="storage-detail"><small>Photos dans le cloud</small><strong id="storageCloudImageCount">0 photo</strong></div>
+                <div class="storage-detail"><small>Images uniques dans le cloud</small><strong id="storageCloudImageCount">0 image</strong></div>
                 <div class="storage-detail"><small>Sauvegardes locales</small><strong id="storageBackupCount">0 copie</strong></div>
               </div>
               <div class="page-actions" style="margin-bottom:0">
@@ -2231,7 +2233,7 @@
                 <p style="margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5">Les nouvelles photos sont envoyées dans un espace privé. Hors connexion, elles restent provisoirement sur l’appareil puis peuvent être transférées au retour d’Internet.</p>
                 <div class="page-actions" style="margin-bottom:0">
                   <button id="checkPhotoCloudBtn" class="action-btn secondary" type="button">Tester l’espace photo</button>
-                  <button id="migratePhotosToCloudBtn" class="save-btn" type="button">Envoyer les photos existantes</button>
+                  <button id="migratePhotosToCloudBtn" class="save-btn" type="button">Envoyer / optimiser les images</button>
                 </div>
                 <div id="photoCloudMessage"></div>
                 <details id="photoCloudSetup" class="photo-cloud-setup">
@@ -2426,11 +2428,13 @@
     const PHOTO_STORAGE_BUCKET="tech42-photos";
     const CLOUD_PHOTO_PREFIX="tech42-cloud-photo:";
     const PHOTO_DELETE_QUEUE_KEY="tech42-photo-delete-queue";
+    const PHOTO_DEDUP_STATE_KEY="tech42-photo-dedup-v1";
     const CLOUD_PHOTO_PLACEHOLDER="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
     const PHOTO_SIGNED_URL_SECONDS=21600;
     const photoSignedUrlCache=new Map();
     let photoCloudAvailable=null;
     let photoMigrationRunning=false;
+    let photoDedupRunning=false;
     const PHOTO_STORAGE_SETUP_SQL=String.raw`insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'tech42-photos',
@@ -2588,6 +2592,30 @@ using (
       return clean||fallback;
     }
 
+    async function photoBlobSha256(blob){
+      if(!globalThis.crypto?.subtle) throw new Error("Empreinte photo indisponible");
+      const digest=await crypto.subtle.digest("SHA-256",await blob.arrayBuffer());
+      return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,"0")).join("");
+    }
+
+    function photoBlobExtension(blob){
+      const mime=String(blob?.type||"").toLowerCase();
+      return mime.includes("png")?"png":mime.includes("webp")?"webp":"jpg";
+    }
+
+    function isExistingCloudPhotoError(error){
+      const text=[error?.statusCode,error?.status,error?.message,error?.error].filter(Boolean).join(" ");
+      return /409|duplicate|already exists|resource already exists/i.test(text);
+    }
+
+    async function ensureContentAddressedCloudPhoto(blob){
+      const digest=await photoBlobSha256(blob);
+      const path=`${cloudUser.id}/images-partagees/${digest}.${photoBlobExtension(blob)}`;
+      const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).upload(path,blob,{contentType:blob.type||"image/jpeg",cacheControl:"31536000",upsert:false});
+      if(error&&!isExistingCloudPhotoError(error)) throw error;
+      return path;
+    }
+
     async function storePhotoSourceInCloud(source,area,recordId){
       const value=storedPhotoValue(source);
       if(!value.startsWith("data:image/")) return {value,uploaded:false,failed:false};
@@ -2599,11 +2627,7 @@ using (
           ? await compressPersonalDevicePhoto(value)
           : value;
         const blob=photoDataUrlToBlob(optimizedValue);
-        const extension=blob.type.includes("png")?"png":blob.type.includes("webp")?"webp":"jpg";
-        const unique=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        const path=`${cloudUser.id}/${safePhotoPathSegment(area)}/${safePhotoPathSegment(recordId)}/${unique}.${extension}`;
-        const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).upload(path,blob,{contentType:blob.type||"image/jpeg",cacheControl:"3600",upsert:false});
-        if(error) throw error;
+        const path=await ensureContentAddressedCloudPhoto(blob);
         await signedCloudPhotoUrl(path).catch(()=>"");
         return {value:cloudPhotoReference(path),uploaded:true,failed:false};
       }catch(error){
@@ -2635,18 +2659,34 @@ using (
       try{localStorage.setItem(PHOTO_DELETE_QUEUE_KEY,JSON.stringify(queued));}catch(error){console.warn("File de suppression photo",error);}
     }
 
+    function activeCloudPhotoPaths(){
+      const paths=new Set();
+      const add=value=>{const path=cloudPhotoPath(value);if(path) paths.add(path);};
+      getAdminRepairs().forEach(item=>(Array.isArray(item.photos)?item.photos:[]).forEach(add));
+      getAdminPersonalDevices().forEach(item=>(Array.isArray(item.photos)?item.photos:[]).forEach(add));
+      getAdminBuySell().forEach(item=>{add(item.idFront);add(item.idBack);});
+      return paths;
+    }
+
     async function flushPendingPhotoDeletes(){
       const queued=pendingPhotoDeletePaths();
       if(!queued.length||!cloudUser||!navigator.onLine||!photoCloudAvailable) return false;
-      const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).remove(queued);
+      const active=activeCloudPhotoPaths();
+      const removable=queued.filter(path=>!active.has(path));
+      if(!removable.length){
+        try{localStorage.removeItem(PHOTO_DELETE_QUEUE_KEY);}catch{}
+        return true;
+      }
+      const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).remove(removable);
       if(error){console.warn("Nettoyage photos cloud",error);return false;}
       try{localStorage.removeItem(PHOTO_DELETE_QUEUE_KEY);}catch{}
-      queued.forEach(path=>photoSignedUrlCache.delete(path));
+      removable.forEach(path=>photoSignedUrlCache.delete(path));
       return true;
     }
 
     async function deleteCloudPhotoPaths(paths=[]){
-      const unique=[...new Set(paths.filter(Boolean))];
+      const active=activeCloudPhotoPaths();
+      const unique=[...new Set(paths.filter(Boolean))].filter(path=>!active.has(path));
       if(!unique.length) return true;
       if(!cloudUser||!navigator.onLine||!photoCloudAvailable){queuePhotoDeletePaths(unique);return false;}
       const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).remove(unique);
@@ -3010,11 +3050,12 @@ using (
     function localStoredImageStats(){
       let count=0;
       let bytes=0;
-      let cloudCount=0;
+      const cloudPaths=new Set();
       const visit=value=>{
         if(typeof value==="string"){
           if(value.startsWith(CLOUD_PHOTO_PREFIX)){
-            cloudCount+=1;
+            const path=cloudPhotoPath(value);
+            if(path) cloudPaths.add(path);
           }else if(value.startsWith("data:image/")){
             count+=1;
             bytes+=personalDeviceDataUrlBytes(value);
@@ -3033,7 +3074,7 @@ using (
         try{ visit(JSON.parse(raw)); }
         catch{ visit(raw); }
       }
-      return {count,bytes,cloudCount};
+      return {count,bytes,cloudCount:cloudPaths.size};
     }
 
     async function updateStorageUsage(){
@@ -3056,7 +3097,7 @@ using (
       const images=localStoredImageStats();
       document.getElementById("storageImageCount").textContent=`${images.count} élément${images.count>1?"s":""}`;
       document.getElementById("storageImageBytes").textContent=formatStorageSize(images.bytes);
-      document.getElementById("storageCloudImageCount").textContent=`${images.cloudCount} photo${images.cloudCount>1?"s":""}`;
+      document.getElementById("storageCloudImageCount").textContent=`${images.cloudCount} image${images.cloudCount>1?"s":""}`;
       try{
         const backups=await listLocalBackups();
         document.getElementById("storageBackupCount").textContent=`${backups.length} copie${backups.length>1?"s":""}`;
@@ -4938,15 +4979,17 @@ using (
       const button=event.currentTarget;
       const message=document.getElementById("photoCloudMessage");
       button.disabled=true;
-      button.textContent="Envoi en cours…";
+      button.textContent="Optimisation en cours…";
       message.className="notice";
-      message.textContent="Transfert sécurisé des photos vers le cloud…";
+      message.textContent="Transfert et suppression des copies identiques…";
       try{
-        const result=await migrateStoredPhotosToCloud();
-        message.className=result.failed?"error":"notice";
-        message.textContent=result.uploaded
-          ? `${result.uploaded} photo${result.uploaded>1?"s":""} envoyée${result.uploaded>1?"s":""} dans le cloud${result.failed?` · ${result.failed} en attente`:""}.`
-          : "Toutes les photos sont déjà dans le cloud.";
+        const result=await migrateStoredPhotosToCloud({forceDedup:true});
+        message.className=result.failed||result.dedupFailed?"error":"notice";
+        const details=[];
+        if(result.uploaded) details.push(`${result.uploaded} image${result.uploaded>1?"s":""} transférée${result.uploaded>1?"s":""}`);
+        if(result.optimized) details.push(`${result.optimized} copie${result.optimized>1?"s":""} inutile${result.optimized>1?"s":""} supprimée${result.optimized>1?"s":""}`);
+        if(result.failed||result.dedupFailed) details.push(`${result.failed+result.dedupFailed} image${result.failed+result.dedupFailed>1?"s":""} en attente`);
+        message.textContent=details.length?`${details.join(" · ")}.`:"Toutes les images sont déjà transférées et optimisées.";
       }catch(error){
         console.error("Migration photos cloud",error);
         message.className="error";
@@ -4954,7 +4997,7 @@ using (
         document.getElementById("photoCloudSetup").open=true;
       }finally{
         button.disabled=false;
-        button.textContent="Envoyer les photos existantes";
+        button.textContent="Envoyer / optimiser les images";
       }
     });
 
@@ -6280,14 +6323,14 @@ using (
       {
         id:"APP-0001",reference:"PERSO-IPHONE",deviceType:"Téléphone",brand:"Apple",model:"iPhone 13",
         color:"Noir",capacity:"128 Go",batteryHealth:88,imei1:"356789000003333",imei2:"",serial:"F2LDEMO13",
-        purchaseDate:"2025-11-12",purchasePrice:320,salePrice:449,condition:"Bon état",status:"Personnel",
+        purchaseDate:"2025-11-12",purchasePrice:320,salePrice:449,condition:"Bon état",status:"Personnel",storageLocation:"Étagère A",
         buyer:"",listingDate:"",warrantyMonths:3,warrantyEndDate:"",accessories:"Boîte et câble",notes:"Appareil personnel entièrement testé.",photos:[],
         repairs:[{id:"RAPP-0001",date:"2026-03-15",fault:"Batterie usée",work:"Remplacement de la batterie",parts:"Batterie compatible",cost:39.9}],savReturns:[]
       },
       {
         id:"APP-0002",reference:"PERSO-PS5",deviceType:"Console",brand:"Sony",model:"PlayStation 5",
         color:"Blanc",capacity:"825 Go",batteryHealth:"",imei1:"",imei2:"",serial:"PS5-DEMO-2026",
-        purchaseDate:"2024-08-20",purchasePrice:420,salePrice:350,condition:"À réparer",status:"À réparer",
+        purchaseDate:"2024-08-20",purchasePrice:420,salePrice:350,condition:"À réparer",status:"À réparer",storageLocation:"Zone consoles",
         buyer:"",listingDate:"",warrantyMonths:0,warrantyEndDate:"",accessories:"Câble secteur et manette",notes:"Port HDMI à contrôler.",photos:[],repairs:[],savReturns:[]
       }
     ];
@@ -6521,7 +6564,7 @@ using (
         const repairs=(Array.isArray(item.repairs)?item.repairs:[]).map(r=>[r.fault,r.work,r.parts].join(" ")).join(" ");
         const sav=(Array.isArray(item.savReturns)?item.savReturns:[]).map(r=>[r.reason,r.diagnosis,r.work,r.status].join(" ")).join(" ");
         const deviceParts=personalDeviceParts(item).map(part=>[part.name,part.state,part.location,part.notes].join(" ")).join(" ");
-        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.accessories,item.notes,item.buyer,item.listingDate,personalWarrantyEndDate(item),personalDeviceTests(item).join(" "),deviceParts,repairs,sav].join(" ").toLowerCase();
+        const text=[item.id,item.reference,item.deviceType,item.brand,item.model,item.color,item.capacity,item.batteryHealth,item.imei1,item.imei2,item.serial,item.condition,item.status,item.storageLocation,item.accessories,item.notes,item.buyer,item.listingDate,personalWarrantyEndDate(item),personalDeviceTests(item).join(" "),deviceParts,repairs,sav].join(" ").toLowerCase();
         return (!search||text.includes(search))&&(!type||item.deviceType===type)&&(!status||item.status===status);
       });
     }
@@ -6589,7 +6632,7 @@ using (
           <div>${cover?`<img class="personal-device-cover" ${photoImageAttributes(cover)} alt="${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}">`:`<div class="personal-device-placeholder" aria-hidden="true">${personalDeviceIcon(item.deviceType)}</div>`}</div>
           <div>
             <h3>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</h3>
-            <div class="personal-device-reference">Réf. : ${escapeHtml(item.reference||item.id)}</div>
+            <div class="personal-device-reference">Réf. : ${escapeHtml(item.reference||item.id)}</div>${item.storageLocation?`<div class="personal-device-location">📍 ${escapeHtml(item.storageLocation)}</div>`:""}
             <div><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span><span class="personal-device-badge">${escapeHtml(item.condition||"État non renseigné")}</span></div>
             <div class="personal-device-meta">
               ${escapeHtml(item.deviceType||"Appareil")} · ${escapeHtml(item.color||"Couleur non renseignée")} · ${escapeHtml(item.capacity||"Configuration non renseignée")}<br>
@@ -6765,7 +6808,70 @@ using (
       return {optimizedCount,savedBytes};
     }
 
-    async function migrateStoredPhotosToCloud(){
+    function replaceCloudPhotoPath(entry,replacements){
+      const oldPath=cloudPhotoPath(entry);
+      const newPath=replacements.get(oldPath);
+      if(!oldPath||!newPath||newPath===oldPath) return entry;
+      const value=cloudPhotoReference(newPath);
+      return typeof entry==="string"?value:{...entry,src:value};
+    }
+
+    async function deduplicateStoredCloudPhotos(force=false){
+      if(photoDedupRunning) return {optimized:0,failed:0,running:true};
+      const stateKey=`${PHOTO_DEDUP_STATE_KEY}:${cloudUser?.id||"hors-ligne"}`;
+      if(!force&&localStorage.getItem(stateKey)==="done") return {optimized:0,failed:0,skipped:true};
+      if(!cloudUser||!navigator.onLine||!photoCloudAvailable) return {optimized:0,failed:0,skipped:true};
+      photoDedupRunning=true;
+      try{
+        const repairs=getAdminRepairs();
+        const devices=getAdminPersonalDevices();
+        const operations=getAdminBuySell();
+        const oldPaths=[...activeCloudPhotoPaths()];
+        const replacements=new Map();
+        let failed=0;
+
+        for(const oldPath of oldPaths){
+          try{
+            const {data:blob,error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).download(oldPath);
+            if(error||!blob) throw error||new Error("Image cloud introuvable");
+            const newPath=await ensureContentAddressedCloudPhoto(blob);
+            replacements.set(oldPath,newPath);
+          }catch(error){
+            failed+=1;
+            console.warn("Optimisation d’une image cloud",oldPath,error);
+          }
+        }
+
+        if(replacements.size){
+          repairs.forEach(item=>{item.photos=(Array.isArray(item.photos)?item.photos:[]).map(entry=>replaceCloudPhotoPath(entry,replacements));});
+          devices.forEach(item=>{item.photos=(Array.isArray(item.photos)?item.photos:[]).map(entry=>replaceCloudPhotoPath(entry,replacements));});
+          operations.forEach(item=>{
+            item.idFront=replaceCloudPhotoPath(item.idFront||"",replacements);
+            item.idBack=replaceCloudPhotoPath(item.idBack||"",replacements);
+          });
+          saveAdminRepairs(repairs);
+          if(!saveAdminPersonalDevices(devices)) throw new Error("DEVICE_DEDUP_SAVE_FAILED");
+          if(!saveAdminBuySell(operations)) throw new Error("BUYSELL_DEDUP_SAVE_FAILED");
+          await cloudSaveNow(true);
+        }
+
+        const remainingPaths=activeCloudPhotoPaths();
+        const obsolete=oldPaths.filter(path=>!remainingPaths.has(path));
+        await deleteCloudPhotoPaths(obsolete);
+        const optimized=Math.max(0,oldPaths.length-remainingPaths.size);
+        if(!failed) localStorage.setItem(stateKey,"done");
+        if(replacements.size){
+          renderRepairs();
+          renderPersonalDevices();
+          renderBuySell();
+        }
+        return {optimized,failed,running:false};
+      }finally{
+        photoDedupRunning=false;
+      }
+    }
+
+    async function migrateStoredPhotosToCloud(options={}){
       if(photoMigrationRunning) return {uploaded:0,failed:0,running:true};
       photoMigrationRunning=true;
       let uploaded=0;
@@ -6814,8 +6920,9 @@ using (
           renderPersonalDevices();
           renderBuySell();
         }
+        const deduplication=await deduplicateStoredCloudPhotos(Boolean(options.forceDedup));
         await updateStorageUsage();
-        return {uploaded,failed,running:false};
+        return {uploaded,failed,optimized:deduplication.optimized||0,dedupFailed:deduplication.failed||0,running:false};
       }finally{
         photoMigrationRunning=false;
       }
@@ -6833,6 +6940,7 @@ using (
       document.getElementById("personalDeviceCapacity").value=item.capacity||"";
       document.getElementById("personalDeviceBatteryHealth").value=item.batteryHealth??"";
       document.getElementById("personalDeviceReference").value=item.reference||"";
+      document.getElementById("personalDeviceStorageLocation").value=item.storageLocation||"";
       document.getElementById("personalDeviceImei1").value=item.imei1||"";
       document.getElementById("personalDeviceImei2").value=item.imei2||"";
       document.getElementById("personalDeviceSerial").value=item.serial||"";
@@ -7029,6 +7137,7 @@ using (
             <div><small>IMEI 2</small><strong>${escapeHtml(item.imei2||"—")}</strong></div>
             <div><small>Numéro de série</small><strong>${escapeHtml(item.serial||"—")}</strong></div>
             <div><small>État de la batterie</small><strong>${battery}</strong></div>
+            <div class="wide"><small>Emplacement de stockage</small><strong>${escapeHtml(item.storageLocation||"—")}</strong></div>
           </div>
         </section>
 
@@ -7234,6 +7343,7 @@ using (
       document.getElementById("personalDeviceDetail").innerHTML=`
         <div class="personal-device-detail-grid">
           <div class="detail-box"><small>Référence</small>${escapeHtml(item.reference||item.id)}</div>
+          <div class="detail-box"><small>Emplacement de stockage</small><strong>📍 ${escapeHtml(item.storageLocation||"Non renseigné")}</strong></div>
           <div class="detail-box"><small>Type</small>${escapeHtml(item.deviceType||"—")}</div>
           <div class="detail-box"><small>Statut</small><span class="personal-device-badge ${personalDeviceBadgeClass(item.status)}">${escapeHtml(item.status||"Personnel")}</span></div>
           <div class="detail-box"><small>Marque / Modèle</small>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</div>
@@ -7468,6 +7578,7 @@ using (
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
+        storageLocation:document.getElementById("personalDeviceStorageLocation").value.trim(),
         deviceType:document.getElementById("personalDeviceType").value,
         brand:document.getElementById("personalDeviceBrand").value.trim(),
         model:document.getElementById("personalDeviceModel").value.trim(),
