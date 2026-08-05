@@ -125,9 +125,16 @@
     .storage-usage-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .storage-usage-line strong{font-size:20px}.storage-usage-state{font-weight:800;color:#74ef8b}
     .storage-usage-state.warning{color:#ffd66b}.storage-usage-state.danger{color:#ff8585}
-    .storage-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+    .storage-details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
     .storage-detail{padding:11px;border:1px solid #303030;border-radius:9px;background:#101010}
     .storage-detail small{display:block;margin-bottom:5px;color:var(--muted)}.storage-detail strong{color:var(--text)}
+    .photo-cloud-panel{margin-top:16px;padding:14px;border:1px solid #3a321e;border-radius:11px;background:#111007}
+    .photo-cloud-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+    .photo-cloud-head h4{margin:0;color:var(--accent);font-size:16px}.photo-cloud-status{padding:7px 10px;border:1px solid #555;border-radius:999px;background:#202020;color:#ddd;font-size:12px;font-weight:800}
+    .photo-cloud-status.online{border-color:#2f7a45;background:#102518;color:#74ef8b}.photo-cloud-status.warning{border-color:#846715;background:#2d2409;color:#ffd66b}.photo-cloud-status.error{border-color:#7a2a2a;background:#2b1111;color:#ff8585}
+    .photo-cloud-setup{margin-top:12px;padding:11px;border:1px dashed #6a5015;border-radius:9px}.photo-cloud-setup summary{cursor:pointer;color:#ffd66b;font-weight:800}
+    .photo-cloud-setup textarea{width:100%;min-height:210px;margin-top:10px;padding:10px;border:1px solid #444;border-radius:8px;background:#080808;color:#ddd;font:12px/1.45 Consolas,monospace;resize:vertical}
+    @media(max-width:900px){.storage-details{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .save-btn{
       padding:11px 15px;border:0;border-radius:9px;background:var(--accent);
       color:#080808;font-weight:800;cursor:pointer
@@ -2209,8 +2216,9 @@
               <div class="storage-usage-line"><strong id="storageUsageValue">Calcul en cours…</strong><span id="storageUsageState" class="storage-usage-state">Niveau normal</span></div>
               <div class="storage-meter" role="progressbar" aria-label="Espace de stockage utilisé" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="storageUsageBar" class="storage-meter-fill"></div></div>
               <div class="storage-details">
-                <div class="storage-detail"><small>Photos et signatures</small><strong id="storageImageCount">0 élément</strong></div>
-                <div class="storage-detail"><small>Poids des images</small><strong id="storageImageBytes">0 Ko</strong></div>
+                <div class="storage-detail"><small>Images/signatures locales</small><strong id="storageImageCount">0 élément</strong></div>
+                <div class="storage-detail"><small>Poids local des images</small><strong id="storageImageBytes">0 Ko</strong></div>
+                <div class="storage-detail"><small>Photos dans le cloud</small><strong id="storageCloudImageCount">0 photo</strong></div>
                 <div class="storage-detail"><small>Sauvegardes locales</small><strong id="storageBackupCount">0 copie</strong></div>
               </div>
               <div class="page-actions" style="margin-bottom:0">
@@ -2218,6 +2226,21 @@
                 <button id="optimizeStoredPhotosBtn" class="save-btn" type="button">Compresser les anciennes photos</button>
               </div>
               <div id="storageUsageMessage"></div>
+              <div class="photo-cloud-panel">
+                <div class="photo-cloud-head"><h4>Photos séparées dans le cloud</h4><span id="photoCloudStatus" class="photo-cloud-status">Vérification en attente</span></div>
+                <p style="margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5">Les nouvelles photos sont envoyées dans un espace privé. Hors connexion, elles restent provisoirement sur l’appareil puis peuvent être transférées au retour d’Internet.</p>
+                <div class="page-actions" style="margin-bottom:0">
+                  <button id="checkPhotoCloudBtn" class="action-btn secondary" type="button">Tester l’espace photo</button>
+                  <button id="migratePhotosToCloudBtn" class="save-btn" type="button">Envoyer les photos existantes</button>
+                </div>
+                <div id="photoCloudMessage"></div>
+                <details id="photoCloudSetup" class="photo-cloud-setup">
+                  <summary>Configuration Supabase nécessaire</summary>
+                  <p style="color:var(--muted);font-size:13px">Dans Supabase, ouvre SQL Editor, colle ce bloc puis clique sur Run.</p>
+                  <textarea id="photoCloudSql" readonly></textarea>
+                  <button id="copyPhotoCloudSqlBtn" class="mini-btn" type="button">Copier le bloc SQL</button>
+                </details>
+              </div>
             </div>
 
           <div class="settings-card">
@@ -2399,6 +2422,238 @@
         detectSessionInUrl: true
       }
     });
+
+    const PHOTO_STORAGE_BUCKET="tech42-photos";
+    const CLOUD_PHOTO_PREFIX="tech42-cloud-photo:";
+    const PHOTO_DELETE_QUEUE_KEY="tech42-photo-delete-queue";
+    const CLOUD_PHOTO_PLACEHOLDER="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+    const PHOTO_SIGNED_URL_SECONDS=21600;
+    const photoSignedUrlCache=new Map();
+    let photoCloudAvailable=null;
+    let photoMigrationRunning=false;
+    const PHOTO_STORAGE_SETUP_SQL=String.raw`insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'tech42-photos',
+  'tech42-photos',
+  false,
+  10485760,
+  array['image/jpeg','image/png','image/webp']
+)
+on conflict (id) do update set
+  public = false,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Tech42 photos lecture" on storage.objects;
+drop policy if exists "Tech42 photos ajout" on storage.objects;
+drop policy if exists "Tech42 photos modification" on storage.objects;
+drop policy if exists "Tech42 photos suppression" on storage.objects;
+
+create policy "Tech42 photos lecture"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'tech42-photos'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+create policy "Tech42 photos ajout"
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'tech42-photos'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+create policy "Tech42 photos modification"
+on storage.objects for update to authenticated
+using (
+  bucket_id = 'tech42-photos'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+)
+with check (
+  bucket_id = 'tech42-photos'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+create policy "Tech42 photos suppression"
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'tech42-photos'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);`;
+
+    function storedPhotoValue(photo){
+      return String(typeof photo==="string"?photo:photo?.src||"");
+    }
+
+    function cloudPhotoPath(photo){
+      const value=storedPhotoValue(photo);
+      return value.startsWith(CLOUD_PHOTO_PREFIX)?value.slice(CLOUD_PHOTO_PREFIX.length):"";
+    }
+
+    function cloudPhotoReference(path){
+      return path?`${CLOUD_PHOTO_PREFIX}${path}`:"";
+    }
+
+    function photoDisplaySource(photo){
+      const value=storedPhotoValue(photo);
+      const path=cloudPhotoPath(value);
+      if(path) return photoSignedUrlCache.get(path)?.url||CLOUD_PHOTO_PLACEHOLDER;
+      if(value.startsWith("data:image/")||value.startsWith("blob:")||/^https:\/\//i.test(value)) return value;
+      return "";
+    }
+
+    function photoImageAttributes(photo){
+      const path=cloudPhotoPath(photo);
+      const source=photoDisplaySource(photo)||CLOUD_PHOTO_PLACEHOLDER;
+      return `src="${escapeHtml(source)}"${path?` data-cloud-photo-path="${escapeHtml(path)}"`:""}`;
+    }
+
+    function setPhotoCloudStatus(message,level=""){
+      const badge=document.getElementById("photoCloudStatus");
+      if(!badge) return;
+      badge.textContent=message;
+      badge.className=`photo-cloud-status ${level}`.trim();
+    }
+
+    async function checkPhotoCloudStorage(){
+      if(!cloudUser){
+        photoCloudAvailable=false;
+        setPhotoCloudStatus("Connexion cloud requise","warning");
+        return false;
+      }
+      if(!navigator.onLine){
+        setPhotoCloudStatus("Hors connexion","warning");
+        return false;
+      }
+      setPhotoCloudStatus("Vérification…","");
+      const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).list(cloudUser.id,{limit:1});
+      if(error){
+        photoCloudAvailable=false;
+        setPhotoCloudStatus("Configuration requise","error");
+        const details=document.getElementById("photoCloudSetup");
+        if(details) details.open=true;
+        return false;
+      }
+      photoCloudAvailable=true;
+      setPhotoCloudStatus("Actif et privé","online");
+      const details=document.getElementById("photoCloudSetup");
+      if(details) details.open=false;
+      flushPendingPhotoDeletes().catch(error=>console.warn("Nettoyage photos cloud",error));
+      return true;
+    }
+
+    async function signedCloudPhotoUrl(path,force=false){
+      if(!path||!cloudUser||!navigator.onLine) return "";
+      const cached=photoSignedUrlCache.get(path);
+      if(!force&&cached&&cached.expiresAt>Date.now()+60000) return cached.url;
+      const {data,error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).createSignedUrl(path,PHOTO_SIGNED_URL_SECONDS);
+      if(error) throw error;
+      const url=data?.signedUrl||data?.signedURL||"";
+      if(url) photoSignedUrlCache.set(path,{url,expiresAt:Date.now()+(PHOTO_SIGNED_URL_SECONDS-120)*1000});
+      return url;
+    }
+
+    async function hydrateCloudPhotoImages(root=document){
+      if(!root?.querySelectorAll) return;
+      const images=[...root.querySelectorAll("img[data-cloud-photo-path]")];
+      const paths=[...new Set(images.map(image=>image.dataset.cloudPhotoPath).filter(Boolean))];
+      await Promise.all(paths.map(async path=>{
+        try{
+          const url=await signedCloudPhotoUrl(path);
+          if(!url) return;
+          images.filter(image=>image.dataset.cloudPhotoPath===path).forEach(image=>{image.src=url;});
+        }catch(error){
+          console.warn("Affichage photo cloud",error);
+        }
+      }));
+    }
+
+    async function ensureCloudPhotoSources(entries=[]){
+      const paths=[...new Set((Array.isArray(entries)?entries:[entries]).map(cloudPhotoPath).filter(Boolean))];
+      await Promise.all(paths.map(path=>signedCloudPhotoUrl(path).catch(error=>console.warn("Lien photo cloud",error))));
+    }
+
+    function photoDataUrlToBlob(dataUrl){
+      const [header,payload]=String(dataUrl||"").split(",",2);
+      if(!header||!payload) throw new Error("Photo invalide");
+      const mime=(header.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";
+      const binary=header.includes(";base64")?atob(payload):decodeURIComponent(payload);
+      const bytes=new Uint8Array(binary.length);
+      for(let index=0;index<binary.length;index+=1) bytes[index]=binary.charCodeAt(index);
+      return new Blob([bytes],{type:mime});
+    }
+
+    function safePhotoPathSegment(value,fallback="photo"){
+      const clean=String(value||fallback).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70);
+      return clean||fallback;
+    }
+
+    async function storePhotoSourceInCloud(source,area,recordId){
+      const value=storedPhotoValue(source);
+      if(!value.startsWith("data:image/")) return {value,uploaded:false,failed:false};
+      if(!cloudUser||!navigator.onLine) return {value,uploaded:false,failed:false};
+      if(photoCloudAvailable===null) await checkPhotoCloudStorage();
+      if(!photoCloudAvailable) return {value,uploaded:false,failed:true};
+      try{
+        const optimizedValue=personalDeviceDataUrlBytes(value)>PERSONAL_DEVICE_PHOTO_TARGET_BYTES
+          ? await compressPersonalDevicePhoto(value)
+          : value;
+        const blob=photoDataUrlToBlob(optimizedValue);
+        const extension=blob.type.includes("png")?"png":blob.type.includes("webp")?"webp":"jpg";
+        const unique=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const path=`${cloudUser.id}/${safePhotoPathSegment(area)}/${safePhotoPathSegment(recordId)}/${unique}.${extension}`;
+        const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).upload(path,blob,{contentType:blob.type||"image/jpeg",cacheControl:"3600",upsert:false});
+        if(error) throw error;
+        await signedCloudPhotoUrl(path).catch(()=>"");
+        return {value:cloudPhotoReference(path),uploaded:true,failed:false};
+      }catch(error){
+        console.error("Envoi photo cloud",error);
+        setPhotoCloudStatus("Échec d’envoi — copie locale conservée","error");
+        return {value,uploaded:false,failed:true};
+      }
+    }
+
+    async function storePhotoEntriesInCloud(entries,area,recordId){
+      const result=[];
+      let uploaded=0;
+      let failed=0;
+      for(const entry of Array.isArray(entries)?entries:[]){
+        const stored=await storePhotoSourceInCloud(entry,area,recordId);
+        if(stored.uploaded) uploaded+=1;
+        if(stored.failed) failed+=1;
+        result.push(typeof entry==="string"?stored.value:{...entry,src:stored.value});
+      }
+      return {entries:result,uploaded,failed};
+    }
+
+    function pendingPhotoDeletePaths(){
+      try{return JSON.parse(localStorage.getItem(PHOTO_DELETE_QUEUE_KEY)||"[]").filter(Boolean);}catch{return []}
+    }
+
+    function queuePhotoDeletePaths(paths=[]){
+      const queued=[...new Set([...pendingPhotoDeletePaths(),...paths.filter(Boolean)])];
+      try{localStorage.setItem(PHOTO_DELETE_QUEUE_KEY,JSON.stringify(queued));}catch(error){console.warn("File de suppression photo",error);}
+    }
+
+    async function flushPendingPhotoDeletes(){
+      const queued=pendingPhotoDeletePaths();
+      if(!queued.length||!cloudUser||!navigator.onLine||!photoCloudAvailable) return false;
+      const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).remove(queued);
+      if(error){console.warn("Nettoyage photos cloud",error);return false;}
+      try{localStorage.removeItem(PHOTO_DELETE_QUEUE_KEY);}catch{}
+      queued.forEach(path=>photoSignedUrlCache.delete(path));
+      return true;
+    }
+
+    async function deleteCloudPhotoPaths(paths=[]){
+      const unique=[...new Set(paths.filter(Boolean))];
+      if(!unique.length) return true;
+      if(!cloudUser||!navigator.onLine||!photoCloudAvailable){queuePhotoDeletePaths(unique);return false;}
+      const {error}=await supabaseClient.storage.from(PHOTO_STORAGE_BUCKET).remove(unique);
+      if(error){console.warn("Suppression photo cloud",error);queuePhotoDeletePaths(unique);return false;}
+      unique.forEach(path=>photoSignedUrlCache.delete(path));
+      return true;
+    }
 
     const CLOUD_TOMBSTONE_KEY = "tech42-deleted-records";
     const CLOUD_STORAGE_KEYS = [
@@ -2755,9 +3010,12 @@
     function localStoredImageStats(){
       let count=0;
       let bytes=0;
+      let cloudCount=0;
       const visit=value=>{
         if(typeof value==="string"){
-          if(value.startsWith("data:image/")){
+          if(value.startsWith(CLOUD_PHOTO_PREFIX)){
+            cloudCount+=1;
+          }else if(value.startsWith("data:image/")){
             count+=1;
             bytes+=personalDeviceDataUrlBytes(value);
           }
@@ -2775,7 +3033,7 @@
         try{ visit(JSON.parse(raw)); }
         catch{ visit(raw); }
       }
-      return {count,bytes};
+      return {count,bytes,cloudCount};
     }
 
     async function updateStorageUsage(){
@@ -2798,6 +3056,7 @@
       const images=localStoredImageStats();
       document.getElementById("storageImageCount").textContent=`${images.count} élément${images.count>1?"s":""}`;
       document.getElementById("storageImageBytes").textContent=formatStorageSize(images.bytes);
+      document.getElementById("storageCloudImageCount").textContent=`${images.cloudCount} photo${images.cloudCount>1?"s":""}`;
       try{
         const backups=await listLocalBackups();
         document.getElementById("storageBackupCount").textContent=`${backups.length} copie${backups.length>1?"s":""}`;
@@ -4517,6 +4776,7 @@
 
         if(role === "admin"){
           refreshAllCloudModules();
+          checkPhotoCloudStorage().then(ready=>{if(ready) migrateStoredPhotosToCloud().catch(error=>console.warn("Migration photo automatique",error));});
           if(hasPendingCloudChanges()){
             setCloudStatus("Connecté — modifications locales protégées", false);
           }else{
@@ -4545,6 +4805,9 @@
         await supabaseClient.auth.signOut();
       }
       cloudUser = null;
+      photoCloudAvailable=null;
+      photoSignedUrlCache.clear();
+      document.querySelectorAll("img[data-cloud-photo-path]").forEach(image=>{image.src=CLOUD_PHOTO_PLACEHOLDER;});
       cloudInitializedUserId = "";
       if(cloudChannel) supabaseClient.removeChannel(cloudChannel);
       cloudChannel = null;
@@ -4593,6 +4856,7 @@
         refreshUserNames();
         refreshLocalBackupSelect();
         updateStorageUsage();
+        checkPhotoCloudStorage();
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
         visualSettingsBlocked.classList.toggle("hidden", activeRole === "admin");
       }
@@ -4649,6 +4913,54 @@
         button.disabled=false;
         button.textContent="Compresser les anciennes photos";
       }
+    });
+
+    const photoCloudSqlField=document.getElementById("photoCloudSql");
+    if(photoCloudSqlField) photoCloudSqlField.value=PHOTO_STORAGE_SETUP_SQL;
+    document.getElementById("copyPhotoCloudSqlBtn").addEventListener("click",async()=>{
+      const field=document.getElementById("photoCloudSql");
+      try{
+        await navigator.clipboard.writeText(field.value);
+      }catch{
+        field.select();
+        document.execCommand("copy");
+      }
+      document.getElementById("photoCloudMessage").className="notice";
+      document.getElementById("photoCloudMessage").textContent="Bloc SQL copié.";
+    });
+    document.getElementById("checkPhotoCloudBtn").addEventListener("click",async()=>{
+      const message=document.getElementById("photoCloudMessage");
+      const ready=await checkPhotoCloudStorage();
+      message.className=ready?"notice":"error";
+      message.textContent=ready?"L’espace photo privé est prêt.":"Configuration nécessaire : ouvre le bloc ci-dessous et exécute-le dans Supabase.";
+    });
+    document.getElementById("migratePhotosToCloudBtn").addEventListener("click",async event=>{
+      const button=event.currentTarget;
+      const message=document.getElementById("photoCloudMessage");
+      button.disabled=true;
+      button.textContent="Envoi en cours…";
+      message.className="notice";
+      message.textContent="Transfert sécurisé des photos vers le cloud…";
+      try{
+        const result=await migrateStoredPhotosToCloud();
+        message.className=result.failed?"error":"notice";
+        message.textContent=result.uploaded
+          ? `${result.uploaded} photo${result.uploaded>1?"s":""} envoyée${result.uploaded>1?"s":""} dans le cloud${result.failed?` · ${result.failed} en attente`:""}.`
+          : "Toutes les photos sont déjà dans le cloud.";
+      }catch(error){
+        console.error("Migration photos cloud",error);
+        message.className="error";
+        message.textContent="L’espace photo n’est pas encore configuré. Utilise le bloc Supabase affiché ci-dessous.";
+        document.getElementById("photoCloudSetup").open=true;
+      }finally{
+        button.disabled=false;
+        button.textContent="Envoyer les photos existantes";
+      }
+    });
+
+    window.addEventListener("online",()=>{
+      if(activeRole!=="admin"||!cloudUser) return;
+      checkPhotoCloudStorage().then(ready=>{if(ready) migrateStoredPhotosToCloud().catch(error=>console.warn("Reprise photos cloud",error));});
     });
 
     document.getElementById("userNamesForm").addEventListener("submit", (event) => {
@@ -5205,7 +5517,7 @@
         const item = document.createElement("div");
         item.className = "repair-photo-item";
         item.innerHTML = `
-          <img src="${typeof src==="string"?src:src.src}" alt="Photo réparation ${index+1}"><small style="display:block;padding:6px;color:var(--muted)">${typeof src==="string"?"Photo":escapeHtml(src.category||"Photo")}</small>
+          <img ${photoImageAttributes(src)} alt="Photo réparation ${index+1}"><small style="display:block;padding:6px;color:var(--muted)">${typeof src==="string"?"Photo":escapeHtml(src.category||"Photo")}</small>
           <button class="repair-photo-remove" type="button" data-photo-index="${index}">×</button>
         `;
         box.appendChild(item);
@@ -5216,6 +5528,7 @@
           renderRepairPhotosPreview();
         });
       });
+      hydrateCloudPhotoImages(box);
     }
 
     ["Before","After","Imei","Accessories"].forEach(name=>{
@@ -5373,16 +5686,22 @@
       try{renderStock();}catch(error){console.warn(error);}
     }
 
-    document.getElementById("repairForm").addEventListener("submit", (event) => {
+    document.getElementById("repairForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       if(activeRole !== "admin") return;
 
       const list = getAdminRepairs();
       const editId = document.getElementById("repairEditId").value;
       const previousRepair = editId ? list.find(r=>r.id===editId) : null;
+      const repairId=editId||nextRepairId(list);
+      const saveButton=document.getElementById("saveRepairBtn");
+      if(saveButton) saveButton.disabled=true;
+      const photoResult=await storePhotoEntriesInCloud(currentRepairPhotos,"reparations",repairId);
+      if(saveButton) saveButton.disabled=false;
+      if(photoResult.failed&&typeof showMobileSaveToast==="function") showMobileSaveToast("Photo conservée localement — espace cloud à vérifier",false);
       const linkedClientId = upsertClientFromFields(document.getElementById("repairClient").value.trim(),document.getElementById("repairPhone").value.trim(),"");
       const item = {
-        id: editId || nextRepairId(list),
+        id: repairId,
         clientId: linkedClientId,
         client: document.getElementById("repairClient").value.trim(),
         phone: document.getElementById("repairPhone").value.trim(),
@@ -5403,7 +5722,7 @@
         dueDate: document.getElementById("repairDueDate").value,
         parts: getRepairLines().map(line=>line.label).join(", "),
         lines: getRepairLines(),
-        photos: [...currentRepairPhotos],
+        photos: photoResult.entries,
         technician: document.getElementById("repairTechnician").value.trim(),
         partsCost: Number(document.getElementById("repairPartsCostInput").value||0),
         partsCostMode: document.getElementById("repairPartsCostMode").value||"TTC",
@@ -5443,6 +5762,9 @@
       }
 
       saveAdminRepairs(list);
+      const oldCloudPaths=(Array.isArray(previousRepair?.photos)?previousRepair.photos:[]).map(cloudPhotoPath).filter(Boolean);
+      const keptCloudPaths=new Set(item.photos.map(cloudPhotoPath).filter(Boolean));
+      deleteCloudPhotoPaths(oldCloudPaths.filter(path=>!keptCloudPaths.has(path)));
       syncRepairInvoice(item);
       hideRepairForm();
       renderRepairs();
@@ -5503,10 +5825,12 @@
       if(activeRole !== "admin") return;
       if(!confirm("Supprimer définitivement ce dossier ? Les pièces utilisées seront remises en stock.")) return;
       const repair=getAdminRepairs().find(r=>r.id===id);
+      const photoPaths=(Array.isArray(repair?.photos)?repair.photos:[]).map(cloudPhotoPath).filter(Boolean);
       restoreRepairStock(repair);
       deletePartsOrdersForSource("repair",id);
       recordCloudDeletion("tech42-repairs",id);
       saveAdminRepairs(getAdminRepairs().filter(r => r.id !== id));
+      deleteCloudPhotoPaths(photoPaths);
       renderRepairs();
       updateDashboardStats();
     }
@@ -5572,11 +5896,12 @@
         <div class="detail-box full"><small>Photos</small>
           <div class="repair-photo-gallery">
             ${(Array.isArray(item.photos) && item.photos.length)
-              ? item.photos.map((photo,i)=>`<img src="${typeof photo==="string"?photo:photo.src}" alt="Photo ${i+1}">`).join("")
+              ? item.photos.map((photo,i)=>`<img ${photoImageAttributes(photo)} alt="Photo ${i+1}">`).join("")
               : "Aucune photo"}
           </div>
         </div>
       `;
+      hydrateCloudPhotoImages(document.getElementById("repairModalContent"));
       document.getElementById("repairModal").classList.remove("hidden");
       const addHistoryBtn=document.getElementById("addHistoryBtn");
       if(addHistoryBtn){
@@ -5639,7 +5964,7 @@
       updateDashboardStats();
     });
 
-    function openRepairIntakeDocument(autoPrint=false){
+    async function openRepairIntakeDocument(autoPrint=false){
       const item = currentRepairList().find(r => r.id === openedRepairId);
       if(!item) return;
 
@@ -5651,6 +5976,7 @@
         alert("Autorise les fenêtres pop-up pour afficher le document.");
         return;
       }
+      await ensureCloudPhotoSources(dossierPhotos);
       printWindow.document.write(`
         <!DOCTYPE html>
         <html lang="fr">
@@ -5722,7 +6048,7 @@
               ${historyRows.length ? `<div class="box full history"><small>Historique récent</small>${historyRows.map(h=>`${formatDate(h.date)} — ${escapeHtml(h.action)}${h.note?` — ${escapeHtml(h.note)}`:""}`).join("<br>")}</div>` : ""}
             </div>
 
-            ${dossierPhotos.length ? `<div class="photos">${dossierPhotos.map(photo=>`<img src="${typeof photo==="string"?photo:photo.src}" alt="Photo du dossier">`).join("")}</div>` : ""}
+            ${dossierPhotos.length ? `<div class="photos">${dossierPhotos.map(photo=>`<img src="${escapeHtml(photoDisplaySource(photo))}" alt="Photo du dossier">`).join("")}</div>` : ""}
 
             <div class="signatures">
               <div class="signature">Signature du client${item.clientSignature?`<img src="${item.clientSignature}" alt="Signature client">`:""}</div>
@@ -6128,8 +6454,7 @@
     }
 
     function personalDevicePhotoSource(photo){
-      const value=String(typeof photo === "string" ? photo : photo?.src || "");
-      return value.startsWith("data:image/") ? value : "";
+      return photoDisplaySource(photo);
     }
 
     function personalDeviceDataUrlBytes(value){
@@ -6245,7 +6570,7 @@
         const completedTests=personalDeviceTests(item);
         const totalTests=personalDeviceTestOptions().length;
         const deviceParts=personalDeviceParts(item);
-        const cover=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).find(Boolean);
+        const cover=(Array.isArray(item.photos)?item.photos:[]).find(photo=>Boolean(personalDevicePhotoSource(photo)));
         const adminActions=activeRole==="admin" ? `
           <button class="mini-btn" type="button" data-personal-parts-order="${escapeHtml(item.id)}">Pièces à commander</button>
           <button class="mini-btn" type="button" data-personal-edit="${escapeHtml(item.id)}">Modifier</button>
@@ -6261,7 +6586,7 @@
         card.setAttribute("role","button");
         card.setAttribute("aria-label",`Ouvrir la fiche ${item.reference||item.id}`);
         card.innerHTML=`
-          <div>${cover?`<img class="personal-device-cover" src="${cover}" alt="${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}">`:`<div class="personal-device-placeholder" aria-hidden="true">${personalDeviceIcon(item.deviceType)}</div>`}</div>
+          <div>${cover?`<img class="personal-device-cover" ${photoImageAttributes(cover)} alt="${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}">`:`<div class="personal-device-placeholder" aria-hidden="true">${personalDeviceIcon(item.deviceType)}</div>`}</div>
           <div>
             <h3>${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}</h3>
             <div class="personal-device-reference">Réf. : ${escapeHtml(item.reference||item.id)}</div>
@@ -6282,6 +6607,7 @@
       });
 
       empty.classList.toggle("hidden",list.length>0);
+      hydrateCloudPhotoImages(box);
       box.querySelectorAll("[data-personal-open]").forEach(card=>{
         card.addEventListener("click",event=>{
           if(event.target.closest("button,a,input,select,textarea,label")) return;
@@ -6341,12 +6667,13 @@
       if(!box) return;
       box.innerHTML=currentPersonalDevicePhotos.map((photo,index)=>{
         const src=personalDevicePhotoSource(photo);
-        return src?`<div class="personal-photo-item"><img src="${src}" alt="Photo appareil ${index+1}"><button type="button" data-personal-photo-remove="${index}" aria-label="Supprimer la photo">×</button></div>`:"";
+        return src?`<div class="personal-photo-item"><img ${photoImageAttributes(photo)} alt="Photo appareil ${index+1}"><button type="button" data-personal-photo-remove="${index}" aria-label="Supprimer la photo">×</button></div>`:"";
       }).join("");
       box.querySelectorAll("[data-personal-photo-remove]").forEach(btn=>btn.addEventListener("click",()=>{
         currentPersonalDevicePhotos.splice(Number(btn.dataset.personalPhotoRemove),1);
         renderPersonalDevicePhotosPreview();
       }));
+      hydrateCloudPhotoImages(box);
     }
 
     function compressPersonalDevicePhoto(source){
@@ -6438,6 +6765,62 @@
       return {optimizedCount,savedBytes};
     }
 
+    async function migrateStoredPhotosToCloud(){
+      if(photoMigrationRunning) return {uploaded:0,failed:0,running:true};
+      photoMigrationRunning=true;
+      let uploaded=0;
+      let failed=0;
+      try{
+        if(!await checkPhotoCloudStorage()) throw new Error("PHOTO_STORAGE_NOT_READY");
+
+        const repairs=getAdminRepairs();
+        let repairsChanged=false;
+        for(const item of repairs){
+          const result=await storePhotoEntriesInCloud(item.photos||[],"reparations",item.id||"dossier");
+          item.photos=result.entries;
+          uploaded+=result.uploaded;
+          failed+=result.failed;
+          repairsChanged=repairsChanged||result.uploaded>0;
+        }
+        if(repairsChanged) saveAdminRepairs(repairs);
+
+        const devices=getAdminPersonalDevices();
+        let devicesChanged=false;
+        for(const item of devices){
+          const result=await storePhotoEntriesInCloud(item.photos||[],"appareils",item.id||"appareil");
+          item.photos=result.entries;
+          uploaded+=result.uploaded;
+          failed+=result.failed;
+          devicesChanged=devicesChanged||result.uploaded>0;
+        }
+        if(devicesChanged&&!saveAdminPersonalDevices(devices)) throw new Error("DEVICE_SAVE_FAILED");
+
+        const operations=getAdminBuySell();
+        let operationsChanged=false;
+        for(const item of operations){
+          for(const field of ["idFront","idBack"]){
+            const stored=await storePhotoSourceInCloud(item[field]||"","rachats",`${item.id||"rachat"}-${field}`);
+            item[field]=stored.value;
+            uploaded+=stored.uploaded?1:0;
+            failed+=stored.failed?1:0;
+            operationsChanged=operationsChanged||stored.uploaded;
+          }
+        }
+        if(operationsChanged&&!saveAdminBuySell(operations)) throw new Error("BUYSELL_SAVE_FAILED");
+
+        if(uploaded){
+          await cloudSaveNow(true);
+          renderRepairs();
+          renderPersonalDevices();
+          renderBuySell();
+        }
+        await updateStorageUsage();
+        return {uploaded,failed,running:false};
+      }finally{
+        photoMigrationRunning=false;
+      }
+    }
+
     function editPersonalDevice(id){
       if(activeRole!=="admin") return;
       const item=getAdminPersonalDevices().find(device=>device.id===id);
@@ -6476,7 +6859,10 @@
     function deletePersonalDevice(id){
       if(activeRole!=="admin") return;
       if(!confirm("Supprimer définitivement cet appareil personnel et son historique ?")) return;
+      const removed=getAdminPersonalDevices().find(item=>item.id===id);
+      const photoPaths=(Array.isArray(removed?.photos)?removed.photos:[]).map(cloudPhotoPath).filter(Boolean);
       if(!saveAdminPersonalDevices(getAdminPersonalDevices().filter(item=>item.id!==id))) return;
+      deleteCloudPhotoPaths(photoPaths);
       deletePartsOrdersForSource("device",id);
       recordCloudDeletion(PERSONAL_DEVICE_STORAGE_KEY,id);
       document.getElementById("personalDeviceModal").classList.add("hidden");
@@ -6762,17 +7148,19 @@
       <\/script>`;
     }
 
-    function printPersonalDeviceSheet(id){
+    async function printPersonalDeviceSheet(id){
       const item=currentPersonalDevices().find(device=>device.id===id);
       if(!item) return;
       const popup=window.open("","_blank","width=980,height=820");
       if(!popup){alert("Autorise les fenêtres pop-up pour imprimer la fiche.");return;}
+      await ensureCloudPhotoSources(item.photos||[]);
       popup.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche ${escapeHtml(item.reference||item.id)}</title><style>${personalDevicePrintStyles()}</style></head><body>${printableToolbarHtml("Imprimer sur une feuille A4")}<div class="device-a4-page">${personalDevicePrintableContent(item)}</div>${personalDeviceA4PopupScript(true)}</body></html>`);
       popup.document.close();
     }
 
     async function createPersonalDevicePdf(item){
       if(typeof html2pdf==="undefined") throw new Error("PDF_LIBRARY_UNAVAILABLE");
+      await ensureCloudPhotoSources(item.photos||[]);
       const wrapper=document.createElement("div");
       wrapper.style.position="fixed";
       wrapper.style.left="-300mm";
@@ -6835,7 +7223,7 @@
       if(!item) return;
       openPersonalDeviceId=id;
       document.getElementById("personalDeviceModalTitle").textContent=`${item.brand||""} ${item.model||""}`.trim()||"Fiche appareil";
-      const photos=(Array.isArray(item.photos)?item.photos:[]).map(personalDevicePhotoSource).filter(Boolean);
+      const photos=(Array.isArray(item.photos)?item.photos:[]).filter(photo=>Boolean(personalDevicePhotoSource(photo)));
       const repairs=Array.isArray(item.repairs)?item.repairs:[];
       const savReturns=Array.isArray(item.savReturns)?item.savReturns:[];
       const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
@@ -6873,7 +7261,9 @@
           <div class="detail-box full"><small>Total des réparations</small>${repairs.length} intervention(s) · ${personalMoney(repairCost)}</div>
           <div class="detail-box full"><small>Suivi SAV</small>${savReturns.length} retour(s) · ${savReturns.filter(entry=>entry.status!=="Clôturé").length} dossier(s) ouvert(s)</div>
         </div>
-        ${photos.length?`<div class="personal-device-gallery">${photos.map((src,index)=>`<img src="${src}" alt="Photo appareil ${index+1}">`).join("")}</div>`:""}`;
+        ${photos.length?`<div class="personal-device-gallery">${photos.map((photo,index)=>`<img ${photoImageAttributes(photo)} alt="Photo appareil ${index+1}">`).join("")}</div>`:""}`;
+
+      hydrateCloudPhotoImages(document.getElementById("personalDeviceDetail"));
 
       const actions=document.getElementById("personalDeviceDetailActions");
       actions.innerHTML=`
@@ -7059,7 +7449,7 @@
       renderPersonalDevicePhotosPreview();
     });
 
-    document.getElementById("personalDeviceForm").addEventListener("submit",event=>{
+    document.getElementById("personalDeviceForm").addEventListener("submit",async event=>{
       event.preventDefault();
       if(activeRole!=="admin") return;
       const list=getAdminPersonalDevices();
@@ -7070,6 +7460,11 @@
       const warrantyMonths=Math.max(0,Number(document.getElementById("personalDeviceWarrantyMonths").value||0));
       const testChecklist=readPersonalDeviceTestChecklist();
       const partsInventory=readPersonalDeviceParts();
+      const saveButton=document.getElementById("savePersonalDeviceBtn");
+      if(saveButton) saveButton.disabled=true;
+      const photoResult=await storePhotoEntriesInCloud(currentPersonalDevicePhotos,"appareils",id);
+      if(saveButton) saveButton.disabled=false;
+      if(photoResult.failed&&typeof showMobileSaveToast==="function") showMobileSaveToast("Photo conservée localement — espace cloud à vérifier",false);
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
@@ -7095,7 +7490,7 @@
         testChecklist,
         partsInventory,
         notes:document.getElementById("personalDeviceNotes").value.trim(),
-        photos:[...currentPersonalDevicePhotos],
+        photos:photoResult.entries,
         repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
         savReturns:Array.isArray(previous?.savReturns)?previous.savReturns:[],
         saleDate:previous?.saleDate||"",
@@ -7108,6 +7503,9 @@
         if(index!==-1) list[index]=item;
       }else list.unshift(item);
       if(!saveAdminPersonalDevices(list)) return;
+      const oldCloudPaths=(Array.isArray(previous?.photos)?previous.photos:[]).map(cloudPhotoPath).filter(Boolean);
+      const keptCloudPaths=new Set(item.photos.map(cloudPhotoPath).filter(Boolean));
+      deleteCloudPhotoPaths(oldCloudPaths.filter(path=>!keptCloudPaths.has(path)));
       hidePersonalDeviceForm();
       renderPersonalDevices();
       updateDashboardStats();
@@ -8564,8 +8962,10 @@
     function renderBuySellIdentityPreviews(){
       const front=document.getElementById("buySellIdFrontPreview");
       const back=document.getElementById("buySellIdBackPreview");
-      if(front) front.innerHTML=buySellIdFrontData?`<img src="${buySellIdFrontData}" alt="Pièce d’identité recto">`:"Recto non ajouté";
-      if(back) back.innerHTML=buySellIdBackData?`<img src="${buySellIdBackData}" alt="Pièce d’identité verso">`:"Verso non ajouté";
+      if(front) front.innerHTML=buySellIdFrontData?`<img ${photoImageAttributes(buySellIdFrontData)} alt="Pièce d’identité recto">`:"Recto non ajouté";
+      if(back) back.innerHTML=buySellIdBackData?`<img ${photoImageAttributes(buySellIdBackData)} alt="Pièce d’identité verso">`:"Verso non ajouté";
+      if(front) hydrateCloudPhotoImages(front);
+      if(back) hydrateCloudPhotoImages(back);
     }
 
     function updateBuySellSignatureStatus(){
@@ -8673,19 +9073,27 @@
       event.target.value="";
     });
 
-    document.getElementById("buySellForm").addEventListener("submit",(event)=>{
+    document.getElementById("buySellForm").addEventListener("submit",async (event)=>{
       event.preventDefault();
       if(activeRole!=="admin") return;
 
       const list=getAdminBuySell();
       const editId=document.getElementById("buySellEditId").value;
+      const previous=list.find(entry=>entry.id===editId);
+      const operationId=editId||nextBuySellId(list);
       const privateBuyBack=isPrivateBuyBack();
       if(privateBuyBack&&(!document.getElementById("buySellSellerAddress").value.trim()||!document.getElementById("buySellIdNumber").value.trim()||!buySellIdFrontData||!buySellIdBackData||!buySellSellerSignatureData||!document.getElementById("buySellOwnershipAttestation").checked)){
         alert("Complète l’adresse, la pièce d’identité recto/verso, l’attestation de propriété et la signature du vendeur.");
         return;
       }
+      const saveButton=document.getElementById("saveBuySellBtn");
+      if(saveButton) saveButton.disabled=true;
+      const frontResult=privateBuyBack?await storePhotoSourceInCloud(buySellIdFrontData,"rachats",`${operationId}-recto`):{value:"",uploaded:false,failed:false};
+      const backResult=privateBuyBack?await storePhotoSourceInCloud(buySellIdBackData,"rachats",`${operationId}-verso`):{value:"",uploaded:false,failed:false};
+      if(saveButton) saveButton.disabled=false;
+      if((frontResult.failed||backResult.failed)&&typeof showMobileSaveToast==="function") showMobileSaveToast("Pièce d’identité conservée localement — espace cloud à vérifier",false);
       const item={
-        id:editId||nextBuySellId(list),
+        id:operationId,
         type:document.getElementById("buySellType").value,
         sourceType:document.getElementById("buySellSourceType").value,
         contactName:document.getElementById("buySellContactName").value.trim(),
@@ -8705,7 +9113,7 @@
         sellerBirthPlace:privateBuyBack?document.getElementById("buySellSellerBirthPlace").value.trim():"",
         idType:privateBuyBack?document.getElementById("buySellIdType").value:"",
         idNumber:privateBuyBack?document.getElementById("buySellIdNumber").value.trim():"",
-        idFront:privateBuyBack?buySellIdFrontData:"",idBack:privateBuyBack?buySellIdBackData:"",
+        idFront:frontResult.value,idBack:backResult.value,
         ownershipAttestation:privateBuyBack&&document.getElementById("buySellOwnershipAttestation").checked,
         sellerSignature:privateBuyBack?buySellSellerSignatureData:"",
         accessories:document.getElementById("buySellAccessories").value.trim(),
@@ -8720,6 +9128,9 @@
       }
 
       if(!saveAdminBuySell(list)) return;
+      const oldCloudPaths=[cloudPhotoPath(previous?.idFront),cloudPhotoPath(previous?.idBack)].filter(Boolean);
+      const keptCloudPaths=new Set([cloudPhotoPath(item.idFront),cloudPhotoPath(item.idBack)].filter(Boolean));
+      deleteCloudPhotoPaths(oldCloudPaths.filter(path=>!keptCloudPaths.has(path)));
       hideBuySellForm();
       renderBuySell();
     });
@@ -8763,17 +9174,21 @@
 
     function deleteBuySell(id){
       if(!confirm("Supprimer définitivement cette opération ?")) return;
+      const removed=getAdminBuySell().find(item=>item.id===id);
+      const photoPaths=[cloudPhotoPath(removed?.idFront),cloudPhotoPath(removed?.idBack)].filter(Boolean);
       if(!saveAdminBuySell(getAdminBuySell().filter(i=>i.id!==id))) return;
+      deleteCloudPhotoPaths(photoPaths);
       recordCloudDeletion("tech42-buy-sell",id);
       renderBuySell();
     }
 
-    function printBuySellPurchaseSheet(id){
+    async function printBuySellPurchaseSheet(id){
       const item=currentBuySell().find(entry=>entry.id===id);
       if(!item||!isPrivateBuyBack(item.type,item.sourceType)) return;
       const popup=window.open("","_blank","width=980,height=820");
       if(!popup){alert("Autorise les fenêtres pop-up pour imprimer la fiche de rachat.");return;}
-      const identityPhotos=[item.idFront?`<div class="id-card"><img src="${item.idFront}" alt="Pièce d’identité recto"><small>Pièce d’identité — Recto</small></div>`:"",item.idBack?`<div class="id-card"><img src="${item.idBack}" alt="Pièce d’identité verso"><small>Pièce d’identité — Verso</small></div>`:""].join("");
+      await ensureCloudPhotoSources([item.idFront,item.idBack]);
+      const identityPhotos=[item.idFront?`<div class="id-card"><img src="${escapeHtml(photoDisplaySource(item.idFront))}" alt="Pièce d’identité recto"><small>Pièce d’identité — Recto</small></div>`:"",item.idBack?`<div class="id-card"><img src="${escapeHtml(photoDisplaySource(item.idBack))}" alt="Pièce d’identité verso"><small>Pièce d’identité — Verso</small></div>`:""].join("");
       popup.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche de rachat ${escapeHtml(item.id)}</title><style>
         @page{size:A4 portrait;margin:10mm}*{box-sizing:border-box}html,body{margin:0;background:#e8e8e8;color:#171717;font-family:Arial,Helvetica,sans-serif}.print-toolbar{position:sticky;top:0;z-index:10;display:flex;justify-content:center;gap:10px;padding:10px;background:#111}.print-toolbar button{padding:10px 18px;border:0;border-radius:8px;background:#f4b51f;color:#111;font-weight:800}.print-toolbar .close-print{background:#fff}.a4-page{width:190mm;height:277mm;margin:8mm auto;overflow:hidden;background:#fff}.sheet{width:190mm;padding:8mm;transform-origin:top left}.head{display:flex;justify-content:space-between;gap:8mm;align-items:center;border-top:2mm solid #d4a72c;padding-top:5mm}.brand{display:flex;align-items:center;gap:4mm}.brand img{width:28mm;height:28mm;object-fit:contain;background:#050505;border-radius:2mm}.brand h1{margin:0;font-size:19pt}.brand p{margin:1mm 0;color:#666;font-size:8pt}.title{max-width:75mm;padding:4mm;background:#111;color:#fff;text-align:right;border-radius:2mm;border-bottom:1.5mm solid #d4a72c}.title h2{margin:1mm 0;font-size:13pt}.title strong{color:#f2d270}.box{margin:4mm 0;padding:4mm;border:1px solid #d7d0bf;border-radius:2mm;break-inside:avoid}.box h3{margin:0 0 3mm;color:#896500;font-size:10pt;text-transform:uppercase}.grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm 7mm}.wide{grid-column:1/-1}.grid small{display:block;color:#777;font-size:7pt;font-weight:800;text-transform:uppercase;margin-bottom:1mm}.grid strong,.grid span{font-size:9pt;overflow-wrap:anywhere}.id-grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm}.id-card{border:1px solid #d7d0bf;border-radius:2mm;padding:2mm}.id-card img{display:block;width:100%;height:38mm;object-fit:contain;background:#f5f5f5}.id-card small{display:block;margin-top:1mm;text-align:center;color:#666}.attestation{padding:4mm;border-left:1.2mm solid #d4a72c;background:#fbfaf7;font-size:9pt;line-height:1.5}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-top:5mm}.signature{height:38mm;border:1px solid #aaa;border-radius:2mm;padding:3mm;font-size:8pt;color:#666}.signature img{display:block;width:100%;height:27mm;object-fit:contain;margin-top:1mm}.footer{display:flex;justify-content:space-between;margin-top:5mm;padding-top:3mm;border-top:1px solid #ccc;color:#666;font-size:7.5pt}@media print{html,body{width:210mm;height:297mm;overflow:hidden;background:#fff}.print-toolbar{display:none}.a4-page{margin:0;box-shadow:none}}
       </style></head><body>${printableToolbarHtml("Imprimer la fiche de rachat A4")}<div class="a4-page"><main id="buybackSheet" class="sheet">
