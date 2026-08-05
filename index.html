@@ -216,8 +216,14 @@
     .device-parts-table{width:100%;border-collapse:collapse;margin-top:8px}.device-parts-table th,.device-parts-table td{padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.device-parts-table th{color:var(--accent);font-size:12px}
     .personal-device-toolbar{display:grid;grid-template-columns:1fr 210px 210px;gap:12px;margin-bottom:16px}
     .personal-device-toolbar input,.personal-device-toolbar select{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}
-    .personal-device-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .personal-device-card{display:grid;grid-template-columns:130px 1fr;gap:15px;background:var(--panel2);border:2px solid var(--device-status-color,var(--border));border-left-width:8px;border-radius:14px;padding:14px;box-shadow:0 8px 22px var(--device-status-shadow,#0004);transition:.18s border-color,.18s box-shadow}
+    .personal-device-list{display:grid;gap:22px}
+    .personal-device-status-group{display:grid;gap:11px}
+    .personal-device-status-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 3px}
+    .personal-device-status-head h3{margin:0;color:var(--text);font-size:18px}
+    .personal-device-status-count{color:var(--muted);font-size:13px;font-weight:700}
+    .personal-device-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .personal-device-card{display:grid;grid-template-columns:130px 1fr;gap:15px;background:var(--panel2);border:2px solid var(--device-status-color,var(--border));border-left-width:8px;border-radius:14px;padding:14px;box-shadow:0 8px 22px var(--device-status-shadow,#0004);cursor:pointer;transition:.18s transform,.18s border-color,.18s box-shadow}
+    .personal-device-card:hover,.personal-device-card:focus-visible{transform:translateY(-2px);box-shadow:0 10px 28px var(--device-status-shadow,#0007);outline:none}
     .personal-device-card.device-status-personal{--device-status-color:#b6b6b6;--device-status-shadow:#b6b6b633}
     .personal-device-card.device-status-repair{--device-status-color:#ff4d4d;--device-status-shadow:#ff4d4d55;background:linear-gradient(135deg,#2b1111 0,var(--panel2) 44%)}
     .personal-device-card.device-status-ready{--device-status-color:#ffc928;--device-status-shadow:#ffc92855;background:linear-gradient(135deg,#2d2409 0,var(--panel2) 44%)}
@@ -256,7 +262,7 @@
     .sav-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c}.sav-form .full{grid-column:1/-1}
     .sav-form input,.sav-form select,.sav-form textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}.sav-form textarea{min-height:78px;resize:vertical}
     .sav-table{width:100%;border-collapse:collapse;margin-top:12px}.sav-table th,.sav-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.sav-table th{color:var(--accent)}
-    @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}}
+    @media(max-width:900px){.personal-device-status-grid{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}}
     @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}.device-test-checklist,.device-part-row{grid-template-columns:1fr}.device-part-row .part-notes{grid-column:auto}}
 
     
@@ -6081,7 +6087,29 @@
       document.getElementById("personalDeviceWarrantyAlertCount").textContent=fullList.filter(personalDeviceHasWarrantyAlert).length;
       document.getElementById("stockDeviceCount").textContent=personalDevicesInStock(fullList);
       box.innerHTML="";
-      list.forEach(item=>{
+      const statusOrder=["À réparer","Prêt à vendre","En vente","Personnel","Vendu"];
+      const statusRank=status=>{
+        const index=statusOrder.indexOf(status||"Personnel");
+        return index<0?statusOrder.length:index;
+      };
+      const statusCounts=list.reduce((counts,item)=>{
+        const status=item.status||"Personnel";
+        counts.set(status,(counts.get(status)||0)+1);
+        return counts;
+      },new Map());
+      const statusGrids=new Map();
+      const orderedList=[...list].sort((a,b)=>statusRank(a.status)-statusRank(b.status));
+      orderedList.forEach(item=>{
+        const statusLabel=item.status||"Personnel";
+        let statusGrid=statusGrids.get(statusLabel);
+        if(!statusGrid){
+          const group=document.createElement("section");
+          group.className="personal-device-status-group";
+          group.innerHTML=`<div class="personal-device-status-head"><h3><span class="personal-device-badge ${personalDeviceBadgeClass(statusLabel)}">${escapeHtml(statusLabel)}</span></h3><span class="personal-device-status-count">${statusCounts.get(statusLabel)} appareil(s)</span></div><div class="personal-device-status-grid"></div>`;
+          statusGrid=group.querySelector(".personal-device-status-grid");
+          statusGrids.set(statusLabel,statusGrid);
+          box.appendChild(group);
+        }
         const repairs=Array.isArray(item.repairs)?item.repairs:[];
         const savReturns=Array.isArray(item.savReturns)?item.savReturns:[];
         const repairCost=repairs.reduce((sum,repair)=>sum+Number(repair.cost||0),0);
@@ -6101,6 +6129,10 @@
 
         const card=document.createElement("article");
         card.className=`personal-device-card device-status-${personalDeviceStatusKey(item.status)}`;
+        card.dataset.personalOpen=item.id;
+        card.tabIndex=0;
+        card.setAttribute("role","button");
+        card.setAttribute("aria-label",`Ouvrir la fiche ${item.reference||item.id}`);
         card.innerHTML=`
           <div>${cover?`<img class="personal-device-cover" src="${cover}" alt="${escapeHtml(item.brand||"")} ${escapeHtml(item.model||"")}">`:`<div class="personal-device-placeholder" aria-hidden="true">${personalDeviceIcon(item.deviceType)}</div>`}</div>
           <div>
@@ -6117,13 +6149,23 @@
               ${item.status==="Vendu"?`${warrantyBadgeHtml(item)}<br>`:item.listingDate?`Mise en vente : ${formatDate(item.listingDate)}<br>`:""}
               ${item.status==="Vendu"?"Prix de vente":"Prix de vente prévu"} : <strong>${personalMoney(item.salePrice)}</strong>
             </div>
-            <div class="personal-device-actions"><button class="mini-btn" type="button" data-personal-view="${escapeHtml(item.id)}">Voir la fiche</button>${adminActions}</div>
+            ${adminActions?`<div class="personal-device-actions">${adminActions}</div>`:""}
           </div>`;
-        box.appendChild(card);
+        statusGrid.appendChild(card);
       });
 
       empty.classList.toggle("hidden",list.length>0);
-      box.querySelectorAll("[data-personal-view]").forEach(btn=>btn.addEventListener("click",()=>openPersonalDeviceDetails(btn.dataset.personalView)));
+      box.querySelectorAll("[data-personal-open]").forEach(card=>{
+        card.addEventListener("click",event=>{
+          if(event.target.closest("button,a,input,select,textarea,label")) return;
+          openPersonalDeviceDetails(card.dataset.personalOpen);
+        });
+        card.addEventListener("keydown",event=>{
+          if(event.target!==card||(event.key!=="Enter"&&event.key!==" ")) return;
+          event.preventDefault();
+          openPersonalDeviceDetails(card.dataset.personalOpen);
+        });
+      });
       box.querySelectorAll("[data-personal-parts-order]").forEach(btn=>btn.addEventListener("click",()=>openPartsOrderModal("device",btn.dataset.personalPartsOrder)));
       box.querySelectorAll("[data-personal-edit]").forEach(btn=>btn.addEventListener("click",()=>editPersonalDevice(btn.dataset.personalEdit)));
       box.querySelectorAll("[data-personal-sale]").forEach(btn=>btn.addEventListener("click",()=>markPersonalDeviceForSale(btn.dataset.personalSale)));
