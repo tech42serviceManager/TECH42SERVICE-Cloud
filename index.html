@@ -192,8 +192,10 @@
     .device-test-fieldset legend{padding:0 8px;color:var(--accent);font-weight:800}
     .device-test-help{margin:0 0 12px;color:var(--muted);font-size:13px}
     .device-test-checklist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-    .device-test-item{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #302a1b;border-radius:9px;background:#15130e;color:var(--text);cursor:pointer}
-    .personal-device-form .device-test-item input{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:0 0 auto}
+    .device-test-item{display:flex;align-items:center;gap:9px;padding:8px;border:1px solid #302a1b;border-radius:9px;background:#15130e;color:var(--text)}
+    .personal-device-form .device-test-item input[type="checkbox"]{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:0 0 auto}
+    .personal-device-form .device-test-label{min-width:0;width:100%;height:auto;padding:7px 8px;border:1px solid transparent;border-radius:7px;background:#0f0f0f;color:var(--text)}
+    .personal-device-form .device-test-label:focus{border-color:var(--accent);outline:none;background:#171717}
     .device-test-summary{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
     .device-test-chip{display:inline-block;padding:5px 8px;border:1px solid #2f6941;border-radius:999px;background:#102518;color:#74ef8b;font-size:12px}
     .device-test-pending{color:#ffd66b}
@@ -1316,24 +1318,24 @@
               <div class="field full"><label>Accessoires présents</label><input id="personalDeviceAccessories" type="text" placeholder="Boîte, chargeur, câble, manette..."></div>
               <fieldset class="device-test-fieldset full">
                 <legend>Tests à effectuer</legend>
-                <p class="device-test-help">Coche chaque test terminé. Les cases restent enregistrées dans la fiche de l’appareil.</p>
+                <p class="device-test-help">Coche chaque test terminé. Tu peux aussi modifier librement chaque intitulé : il restera enregistré dans la fiche.</p>
                 <div id="personalDeviceTestChecklist" class="device-test-checklist">
-                  <label class="device-test-item"><input type="checkbox" value="Allumage et redémarrage">Allumage et redémarrage</label>
-                  <label class="device-test-item"><input type="checkbox" value="Écran et affichage">Écran et affichage</label>
-                  <label class="device-test-item"><input type="checkbox" value="Tactile, clavier ou commandes">Tactile, clavier ou commandes</label>
-                  <label class="device-test-item"><input type="checkbox" value="Boutons physiques">Boutons physiques</label>
-                  <label class="device-test-item"><input type="checkbox" value="Batterie et autonomie">Batterie et autonomie</label>
-                  <label class="device-test-item"><input type="checkbox" value="Charge et alimentation">Charge et alimentation</label>
-                  <label class="device-test-item"><input type="checkbox" value="Wi-Fi">Wi-Fi</label>
-                  <label class="device-test-item"><input type="checkbox" value="Bluetooth">Bluetooth</label>
-                  <label class="device-test-item"><input type="checkbox" value="Réseau mobile et carte SIM">Réseau mobile et carte SIM</label>
-                  <label class="device-test-item"><input type="checkbox" value="Appels, micros et haut-parleurs">Appels, micros et haut-parleurs</label>
-                  <label class="device-test-item"><input type="checkbox" value="Caméras">Caméras</label>
-                  <label class="device-test-item"><input type="checkbox" value="Connectiques et ports">Connectiques et ports</label>
-                  <label class="device-test-item"><input type="checkbox" value="Biométrie (Face ID, Touch ID)">Biométrie (Face ID, Touch ID)</label>
-                  <label class="device-test-item"><input type="checkbox" value="IMEI ou numéro de série vérifié">IMEI ou numéro de série vérifié</label>
-                  <label class="device-test-item"><input type="checkbox" value="Compte constructeur et verrouillage">Compte constructeur et verrouillage</label>
-                  <label class="device-test-item"><input type="checkbox" value="Réinitialisation complète">Réinitialisation complète</label>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Allumage et redémarrage" value="Allumage et redémarrage" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Écran et affichage" value="Écran et affichage" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Tactile, clavier ou commandes" value="Tactile, clavier ou commandes" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Boutons physiques" value="Boutons physiques" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Batterie et autonomie" value="Batterie et autonomie" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Charge et alimentation" value="Charge et alimentation" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Wi-Fi" value="Wi-Fi" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Bluetooth" value="Bluetooth" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Réseau mobile et carte SIM" value="Réseau mobile et carte SIM" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Appels, micros et haut-parleurs" value="Appels, micros et haut-parleurs" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Caméras" value="Caméras" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Connectiques et ports" value="Connectiques et ports" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Biométrie (Face ID, Touch ID)" value="Biométrie (Face ID, Touch ID)" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="IMEI ou numéro de série vérifié" value="IMEI ou numéro de série vérifié" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Compte constructeur et verrouillage" value="Compte constructeur et verrouillage" maxlength="90" required aria-label="Intitulé du test"></div>
+                  <div class="device-test-item"><input type="checkbox" aria-label="Test effectué"><input class="device-test-label" type="text" data-default-label="Réinitialisation complète" value="Réinitialisation complète" maxlength="90" required aria-label="Intitulé du test"></div>
                 </div>
               </fieldset>
               <div class="field full"><label>Notes et état détaillé</label><textarea id="personalDeviceNotes" placeholder="Rayures, tests effectués, défauts connus..."></textarea></div>
@@ -5582,21 +5584,51 @@
       return (Array.isArray(list)?list:[]).filter(item=>item.status!=="Vendu").length;
     }
 
+    function personalDeviceTestRows(){
+      return [...document.querySelectorAll("#personalDeviceTestChecklist .device-test-item")].map(row=>({
+        checkbox:row.querySelector("input[type='checkbox']"),
+        labelInput:row.querySelector(".device-test-label")
+      })).filter(row=>row.checkbox&&row.labelInput);
+    }
+
     function personalDeviceTestOptions(){
-      return [...document.querySelectorAll("#personalDeviceTestChecklist input[type='checkbox']")];
+      return personalDeviceTestRows().map(row=>row.checkbox);
     }
 
     function personalDeviceTests(item){
-      return Array.isArray(item?.tests) ? item.tests.map(value=>String(value)).filter(Boolean) : [];
+      if(Array.isArray(item?.testChecklist)){
+        return item.testChecklist
+          .filter(entry=>entry&&typeof entry==="object"&&entry.checked)
+          .map(entry=>String(entry.label||"").trim())
+          .filter(Boolean);
+      }
+      return Array.isArray(item?.tests) ? item.tests.map(value=>String(value).trim()).filter(Boolean) : [];
+    }
+
+    function readPersonalDeviceTestChecklist(){
+      return personalDeviceTestRows().map(row=>({
+        label:row.labelInput.value.trim()||row.labelInput.dataset.defaultLabel||"Test",
+        checked:row.checkbox.checked
+      }));
     }
 
     function selectedPersonalDeviceTests(){
-      return personalDeviceTestOptions().filter(input=>input.checked).map(input=>input.value);
+      return readPersonalDeviceTestChecklist().filter(entry=>entry.checked).map(entry=>entry.label);
     }
 
-    function restorePersonalDeviceTests(tests=[]){
-      const selected=new Set((Array.isArray(tests)?tests:[]).map(value=>String(value)));
-      personalDeviceTestOptions().forEach(input=>{input.checked=selected.has(input.value);});
+    function restorePersonalDeviceTests(item=null){
+      const rows=personalDeviceTestRows();
+      const savedChecklist=Array.isArray(item?.testChecklist)?item.testChecklist:[];
+      const legacySelected=new Set((Array.isArray(item?.tests)?item.tests:[]).map(value=>String(value)));
+      rows.forEach((row,index)=>{
+        const saved=savedChecklist[index];
+        const defaultLabel=row.labelInput.dataset.defaultLabel||row.labelInput.defaultValue||"Test";
+        const savedLabel=typeof saved==="string"?saved:String(saved?.label||"").trim();
+        row.labelInput.value=savedLabel||defaultLabel;
+        row.checkbox.checked=saved&&typeof saved==="object"
+          ? Boolean(saved.checked)
+          : legacySelected.has(row.labelInput.value)||legacySelected.has(defaultLabel);
+      });
     }
 
     function nextPersonalDeviceId(list){
@@ -5763,7 +5795,7 @@
     function resetPersonalDeviceForm(){
       document.getElementById("personalDeviceForm").reset();
       document.getElementById("personalDeviceEditId").value="";
-      restorePersonalDeviceTests([]);
+      restorePersonalDeviceTests();
       currentPersonalDevicePhotos=[];
       renderPersonalDevicePhotosPreview();
       document.getElementById("savePersonalDeviceBtn").textContent="Enregistrer l’appareil";
@@ -5852,7 +5884,7 @@
       document.getElementById("personalDeviceStatus").value=item.status||"Personnel";
       document.getElementById("personalDeviceBuyer").value=item.buyer||"";
       document.getElementById("personalDeviceAccessories").value=item.accessories||"";
-      restorePersonalDeviceTests(personalDeviceTests(item));
+      restorePersonalDeviceTests(item);
       document.getElementById("personalDeviceNotes").value=item.notes||"";
       currentPersonalDevicePhotos=Array.isArray(item.photos)?[...item.photos]:[];
       renderPersonalDevicePhotosPreview();
@@ -6435,6 +6467,7 @@
       const id=editId||nextPersonalDeviceId(list);
       const batteryValue=document.getElementById("personalDeviceBatteryHealth").value;
       const warrantyMonths=Math.max(0,Number(document.getElementById("personalDeviceWarrantyMonths").value||0));
+      const testChecklist=readPersonalDeviceTestChecklist();
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
@@ -6456,7 +6489,8 @@
         status:document.getElementById("personalDeviceStatus").value,
         buyer:document.getElementById("personalDeviceBuyer").value.trim(),
         accessories:document.getElementById("personalDeviceAccessories").value.trim(),
-        tests:selectedPersonalDeviceTests(),
+        tests:testChecklist.filter(entry=>entry.checked).map(entry=>entry.label),
+        testChecklist,
         notes:document.getElementById("personalDeviceNotes").value.trim(),
         photos:[...currentPersonalDevicePhotos],
         repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
