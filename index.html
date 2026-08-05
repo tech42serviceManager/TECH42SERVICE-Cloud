@@ -208,15 +208,6 @@
     .device-part-row .field{margin:0}.device-part-row .part-notes{grid-column:1/-2}.device-part-row .part-remove{align-self:end}
     .device-parts-empty{padding:14px;text-align:center;color:var(--muted);border:1px dashed #4b3c18;border-radius:9px}
     .device-parts-table{width:100%;border-collapse:collapse;margin-top:8px}.device-parts-table th,.device-parts-table td{padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.device-parts-table th{color:var(--accent);font-size:12px}
-    .dymo-label-editor{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(390px,1.2fr);gap:18px;align-items:start}
-    .dymo-label-controls textarea{width:100%;min-height:155px;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text);resize:vertical;line-height:1.45}
-    .dymo-label-help{margin:0 0 14px;padding:10px;border:1px solid #5f4a17;border-radius:9px;background:#181407;color:#ecd68e;font-size:13px;line-height:1.45}
-    .dymo-label-preview-shell{overflow:auto;padding:14px;background:#d8d8d8;border-radius:12px;border:1px solid #777}
-    .dymo-label-sheet{width:101mm;height:54mm;padding:2.2mm;overflow:hidden;background:#fff;color:#000;border:1px solid #222;font-family:Arial,Helvetica,sans-serif;display:grid;grid-template-columns:23mm 1fr;grid-template-rows:23mm 1fr 5mm;gap:1.5mm}
-    .dymo-label-logo{grid-row:1;display:grid;place-items:center;border-right:.35mm solid #000;padding-right:1.5mm}.dymo-label-logo img{display:block;width:20mm;height:20mm;object-fit:contain;filter:grayscale(1) contrast(1.35)}
-    .dymo-label-info{grid-column:2;grid-row:1;min-width:0}.dymo-label-kicker{font-size:7.5pt;font-weight:900;letter-spacing:.6pt}.dymo-label-device{margin-top:1mm;font-size:13pt;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dymo-label-id{margin-top:1.2mm;font-size:7.5pt;line-height:1.25}
-    .dymo-label-parts{grid-column:1/-1;grid-row:2;border-top:.35mm solid #000;padding-top:1mm;overflow:hidden}.dymo-label-parts-title{font-size:7pt;font-weight:900;text-transform:uppercase;margin-bottom:.8mm}.dymo-label-parts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7mm 3mm;font-size:8.2pt;font-weight:700;line-height:1.1}.dymo-label-part{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dymo-label-part::before{content:"• ";font-weight:900}
-    .dymo-label-footer{grid-column:1/-1;grid-row:3;display:flex;align-items:end;justify-content:space-between;gap:3mm;border-top:.2mm solid #555;padding-top:.6mm;font-size:6.5pt;font-weight:700;white-space:nowrap;overflow:hidden}
     .personal-device-toolbar{display:grid;grid-template-columns:1fr 210px 210px;gap:12px;margin-bottom:16px}
     .personal-device-toolbar input,.personal-device-toolbar select{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}
     .personal-device-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -251,7 +242,7 @@
     .sav-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c}.sav-form .full{grid-column:1/-1}
     .sav-form input,.sav-form select,.sav-form textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)}.sav-form textarea{min-height:78px;resize:vertical}
     .sav-table{width:100%;border-collapse:collapse;margin-top:12px}.sav-table th,.sav-table td{padding:10px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.sav-table th{color:var(--accent)}
-    @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}.dymo-label-editor{grid-template-columns:1fr}}
+    @media(max-width:900px){.personal-device-list{grid-template-columns:1fr}.personal-device-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.device-test-checklist{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row{grid-template-columns:repeat(2,minmax(0,1fr))}.device-part-row .part-notes{grid-column:1/-1}.device-part-row .part-remove{justify-self:start}}
     @media(max-width:620px){.personal-device-card{grid-template-columns:1fr}.personal-device-cover,.personal-device-placeholder{width:100%;height:180px}.personal-device-detail-grid,.sav-form{grid-template-columns:1fr}.personal-device-detail-grid .full,.sav-form .full{grid-column:auto}.device-test-checklist,.device-part-row{grid-template-columns:1fr}.device-part-row .part-notes{grid-column:auto}}
 
     
@@ -1437,28 +1428,6 @@
           </section>
         </div>
       </div>
-
-      <div id="personalPartsLabelModal" class="modal-backdrop hidden">
-        <div class="modal-card" style="width:min(980px,100%)">
-          <div class="modal-head"><h2>Étiquette téléphone pour pièces — DYMO 54 × 101 mm</h2><button id="closePersonalPartsLabelModal" class="close-btn" type="button">Fermer</button></div>
-          <div class="dymo-label-help">Dans la fenêtre d’impression, sélectionne la DYMO LabelWriter 450, le papier <strong>101 × 54 mm</strong>, l’orientation paysage, les marges « aucune » et l’échelle 100 %.</div>
-          <div class="dymo-label-editor">
-            <div class="dymo-label-controls">
-              <div class="field">
-                <label for="personalPartsLabelLines">Petite liste des pièces — 6 lignes maximum</label>
-                <textarea id="personalPartsLabelLines" rows="7" maxlength="420" placeholder="Écran à tester&#10;Caméra arrière fonctionnelle&#10;Carte mère bloquée iCloud"></textarea>
-              </div>
-              <div class="page-actions">
-                <button id="savePersonalPartsLabelBtn" class="save-btn" type="button">Enregistrer la liste</button>
-                <button id="printPersonalPartsLabelBtn" class="action-btn" type="button">Imprimer l’étiquette</button>
-              </div>
-              <div id="personalPartsLabelMessage"></div>
-            </div>
-            <div class="dymo-label-preview-shell"><div id="personalPartsLabelPreview"></div></div>
-          </div>
-        </div>
-      </div>
-
 
       <section id="documentsPage" class="hidden">
         <header class="topbar">
@@ -6369,91 +6338,6 @@
       }
     }
 
-    let openPersonalPartsLabelDeviceId="";
-
-    function normalizePersonalPartsLabelLines(value){
-      const source=Array.isArray(value)?value:String(value||"").split(/\r?\n/);
-      return source.map(line=>String(line).trim()).filter(Boolean).slice(0,6);
-    }
-
-    function personalPartsLabelLines(item){
-      const saved=normalizePersonalPartsLabelLines(item?.partsLabelLines||[]);
-      if(saved.length) return saved;
-      return personalDeviceParts(item).slice(0,6).map(part=>{
-        const quantity=part.quantity>1?` ×${part.quantity}`:"";
-        const state=part.state&&part.state!=="Disponible"?` — ${part.state}`:"";
-        return `${part.name}${quantity}${state}`;
-      });
-    }
-
-    function personalPartsLabelMarkup(item,lines){
-      const identifier=item.imei1||item.imei2||item.serial||"Non renseigné";
-      const safeLines=normalizePersonalPartsLabelLines(lines);
-      return `<section class="dymo-label-sheet">
-        <div class="dymo-label-logo"><img src="${window.TECH42_LOGO_DATA_URL}" alt="TECH42SERVICE"></div>
-        <div class="dymo-label-info">
-          <div class="dymo-label-kicker">TÉLÉPHONE POUR PIÈCES</div>
-          <div class="dymo-label-device">${escapeHtml([item.brand,item.model].filter(Boolean).join(" ")||"Téléphone")}</div>
-          <div class="dymo-label-id"><strong>Réf.</strong> ${escapeHtml(item.reference||item.id)}<br><strong>IMEI / Série</strong> ${escapeHtml(identifier)}</div>
-        </div>
-        <div class="dymo-label-parts"><div class="dymo-label-parts-title">Pièces / observations</div><div class="dymo-label-parts-grid">${safeLines.length?safeLines.map(line=>`<div class="dymo-label-part">${escapeHtml(line)}</div>`).join(""):'<div class="dymo-label-part">Aucune pièce indiquée</div>'}</div></div>
-        <div class="dymo-label-footer"><span>TECH42SERVICE · ${escapeHtml(CONTACT_PHONE)}</span><span>${new Date().toLocaleDateString("fr-FR")}</span></div>
-      </section>`;
-    }
-
-    function updatePersonalPartsLabelPreview(){
-      const item=getAdminPersonalDevices().find(device=>device.id===openPersonalPartsLabelDeviceId)
-        ||currentPersonalDevices().find(device=>device.id===openPersonalPartsLabelDeviceId);
-      if(!item) return;
-      const lines=normalizePersonalPartsLabelLines(document.getElementById("personalPartsLabelLines").value);
-      document.getElementById("personalPartsLabelPreview").innerHTML=personalPartsLabelMarkup(item,lines);
-    }
-
-    function openPersonalPartsLabel(id){
-      const item=currentPersonalDevices().find(device=>device.id===id);
-      if(!item||item.deviceType!=="Téléphone"||item.condition!=="Pour pièces") return;
-      openPersonalPartsLabelDeviceId=id;
-      document.getElementById("personalPartsLabelLines").value=personalPartsLabelLines(item).join("\n");
-      document.getElementById("personalPartsLabelMessage").textContent="";
-      updatePersonalPartsLabelPreview();
-      document.getElementById("personalPartsLabelModal").classList.remove("hidden");
-    }
-
-    function savePersonalPartsLabelLines(showMessage=true){
-      if(activeRole!=="admin") return null;
-      const list=getAdminPersonalDevices();
-      const item=list.find(device=>device.id===openPersonalPartsLabelDeviceId);
-      if(!item) return null;
-      const lines=normalizePersonalPartsLabelLines(document.getElementById("personalPartsLabelLines").value);
-      item.partsLabelLines=lines;
-      if(!saveAdminPersonalDevices(list)) return null;
-      if(showMessage){
-        const message=document.getElementById("personalPartsLabelMessage");
-        message.className="notice";
-        message.textContent="Liste de l’étiquette enregistrée.";
-      }
-      updatePersonalPartsLabelPreview();
-      return {item,lines};
-    }
-
-    function personalPartsLabelPrintStyles(){
-      return `@page{size:101mm 54mm;margin:0}*{box-sizing:border-box}html,body{width:101mm;height:54mm;margin:0;padding:0;overflow:hidden;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif}.dymo-label-sheet{width:101mm;height:54mm;padding:2.2mm;overflow:hidden;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;display:grid;grid-template-columns:23mm 1fr;grid-template-rows:23mm 1fr 5mm;gap:1.5mm}.dymo-label-logo{grid-row:1;display:grid;place-items:center;border-right:.35mm solid #000;padding-right:1.5mm}.dymo-label-logo img{display:block;width:20mm;height:20mm;object-fit:contain;filter:grayscale(1) contrast(1.35)}.dymo-label-info{grid-column:2;grid-row:1;min-width:0}.dymo-label-kicker{font-size:7.5pt;font-weight:900;letter-spacing:.6pt}.dymo-label-device{margin-top:1mm;font-size:13pt;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dymo-label-id{margin-top:1.2mm;font-size:7.5pt;line-height:1.25}.dymo-label-parts{grid-column:1/-1;grid-row:2;border-top:.35mm solid #000;padding-top:1mm;overflow:hidden}.dymo-label-parts-title{font-size:7pt;font-weight:900;text-transform:uppercase;margin-bottom:.8mm}.dymo-label-parts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7mm 3mm;font-size:8.2pt;font-weight:700;line-height:1.1}.dymo-label-part{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dymo-label-part::before{content:"• ";font-weight:900}.dymo-label-footer{grid-column:1/-1;grid-row:3;display:flex;align-items:end;justify-content:space-between;gap:3mm;border-top:.2mm solid #555;padding-top:.6mm;font-size:6.5pt;font-weight:700;white-space:nowrap;overflow:hidden}`;
-    }
-
-    function printPersonalPartsLabel(){
-      const saved=savePersonalPartsLabelLines(false);
-      if(!saved) return;
-      const printWindow=window.open("","_blank","width=900,height=600");
-      if(!printWindow){alert("La fenêtre d’impression a été bloquée par le navigateur.");return;}
-      printWindow.document.open();
-      printWindow.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Étiquette ${escapeHtml(saved.item.reference||saved.item.id)}</title><style>${personalPartsLabelPrintStyles()}</style></head><body>${personalPartsLabelMarkup(saved.item,saved.lines)}</body></html>`);
-      printWindow.document.close();
-      const launchPrint=()=>setTimeout(()=>{printWindow.focus();printWindow.print();},250);
-      const logo=printWindow.document.querySelector("img");
-      if(!logo||logo.complete) launchPrint();
-      else{logo.addEventListener("load",launchPrint,{once:true});logo.addEventListener("error",launchPrint,{once:true});setTimeout(launchPrint,1200);}
-    }
-
     function openPersonalDeviceDetails(id){
       const item=currentPersonalDevices().find(device=>device.id===id);
       if(!item) return;
@@ -6502,7 +6386,6 @@
       actions.innerHTML=`
         <button class="action-btn" type="button" data-detail-print="${escapeHtml(item.id)}">Imprimer A4</button>
         <button class="action-btn secondary" type="button" data-detail-pdf="${escapeHtml(item.id)}">Télécharger PDF A4</button>
-        ${item.deviceType==="Téléphone"&&item.condition==="Pour pièces"?`<button class="action-btn" type="button" data-detail-parts-label="${escapeHtml(item.id)}">Étiquette DYMO 54 × 101</button>`:""}
         ${activeRole==="admin"?`
           <button class="action-btn" type="button" data-detail-edit="${escapeHtml(item.id)}">Modifier la fiche</button>
           ${item.status!=="En vente"&&item.status!=="Vendu"?`<button class="action-btn secondary" type="button" data-detail-sale="${escapeHtml(item.id)}">Mettre en vente</button>`:""}
@@ -6511,7 +6394,6 @@
           <button class="mini-btn danger" type="button" data-detail-delete="${escapeHtml(item.id)}">Supprimer</button>`:""}`;
       actions.querySelector("[data-detail-print]")?.addEventListener("click",()=>printPersonalDeviceSheet(id));
       actions.querySelector("[data-detail-pdf]")?.addEventListener("click",()=>downloadPersonalDevicePdf(id));
-      actions.querySelector("[data-detail-parts-label]")?.addEventListener("click",()=>openPersonalPartsLabel(id));
       actions.querySelector("[data-detail-edit]")?.addEventListener("click",()=>editPersonalDevice(id));
       actions.querySelector("[data-detail-sale]")?.addEventListener("click",()=>markPersonalDeviceForSale(id));
       actions.querySelector("[data-detail-sold]")?.addEventListener("click",()=>markPersonalDeviceSold(id));
@@ -6656,11 +6538,6 @@
     });
     document.getElementById("closePersonalDeviceModal").addEventListener("click",()=>document.getElementById("personalDeviceModal").classList.add("hidden"));
     document.getElementById("personalDeviceModal").addEventListener("click",event=>{if(event.target.id==="personalDeviceModal") event.currentTarget.classList.add("hidden");});
-    document.getElementById("personalPartsLabelLines").addEventListener("input",updatePersonalPartsLabelPreview);
-    document.getElementById("savePersonalPartsLabelBtn").addEventListener("click",()=>savePersonalPartsLabelLines());
-    document.getElementById("printPersonalPartsLabelBtn").addEventListener("click",printPersonalPartsLabel);
-    document.getElementById("closePersonalPartsLabelModal").addEventListener("click",()=>document.getElementById("personalPartsLabelModal").classList.add("hidden"));
-    document.getElementById("personalPartsLabelModal").addEventListener("click",event=>{if(event.target.id==="personalPartsLabelModal") event.currentTarget.classList.add("hidden");});
     document.getElementById("addPersonalRepairBtn").addEventListener("click",()=>showPersonalRepairForm());
     document.getElementById("cancelPersonalRepairBtn").addEventListener("click",hidePersonalRepairForm);
     document.getElementById("addPersonalSavBtn").addEventListener("click",()=>showPersonalSavForm());
@@ -6722,7 +6599,6 @@
         tests:testChecklist.filter(entry=>entry.checked).map(entry=>entry.label),
         testChecklist,
         partsInventory,
-        partsLabelLines:Array.isArray(previous?.partsLabelLines)?previous.partsLabelLines.map(line=>String(line)).slice(0,6):[],
         notes:document.getElementById("personalDeviceNotes").value.trim(),
         photos:[...currentPersonalDevicePhotos],
         repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
