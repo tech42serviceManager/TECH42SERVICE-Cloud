@@ -118,6 +118,16 @@
     .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
     .settings-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:16px}
     .settings-card h3{margin-top:0;color:var(--accent)}
+    .storage-usage-card{grid-column:1/-1}
+    .storage-meter{height:18px;margin:14px 0 10px;border:1px solid #3d3d3d;border-radius:999px;background:#080808;overflow:hidden}
+    .storage-meter-fill{width:0;height:100%;border-radius:inherit;background:#42c96a;transition:.3s width,.3s background}
+    .storage-meter-fill.warning{background:#ffc928}.storage-meter-fill.danger{background:#ff4d4d}
+    .storage-usage-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .storage-usage-line strong{font-size:20px}.storage-usage-state{font-weight:800;color:#74ef8b}
+    .storage-usage-state.warning{color:#ffd66b}.storage-usage-state.danger{color:#ff8585}
+    .storage-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+    .storage-detail{padding:11px;border:1px solid #303030;border-radius:9px;background:#101010}
+    .storage-detail small{display:block;margin-bottom:5px;color:var(--muted)}.storage-detail strong{color:var(--text)}
     .save-btn{
       padding:11px 15px;border:0;border-radius:9px;background:var(--accent);
       color:#080808;font-weight:800;cursor:pointer
@@ -537,6 +547,7 @@
       form .full:has(> .save-btn){position:sticky;bottom:8px;z-index:12;padding:8px;background:linear-gradient(180deg,transparent,#080808 28%);border-radius:12px}
       .page-actions .save-btn{flex:1 1 100%}
       input,select,textarea{font-size:16px!important}
+      .storage-details{grid-template-columns:1fr}
     }
 
     /* V21.11 — Synchronisation bidirectionnelle fiche par fiche */
@@ -2192,6 +2203,23 @@
         <div id="adminOnlySettings">
           <div class="settings-grid">
 
+            <div class="settings-card storage-usage-card">
+              <h3>Stockage du logiciel</h3>
+              <p style="color:var(--muted);font-size:14px;line-height:1.5">La jauge surveille les données enregistrées dans le navigateur. Toutes les nouvelles photos sont automatiquement compressées avant leur enregistrement.</p>
+              <div class="storage-usage-line"><strong id="storageUsageValue">Calcul en cours…</strong><span id="storageUsageState" class="storage-usage-state">Niveau normal</span></div>
+              <div class="storage-meter" role="progressbar" aria-label="Espace de stockage utilisé" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="storageUsageBar" class="storage-meter-fill"></div></div>
+              <div class="storage-details">
+                <div class="storage-detail"><small>Photos et signatures</small><strong id="storageImageCount">0 élément</strong></div>
+                <div class="storage-detail"><small>Poids des images</small><strong id="storageImageBytes">0 Ko</strong></div>
+                <div class="storage-detail"><small>Sauvegardes locales</small><strong id="storageBackupCount">0 copie</strong></div>
+              </div>
+              <div class="page-actions" style="margin-bottom:0">
+                <button id="refreshStorageUsageBtn" class="action-btn secondary" type="button">Actualiser la jauge</button>
+                <button id="optimizeStoredPhotosBtn" class="save-btn" type="button">Compresser les anciennes photos</button>
+              </div>
+              <div id="storageUsageMessage"></div>
+            </div>
+
           <div class="settings-card">
             <h3>Apparence</h3>
             <div class="field">
@@ -2704,7 +2732,79 @@
     const LOCAL_BACKUP_DB = "TECH42SERVICE_LOCAL_BACKUPS";
     const LOCAL_BACKUP_STORE = "snapshots";
     const LOCAL_BACKUP_LIMIT = 20;
+    const LOCAL_STORAGE_SAFE_REFERENCE_BYTES = 5 * 1024 * 1024;
     let lastLocalBackupJson = "";
+
+    function formatStorageSize(bytes){
+      const value=Math.max(0,Number(bytes)||0);
+      if(value<1024) return `${Math.round(value)} octets`;
+      if(value<1024*1024) return `${(value/1024).toLocaleString("fr-FR",{maximumFractionDigits:1})} Ko`;
+      return `${(value/(1024*1024)).toLocaleString("fr-FR",{maximumFractionDigits:2})} Mo`;
+    }
+
+    function localStorageUsageBytes(){
+      let bytes=0;
+      for(let index=0;index<localStorage.length;index+=1){
+        const key=localStorage.key(index)||"";
+        const value=localStorage.getItem(key)||"";
+        bytes+=new Blob([key,value]).size;
+      }
+      return bytes;
+    }
+
+    function localStoredImageStats(){
+      let count=0;
+      let bytes=0;
+      const visit=value=>{
+        if(typeof value==="string"){
+          if(value.startsWith("data:image/")){
+            count+=1;
+            bytes+=personalDeviceDataUrlBytes(value);
+          }
+          return;
+        }
+        if(Array.isArray(value)){
+          value.forEach(visit);
+          return;
+        }
+        if(value&&typeof value==="object") Object.values(value).forEach(visit);
+      };
+      for(let index=0;index<localStorage.length;index+=1){
+        const raw=localStorage.getItem(localStorage.key(index)||"");
+        if(!raw) continue;
+        try{ visit(JSON.parse(raw)); }
+        catch{ visit(raw); }
+      }
+      return {count,bytes};
+    }
+
+    async function updateStorageUsage(){
+      const value=document.getElementById("storageUsageValue");
+      const state=document.getElementById("storageUsageState");
+      const bar=document.getElementById("storageUsageBar");
+      const meter=bar?.parentElement;
+      if(!value||!state||!bar) return;
+      const used=localStorageUsageBytes();
+      const ratio=used/LOCAL_STORAGE_SAFE_REFERENCE_BYTES;
+      const percent=Math.max(0,Math.round(ratio*100));
+      const visualPercent=Math.min(100,percent);
+      const level=ratio>=.85?"danger":ratio>=.65?"warning":"";
+      value.textContent=`${formatStorageSize(used)} / repère de sécurité 5 Mo`;
+      state.textContent=level==="danger"?"Risque de saturation":level==="warning"?"À surveiller":"Niveau normal";
+      state.className=`storage-usage-state ${level}`.trim();
+      bar.className=`storage-meter-fill ${level}`.trim();
+      bar.style.width=`${visualPercent}%`;
+      meter?.setAttribute("aria-valuenow",String(visualPercent));
+      const images=localStoredImageStats();
+      document.getElementById("storageImageCount").textContent=`${images.count} élément${images.count>1?"s":""}`;
+      document.getElementById("storageImageBytes").textContent=formatStorageSize(images.bytes);
+      try{
+        const backups=await listLocalBackups();
+        document.getElementById("storageBackupCount").textContent=`${backups.length} copie${backups.length>1?"s":""}`;
+      }catch{
+        document.getElementById("storageBackupCount").textContent="Indisponible";
+      }
+    }
 
     function openLocalBackupDb(){
       return new Promise((resolve, reject) => {
@@ -4492,6 +4592,7 @@
       if(page === "settings"){
         refreshUserNames();
         refreshLocalBackupSelect();
+        updateStorageUsage();
         adminOnlySettings.classList.toggle("hidden", activeRole !== "admin");
         visualSettingsBlocked.classList.toggle("hidden", activeRole === "admin");
       }
@@ -4524,6 +4625,31 @@
     }
     activateDashboardPanel(document.getElementById("dashboardPlanningPanel"), "appointments");
     activateDashboardPanel(document.getElementById("dashboardPrioritiesPanel"), "repairs");
+
+    document.getElementById("refreshStorageUsageBtn").addEventListener("click",()=>updateStorageUsage());
+    document.getElementById("optimizeStoredPhotosBtn").addEventListener("click",async event=>{
+      const button=event.currentTarget;
+      const message=document.getElementById("storageUsageMessage");
+      button.disabled=true;
+      button.textContent="Compression en cours…";
+      message.className="notice";
+      message.textContent="Analyse et compression des anciennes photos…";
+      try{
+        const result=await optimizeStoredPhotos();
+        message.className="notice";
+        message.textContent=result.optimizedCount
+          ? `${result.optimizedCount} photo${result.optimizedCount>1?"s":""} compressée${result.optimizedCount>1?"s":""}. ${formatStorageSize(result.savedBytes)} libérés.`
+          : "Toutes les photos sont déjà optimisées.";
+        await updateStorageUsage();
+      }catch(error){
+        console.error("Optimisation des photos",error);
+        message.className="error";
+        message.textContent="La compression n’a pas pu être terminée. Les données existantes sont conservées.";
+      }finally{
+        button.disabled=false;
+        button.textContent="Compresser les anciennes photos";
+      }
+    });
 
     document.getElementById("userNamesForm").addEventListener("submit", (event) => {
       event.preventDefault();
@@ -4606,6 +4732,7 @@
         await createLocalBackup("Copie manuelle", true);
         msg.className = "notice";
         msg.textContent = "Sauvegarde locale datée créée sur cet appareil.";
+        await updateStorageUsage();
       }catch(error){
         console.error(error);
         msg.className = "error";
@@ -4627,6 +4754,7 @@
         await restoreLocalBackup(select.value);
         msg.className = "notice";
         msg.textContent = "Sauvegarde restaurée et synchronisée.";
+        await updateStorageUsage();
       }catch(error){
         console.error(error);
         msg.className = "error";
@@ -5070,15 +5198,6 @@
     let currentRepairPhotos = [];
     let currentRepairPhotoCategory = "avant";
 
-    function fileToDataUrl(file){
-      return new Promise((resolve,reject)=>{
-        const reader = new FileReader();
-        reader.onload = ()=>resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
     function renderRepairPhotosPreview(){
       const box = document.getElementById("repairPhotosPreview");
       box.innerHTML = "";
@@ -5106,13 +5225,21 @@
         const map={Before:"avant",After:"après",Imei:"imei",Accessories:"accessoires"};
         currentRepairPhotoCategory=map[name];
         const files=[...event.target.files];
+        let added=0;
         for(const file of files){
           if(!file.type.startsWith("image/")) continue;
-          const dataUrl=await fileToDataUrl(file);
-          currentRepairPhotos.push({src:dataUrl,category:currentRepairPhotoCategory});
+          try{
+            const dataUrl=await compressPersonalDevicePhoto(file);
+            currentRepairPhotos.push({src:dataUrl,category:currentRepairPhotoCategory});
+            added+=1;
+          }catch(error){
+            console.error("Compression photo réparation",error);
+            alert(`La photo « ${file.name} » n’a pas pu être ajoutée.`);
+          }
         }
         event.target.value="";
         renderRepairPhotosPreview();
+        if(added&&typeof showMobileSaveToast==="function") showMobileSaveToast(`${added} photo${added>1?"s":""} compressée${added>1?"s":""} ✓`,true);
       });
     });
 
@@ -6222,36 +6349,93 @@
       }));
     }
 
-    function compressPersonalDevicePhoto(file){
+    function compressPersonalDevicePhoto(source){
       return new Promise((resolve,reject)=>{
+        const image=new Image();
+        image.onerror=reject;
+        image.onload=()=>{
+          const canvas=document.createElement("canvas");
+          let maximumSize=1000;
+          let quality=.74;
+          let compressed="";
+          for(let attempt=0;attempt<7;attempt+=1){
+            const ratio=Math.min(1,maximumSize/Math.max(image.width,image.height));
+            canvas.width=Math.max(1,Math.round(image.width*ratio));
+            canvas.height=Math.max(1,Math.round(image.height*ratio));
+            const context=canvas.getContext("2d");
+            if(!context){ reject(new Error("Compression indisponible")); return; }
+            context.clearRect(0,0,canvas.width,canvas.height);
+            context.drawImage(image,0,0,canvas.width,canvas.height);
+            compressed=canvas.toDataURL("image/jpeg",quality);
+            if(personalDeviceDataUrlBytes(compressed)<=PERSONAL_DEVICE_PHOTO_TARGET_BYTES) break;
+            maximumSize=Math.max(560,Math.round(maximumSize*.84));
+            quality=Math.max(.44,quality-.06);
+          }
+          resolve(compressed);
+        };
+        if(typeof source==="string"){
+          image.src=source;
+          return;
+        }
         const reader=new FileReader();
         reader.onerror=reject;
-        reader.onload=()=>{
-          const image=new Image();
-          image.onerror=reject;
-          image.onload=()=>{
-            const canvas=document.createElement("canvas");
-            let maximumSize=1000;
-            let quality=.74;
-            let compressed="";
-            for(let attempt=0;attempt<7;attempt+=1){
-              const ratio=Math.min(1,maximumSize/Math.max(image.width,image.height));
-              canvas.width=Math.max(1,Math.round(image.width*ratio));
-              canvas.height=Math.max(1,Math.round(image.height*ratio));
-              const context=canvas.getContext("2d");
-              context.clearRect(0,0,canvas.width,canvas.height);
-              context.drawImage(image,0,0,canvas.width,canvas.height);
-              compressed=canvas.toDataURL("image/jpeg",quality);
-              if(personalDeviceDataUrlBytes(compressed)<=PERSONAL_DEVICE_PHOTO_TARGET_BYTES) break;
-              maximumSize=Math.max(560,Math.round(maximumSize*.84));
-              quality=Math.max(.44,quality-.06);
-            }
-            resolve(compressed);
-          };
-          image.src=reader.result;
-        };
-        reader.readAsDataURL(file);
+        reader.onload=()=>{image.src=reader.result;};
+        reader.readAsDataURL(source);
       });
+    }
+
+    async function optimizeStoredPhotos(){
+      let optimizedCount=0;
+      let savedBytes=0;
+      const optimizeSource=async source=>{
+        if(typeof source!=="string"||!source.startsWith("data:image/")) return source;
+        const before=personalDeviceDataUrlBytes(source);
+        if(before<=PERSONAL_DEVICE_PHOTO_TARGET_BYTES) return source;
+        const compressed=await compressPersonalDevicePhoto(source);
+        const after=personalDeviceDataUrlBytes(compressed);
+        if(after>=before) return source;
+        optimizedCount+=1;
+        savedBytes+=before-after;
+        return compressed;
+      };
+      const optimizePhotoEntry=async entry=>{
+        if(typeof entry==="string") return await optimizeSource(entry);
+        if(!entry||typeof entry!=="object") return entry;
+        const nextSource=await optimizeSource(entry.src);
+        return nextSource===entry.src?entry:{...entry,src:nextSource};
+      };
+
+      const repairs=getAdminRepairs();
+      for(const item of repairs){
+        if(!Array.isArray(item.photos)) continue;
+        const next=[];
+        for(const photo of item.photos) next.push(await optimizePhotoEntry(photo));
+        item.photos=next;
+      }
+
+      const devices=getAdminPersonalDevices();
+      for(const item of devices){
+        if(!Array.isArray(item.photos)) continue;
+        const next=[];
+        for(const photo of item.photos) next.push(await optimizePhotoEntry(photo));
+        item.photos=next;
+      }
+
+      const operations=getAdminBuySell();
+      for(const item of operations){
+        item.idFront=await optimizeSource(item.idFront||"");
+        item.idBack=await optimizeSource(item.idBack||"");
+      }
+
+      if(optimizedCount){
+        saveAdminRepairs(repairs);
+        if(!saveAdminPersonalDevices(devices)) throw new Error("Enregistrement des appareils impossible");
+        if(!saveAdminBuySell(operations)) throw new Error("Enregistrement des rachats impossible");
+        renderRepairs();
+        renderPersonalDevices();
+        renderBuySell();
+      }
+      return {optimizedCount,savedBytes};
     }
 
     function editPersonalDevice(id){
