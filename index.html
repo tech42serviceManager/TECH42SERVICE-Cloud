@@ -109,7 +109,7 @@
     .dashboard-card-detail{margin-top:8px;color:var(--muted);font-size:13px}.dashboard-card-detail strong{color:var(--text)}
     .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px}
     .panel h2{margin:0 0 14px;font-size:20px}
-    .quick-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+    .quick-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
     .quick button{
       min-height:90px;border:1px solid var(--border);border-radius:12px;
       background:var(--panel2);color:var(--text);cursor:pointer;font-size:15px
@@ -431,6 +431,17 @@
     .link-card p{color:var(--muted);font-size:14px;min-height:38px}
     .link-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
     .link-open{display:inline-block;padding:9px 11px;border-radius:8px;background:var(--accent);color:#080808;text-decoration:none;font-weight:800}
+    .supplier-form{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px;align-items:end}
+    .supplier-form .supplier-description{grid-column:1/-1}
+    .supplier-form input,.supplier-form select,.supplier-toolbar input,.supplier-toolbar select{
+      width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;background:#171717;color:var(--text)
+    }
+    .supplier-toolbar{display:grid;grid-template-columns:1fr 230px;gap:12px;margin-bottom:14px}
+    .supplier-card{position:relative;overflow:hidden}
+    .supplier-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent)}
+    .supplier-card p{min-height:42px;line-height:1.45}
+    .supplier-card .link-card-actions{align-items:stretch}
+    .supplier-card .link-card-actions button{min-height:39px}
     .doc-pro-header{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
     .doc-pro-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px}
     .doc-pro-card h3{margin:0 0 10px;color:var(--accent)}
@@ -511,7 +522,8 @@
     }
     @media(max-width:520px){
       .main{padding:14px}.topbar{align-items:flex-start;flex-direction:column}
-      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.personal-device-form,.personal-device-toolbar,.personal-device-summary,.personal-repair-form,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
+      .clock{font-size:42px}.cards,.quick-grid,.settings-grid,.repair-form,.repair-details,.repair-toolbar,.stock-form,.stock-toolbar,.stock-summary,.personal-device-form,.personal-device-toolbar,.personal-device-summary,.personal-repair-form,.document-form,.template-grid,.document-line,.repair-line,.appt-form,.appt-toolbar,.client-form,.buysell-form,.buysell-toolbar,.links-form,.supplier-form,.supplier-toolbar,.doc-pro-header,.photo-type-grid,.pro-grid,.signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr}
+      .supplier-form .supplier-description{grid-column:auto}
       .buyback-identity-grid,.id-photo-grid{grid-template-columns:1fr}.buyback-identity-grid .full{grid-column:auto}
       .document-discount-controls{grid-template-columns:1fr}
       .document-discount-title{grid-column:1}
@@ -665,7 +677,7 @@
       .personal-device-form,.personal-device-toolbar,.personal-repair-form,.personal-device-detail-grid,
       .sav-form,.document-form,.document-device-grid,.template-grid,.document-line,.repair-line,
       .appt-form,.appt-toolbar,.client-form,.payment-form,.buysell-form,.buysell-toolbar,
-      .buyback-identity-grid,.id-photo-grid,.links-form,.doc-pro-header,.photo-type-grid,.pro-grid,
+      .buyback-identity-grid,.id-photo-grid,.links-form,.supplier-form,.supplier-toolbar,.doc-pro-header,.photo-type-grid,.pro-grid,
       .signature-grid,.repair-finance-grid,.history-form{grid-template-columns:1fr!important}
       .repair-form .full,.repair-details .full,.stock-form .full,.personal-device-form .full,
       .personal-repair-form .full,.personal-device-detail-grid .full,.sav-form .full,
@@ -844,6 +856,7 @@
           <button type="button" data-mobile-page="invoices">Factures</button>
           <button type="button" data-mobile-page="payments">Encaissements</button>
           <button type="button" data-mobile-page="buySell">Rachat / Vente</button>
+          <button type="button" data-mobile-page="suppliers">Fournisseurs</button>
           <button type="button" data-mobile-page="repairHelp">Aide réparations</button>
           <button type="button" data-mobile-page="settings">Paramètres</button>
           <button id="mobileSyncButton" type="button">Synchroniser</button>
@@ -925,6 +938,7 @@
             <button id="quickQuote" class="write-action">Nouveau devis</button>
             <button id="quickAppointment" class="write-action">Nouveau rendez-vous</button>
             <button id="quickNote" class="write-action quick-note-button" type="button"><strong>📝 Mes notes</strong><small id="quickNotePreview">Aucune note</small></button>
+            <button id="quickSuppliers" type="button"><strong>Fournisseurs</strong></button>
           </div>
         </section>
       </section>
@@ -1198,7 +1212,7 @@
             <div><label>Statut</label><select id="partsOrderStatus"><option>À commander</option><option>Commandée</option><option>Reçue</option><option>Annulée</option></select></div>
             <div class="double"><label>Pièce à commander</label><input id="partsOrderName" type="text" required placeholder="Ex. Écran OLED iPhone 13"></div>
             <div><label>Quantité</label><input id="partsOrderQuantity" type="number" min="1" step="1" value="1" required></div>
-            <div><label>Fournisseur</label><input id="partsOrderSupplier" type="text" placeholder="Ex. Mobilax"></div>
+            <div><label>Fournisseur</label><input id="partsOrderSupplier" type="text" list="supplierNamesList" placeholder="Ex. Mobilax"></div>
             <div><label>Référence fournisseur</label><input id="partsOrderReference" type="text"></div>
             <div><label>Coût prévu TTC</label><input id="partsOrderCost" type="number" min="0" step="0.01" value="0"></div>
             <div class="double"><label>Lien de commande</label><input id="partsOrderLink" type="url" placeholder="https://..."></div>
@@ -1309,7 +1323,7 @@
             </div>
             <div class="field">
               <label>Fournisseur</label>
-              <input id="stockSupplier" type="text">
+              <input id="stockSupplier" type="text" list="supplierNamesList">
             </div>
 
             <div class="field">
@@ -2242,6 +2256,68 @@
         </section>
       </section>
 
+      <section id="suppliersPage" class="hidden">
+        <header class="topbar">
+          <div>
+            <h1>Fournisseurs</h1>
+            <p>Liens directs vers les fournisseurs de pièces pour téléphone, console et ordinateur</p>
+          </div>
+        </header>
+
+        <div id="supplierDemoNote" class="demo-banner hidden">
+          MODE PRÉSENTATION — Liste de démonstration — Aucune modification autorisée
+        </div>
+
+        <section id="supplierEditorPanel" class="panel">
+          <h2 id="supplierFormTitle">Ajouter un fournisseur</h2>
+          <form id="supplierForm" class="supplier-form">
+            <input id="supplierEditId" type="hidden">
+            <div class="field">
+              <label>Nom du fournisseur</label>
+              <input id="supplierName" type="text" maxlength="100" required placeholder="Ex. Mobilax">
+            </div>
+            <div class="field">
+              <label>Lien du site</label>
+              <input id="supplierUrl" type="url" required placeholder="https://...">
+            </div>
+            <div class="field">
+              <label>Catégorie</label>
+              <select id="supplierCategory">
+                <option>Téléphone / Tablette</option>
+                <option>Console</option>
+                <option>Ordinateur</option>
+                <option>Multi-appareils</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field supplier-description">
+              <label>Description / Conditions</label>
+              <input id="supplierDescription" type="text" maxlength="220" placeholder="Ex. Grossiste professionnel, compte requis, pièces d’origine…">
+            </div>
+            <div class="page-actions" style="margin:0">
+              <button id="saveSupplierBtn" class="save-btn write-action" type="submit">Ajouter le fournisseur</button>
+              <button id="cancelSupplierEditBtn" class="action-btn secondary hidden" type="button">Annuler la modification</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="supplier-toolbar">
+            <input id="supplierSearch" type="search" placeholder="Rechercher un fournisseur…">
+            <select id="supplierFilter">
+              <option value="">Toutes les catégories</option>
+              <option>Téléphone / Tablette</option>
+              <option>Console</option>
+              <option>Ordinateur</option>
+              <option>Multi-appareils</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div id="supplierGrid" class="links-grid"></div>
+          <div id="supplierEmpty" class="empty-state">Aucun fournisseur enregistré.</div>
+        </section>
+      </section>
+
       <section id="settingsPage" class="hidden">
         <header class="topbar">
           <div>
@@ -2748,6 +2824,7 @@ using (
       "tech42-payments",
       "tech42-buy-sell",
       "tech42-parts-orders",
+      "tech42-supplier-links",
       "tech42-repair-help-links",
       "tech42-quick-note",
       "tech42-quick-notes",
@@ -2767,6 +2844,7 @@ using (
       "tech42-payments",
       "tech42-buy-sell",
       "tech42-parts-orders",
+      "tech42-supplier-links",
       "tech42-repair-help-links",
       "tech42-quick-notes",
       CLOUD_TOMBSTONE_KEY
@@ -3762,6 +3840,7 @@ using (
       try{ renderAppointments(); }catch(e){ console.warn(e); }
       try{ renderClients(); }catch(e){ console.warn(e); }
       try{ renderBuySell(); }catch(e){ console.warn(e); }
+      try{ renderSuppliers(); }catch(e){ console.warn(e); }
       try{ renderRepairHelp(); }catch(e){ console.warn(e); }
       try{ refreshQuickNotePreview(); }catch(e){ console.warn(e); }
       try{ updateDashboardStats(); }catch(e){ console.warn(e); }
@@ -4659,6 +4738,7 @@ using (
     const clientsPage = document.getElementById("clientsPage");
     const paymentsPage = document.getElementById("paymentsPage");
     const buySellPage = document.getElementById("buySellPage");
+    const suppliersPage = document.getElementById("suppliersPage");
     const repairHelpPage = document.getElementById("repairHelpPage");
     const repairDemoNote = document.getElementById("repairDemoNote");
     const stockDemoNote = document.getElementById("stockDemoNote");
@@ -4668,6 +4748,7 @@ using (
     const clientsDemoNote = document.getElementById("clientsDemoNote");
     const paymentsDemoNote = document.getElementById("paymentsDemoNote");
     const buySellDemoNote = document.getElementById("buySellDemoNote");
+    const supplierDemoNote = document.getElementById("supplierDemoNote");
     const repairHelpDemoNote = document.getElementById("repairHelpDemoNote");
     const adminOnlySettings = document.getElementById("adminOnlySettings");
     const visualSettingsBlocked = document.getElementById("visualSettingsBlocked");
@@ -4817,6 +4898,8 @@ using (
       clientsDemoNote.classList.toggle("hidden", role !== "visuel");
       paymentsDemoNote.classList.toggle("hidden", role !== "visuel");
       buySellDemoNote.classList.toggle("hidden", role !== "visuel");
+      supplierDemoNote.classList.toggle("hidden", role !== "visuel");
+      document.getElementById("supplierEditorPanel").classList.toggle("hidden", role === "visuel");
       repairHelpDemoNote.classList.toggle("hidden", role !== "visuel");
       const settingsBtn = document.querySelector('[data-page="settings"]');
       settingsBtn.classList.toggle("hidden", role === "visuel");
@@ -4927,6 +5010,7 @@ using (
       clientsPage.classList.toggle("hidden", page !== "clients");
       paymentsPage.classList.toggle("hidden", page !== "payments");
       buySellPage.classList.toggle("hidden", page !== "buySell");
+      suppliersPage.classList.toggle("hidden", page !== "suppliers");
       repairHelpPage.classList.toggle("hidden", page !== "repairHelp");
       settingsPage.classList.toggle("hidden", page !== "settings");
 
@@ -4935,6 +5019,7 @@ using (
       if(page === "documents"){ renderDocuments(); loadDocumentTemplates(); resetDocumentForm(); }
       if(page === "invoices") renderDocuments();
       if(page === "payments") renderPayments();
+      if(page === "suppliers") renderSuppliers();
       if(page === "appointments"){ renderAppointments();
       updateDashboardStats(); resetAppointmentForm(); }
 
@@ -4950,7 +5035,7 @@ using (
     }
 
     function installModuleHomeButtons(){
-      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, invoicesPage, paymentsPage, buySellPage, repairHelpPage, settingsPage];
+      const pages = [repairsPage, clientsPage, stockPage, appointmentsPage, documentsPage, invoicesPage, paymentsPage, buySellPage, suppliersPage, repairHelpPage, settingsPage];
       pages.forEach(page => {
         if(!page) return;
         const topbar = page.querySelector(":scope > .topbar");
@@ -9041,6 +9126,10 @@ using (
       showAppointmentForm();
     });
 
+    document.getElementById("quickSuppliers").addEventListener("click",()=>{
+      showPage("suppliers");
+    });
+
 
     const demoClients = [
       {id:"CLI-0001",name:"Jean Martin",phone:"06 12 34 56 78",email:"jean@example.fr",address:"12 rue des Lilas",notes:"Client régulier"},
@@ -9534,6 +9623,137 @@ using (
       popup.document.close();
     }
 
+
+    const SUPPLIER_STORAGE_KEY = "tech42-supplier-links";
+    const DEFAULT_SUPPLIERS = [
+      {id:"FOU-001",name:"Mobilax",url:"https://www.mobilax.fr/",category:"Téléphone / Tablette",description:"Grossiste professionnel en pièces, écrans, batteries, accessoires et outillage."},
+      {id:"FOU-002",name:"UTOPYA",url:"https://www.utopya.fr/",category:"Téléphone / Tablette",description:"Grossiste B2B en pièces détachées pour smartphones, iPhone et Samsung."},
+      {id:"FOU-003",name:"Brico-phone",url:"https://www.brico-phone.com/",category:"Téléphone / Tablette",description:"Pièces et outils pour smartphones, tablettes et certaines consoles."},
+      {id:"FOU-004",name:"Storephone",url:"https://storephone.fr/",category:"Multi-appareils",description:"Grossiste en pièces pour smartphones, tablettes, ordinateurs et consoles."},
+      {id:"FOU-005",name:"CHIP'N MODZ",url:"https://www.chipnmodz.fr/",category:"Console",description:"Pièces détachées pour PlayStation, Xbox, Nintendo Switch et consoles anciennes."},
+      {id:"FOU-006",name:"Nextgen Industry",url:"https://www.nextgen-industry.com/",category:"Console",description:"Pièces et accessoires pour consoles de jeux et smartphones."},
+      {id:"FOU-007",name:"Pièces2Mobile — Consoles",url:"https://www.pieces2mobile.com/console.html",category:"Console",description:"Pièces détachées pour consoles Sony, Microsoft et Nintendo."},
+      {id:"FOU-008",name:"IPC-Computer",url:"https://www.ipc-computer.fr/",category:"Ordinateur",description:"Batteries, chargeurs, claviers, écrans et pièces pour ordinateurs portables."},
+      {id:"FOU-009",name:"LDLC Pro",url:"https://www.ldlc.pro/",category:"Ordinateur",description:"Matériel et composants informatiques pour entreprises, artisans et revendeurs."},
+      {id:"FOU-010",name:"Ingram Micro France",url:"https://fr.ingrammicro.eu/",category:"Ordinateur",description:"Grossiste informatique professionnel — création d’un compte professionnel nécessaire."},
+      {id:"FOU-011",name:"iFixit",url:"https://www.ifixit.com/fr-fr/Store",category:"Multi-appareils",description:"Pièces et outils pour téléphones, ordinateurs, tablettes et consoles."}
+    ];
+
+    function ensureDefaultSuppliers(){
+      if(localStorage.getItem(SUPPLIER_STORAGE_KEY)===null){
+        saveStoredLinks(SUPPLIER_STORAGE_KEY,DEFAULT_SUPPLIERS.map(item=>({...item})));
+      }
+    }
+
+    function currentSuppliers(){
+      if(activeRole==="visuel") return DEFAULT_SUPPLIERS;
+      ensureDefaultSuppliers();
+      return getStoredLinks(SUPPLIER_STORAGE_KEY);
+    }
+
+    function refreshSupplierNamesList(){
+      const datalist=document.getElementById("supplierNamesList");
+      if(!datalist) return;
+      const list=activeRole==="visuel"?DEFAULT_SUPPLIERS:currentSuppliers();
+      datalist.innerHTML=list
+        .slice()
+        .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"fr"))
+        .map(item=>`<option value="${escapeHtml(item.name||"")}">${escapeHtml(item.category||"")}</option>`)
+        .join("");
+    }
+
+    function resetSupplierForm(){
+      document.getElementById("supplierForm").reset();
+      document.getElementById("supplierEditId").value="";
+      document.getElementById("supplierFormTitle").textContent="Ajouter un fournisseur";
+      document.getElementById("saveSupplierBtn").textContent="Ajouter le fournisseur";
+      document.getElementById("cancelSupplierEditBtn").classList.add("hidden");
+    }
+
+    function editSupplier(id){
+      if(activeRole!=="admin") return;
+      const item=getStoredLinks(SUPPLIER_STORAGE_KEY).find(entry=>entry.id===id);
+      if(!item) return;
+      document.getElementById("supplierEditId").value=item.id;
+      document.getElementById("supplierName").value=item.name||"";
+      document.getElementById("supplierUrl").value=item.url||"";
+      document.getElementById("supplierCategory").value=item.category||"Autre";
+      document.getElementById("supplierDescription").value=item.description||"";
+      document.getElementById("supplierFormTitle").textContent="Modifier le fournisseur";
+      document.getElementById("saveSupplierBtn").textContent="Enregistrer les modifications";
+      document.getElementById("cancelSupplierEditBtn").classList.remove("hidden");
+      document.getElementById("supplierEditorPanel").scrollIntoView({behavior:"smooth",block:"start"});
+    }
+
+    function renderSuppliers(){
+      const search=document.getElementById("supplierSearch").value.trim().toLowerCase();
+      const category=document.getElementById("supplierFilter").value;
+      const categoryOrder={"Téléphone / Tablette":1,"Console":2,"Ordinateur":3,"Multi-appareils":4,"Autre":5};
+      const list=currentSuppliers()
+        .filter(item=>{
+          const text=[item.name,item.url,item.category,item.description].join(" ").toLowerCase();
+          return (!search||text.includes(search))&&(!category||item.category===category);
+        })
+        .sort((a,b)=>(categoryOrder[a.category]||99)-(categoryOrder[b.category]||99)||String(a.name||"").localeCompare(String(b.name||""),"fr"));
+      const grid=document.getElementById("supplierGrid");
+      grid.innerHTML=list.map(item=>{
+        const actions=activeRole==="admin"
+          ? `<button class="mini-btn" type="button" data-supplier-edit="${escapeHtml(item.id)}">Modifier</button><button class="mini-btn danger" type="button" data-supplier-delete="${escapeHtml(item.id)}">Supprimer</button>`
+          : "";
+        return `<article class="link-card supplier-card">
+          <h3>${escapeHtml(item.name||"Fournisseur")}</h3>
+          <span class="workflow-badge">${escapeHtml(item.category||"Autre")}</span>
+          <p>${escapeHtml(item.description||"Aucune description")}</p>
+          <div class="link-card-actions">
+            <a class="link-open" href="${escapeHtml(safeExternalUrl(item.url||""))}" target="_blank" rel="noopener noreferrer">Ouvrir le site</a>
+            ${actions}
+          </div>
+        </article>`;
+      }).join("");
+      document.getElementById("supplierEmpty").classList.toggle("hidden",list.length>0);
+      grid.querySelectorAll("[data-supplier-edit]").forEach(button=>button.addEventListener("click",()=>editSupplier(button.dataset.supplierEdit)));
+      grid.querySelectorAll("[data-supplier-delete]").forEach(button=>button.addEventListener("click",()=>{
+        const id=button.dataset.supplierDelete;
+        const item=getStoredLinks(SUPPLIER_STORAGE_KEY).find(entry=>entry.id===id);
+        if(!item||!confirm(`Supprimer le fournisseur « ${item.name} » ?`)) return;
+        recordCloudDeletion(SUPPLIER_STORAGE_KEY,id);
+        saveStoredLinks(SUPPLIER_STORAGE_KEY,getStoredLinks(SUPPLIER_STORAGE_KEY).filter(entry=>entry.id!==id));
+        if(document.getElementById("supplierEditId").value===id) resetSupplierForm();
+        renderSuppliers();
+      }));
+      refreshSupplierNamesList();
+    }
+
+    document.getElementById("supplierForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      if(activeRole!=="admin") return;
+      const name=document.getElementById("supplierName").value.trim();
+      const url=document.getElementById("supplierUrl").value.trim();
+      if(safeExternalUrl(url)==="#"){
+        alert("Le lien du fournisseur doit commencer par https:// ou http://");
+        return;
+      }
+      const list=getStoredLinks(SUPPLIER_STORAGE_KEY);
+      const editId=document.getElementById("supplierEditId").value;
+      const existing=list.find(item=>item.id===editId);
+      const item={
+        ...(existing||{}),
+        id:existing?.id||nextLinkId("FOU",list),
+        name,
+        url,
+        category:document.getElementById("supplierCategory").value,
+        description:document.getElementById("supplierDescription").value.trim()
+      };
+      if(existing) list[list.findIndex(entry=>entry.id===existing.id)]=item;
+      else list.unshift(item);
+      saveStoredLinks(SUPPLIER_STORAGE_KEY,list);
+      resetSupplierForm();
+      renderSuppliers();
+    });
+
+    document.getElementById("cancelSupplierEditBtn").addEventListener("click",resetSupplierForm);
+    document.getElementById("supplierSearch").addEventListener("input",renderSuppliers);
+    document.getElementById("supplierFilter").addEventListener("change",renderSuppliers);
 
     const demoRepairHelpLinks = [
       {id:"HELP-001",name:"iFixit",url:"https://www.ifixit.com",category:"Schémas / Documentation",description:"Guides de démontage et réparation"},
@@ -10459,6 +10679,7 @@ using (
   </script>
 <datalist id="clientNamesList"></datalist>
   <datalist id="stockPartsList"></datalist>
+  <datalist id="supplierNamesList"></datalist>
 
 <script>
   (function enableSimplifiedMobileNavigation(){
@@ -10466,7 +10687,7 @@ using (
       dashboard:"Accueil",repairs:"Réparations",clients:"Clients",stock:"Stock",
       appointments:"Rendez-vous",documents:"Documents",invoices:"Factures",
       payments:"Encaissements",buySell:"Rachat / Vente",repairHelp:"Aide réparations",
-      settings:"Paramètres"
+      suppliers:"Fournisseurs",settings:"Paramètres"
     };
     const primaryPages=new Set(["dashboard","repairs","appointments","stock"]);
     const currentPage=document.getElementById("mobileCurrentPage");
