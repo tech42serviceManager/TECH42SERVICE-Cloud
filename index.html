@@ -1132,26 +1132,10 @@
             </div>
 
             <div class="field full">
-              <label>Photos du dossier</label>
-              <div class="photo-type-grid">
-                <div class="photo-type-card">
-                  <label>Avant réparation</label>
-                  <input id="repairPhotosBefore" type="file" accept="image/*" multiple>
-                </div>
-                <div class="photo-type-card">
-                  <label>Après réparation</label>
-                  <input id="repairPhotosAfter" type="file" accept="image/*" multiple>
-                </div>
-                <div class="photo-type-card">
-                  <label>IMEI / Série</label>
-                  <input id="repairPhotosImei" type="file" accept="image/*" multiple>
-                </div>
-                <div class="photo-type-card">
-                  <label>Accessoires / État</label>
-                  <input id="repairPhotosAccessories" type="file" accept="image/*" multiple>
-                </div>
-              </div>
-              <div id="repairPhotosPreview" class="repair-photos-preview"></div>
+              <label>Lien externe vers les photos (facultatif)</label>
+              <input id="repairEvidenceLink" type="url" placeholder="Ex. lien Google Drive ou Google Photos du dossier">
+              <small style="color:var(--muted)">Le logiciel conserve uniquement ce lien : aucune photo n’est enregistrée.</small>
+              <div hidden><input id="repairPhotosBefore" type="file"><input id="repairPhotosAfter" type="file"><input id="repairPhotosImei" type="file"><input id="repairPhotosAccessories" type="file"><div id="repairPhotosPreview"></div></div>
             </div>
 
             <div class="field full">
@@ -1533,9 +1517,10 @@
               </fieldset>
               <div class="field full"><label>Réparations à effectuer</label><textarea id="personalDeviceNotes" placeholder="Liste des réparations à prévoir ou à effectuer..."></textarea></div>
               <div class="field full">
-                <label>Photos de l’appareil</label>
-                <input id="personalDevicePhotos" type="file" accept="image/*" multiple>
-                <div id="personalDevicePhotosPreview" class="personal-photo-preview"></div>
+                <label>Lien externe vers les photos (facultatif)</label>
+                <input id="personalDeviceEvidenceLink" type="url" placeholder="Ex. lien Google Drive ou Google Photos">
+                <small style="color:var(--muted)">Aucune image n’est stockée dans le logiciel.</small>
+                <div hidden><input id="personalDevicePhotos" type="file"><div id="personalDevicePhotosPreview"></div></div>
               </div>
               <div class="full"><button id="savePersonalDeviceBtn" class="save-btn" type="submit">Enregistrer l’appareil</button></div>
             </form>
@@ -2201,11 +2186,10 @@
                 <div class="field"><label>Type de pièce d’identité</label><select id="buySellIdType"><option>Carte nationale d’identité</option><option>Passeport</option><option>Permis de conduire</option><option>Autre</option></select></div>
                 <div class="field"><label>Numéro de la pièce d’identité</label><input id="buySellIdNumber" type="text"></div>
                 <div class="field full">
-                  <label>Photos de la pièce d’identité</label>
-                  <div class="id-photo-grid">
-                    <div><input id="buySellIdFrontFile" type="file" accept="image/*"><div id="buySellIdFrontPreview" class="id-photo-preview">Recto non ajouté</div></div>
-                    <div><input id="buySellIdBackFile" type="file" accept="image/*"><div id="buySellIdBackPreview" class="id-photo-preview">Verso non ajouté</div></div>
-                  </div>
+                  <label>Référence ou lien externe de la pièce d’identité</label>
+                  <input id="buySellIdEvidenceLink" type="text" placeholder="Ex. dossier papier RV-0001 ou lien privé externe">
+                  <small style="color:var(--muted)">Aucune photo de pièce d’identité n’est stockée dans le logiciel.</small>
+                  <div hidden><input id="buySellIdFrontFile" type="file"><input id="buySellIdBackFile" type="file"><div id="buySellIdFrontPreview"></div><div id="buySellIdBackPreview"></div></div>
                 </div>
                 <label class="buyback-attestation full"><input id="buySellOwnershipAttestation" type="checkbox"><span>Le vendeur atteste être le propriétaire légitime de l’appareil, que celui-ci n’est ni volé, ni perdu, ni soumis à un financement ou à une opposition.</span></label>
                 <div class="signature-inline full"><button id="openBuySellSignatureBtn" class="action-btn" type="button">Faire signer le vendeur</button><span id="buySellSignatureStatus" class="client-sign-status">Non signé</span></div>
@@ -2350,7 +2334,7 @@
 
             <div class="settings-card storage-usage-card">
               <h3>Stockage du logiciel</h3>
-              <p style="color:var(--muted);font-size:14px;line-height:1.5">La jauge surveille les données enregistrées dans le navigateur. Toutes les nouvelles photos sont automatiquement compressées avant leur enregistrement.</p>
+              <p style="color:var(--muted);font-size:14px;line-height:1.5">La jauge surveille les données enregistrées dans le navigateur. Les photos ne sont plus enregistrées dans le logiciel : seuls des liens externes facultatifs peuvent être conservés.</p>
               <div class="storage-usage-line"><strong id="storageUsageValue">Calcul en cours…</strong><span id="storageUsageState" class="storage-usage-state">Niveau normal</span></div>
               <div class="storage-meter" role="progressbar" aria-label="Espace de stockage utilisé" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="storageUsageBar" class="storage-meter-fill"></div></div>
               <div class="storage-details">
@@ -2361,10 +2345,10 @@
               </div>
               <div class="page-actions" style="margin-bottom:0">
                 <button id="refreshStorageUsageBtn" class="action-btn secondary" type="button">Actualiser la jauge</button>
-                <button id="optimizeStoredPhotosBtn" class="save-btn" type="button">Compresser les anciennes photos</button>
+                <button id="optimizeStoredPhotosBtn" class="save-btn" type="button" hidden>Compresser les anciennes photos</button>
               </div>
               <div id="storageUsageMessage"></div>
-              <div class="photo-cloud-panel">
+              <div class="photo-cloud-panel" hidden>
                 <div class="photo-cloud-head"><h4>Photos séparées dans le cloud</h4><span id="photoCloudStatus" class="photo-cloud-status">Vérification en attente</span></div>
                 <p style="margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5">Les nouvelles photos sont envoyées dans un espace privé. Hors connexion, elles restent provisoirement sur l’appareil puis peuvent être transférées au retour d’Internet.</p>
                 <div class="page-actions" style="margin-bottom:0">
@@ -5902,9 +5886,7 @@ using (
       const repairId=editId||nextRepairId(list);
       const saveButton=document.getElementById("saveRepairBtn");
       if(saveButton) saveButton.disabled=true;
-      const photoResult=await storePhotoEntriesInCloud(currentRepairPhotos,"reparations",repairId);
       if(saveButton) saveButton.disabled=false;
-      if(photoResult.failed&&typeof showMobileSaveToast==="function") showMobileSaveToast("Photo conservée localement — espace cloud à vérifier",false);
       const linkedClientId = upsertClientFromFields(document.getElementById("repairClient").value.trim(),document.getElementById("repairPhone").value.trim(),"");
       const item = {
         id: repairId,
@@ -5928,7 +5910,8 @@ using (
         dueDate: document.getElementById("repairDueDate").value,
         parts: getRepairLines().map(line=>line.label).join(", "),
         lines: getRepairLines(),
-        photos: photoResult.entries,
+        photos: [],
+        evidenceLink: document.getElementById("repairEvidenceLink").value.trim(),
         technician: document.getElementById("repairTechnician").value.trim(),
         partsCost: Number(document.getElementById("repairPartsCostInput").value||0),
         partsCostMode: document.getElementById("repairPartsCostMode").value||"TTC",
@@ -6002,8 +5985,9 @@ using (
       repairDiscountValue=Number(item.discountValue||0);
       document.getElementById("repairDeposit").value = item.deposit || "";
       document.getElementById("repairDepositDate").value = item.depositDate || "";
-      currentRepairPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
+      currentRepairPhotos = [];
       renderRepairPhotosPreview();
+      document.getElementById("repairEvidenceLink").value = item.evidenceLink || "";
       document.getElementById("repairDueDate").value = item.dueDate || "";
       document.getElementById("repairTechnician").value=item.technician||"";
       const savedPartsMode=item.partsCostMode||"TTC";
@@ -7150,8 +7134,9 @@ using (
       document.getElementById("personalDeviceAccessories").value=item.accessories||"";
       restorePersonalDeviceTests(item);
       document.getElementById("personalDeviceNotes").value=item.notes||"";
-      currentPersonalDevicePhotos=Array.isArray(item.photos)?[...item.photos]:[];
+      currentPersonalDevicePhotos=[];
       renderPersonalDevicePhotosPreview();
+      document.getElementById("personalDeviceEvidenceLink").value=item.evidenceLink||"";
       document.getElementById("savePersonalDeviceBtn").textContent="Enregistrer les modifications";
       document.getElementById("personalDeviceModal").classList.add("hidden");
       showPersonalDeviceForm();
@@ -7765,9 +7750,7 @@ using (
       const partsInventory=readPersonalDeviceParts();
       const saveButton=document.getElementById("savePersonalDeviceBtn");
       if(saveButton) saveButton.disabled=true;
-      const photoResult=await storePhotoEntriesInCloud(currentPersonalDevicePhotos,"appareils",id);
       if(saveButton) saveButton.disabled=false;
-      if(photoResult.failed&&typeof showMobileSaveToast==="function") showMobileSaveToast("Photo conservée localement — espace cloud à vérifier",false);
       const item={
         id,
         reference:document.getElementById("personalDeviceReference").value.trim()||id,
@@ -7794,7 +7777,8 @@ using (
         testChecklist,
         partsInventory,
         notes:document.getElementById("personalDeviceNotes").value.trim(),
-        photos:photoResult.entries,
+        photos:[],
+        evidenceLink:document.getElementById("personalDeviceEvidenceLink").value.trim(),
         repairs:Array.isArray(previous?.repairs)?previous.repairs:[],
         savReturns:Array.isArray(previous?.savReturns)?previous.savReturns:[],
         saleDate:previous?.saleDate||"",
@@ -9541,14 +9525,14 @@ using (
       const previous=list.find(entry=>entry.id===editId);
       const operationId=editId||nextBuySellId(list);
       const privateBuyBack=isPrivateBuyBack();
-      if(privateBuyBack&&(!document.getElementById("buySellSellerAddress").value.trim()||!document.getElementById("buySellIdNumber").value.trim()||!buySellIdFrontData||!buySellIdBackData||!buySellSellerSignatureData||!document.getElementById("buySellOwnershipAttestation").checked)){
-        alert("Complète l’adresse, la pièce d’identité recto/verso, l’attestation de propriété et la signature du vendeur.");
+      if(privateBuyBack&&(!document.getElementById("buySellSellerAddress").value.trim()||!document.getElementById("buySellIdNumber").value.trim()||!buySellSellerSignatureData||!document.getElementById("buySellOwnershipAttestation").checked)){
+        alert("Complète l’adresse, le numéro de pièce d’identité, l’attestation de propriété et la signature du vendeur.");
         return;
       }
       const saveButton=document.getElementById("saveBuySellBtn");
       if(saveButton) saveButton.disabled=true;
-      const frontResult=privateBuyBack?await storePhotoSourceInCloud(buySellIdFrontData,"rachats",`${operationId}-recto`):{value:"",uploaded:false,failed:false};
-      const backResult=privateBuyBack?await storePhotoSourceInCloud(buySellIdBackData,"rachats",`${operationId}-verso`):{value:"",uploaded:false,failed:false};
+      const frontResult={value:"",uploaded:false,failed:false};
+      const backResult={value:"",uploaded:false,failed:false};
       if(saveButton) saveButton.disabled=false;
       if((frontResult.failed||backResult.failed)&&typeof showMobileSaveToast==="function") showMobileSaveToast("Pièce d’identité conservée localement — espace cloud à vérifier",false);
       const item={
@@ -9572,6 +9556,7 @@ using (
         sellerBirthPlace:privateBuyBack?document.getElementById("buySellSellerBirthPlace").value.trim():"",
         idType:privateBuyBack?document.getElementById("buySellIdType").value:"",
         idNumber:privateBuyBack?document.getElementById("buySellIdNumber").value.trim():"",
+        idEvidenceLink:privateBuyBack?document.getElementById("buySellIdEvidenceLink").value.trim():"",
         idFront:frontResult.value,idBack:backResult.value,
         ownershipAttestation:privateBuyBack&&document.getElementById("buySellOwnershipAttestation").checked,
         sellerSignature:privateBuyBack?buySellSellerSignatureData:"",
@@ -9618,6 +9603,7 @@ using (
       document.getElementById("buySellSellerBirthPlace").value=item.sellerBirthPlace||"";
       document.getElementById("buySellIdType").value=item.idType||"Carte nationale d’identité";
       document.getElementById("buySellIdNumber").value=item.idNumber||"";
+      document.getElementById("buySellIdEvidenceLink").value=item.idEvidenceLink||"";
       document.getElementById("buySellOwnershipAttestation").checked=Boolean(item.ownershipAttestation);
       buySellIdFrontData=item.idFront||"";
       buySellIdBackData=item.idBack||"";
